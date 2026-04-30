@@ -50,7 +50,7 @@
   /* ——— Typography ——————————————————————————————— */
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
   --font-display: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
-  --font-serif: "Instrument Serif", "New York", "Times New Roman", serif;
+  --font-serif: "Lora", "New York", "Georgia", serif;
 
   --fs-eyebrow:  0.78rem;
   --fs-body:     1.0625rem;
@@ -326,11 +326,11 @@ ul { list-style: none; padding: 0; margin: 0; }
 }
 .nav__brand { display: flex; align-items: center; gap: 0.6rem; font-weight: 600; }
 .nav__brand-mark {
-  display: inline-grid; place-items: center;
+  display: block;
   width: 32px; height: 32px;
-  background: var(--color-ink); color: var(--color-bg);
   border-radius: 50%;
-  font-size: 0.78rem; letter-spacing: 0;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 .nav__brand-name { font-size: 0.96rem; letter-spacing: -0.01em; }
 .nav__links {
@@ -352,7 +352,13 @@ ul { list-style: none; padding: 0; margin: 0; }
 }
 .nav__links a:hover { color: var(--color-ink); }
 .nav__links a:hover::after { transform: scaleX(1); }
-.nav__cta { padding: 0.6rem 1.05rem; }
+.nav__cta {
+  padding: 0.6rem 1.05rem;
+  transition: transform var(--dur-base) var(--ease-apple),
+              background var(--dur-base) var(--ease-apple),
+              color var(--dur-base) var(--ease-apple),
+              box-shadow var(--dur-base) var(--ease-apple);
+}
 
 
 /* =====================================================================
@@ -362,10 +368,10 @@ ul { list-style: none; padding: 0; margin: 0; }
   position: relative;
   padding-block: clamp(6rem, 14vh, 11rem) clamp(4rem, 10vh, 8rem);
 }
-.hero__inner { max-width: 920px; }
+.hero__inner { max-width: none; }
 .hero__title {
   font-family: var(--font-display);
-  font-size: var(--fs-h1);
+  font-size: clamp(2rem, 4vw, 3.4rem);
   font-weight: 600;
   line-height: var(--lh-tight);
   letter-spacing: -0.025em;
@@ -431,6 +437,11 @@ ul { list-style: none; padding: 0; margin: 0; }
   color: var(--color-ink-muted);
   letter-spacing: -0.01em;
 }
+.logos__img {
+  height: 30px;
+  width: auto;
+  display: block;
+}
 
 
 /* =====================================================================
@@ -457,6 +468,12 @@ ul { list-style: none; padding: 0; margin: 0; }
   font-family: var(--font-serif); font-style: italic;
   color: var(--color-ink-muted);
   font-size: 1.2rem; letter-spacing: 0.02em;
+}
+.about__portrait-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: top center;
 }
 .about__copy p { color: var(--color-ink-muted); margin: 0 0 var(--space-3); max-width: 56ch; }
 .about__points {
@@ -554,8 +571,24 @@ ul { list-style: none; padding: 0; margin: 0; }
   color: var(--color-accent);
   font-weight: 500;
 }
-.tier--featured .tier__list li::before { color: #6CB1FF; }
+.tier--featured .tier__list li::before { color: var(--color-accent-ink); }
 .tier__cta { margin-top: auto; align-self: flex-start; }
+
+/* "Sprechen wir drüber" price variant */
+.tier__price--talk {
+  font-size: 1.3rem;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.tier__price--talk small {
+  font-size: 0.92rem;
+  font-weight: 400;
+  opacity: 0.65;
+  letter-spacing: 0;
+}
 
 
 /* =====================================================================

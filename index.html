@@ -15,7 +15,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -41,14 +41,14 @@
   <header class="nav-wrap">
     <nav class="nav glass" aria-label="Hauptnavigation">
       <a class="nav__brand" href="#top" aria-label="Jason Martin — Startseite">
-        <span class="nav__brand-mark">JM</span>
-        <span class="nav__brand-name">Jason Martin</span>
+        <img class="nav__brand-mark" src="images/jason-martin-500x500.avif" alt="Jason Martin" width="32" height="32" />
+        <span class="nav__brand-name">Martin, Jason</span>
       </a>
       <ul class="nav__links">
-        <li><a href="#about">Über mich</a></li>
         <li><a href="#services">Leistungen</a></li>
         <li><a href="#work">Galerien</a></li>
         <li><a href="#insights">Insights</a></li>
+        <li><a href="#about">Über mich</a></li>
       </ul>
       <a class="btn btn--primary glass-btn nav__cta" href="#contact">Termin buchen</a>
     </nav>
@@ -78,14 +78,9 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
           </a>
         </div>
-        <div class="hero__meta reveal" style="--reveal-delay: 320ms">
-          <span class="chip glass">5+ Jahre Performance Creative</span>
-          <span class="chip glass">DACH · DE/EN</span>
-          <span class="chip glass">Solo Studio</span>
-        </div>
       </div>
 
-      <a class="hero__scroll" href="#about" aria-label="Weiter scrollen">
+      <a class="hero__scroll" href="#services" aria-label="Weiter scrollen">
         <span></span>
       </a>
     </section>
@@ -97,45 +92,11 @@
       <div class="container">
         <p class="logos__label">Vertrauen aus 5 Jahren Agenturarbeit</p>
         <div class="logos__row">
-          <span class="logos__item">DTC Brand A</span>
-          <span class="logos__item">Skincare B</span>
-          <span class="logos__item">Fashion C</span>
-          <span class="logos__item">Home D</span>
-          <span class="logos__item">Wellness E</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================================================================
-         ABOUT
-         ================================================================== -->
-    <section id="about" class="section about">
-      <div class="container about__grid">
-        <div class="about__visual reveal">
-          <div class="about__portrait" aria-hidden="true">
-            <span class="about__portrait-placeholder">Foto</span>
-          </div>
-        </div>
-        <div class="about__copy">
-          <p class="eyebrow reveal">Über mich</p>
-          <h2 class="section__title reveal" style="--reveal-delay: 80ms">
-            5 Jahre Performance Creative.<br />
-            Jetzt fokussiert auf <em>eine</em> Sache.
-          </h2>
-          <p class="reveal" style="--reveal-delay: 160ms">
-            Fünf Jahre lang habe ich eine Agentur für Meta Media Buying und Ad Creative geführt –
-            hunderte Creatives gegen echte Conversion-Daten getestet. Diese Zeit hat mir gezeigt,
-            wo der eigentliche Hebel liegt: nicht in der Anzeige, sondern auf der Produktseite.
-          </p>
-          <p class="reveal" style="--reveal-delay: 220ms">
-            Heute baue ich genau dafür Produktgalerien. Mit KI, mit dem Auge eines Performance-Marketers
-            und mit dem Anspruch, dass jede Galerie die Conversion-Rate spürbar bewegt – nicht nur gut aussieht.
-          </p>
-          <ul class="about__points reveal" style="--reveal-delay: 280ms">
-            <li>Galerie-Komplett-Pakete pro Produkt oder Launch</li>
-            <li>KI-Bilder in Studioqualität – ohne Studio</li>
-            <li>Conversion-getriebene Bildlogik, nicht nur „schön"</li>
-          </ul>
+          <img class="logos__img" src="images/hye-black.avif" alt="Hye" />
+          <img class="logos__img" src="images/mybugbar-black.avif" alt="MyBugBar" />
+          <img class="logos__img" src="images/sheko-black.avif" alt="Sheko" />
+          <img class="logos__img" src="images/natures-way-black.avif" alt="Nature's Way" />
+          <img class="logos__img" src="images/feierbar-black.avif" alt="Feierbar" />
         </div>
       </div>
     </section>
@@ -161,11 +122,11 @@
             <div class="tier__head">
               <span class="tier__tag">Einstieg</span>
               <h3 class="tier__name">PDP Gallery Sprint</h3>
-              <p class="tier__price"><span>€</span>1.950 <small>/ Produkt</small></p>
+              <p class="tier__price"><span>€</span>490 <small>/ Produkt</small></p>
             </div>
             <p class="tier__desc">
-              Komplette Produktgalerie für ein SKU. 6–10 Bilder: Hero, Detail, Lifestyle,
-              Feature-Callouts. Optional eine kurze Motion-Sequenz.
+              Komplette Produktgalerie für ein Produkt. 6–10 Bilder: Hero, Detail, Lifestyle,
+              Feature-Callouts etc.
             </p>
             <ul class="tier__list">
               <li>5 Werktage Lieferzeit</li>
@@ -180,11 +141,11 @@
             <div class="tier__head">
               <span class="tier__tag">Launch</span>
               <h3 class="tier__name">Product Launch System</h3>
-              <p class="tier__price"><span>€</span>4.500 <small>– €9.000</small></p>
+              <p class="tier__price tier__price--talk">Sprechen wir<br /><small>individuell drüber.</small></p>
             </div>
             <p class="tier__desc">
-              Galerien für deinen Launch oder eine Kollektion: 3–6 SKUs, plus ein konsistentes
-              visuelles System (Licht, Szenen, Farben). Optional: passende Landing Page.
+              Galerien für deinen Launch oder eine Kollektion. Landing Pages können ebenfalls
+              ein Teil sein.
             </p>
             <ul class="tier__list">
               <li>3 Wochen Projektzeit</li>
@@ -198,11 +159,11 @@
             <div class="tier__head">
               <span class="tier__tag">Retainer</span>
               <h3 class="tier__name">Gallery Partner</h3>
-              <p class="tier__price"><span>€</span>3.500 <small>– €6.000 / Monat</small></p>
+              <p class="tier__price tier__price--talk">Sprechen wir<br /><small>individuell drüber.</small></p>
             </div>
             <p class="tier__desc">
-              Dein laufender Galerie-Partner. Monatlich neue Galerien für 3–6 Produkte plus
-              Refresh deiner Bestseller und ein monatlicher Conversion-Review.
+              Dein laufender Galerie-Partner. Monatlich neue Galerien für deine Produkte
+              und ein monatlicher Conversion-Review.
             </p>
             <ul class="tier__list">
               <li>3 Monate Mindestlaufzeit</li>
@@ -318,6 +279,40 @@
             </div>
           </div>
         </aside>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         ABOUT
+         ================================================================== -->
+    <section id="about" class="section about">
+      <div class="container about__grid">
+        <div class="about__visual reveal">
+          <div class="about__portrait">
+            <img class="about__portrait-img" src="images/jason-martin-vertical-full-res.avif" alt="Jason Martin" />
+          </div>
+        </div>
+        <div class="about__copy">
+          <p class="eyebrow reveal">Über mich</p>
+          <h2 class="section__title reveal" style="--reveal-delay: 80ms">
+            5 Jahre Performance Creative.<br />
+            Jetzt fokussiert auf <em>eine</em> Sache.
+          </h2>
+          <p class="reveal" style="--reveal-delay: 160ms">
+            Fünf Jahre lang habe ich eine Agentur für Meta Media Buying und Ad Creative geführt –
+            hunderte Creatives gegen echte Conversion-Daten getestet. Diese Zeit hat mir gezeigt,
+            wo der eigentliche Hebel liegt: nicht in der Anzeige, sondern auf der Produktseite.
+          </p>
+          <p class="reveal" style="--reveal-delay: 220ms">
+            Heute baue ich genau dafür Produktgalerien. Mit KI, mit dem Auge eines Performance-Marketers
+            und mit dem Anspruch, dass jede Galerie die Conversion-Rate spürbar bewegt – nicht nur gut aussieht.
+          </p>
+          <ul class="about__points reveal" style="--reveal-delay: 280ms">
+            <li>Galerie-Komplett-Pakete pro Produkt oder Launch</li>
+            <li>KI-Bilder in Studioqualität – ohne Studio</li>
+            <li>Conversion-getriebene Bildlogik, nicht nur „schön"</li>
+          </ul>
+        </div>
       </div>
     </section>
 
