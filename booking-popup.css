@@ -161,7 +161,7 @@
   letter-spacing: -0.02em;
   line-height: 1.15;
   margin: 0;
-  color: #f7f5f1;
+  color: var(--color-ink);
 }
 
 .bp-close {
@@ -176,7 +176,7 @@
   justify-content: center;
   cursor: pointer;
   font-size: 0.85rem;
-  color: #f7f5f1;
+  color: var(--color-ink);
   transition: background 160ms ease, color 160ms ease;
   margin-top: 2px;
 }
@@ -187,10 +187,10 @@
 
 .bp-tz-note {
   font-size: 0.8rem;
-  color: #f7f5f1;
+  color: var(--color-ink);
   margin: 0 0 1.25rem;
 }
-.bp-tz-note strong { color: #f7f5f1; font-weight: 500; }
+.bp-tz-note strong { color: var(--color-ink); font-weight: 500; }
 
 
 /* ── Loading state ───────────────────────────────────────────────────── */
@@ -336,7 +336,7 @@
 .bp-cal-month {
   font-weight: 600;
   font-size: 0.98rem;
-  color: #f7f5f1;
+  color: var(--color-ink);
   letter-spacing: -0.01em;
   text-transform: capitalize;
 }
@@ -378,7 +378,7 @@
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #f7f5f1;
+  color: var(--color-ink);
   padding: 0.3rem 0 0.6rem;
 }
 
@@ -399,7 +399,7 @@
 
 .bp-cal-cell--disabled { color: rgba(10, 10, 10, 0.22); pointer-events: none; }
 
-.bp-cal-cell--available { color: #f7f5f1; cursor: pointer; font-weight: 500; }
+.bp-cal-cell--available { color: var(--color-ink); cursor: pointer; font-weight: 500; }
 .bp-cal-cell--available:hover {
   background: rgba(255, 255, 255, 0.60);
   color: #0A84FF;
@@ -438,7 +438,7 @@
   gap: 0.5rem;
   font-size: 0.88rem;
   font-weight: 500;
-  color: #f7f5f1;
+  color: var(--color-ink);
   background: none;
   border: none;
   cursor: pointer;
@@ -512,13 +512,13 @@
           backdrop-filter: blur(8px);
 }
 .bp-slot-preview-time { font-size: 1rem; font-weight: 600; color: #0A0A0A; letter-spacing: -0.01em; }
-.bp-slot-preview-tz   { font-size: 0.76rem; color: #f7f5f1; }
+.bp-slot-preview-tz   { font-size: 0.76rem; color: var(--color-ink); }
 
 .bp-form { display: flex; flex-direction: column; gap: 1.1rem; }
 .bp-field { display: flex; flex-direction: column; gap: 0.4rem; }
 
-.bp-label { font-size: 0.85rem; font-weight: 500; color: #f7f5f1; }
-.bp-optional { font-weight: 400; color: #f7f5f1; }
+.bp-label { font-size: 0.85rem; font-weight: 500; color: var(--color-ink); }
+.bp-optional { font-weight: 400; color: var(--color-ink); }
 
 /* Inputs — glass style, clearly readable */
 .bp-input,
