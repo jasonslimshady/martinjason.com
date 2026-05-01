@@ -539,7 +539,7 @@ ul { list-style: none; padding: 0; margin: 0; }
   padding: 0.3rem 0.7rem;
   border-radius: var(--radius-pill);
   font-size: 0.78rem; font-weight: 500;
-  color: var(--color-ink);
+  color: var(--color-accent-ink);
   background: var(--color-accent);
 }
 .tier__tag {
