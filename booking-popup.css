@@ -9,9 +9,9 @@
 .booking-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(10, 10, 10, 0.22);       /* lighter than before */
+  background: rgba(10, 10, 10, 0.22);
   -webkit-backdrop-filter: blur(3px) saturate(140%);
-          backdrop-filter: blur(3px) saturate(140%); /* subtle blur */
+          backdrop-filter: blur(3px) saturate(140%);
   z-index: 9000;
   display: flex;
   align-items: center;
@@ -28,20 +28,25 @@
 }
 
 
-/* ── Popup card (premium glass) ──────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════
+   Popup card — CSS glass (Tier 1, always active)
+   ───────────────────────────────────────────────────────────────────────
+   Tunable variables (read by booking-glass.js for SVG + WebGL layers):
+     --glass-blur         backdrop blur amount
+     --glass-refraction   SVG displacement scale (px)
+     --glass-bevel        edge bevel width (0–0.5, fraction of popup)
+     --glass-specular     specular highlight strength (0–1)
+     --glass-dispersion   chromatic aberration amount (0–1)
+   ═══════════════════════════════════════════════════════════════════════ */
 
 .booking-popup {
-  /* More transparent + stronger blur = richer glass */
-  background: rgba(255, 255, 255, 0.58);
-  -webkit-backdrop-filter: blur(52px) saturate(220%);
-          backdrop-filter: blur(52px) saturate(220%);
-  /* Bright border + top-edge highlight */
-  border: 1px solid rgba(255, 255, 255, 0.92);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),  /* top shine */
-    0 2px 2px rgba(10, 10, 10, 0.03),
-    0 12px 32px rgba(10, 10, 10, 0.10),
-    0 40px 96px rgba(10, 10, 10, 0.14);
+  --glass-blur:       44px;
+  --glass-refraction: 10;
+  --glass-bevel:      0.06;
+  --glass-specular:   0.88;
+  --glass-dispersion: 0.36;
+
+  /* Shape */
   border-radius: 26px;
   width: 100%;
   max-width: 560px;
@@ -50,19 +55,120 @@
   overflow-x: hidden;
   padding: 2.25rem 2.5rem 2.5rem;
   position: relative;
+
+  /* CSS Tier 1 glass background (replaced by .bp-glass-backdrop when JS runs) */
+  background: rgba(255, 255, 255, 0.62);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(200%);
+          backdrop-filter: blur(var(--glass-blur)) saturate(200%);
+
+  /* Border — bright outer ring + inner bevel shine */
+  border: 1px solid rgba(255, 255, 255, 0.88);
+
+  /* Layered depth shadows:
+     1. Top-edge inset shine      (inner bevel)
+     2. Left-edge inset shine     (inner bevel)
+     3. Bottom inset darkness     (inner depth / thickness)
+     4. Ambient outer shadow
+     5. Key outer shadow          (depth, lifted card)
+     6. Large diffuse             (atmospheric)  */
+  box-shadow:
+    inset 0  1px  0   rgba(255, 255, 255, 0.98),
+    inset 1px 0   0   rgba(255, 255, 255, 0.45),
+    inset 0 -1px  0   rgba(0,   0,   0,   0.06),
+    0  1px  2px       rgba(10,  10,  10,  0.04),
+    0  8px  24px      rgba(10,  10,  10,  0.09),
+    0 32px  72px      rgba(10,  10,  10,  0.13);
+
+  /* Entry animation */
   transform: scale(0.95) translateY(10px);
   transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
   scrollbar-width: thin;
-  scrollbar-color: rgba(10,10,10,0.12) transparent;
+  scrollbar-color: rgba(10, 10, 10, 0.12) transparent;
 }
 
 .booking-overlay.is-open .booking-popup {
   transform: scale(1) translateY(0);
 }
 
-/* Fallback: no backdrop-filter */
+/* Tier 1 specular glint — top-left gradient highlight via pseudo-element */
+.booking-popup::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse 70% 40% at 22% 0%,
+      rgba(255, 255, 255, 0.55) 0%,
+      rgba(255, 255, 255, 0.00) 70%);
+  pointer-events: none;
+  z-index: 5;          /* above WebGL canvas */
+}
+
+/* Tier 1 rim-light sweep — bottom-right warm reflection */
+.booking-popup::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse 60% 30% at 85% 100%,
+      rgba(255, 255, 255, 0.22) 0%,
+      rgba(255, 255, 255, 0.00) 65%);
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* When JS glass layer is active — card becomes a transparent shell;
+   .bp-glass-backdrop handles the blurred background instead. */
+.booking-popup[data-glass-ready] {
+  background: transparent;
+  -webkit-backdrop-filter: none;
+          backdrop-filter: none;
+}
+
+/* Hard fallback: no backdrop-filter support at all */
 @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
   .booking-popup { background: rgba(247, 245, 241, 0.97); }
+}
+
+
+/* ── Tier 2 — SVG-displaced backdrop layer (injected by booking-glass.js) ── */
+
+.bp-glass-backdrop {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+
+  /* Backdrop blur applied here; JS adds SVG displacement via filter: url(#bp-refract) */
+  background: rgba(255, 255, 255, 0.56);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(200%);
+          backdrop-filter: blur(var(--glass-blur)) saturate(200%);
+
+  pointer-events: none;
+  z-index: 0;
+}
+
+
+/* ── Tier 3 — WebGL optical-effects canvas (injected by booking-glass.js) ── */
+
+.bp-glass-webgl {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 4;          /* above content (z-index 2), below ::before/::after (z-index 5) */
+  display: block;
+  /* Normal composite — canvas emits mostly transparent pixels; bright
+     rim/specular pixels layer softly over the popup content. */
+}
+
+
+/* ── Reduced motion — freeze caustic animation ──────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .booking-popup,
+  .booking-overlay { transition: none; }
 }
 
 
