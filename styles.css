@@ -309,6 +309,7 @@ ul { list-style: none; padding: 0; margin: 0; }
 .btn_bundle_buchen_cta {
   margin-top: auto;
   align-self: flex-start;
+  color: var(--color-accent-ink);
   background:var(--color-accent);
 }
 
