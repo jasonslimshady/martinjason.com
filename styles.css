@@ -306,6 +306,12 @@ ul { list-style: none; padding: 0; margin: 0; }
   letter-spacing: -0.005em;
 }
 
+.btn_bundle_buchen_cta {
+  margin-top: auto;
+  align-self: flex-start;
+  background: var(--color-accent);
+}
+
 
 /* =====================================================================
    7a. NAV
@@ -526,7 +532,7 @@ ul { list-style: none; padding: 0; margin: 0; }
 .tier--featured .tier__price { color: #fff; }
 .tier--featured .tier__desc,
 .tier--featured .tier__list,
-.tier--featured .tier__tag { color: #B8B8C2; }
+.tier--featured .tier__tag { color: var(--color-accent); }
 
 .tier__badge {
   position: absolute; top: -12px; right: 16px;

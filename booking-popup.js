@@ -22,16 +22,16 @@
       eventTitle: 'Kostenloses Erstgespräch - Gespräch mit Martin, Jason'
     },
     'sprint': {
-      label: 'PDP Gallery Sprint',
+      label: 'Gallery Sprint',
       desc:  '30 Min · Produktgalerie für ein einzelnes Produkt, 6–10 Bilder in 5 Werktagen',
       icon:  '⚡',
-      eventTitle: 'PDP Gallery Sprint - Gespräch mit Martin, Jason'
+      eventTitle: 'Gallery Sprint - Gespräch mit Martin, Jason'
     },
     'launch': {
-      label: 'Product Launch System',
+      label: 'Gallery Bundle',
       desc:  '30 Min · Galerien für deinen Launch oder eine ganze Kollektion',
       icon:  '🚀',
-      eventTitle: 'Product/Kollektion Launch System - Gespräch mit Martin, Jason'
+      eventTitle: 'Gallery Bundle - Gespräch mit Martin, Jason'
     },
     'partner': {
       label: 'Gallery Partner werden',
