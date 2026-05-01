@@ -15,6 +15,19 @@ const CALENDAR_ID = process.env.CALENDAR_ID || 'jasonmartinde@gmail.com';
 const HOST_NAME   = 'Jason Martin';
 const HOST_EMAIL  = process.env.CALENDAR_ID || 'jasonmartinde@gmail.com';
 
+// ── Meeting type → event title map ───────────────────────────────────────────
+
+const MEETING_TITLES = {
+  erstgespraech: 'Kostenloses Erstgespräch - Gespräch mit Martin, Jason',
+  sprint:        'PDP Gallery Sprint - Gespräch mit Martin, Jason',
+  launch:        'Product/Kollektion Launch System - Gespräch mit Martin, Jason',
+  partner:       'Gallery Partner werden - Gespräch mit Martin, Jason',
+};
+
+function getEventTitle(meetingTypeId, fallbackName) {
+  return MEETING_TITLES[meetingTypeId] || `Strategiegespräch mit ${fallbackName}`;
+}
+
 // ── Formatters ────────────────────────────────────────────────────────────────
 
 function fmtDateTime(isoString, timezone) {
@@ -38,11 +51,12 @@ function fmtTime(isoString, timezone) {
 
 // ── Calendar event ────────────────────────────────────────────────────────────
 
-async function createCalendarEvent({ slot, name, email, description, timezone }) {
+async function createCalendarEvent({ slot, name, email, description, timezone, meetingTypeId }) {
   const calendar = getCalendarClient();
+  const eventTitle = getEventTitle(meetingTypeId, name);
 
   const eventDescription =
-    `30-Minuten Strategiegespräch mit ${name}\n\n` +
+    `30-Minuten ${eventTitle}\n\n` +
     (description ? `Thema: ${description}\n\n` : '') +
     `Gebuchte Zeit (Besucherzone ${timezone}):\n` +
     `${fmtDateTime(slot.start, timezone)} – ${fmtTime(slot.end, timezone)}\n\n` +
@@ -55,7 +69,7 @@ async function createCalendarEvent({ slot, name, email, description, timezone })
     sendUpdates: 'all',
     conferenceDataVersion: 1,
     requestBody: {
-      summary:     `Strategiegespräch mit ${name}`,
+      summary:     eventTitle,
       description: eventDescription,
       start: { dateTime: slot.start, timeZone: 'UTC' },
       end:   { dateTime: slot.end,   timeZone: 'UTC' },
@@ -194,7 +208,7 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST')   return res.status(405).json({ error: 'Method not allowed' });
 
-  const { slot, name, email, description, timezone } = req.body || {};
+  const { slot, name, email, description, timezone, meetingType } = req.body || {};
 
   // Validate
   if (!slot?.start || !slot?.end || !name?.trim() || !email?.trim()) {
@@ -211,7 +225,7 @@ export default async function handler(req, res) {
 
   try {
     // 1. Create calendar event
-    await createCalendarEvent({ slot, name, email, description: description?.trim() || '', timezone: tz });
+    await createCalendarEvent({ slot, name, email, description: description?.trim() || '', timezone: tz, meetingTypeId: meetingType });
     console.log(`[book] Calendar event created for ${email} at ${slot.start}`);
 
     // 2. Send confirmation email (non-fatal if it fails)
