@@ -309,7 +309,7 @@ ul { list-style: none; padding: 0; margin: 0; }
 .btn_bundle_buchen_cta {
   margin-top: auto;
   align-self: flex-start;
-  background: var(--color-accent);
+  background:var(--color-accent);
 }
 
 
@@ -530,8 +530,8 @@ ul { list-style: none; padding: 0; margin: 0; }
 }
 .tier--featured .tier__name { color: #fff; }
 .tier--featured .tier__price { color: #fff; }
-.tier--featured .tier__desc,
-.tier--featured .tier__list,
+.tier--featured .tier__desc { color: #B8B8C2; }
+.tier--featured .tier__list { color: #B8B8C2; }
 .tier--featured .tier__tag { color: var(--color-accent); }
 
 .tier__badge {
@@ -571,6 +571,13 @@ ul { list-style: none; padding: 0; margin: 0; }
   color: var(--color-ink-muted);
   font-size: 0.96rem;
 }
+
+.tier__list2 li {
+  position: relative; padding-left: 1.4rem;
+  color: var(--color-accent-ink);
+  font-size: 0.96rem;
+}
+
 .tier__list li::before {
   content: "→"; position: absolute; left: 0;
   color: var(--color-accent);
