@@ -21,7 +21,7 @@
 .booking-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(10, 10, 10, 0.22);
   -webkit-backdrop-filter: blur(10px) saturate(140%);
           backdrop-filter: blur(10px) saturate(140%);
   z-index: 9000;
@@ -161,7 +161,7 @@
   letter-spacing: -0.02em;
   line-height: 1.15;
   margin: 0;
-  color: #0A0A0A;
+  color: #f7f5f1;
 }
 
 .bp-close {
@@ -176,7 +176,7 @@
   justify-content: center;
   cursor: pointer;
   font-size: 0.85rem;
-  color: #54545A;
+  color: #f7f5f1;
   transition: background 160ms ease, color 160ms ease;
   margin-top: 2px;
 }
@@ -187,7 +187,7 @@
 
 .bp-tz-note {
   font-size: 0.8rem;
-  color: #8A8A92;
+  color: #f7f5f1;
   margin: 0 0 1.25rem;
 }
 .bp-tz-note strong { color: #54545A; font-weight: 500; }
@@ -333,7 +333,7 @@
 .bp-cal-month {
   font-weight: 600;
   font-size: 0.98rem;
-  color: #0A0A0A;
+  color: #f7f5f1;
   letter-spacing: -0.01em;
   text-transform: capitalize;
 }
@@ -375,7 +375,7 @@
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #8A8A92;
+  color: #f7f5f1;
   padding: 0.3rem 0 0.6rem;
 }
 
@@ -396,7 +396,7 @@
 
 .bp-cal-cell--disabled { color: rgba(10, 10, 10, 0.22); pointer-events: none; }
 
-.bp-cal-cell--available { color: #0A0A0A; cursor: pointer; font-weight: 500; }
+.bp-cal-cell--available { color: #f7f5f1; cursor: pointer; font-weight: 500; }
 .bp-cal-cell--available:hover {
   background: rgba(255, 255, 255, 0.60);
   color: #0A84FF;
@@ -436,7 +436,7 @@
   gap: 0.5rem;
   font-size: 0.88rem;
   font-weight: 500;
-  color: #54545A;
+  color: #f7f5f1;
   background: none;
   border: none;
   cursor: pointer;
@@ -476,7 +476,7 @@
 }
 .bp-time-slot:hover {
   border-color: rgba(10, 132, 255, 0.45);
-  background: rgba(10, 132, 255, 0.06);
+  background: rgba(255, 255, 255, 0.06);
   transform: translateY(-1px);
 }
 
