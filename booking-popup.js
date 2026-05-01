@@ -27,7 +27,7 @@
       icon:  '⚡',
       eventTitle: 'Gallery Sprint - Gespräch mit Martin, Jason'
     },
-    'launch': {
+    'bundle': {
       label: 'Gallery Bundle',
       desc:  '30 Min · Galerien für deinen Launch oder eine ganze Kollektion',
       icon:  '🚀',
@@ -50,7 +50,7 @@
     'Termin buchen':           'select',
     'Kostenloses Erstgespräch':'select',
     'Sprint starten':          'sprint',
-    'Launch besprechen':       'launch',
+    'Bundle buchen':       'bundle',
     'Gallery Partner werden':  'partner'
   };
 
