@@ -1,0 +1,20 @@
+{
+  "name": "martinjason-booking-api",
+  "version": "1.0.0",
+  "description": "Booking API backend for martinjason.com — Claude + Google Calendar",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "vercel dev",
+    "token": "node get-token.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "googleapis": "^144.0.0"
+  },
+  "devDependencies": {
+    "vercel": "^39.0.0"
+  }
+}
