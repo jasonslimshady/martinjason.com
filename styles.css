@@ -568,6 +568,7 @@ ul { list-style: none; padding: 0; margin: 0; }
 .tier__price small { font-size: 0.95rem; font-weight: 400; opacity: 0.7; letter-spacing: 0; }
 .tier__desc { color: var(--color-ink-muted); margin: 0; }
 .tier__list { display: grid; gap: 0.5rem; }
+.tier__list2 { display: grid; gap: 0.5rem; }
 .tier__list li {
   position: relative; padding-left: 1.4rem;
   color: var(--color-ink-muted);
@@ -581,8 +582,6 @@ ul { list-style: none; padding: 0; margin: 0; }
 }
 
 .tier__list2 li {
-  display: grid;
-  gap: 0.5rem;
   position: relative; padding-left: 1.4rem;
   color: var(--color-accent-ink);
   font-size: 0.96rem;
