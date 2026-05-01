@@ -18,6 +18,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="booking-popup.css" />
 </head>
 <body>
 
@@ -336,7 +337,7 @@
           und du gehst mit drei konkreten Verbesserungen raus, ob wir zusammenarbeiten oder nicht.
         </p>
         <div class="contact__cta reveal" style="--reveal-delay: 240ms">
-          <a class="btn btn--primary btn--lg glass-btn" href="mailto:jasonmartinph@gmail.com">
+          <a class="btn btn--primary btn--lg glass-btn" href="#contact" data-booking>
             Termin buchen
           </a>
         </div>
@@ -366,5 +367,14 @@
   </footer>
 
   <script src="script.js"></script>
+
+  <!-- ====================================================================
+       Booking popup — replace YOUR-VERCEL-URL after deploying the API.
+       See booking-api/SETUP.md for instructions.
+       ==================================================================== -->
+  <script>
+    window.BOOKING_API_BASE = 'https://YOUR-VERCEL-URL.vercel.app';
+  </script>
+  <script src="booking-popup.js"></script>
 </body>
 </html>
