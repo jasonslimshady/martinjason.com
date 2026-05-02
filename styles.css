@@ -344,7 +344,7 @@ ul { list-style: none; padding: 0; margin: 0; }
   flex-shrink: 0;
 }
 
-.nav__brand-mark {
+.nav__brand-mark-footer {
   display: block;
   width: 64px; height: 64px;
   border-radius: 50%;
