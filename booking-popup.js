@@ -211,10 +211,13 @@
 
     var nowFirst = new Date(); nowFirst.setDate(1); nowFirst.setHours(0,0,0,0);
     var canPrev  = m > nowFirst;
+    // Limit next-month button to 2 months ahead
+    var maxMonth = new Date(nowFirst.getFullYear(), nowFirst.getMonth() + 2, 1);
+    var canNext  = m < maxMonth;
 
     // Back button: goes to meeting-select if user came from there, otherwise hidden
     var backBtn = state.fromSelect
-      ? '<button class="bp-back" data-action="back-to-meeting-select">' +
+      ? '<button class="bp-back bp-back--after-badge" data-action="back-to-meeting-select">' +
           '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>' +
           'Terminart ändern</button>'
       : '';
@@ -233,7 +236,7 @@
                  '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>' +
                '</button>' +
                '<span class="bp-cal-month">' + monthLabel + '</span>' +
-               '<button class="bp-cal-nav-btn" data-action="next-month">' +
+               '<button class="bp-cal-nav-btn" data-action="next-month"' + (canNext ? '' : ' disabled') + '>' +
                  '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>' +
                '</button>' +
              '</div>' +

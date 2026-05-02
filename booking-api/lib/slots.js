@@ -14,7 +14,7 @@
 
 const BALI_OFFSET_HOURS = 8; // UTC+8
 const SLOT_DURATION_MINS = 30;
-const LOOKAHEAD_DAYS = 30;   // how many days ahead to generate slots
+const LOOKAHEAD_DAYS = 62;   // ~2 months ahead
 
 /**
  * Working periods per JS day-of-week (0=Sun, 1=Mon … 6=Sat)
