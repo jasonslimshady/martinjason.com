@@ -301,7 +301,9 @@
 
 /* Selected meeting type badge */
 .bp-meeting-badge {
-  display: inline-flex;
+  /* Block-level so the back button always wraps to the next line */
+  display: flex;
+  width: fit-content;
   align-items: center;
   gap: 0.4rem;
   font-size: 0.78rem;
@@ -313,16 +315,17 @@
   border: 1px solid rgba(10, 132, 255, 0.18);
   border-radius: 999px;
   padding: 0.25rem 0.75rem;
-  margin: 0 0 0 0;          /* flush left, no extra margins */
+  margin: 0;                /* flush left, no top gap */
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* Back button that follows the badge — gets its own top spacing */
+/* Back button that follows the badge — sits on its own line with breathing room */
 .bp-back--after-badge {
-  margin-top: 0.65rem;
+  display: inline-flex;
+  margin-top: 0.55rem;
 }
 
 
