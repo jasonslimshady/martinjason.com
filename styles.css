@@ -343,6 +343,16 @@ ul { list-style: none; padding: 0; margin: 0; }
   object-fit: cover;
   flex-shrink: 0;
 }
+
+.nav__brand-mark {
+  display: block;
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  margin-bottom:0.25rem;
+}
+
 .nav__brand-name { font-size: 0.96rem; letter-spacing: -0.01em; }
 .nav__links {
   display: flex; gap: var(--space-3);
