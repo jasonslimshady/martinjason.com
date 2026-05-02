@@ -224,8 +224,8 @@
              '<h2 class="bp-title">Datum wählen</h2></div>' +
              btnClose() +
            '</div>' +
-           backBtn +
            meetingBadge() +
+           backBtn +
            '<p class="bp-tz-note">Deine Zeitzone: <strong>' + esc(USER_TZ) + '</strong></p>' +
            '<div class="bp-calendar">' +
              '<div class="bp-cal-nav">' +

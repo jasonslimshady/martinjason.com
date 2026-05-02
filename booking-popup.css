@@ -435,6 +435,7 @@
 
 .bp-back {
   display: inline-flex;
+  align-items: center;
   gap: 0.5rem;
   font-size: 0.88rem;
   font-weight: 500;
