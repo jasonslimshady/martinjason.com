@@ -310,7 +310,11 @@ ul { list-style: none; padding: 0; margin: 0; }
   margin-top: auto;
   align-self: flex-start;
   color: var(--color-accent-ink);
-  background:var(--color-accent);
+  background: var(--color-accent);
+}
+
+.btn_bundle_buchen_cta::hover {
+  color: var(--color-accent);
 }
 
 
