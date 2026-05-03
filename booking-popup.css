@@ -142,7 +142,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
 }
 
 .bp-eyebrow {
@@ -316,6 +316,7 @@
   border-radius: 999px;
   padding: 0.25rem 0.75rem;
   margin: 0;                /* flush left, no top gap */
+  margin-bottom: 0.75rem;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
