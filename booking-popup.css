@@ -377,7 +377,7 @@
 .bp-cal-days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 3px;
+  gap: 8px;
 }
 
 .bp-cal-dow {
@@ -407,7 +407,13 @@
 
 .bp-cal-cell--disabled { color: rgba(10, 10, 10, 0.22); pointer-events: none; }
 
-.bp-cal-cell--available { color: var(--color-ink); cursor: pointer; font-weight: 500; }
+.bp-cal-cell--available { 
+  color: var(--color-ink);
+  cursor: pointer;
+  font-weight: 500;
+  background: rgb(255, 255, 255, 0.20);
+}
+
 .bp-cal-cell--available:hover {
   background: rgba(255, 255, 255, 0.60);
   color: #0A84FF;
