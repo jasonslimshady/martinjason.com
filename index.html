@@ -47,14 +47,25 @@
         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
     })(window, document, "clarity", "script", "wkr32ce57m");
 </script>
-  <!-- Google Analytics 4 -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VGBWRTMZW2"></script>
-  <script>
+
+<!-- Google Analytics 4 -->
+<script>
+  const ignoreAnalytics = localStorage.getItem('ignore_analytics') === 'true';
+
+  if (!ignoreAnalytics) {
+    const gaScript = document.createElement('script');
+    gaScript.async = true;
+    gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-VGBWRTMZW2';
+    document.head.appendChild(gaScript);
+
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
+    window.gtag = gtag;
+
     gtag('js', new Date());
     gtag('config', 'G-VGBWRTMZW2');
-  </script>
+  }
+</script>
 </head>
 <body>
 
