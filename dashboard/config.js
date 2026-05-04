@@ -22,11 +22,12 @@ const CONFIG = {
   GA4_MEASUREMENT_ID: 'G-VGBWRTMZW2',
 
   // ----------------------------------------------------------
-  //  Looker Studio Embed URL
-  //  After creating your Looker Studio report, paste the
-  //  embed URL here (Share → Embed report → copy iframe src).
+  //  Google Analytics 4 — Property ID (numeric)
+  //  NOT the G-... Measurement ID — this is a plain number.
+  //  Find it: GA4 → Admin (gear icon, bottom-left) → Property Settings → Property ID
+  //  Example: '325847291'
   // ----------------------------------------------------------
-  LOOKER_STUDIO_URL: 'https://datastudio.google.com/embed/reporting/97af4762-337c-4374-9ac2-7c4200bfd896/page/rA5wF',
+  GA4_PROPERTY_ID: '',
 
   // ----------------------------------------------------------
   //  Invoicing defaults (shown as pre-filled values)

@@ -125,8 +125,23 @@
     .empty-sub{font-size:.8125rem;color:var(--ink-m);margin:0 0 1.125rem;max-width:240px}
 
     /* ANALYTICS */
-    .analytics-embed{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden}
-    .analytics-embed iframe{width:100%;height:570px;border:none;display:block}
+    .ga-toolbar{display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap}
+    .ga-range-btn{padding:.375rem .875rem;border-radius:var(--r-pill);font-size:.8125rem;font-weight:500;background:var(--surface);color:var(--ink-m);border:1px solid var(--border-s);cursor:pointer;transition:all var(--fast)}
+    .ga-range-btn.active,.ga-range-btn:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+    .ga-metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1rem}
+    .ga-metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:1.25rem 1.5rem}
+    .ga-metric-lbl{font-size:.6875rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-s);margin-bottom:.375rem}
+    .ga-metric-val{font-size:2rem;font-weight:700;letter-spacing:-.04em;line-height:1}
+    .ga-metric-sub{font-size:.8125rem;color:var(--ink-s);margin-top:.375rem}
+    .ga-chart-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:1.25rem 1.5rem;margin-bottom:1rem}
+    .ga-chart-ttl{font-size:.875rem;font-weight:600;margin-bottom:1rem;color:var(--ink)}
+    .ga-2col{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .ga-auth-wrap{display:flex;align-items:center;justify-content:center;min-height:280px;flex-direction:column;gap:.875rem;padding:2rem}
+    .ga-connect-btn{display:inline-flex;align-items:center;gap:.625rem;padding:.75rem 1.5rem;background:#fff;border:1px solid var(--border-s);border-radius:var(--r-sm);font-size:.9375rem;font-weight:500;cursor:pointer;box-shadow:var(--shadow);transition:all var(--fast)}
+    .ga-connect-btn:hover{box-shadow:var(--shadow-s);transform:translateY(-1px)}
+    .ga-bar-col{display:flex;flex-direction:column;align-items:center;gap:.3rem;flex:1;min-width:0}
+    .ga-bar{width:100%;max-width:28px;background:var(--accent);border-radius:4px 4px 0 0;opacity:.8;transition:opacity var(--fast);cursor:default}
+    .ga-bar:hover{opacity:1}
 
     /* KANBAN */
     .kanban{display:flex;gap:.75rem;overflow-x:auto;padding-bottom:.75rem}
@@ -336,8 +351,30 @@
         <div class="stat-card"><div class="stat-lbl">Nicht fakturiert</div><div class="stat-val" id="s-hours">—</div><div class="stat-sub">Stunden offen</div></div>
         <div class="stat-card"><div class="stat-lbl">Offene Rechnungen</div><div class="stat-val" id="s-invs">—</div><div class="stat-sub">Ausstehend</div></div>
       </div>
-      <div class="analytics-embed">
-        <iframe src="https://datastudio.google.com/embed/reporting/97af4762-337c-4374-9ac2-7c4200bfd896/page/rA5wF" allowfullscreen sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+      <!-- GA4 Toolbar -->
+      <div class="ga-toolbar">
+        <button class="ga-range-btn active" data-start="7daysAgo" data-end="today">Letzte 7 Tage</button>
+        <button class="ga-range-btn" data-start="30daysAgo" data-end="today">Letzte 30 Tage</button>
+        <button class="ga-range-btn" data-start="90daysAgo" data-end="today">Letzte 90 Tage</button>
+        <div style="display:flex;gap:.375rem;align-items:center;margin-left:auto;flex-wrap:wrap">
+          <input type="date" class="fi" id="ga-from" style="width:140px;font-size:.8125rem;padding:.375rem .625rem" />
+          <span style="color:var(--ink-s);font-size:.875rem">–</span>
+          <input type="date" class="fi" id="ga-to" style="width:140px;font-size:.8125rem;padding:.375rem .625rem" />
+          <button class="btn btn--ghost btn--sm" id="ga-custom-btn">Anwenden</button>
+        </div>
+      </div>
+      <!-- GA4 Content -->
+      <div id="ga-content">
+        <div class="ga-auth-wrap">
+          <div style="font-size:2.5rem;line-height:1">📊</div>
+          <p style="font-weight:700;font-size:1.125rem;margin:0;letter-spacing:-.02em">Analytics verbinden</p>
+          <p style="color:var(--ink-m);margin:0;font-size:.9375rem;text-align:center;max-width:320px;line-height:1.5">Melde dich mit deinem Google-Konto an, um Website-Daten direkt hier zu sehen.</p>
+          <button class="ga-connect-btn" id="ga-auth-btn">
+            <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#4285F4" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.4-.4-3.5z"/><path fill="#34A853" d="M6.3 14.7l6.6 4.8C14.5 16 19 12 24 12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 16.2 4 9.6 8.3 6.3 14.7z"/><path fill="#FBBC05" d="M24 44c5.2 0 9.9-1.9 13.5-5l-6.2-5.2C29.4 35.6 26.8 36 24 36c-5.2 0-9.6-3.3-11.3-8H6.2C9.5 35.6 16.2 44 24 44z"/><path fill="#EA4335" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.8l6.2 5.2C40.6 36.4 44 30.7 44 24c0-1.2-.1-2.4-.4-3.5z"/></svg>
+            Mit Google anmelden
+          </button>
+          <p style="font-size:.75rem;color:var(--ink-s)">Nur du siehst diese Daten — kein Dritter hat Zugriff.</p>
+        </div>
       </div>
     </section>
 
@@ -1339,6 +1376,215 @@ function printInvoice(){
   $('print-area').style.display='block';
   window.print();
   $('print-area').style.display='none';
+}
+
+// ── ANALYTICS (GA4 Data API) ──────────────────────────────────────────
+let gaToken  = null;
+let gaStart  = '7daysAgo';
+let gaEnd    = 'today';
+
+// Range preset buttons
+document.querySelectorAll('.ga-range-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.ga-range-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    gaStart = btn.dataset.start;
+    gaEnd   = btn.dataset.end;
+    if (gaToken) renderAnalytics();
+  });
+});
+
+// Custom date range
+$('ga-custom-btn').addEventListener('click', () => {
+  const from = $('ga-from').value, to = $('ga-to').value;
+  if (!from || !to) { toast('Bitte beide Daten auswählen.','err'); return; }
+  if (from > to) { toast('Von-Datum muss vor Bis-Datum liegen.','err'); return; }
+  document.querySelectorAll('.ga-range-btn').forEach(b => b.classList.remove('active'));
+  gaStart = from; gaEnd = to;
+  if (gaToken) renderAnalytics();
+});
+
+// Auth button
+$('ga-auth-btn').addEventListener('click', async () => {
+  try {
+    gaToken = await getGaToken();
+    renderAnalytics();
+  } catch(e) {
+    toast('Google-Anmeldung fehlgeschlagen: ' + e.message, 'err');
+  }
+});
+
+function getGaToken() {
+  return new Promise((resolve, reject) => {
+    if (!window.google) { reject(new Error('Google Identity Services nicht geladen')); return; }
+    const client = google.accounts.oauth2.initTokenClient({
+      client_id: CONFIG.GMAIL_CLIENT_ID,
+      scope: 'https://www.googleapis.com/auth/analytics.readonly',
+      callback: (res) => { if (res.error) reject(new Error(res.error)); else resolve(res.access_token); }
+    });
+    client.requestAccessToken();
+  });
+}
+
+async function gaReport(body) {
+  const pid = CONFIG.GA4_PROPERTY_ID;
+  const res = await fetch(`https://analyticsdata.googleapis.com/v1beta/properties/${pid}:runReport`, {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + gaToken, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || res.statusText);
+  }
+  return res.json();
+}
+
+function gaMetric(report, name) {
+  if (!report?.rows?.[0]) return '0';
+  const idx = (report.metricHeaders || []).findIndex(h => h.name === name);
+  return idx >= 0 ? (report.rows[0].metricValues[idx]?.value || '0') : '0';
+}
+
+function fmtSec(s) {
+  const n = parseFloat(s) || 0;
+  const m = Math.floor(n / 60), sec = Math.floor(n % 60);
+  if (m >= 60) return `${Math.floor(m/60)}h ${m%60}m`;
+  return m > 0 ? `${m}m ${sec}s` : `${sec}s`;
+}
+
+async function renderAnalytics() {
+  if (!CONFIG.GA4_PROPERTY_ID) {
+    $('ga-content').innerHTML = `<div class="ga-auth-wrap">
+      <p style="font-weight:700;color:var(--orange)">GA4 Property ID fehlt</p>
+      <p style="color:var(--ink-m);text-align:center;max-width:340px">Bitte trage deine <strong>GA4_PROPERTY_ID</strong> in <code>config.js</code> ein.<br>GA4 → Admin → Property Settings → Property ID (eine Zahl)</p>
+    </div>`;
+    return;
+  }
+  $('ga-content').innerHTML = `<div class="ga-auth-wrap"><div class="spin"></div><p style="color:var(--ink-m);margin:0">Daten werden geladen…</p></div>`;
+
+  try {
+    const dr = [{ startDate: gaStart, endDate: gaEnd }];
+
+    const [overview, daily, pages, events] = await Promise.all([
+      gaReport({ dateRanges: dr, metrics: [
+        {name:'activeUsers'},{name:'sessions'},{name:'averageSessionDuration'},{name:'screenPageViews'}
+      ]}),
+      gaReport({ dateRanges: dr,
+        dimensions: [{name:'date'}],
+        metrics: [{name:'activeUsers'}],
+        orderBys: [{dimension:{dimensionName:'date'}}]
+      }),
+      gaReport({ dateRanges: dr,
+        dimensions: [{name:'pagePath'},{name:'pageTitle'}],
+        metrics: [{name:'screenPageViews'},{name:'averageTimeOnPage'}],
+        orderBys: [{metric:{metricName:'screenPageViews'},desc:true}],
+        limit: 10
+      }),
+      gaReport({ dateRanges: dr,
+        dimensions: [{name:'eventName'}],
+        metrics: [{name:'eventCount'}],
+        orderBys: [{metric:{metricName:'eventCount'},desc:true}],
+        limit: 20
+      }),
+    ]);
+
+    // Overview values
+    const users    = parseInt(gaMetric(overview,'activeUsers'))         || 0;
+    const sessions = parseInt(gaMetric(overview,'sessions'))            || 0;
+    const avgDur   = gaMetric(overview,'averageSessionDuration');
+    const pgViews  = parseInt(gaMetric(overview,'screenPageViews'))     || 0;
+
+    // Daily chart bars
+    const dailyRows = daily?.rows || [];
+    const maxU = Math.max(...dailyRows.map(r => parseInt(r.metricValues[0].value)||0), 1);
+    const chartBars = dailyRows.length
+      ? dailyRows.map(r => {
+          const d = r.dimensionValues[0].value;
+          const u = parseInt(r.metricValues[0].value) || 0;
+          const h = Math.max(3, Math.round((u / maxU) * 110));
+          const lbl = `${d.slice(6,8)}.${d.slice(4,6)}`;
+          return `<div class="ga-bar-col" title="${u} Nutzer am ${lbl}">
+            <div style="font-size:.625rem;color:var(--ink-s);font-weight:500;min-height:14px">${u > 0 ? u : ''}</div>
+            <div class="ga-bar" style="height:${h}px"></div>
+            <div style="font-size:.5625rem;color:var(--ink-s);white-space:nowrap">${lbl}</div>
+          </div>`;
+        }).join('')
+      : '<p style="color:var(--ink-s);font-size:.875rem;margin:auto">Keine Daten für diesen Zeitraum.</p>';
+
+    // Pages rows
+    const pageRows = (pages?.rows || []).map(r => {
+      const path  = r.dimensionValues[0].value;
+      const title = r.dimensionValues[1].value || '—';
+      const views = r.metricValues[0].value;
+      const avg   = fmtSec(r.metricValues[1].value);
+      return `<tr>
+        <td style="max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(path)}">${esc(path)}</td>
+        <td class="muted" style="font-size:.8125rem;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(title.length > 35 ? title.slice(0,35)+'…' : title)}</td>
+        <td class="mono">${parseInt(views).toLocaleString('de-DE')}</td>
+        <td class="muted">${avg}</td>
+      </tr>`;
+    }).join('') || `<tr><td colspan="4"><div class="empty-st"><p class="empty-ttl">Keine Seitenaufrufe</p></div></td></tr>`;
+
+    // Events rows
+    const eventRows = (events?.rows || []).map(r => {
+      const name  = r.dimensionValues[0].value;
+      const count = parseInt(r.metricValues[0].value)||0;
+      return `<tr><td>${esc(name)}</td><td class="mono">${count.toLocaleString('de-DE')}</td></tr>`;
+    }).join('') || `<tr><td colspan="2"><div class="empty-st"><p class="empty-ttl">Keine Events</p></div></td></tr>`;
+
+    $('ga-content').innerHTML = `
+      <div class="ga-metric-grid">
+        <div class="ga-metric">
+          <div class="ga-metric-lbl">Nutzer</div>
+          <div class="ga-metric-val">${users.toLocaleString('de-DE')}</div>
+          <div class="ga-metric-sub">Aktive Nutzer</div>
+        </div>
+        <div class="ga-metric">
+          <div class="ga-metric-lbl">Sessions</div>
+          <div class="ga-metric-val">${sessions.toLocaleString('de-DE')}</div>
+          <div class="ga-metric-sub">Sitzungen gesamt</div>
+        </div>
+        <div class="ga-metric">
+          <div class="ga-metric-lbl">Ø Sitzungsdauer</div>
+          <div class="ga-metric-val">${fmtSec(avgDur)}</div>
+          <div class="ga-metric-sub">Durchschnitt</div>
+        </div>
+        <div class="ga-metric">
+          <div class="ga-metric-lbl">Seitenaufrufe</div>
+          <div class="ga-metric-val">${pgViews.toLocaleString('de-DE')}</div>
+          <div class="ga-metric-sub">Seiten gesamt</div>
+        </div>
+      </div>
+      <div class="ga-chart-wrap">
+        <div class="ga-chart-ttl">Tägliche Nutzer</div>
+        <div style="display:flex;align-items:flex-end;gap:3px;height:148px;padding-top:.75rem">
+          ${chartBars}
+        </div>
+      </div>
+      <div class="ga-2col">
+        <div class="card">
+          <div class="card-hd"><span class="card-ttl">Top Seiten</span></div>
+          <table class="dtable">
+            <thead><tr><th>Pfad</th><th>Titel</th><th>Aufrufe</th><th>Ø Zeit</th></tr></thead>
+            <tbody>${pageRows}</tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-hd"><span class="card-ttl">Events &amp; Klicks</span></div>
+          <table class="dtable">
+            <thead><tr><th>Event</th><th>Anzahl</th></tr></thead>
+            <tbody>${eventRows}</tbody>
+          </table>
+        </div>
+      </div>`;
+  } catch(e) {
+    $('ga-content').innerHTML = `<div class="ga-auth-wrap">
+      <p style="font-weight:700;color:var(--red)">Fehler beim Laden</p>
+      <p style="color:var(--ink-m);text-align:center;max-width:300px">${esc(e.message)}</p>
+      <button class="btn btn--ghost btn--sm" onclick="gaToken=null;$('ga-content').innerHTML='';location.reload()">Neu anmelden</button>
+    </div>`;
+  }
 }
 
 // ── GMAIL SEND ────────────────────────────────────────────────────────
