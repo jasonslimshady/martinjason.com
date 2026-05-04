@@ -489,7 +489,7 @@ ul { list-style: none; padding: 0; margin: 0; }
   z-index: 11;
   transition:
     transform 0.75s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity   0.22s cubic-bezier(0.4, 0, 0.2, 1); /* fast fade */
+    opacity   0.5s cubic-bezier(0.4, 0, 0.2, 1); /* fast fade */
 }
 
 @media (max-width: 980px) {
