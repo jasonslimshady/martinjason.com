@@ -40,73 +40,66 @@
 }
 
 
-/* ── Popup card — base (all browsers) ───────────────────────────────── */
+/* ── Popup shell — glass layer (no overflow, no scroll) ─────────────
+   Separating glass rendering from the scroll container eliminates the
+   compositing artifact at the bottom clip edge that appears when
+   backdrop-filter + filter: drop-shadow() share a scrollable element.
+   ─────────────────────────────────────────────────────────────────── */
 
-.booking-popup {
-  /* Layout */
+.booking-popup-shell {
+  /* Shape */
   border-radius: 28px;
   width: 100%;
   max-width: 560px;
-  max-height: 88vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 2.25rem 2.5rem 2.5rem;
   position: relative;
+  /* overflow: clip clips child content to the rounded corners without
+     creating a block formatting context — safe to combine with
+     backdrop-filter (unlike overflow: hidden which breaks it) */
+  overflow: clip;
 
   /* Standard frosted glass — Safari / Firefox */
-  background: var(--glass-bg);                         /* rgba(255,255,255,0.55) */
+  background: var(--glass-bg);
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
           backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
-  border: 1px solid var(--glass-border);               /* rgba(255,255,255,0.65) */
+  border: 1px solid var(--glass-border);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.95),
     var(--glass-shadow-strong);
 
-  /* Entry animation */
+  /* Entry animation lives on the shell */
   transform: scale(0.95) translateY(10px);
   transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
-  scrollbar-width: thin;
-  scrollbar-color: rgba(10, 10, 10, 0.12) transparent;
 }
 
-.booking-overlay.is-open .booking-popup {
+.booking-overlay.is-open .booking-popup-shell {
   transform: scale(1) translateY(0);
 }
 
-/* Hard fallback — no backdrop-filter support at all */
+/* Hard fallback — no backdrop-filter support */
 @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
-  .booking-popup { background: rgba(247, 245, 241, 0.97); }
+  .booking-popup-shell { background: rgba(247, 245, 241, 0.97); }
 }
 
 
-/* ── Popup card — liquid glass (Chrome / Edge) ───────────────────────
-   backdrop-filter accepts SVG filter url() in Blink-based browsers.
-   The SVG #bp-glass filter (injected by booking-glass.js) runs
-   feTurbulence → feDisplacementMap on the captured backdrop, creating
-   the organic liquid warp of the liquid-glass-vue AppCard component.
+/* ── Liquid glass enhancement (Chrome / Edge only) ───────────────────
+   Glass effects on the shell — NOT the scroll container.
    ─────────────────────────────────────────────────────────────────── */
 
 @supports (backdrop-filter: url('#')) {
 
-  .booking-popup {
-    /* Nearly transparent — the displaced backdrop IS the background */
+  .booking-popup-shell {
     background: rgba(255, 255, 255, 0.50);
     border: none;
-
-    /* Liquid displacement + subtle blur — same pattern as AppCard.vue  */
     -webkit-backdrop-filter: brightness(1.05) blur(2px) url(#bp-glass);
             backdrop-filter: brightness(1.05) blur(2px) url(#bp-glass);
-
-    /* Outer depth — replaces box-shadow (drop-shadow works with filter) */
     filter:
       drop-shadow(-6px -8px 40px rgba(255, 255, 255, 0.10))
       drop-shadow( 0px  20px 56px rgba(0,   0,   0,   0.24));
-
     box-shadow: none;
   }
 
-  /* Glass rim glow — matches AppCard.vue ::before exactly */
-  .booking-popup::before {
+  /* Glass rim glow on the shell */
+  .booking-popup-shell::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -127,7 +120,27 @@
 }
 
 
-/* ── Ensure all popup content sits above the ::before rim overlay ───── */
+/* ── Popup scroll container (inner) — no glass effects here ─────────── */
+
+.booking-popup {
+  /* Scroll lives here, isolated from glass compositing */
+  max-height: 88vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 2.25rem 2.5rem 2.5rem;
+  position: relative;
+  border-radius: inherit;
+
+  /* Hide scrollbar — Chrome/Safari/Edge */
+  scrollbar-width: none;           /* Firefox */
+  -ms-overflow-style: none;        /* IE / Edge legacy */
+}
+.booking-popup::-webkit-scrollbar {
+  display: none;                   /* Chrome, Safari */
+}
+
+
+/* ── Ensure all popup content sits above the shell ::before rim ──────── */
 
 .booking-popup > * {
   position: relative;
@@ -704,16 +717,18 @@
 
 @media (prefers-reduced-motion: reduce) {
   .booking-overlay,
-  .booking-popup { transition: none; }
+  .booking-popup-shell { transition: none; }
 }
 
 
 /* ── Responsive ──────────────────────────────────────────────────────── */
 
 @media (max-width: 600px) {
+  .booking-popup-shell {
+    border-radius: 22px;
+  }
   .booking-popup {
     padding: 1.75rem 1.5rem 2rem;
-    border-radius: 22px;
     max-height: 92vh;
   }
   .bp-title        { font-size: 1.25rem; }

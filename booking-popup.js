@@ -557,9 +557,15 @@
     overlay.setAttribute('aria-modal', 'true');
     overlay.setAttribute('aria-label', 'Termin buchen');
 
+    // Shell = glass layer (backdrop-filter + drop-shadow, no overflow)
+    // Popup = scroll container inside the shell (no glass effects)
+    var shell = document.createElement('div');
+    shell.className = 'booking-popup-shell';
+
     popup = document.createElement('div');
     popup.className = 'booking-popup';
-    overlay.appendChild(popup);
+    shell.appendChild(popup);
+    overlay.appendChild(shell);
     document.body.appendChild(overlay);
 
     overlay.addEventListener('click', function(e) { if (e.target === overlay) closePopup(); });
