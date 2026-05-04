@@ -26,7 +26,7 @@ const CONFIG = {
   //  After creating your Looker Studio report, paste the
   //  embed URL here (Share → Embed report → copy iframe src).
   // ----------------------------------------------------------
-  LOOKER_STUDIO_URL: '',   // ← update this after Step 2
+  LOOKER_STUDIO_URL: 'https://datastudio.google.com/embed/reporting/97af4762-337c-4374-9ac2-7c4200bfd896/page/rA5wF',
 
   // ----------------------------------------------------------
   //  Invoicing defaults (shown as pre-filled values)
@@ -45,5 +45,14 @@ const CONFIG = {
 
   // Default payment term in days
   DEFAULT_PAYMENT_DAYS: 14,
+
+  // ----------------------------------------------------------
+  //  Gmail OAuth (for sending invoices from your Gmail)
+  //  1. Go to console.cloud.google.com → your project → APIs & Services → Credentials
+  //  2. Create OAuth 2.0 Client ID → Web application
+  //  3. Add http://localhost and https://dashboard.martinjason.com to Authorized JS origins
+  //  4. Paste the Client ID below (looks like: XXXXXXXXX.apps.googleusercontent.com)
+  // ----------------------------------------------------------
+  GMAIL_CLIENT_ID: '672383429326-fve9t1ak2haf7ll2he2r54rkvohtqugt.apps.googleusercontent.com',
 
 };
