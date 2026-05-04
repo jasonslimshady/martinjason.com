@@ -27,7 +27,7 @@ const CONFIG = {
   //  Find it: GA4 → Admin (gear icon, bottom-left) → Property Settings → Property ID
   //  Example: '325847291'
   // ----------------------------------------------------------
-  GA4_PROPERTY_ID: '',
+  GA4_PROPERTY_ID: '535837432',
 
   // ----------------------------------------------------------
   //  Invoicing defaults (shown as pre-filled values)
