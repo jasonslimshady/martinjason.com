@@ -97,24 +97,41 @@
          HERO
          ================================================================== -->
     <section class="hero">
-      <div class="container">
-        <p class="eyebrow reveal">AI Product Gallery Designer</p>
-        <h1 class="hero__title reveal" style="--reveal-delay: 80ms">
-          Produktgrafiken für DTC Brands<br />
-          in <em>Studioqualität</em> – erstellt mit KI,<br />
-          nicht mit Kameras.
-        </h1>
-        <p class="hero__sub reveal" style="--reveal-delay: 160ms">
-          Ich baue Produktgalerien für deine Produktseite, die so aussehen wie ein €10k-Fotoshooting –
-          in einem Bruchteil der Zeit. Für DACH-DTC-Marken, denen die Conversion-Rate wichtig ist.
-        </p>
-        <div class="hero__cta reveal" style="--reveal-delay: 240ms">
-          <a class="btn btn--primary glass-btn" href="#work">Galerien ansehen</a>
-          <a class="btn btn--ghost" href="#contact">
-            Kostenloses Erstgespräch
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-          </a>
+      <div class="container hero__inner">
+
+        <!-- Left: copy -->
+        <div class="hero__copy">
+          <p class="eyebrow reveal">AI Product Gallery Designer</p>
+          <h1 class="hero__title reveal" style="--reveal-delay: 80ms">
+            Produktgrafiken für DTC Brands<br />
+            in <em>Studioqualität</em> – erstellt mit KI,<br />
+            nicht mit Kameras.
+          </h1>
+          <p class="hero__sub reveal" style="--reveal-delay: 160ms">
+            Ich baue Produktgalerien für deine Produktseite, die so aussehen wie ein €10k-Fotoshooting –
+            in einem Bruchteil der Zeit. Für DACH-DTC-Marken, denen die Conversion-Rate wichtig ist.
+          </p>
+          <div class="hero__cta reveal" style="--reveal-delay: 240ms">
+            <a class="btn btn--primary glass-btn" href="#work">Galerien ansehen</a>
+            <a class="btn btn--ghost" href="#contact">
+              Kostenloses Erstgespräch
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </a>
+          </div>
         </div>
+
+        <!-- Right: animated card slider (swap --slide-bg for real image URLs later) -->
+        <div class="hero__slider-wrap" aria-hidden="true">
+          <div class="hero__slider">
+            <div class="slide" data-pos="0" style="--slide-bg: #E8A87C"></div>
+            <div class="slide" data-pos="1" style="--slide-bg: #B8CDD9"></div>
+            <div class="slide" data-pos="2" style="--slide-bg: #C9B99A"></div>
+            <div class="slide" data-pos="3" style="--slide-bg: #A8BFA8"></div>
+            <div class="slide" data-pos="4" style="--slide-bg: #D9B8B8"></div>
+            <div class="slide" data-pos="5" style="--slide-bg: #C4B8D9"></div>
+          </div>
+        </div>
+
       </div>
 
       <a class="hero__scroll" href="#services" aria-label="Weiter scrollen">
@@ -410,5 +427,49 @@
   </script>
   <script src="booking-popup.js"></script>
   <script src="booking-glass.js"></script>
+
+  <!-- Hero card slider -->
+  <script>
+  (function () {
+    var slider = document.querySelector('.hero__slider');
+    if (!slider) return;
+
+    var slides = Array.from(slider.querySelectorAll('.slide'));
+    var N = slides.length;          // 6 cards
+    var TRANSITION_MS = 750;        // must match CSS transition duration
+    var INTERVAL_MS   = 5000;       // 5 s per slide
+
+    function advance() {
+      var front = slides.find(function(s){ return s.dataset.pos === '0'; });
+      if (!front) return;
+
+      // 1. Animate front card out (left + fade)
+      front.classList.add('exiting');
+
+      // 2. Shift every other card one step forward
+      slides.forEach(function(slide) {
+        var pos = parseInt(slide.dataset.pos, 10);
+        if (!isNaN(pos) && pos > 0) {
+          slide.dataset.pos = String(pos - 1);
+        }
+      });
+
+      // 3. After transition, snap front card to the back of the queue
+      setTimeout(function() {
+        front.style.transition = 'none';
+        front.classList.remove('exiting');
+        front.dataset.pos = String(N - 1);
+        // Re-enable transitions after layout flush
+        requestAnimationFrame(function() {
+          requestAnimationFrame(function() {
+            front.style.transition = '';
+          });
+        });
+      }, TRANSITION_MS);
+    }
+
+    setInterval(advance, INTERVAL_MS);
+  })();
+  </script>
 </body>
 </html>

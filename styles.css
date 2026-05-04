@@ -391,7 +391,7 @@ ul { list-style: none; padding: 0; margin: 0; }
 }
 .hero__title {
   font-family: var(--font-display);
-  font-size: clamp(2rem, 4vw, 3.4rem);
+  font-size: clamp(1.8rem, 3.6vw, 3.06rem); /* ~10% smaller than original clamp(2rem,4vw,3.4rem) */
   font-weight: 600;
   line-height: var(--lh-tight);
   letter-spacing: -0.025em;
@@ -404,13 +404,81 @@ ul { list-style: none; padding: 0; margin: 0; }
   letter-spacing: -0.01em;
 }
 .hero__sub {
-  max-width: 56ch;
-  font-size: var(--fs-lede);
+  max-width: 52ch;
+  font-size: 1.125rem; /* ~10% smaller than --fs-lede (1.25rem) */
   color: var(--color-ink-muted);
   margin: 0 0 var(--space-4);
 }
 .hero__cta { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: var(--space-5); }
 .hero__meta { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+/* ─── Hero two-column layout ────────────────────────────────────────── */
+.hero__inner {
+  display: flex;
+  align-items: center;
+  gap: clamp(2rem, 5vw, 4.5rem);
+}
+.hero__copy {
+  flex: 0 1 560px;
+  min-width: 0;
+}
+
+/* ─── Card slider ───────────────────────────────────────────────────── */
+.hero__slider-wrap {
+  flex: 0 0 auto;
+  /* Extra right padding creates breathing room for the peeking back cards */
+  padding-right: 130px;
+}
+.hero__slider {
+  position: relative;
+  width: 260px;
+  height: 320px;
+}
+.slide {
+  position: absolute;
+  inset: 0;
+  width: 260px;
+  height: 320px;
+  border-radius: 22px;
+  background: var(--slide-bg, #E8A87C);
+  /* Glass-effect border: bright rim + layered shadow */
+  border: 2px solid rgba(255, 255, 255, 0.78);
+  box-shadow:
+    0 2px 4px  rgba(0, 0, 0, 0.04),
+    0 18px 52px rgba(0, 0, 0, 0.11),
+    inset 0 1px 0 rgba(255, 255, 255, 0.90);
+  transform-origin: top left;
+  transition:
+    transform 0.75s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity   0.75s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
+}
+
+/* ── Visible stack positions ── */
+.slide[data-pos="0"] { transform: translateX(0px)   scale(1);    opacity: 1;    z-index: 10; }
+.slide[data-pos="1"] { transform: translateX(52px)  scale(0.87); opacity: 1;    z-index: 9;  }
+.slide[data-pos="2"] { transform: translateX(96px)  scale(0.76); opacity: 0.88; z-index: 8;  }
+
+/* ── Off-screen queue (invisible, parked to the right) ── */
+.slide[data-pos="3"],
+.slide[data-pos="4"],
+.slide[data-pos="5"] { transform: translateX(132px) scale(0.66); opacity: 0;    z-index: 7;  }
+
+/* ── Front card exit: drifts left and fades ── */
+.slide.exiting {
+  transform: translateX(-52px) scale(0.88);
+  opacity: 0;
+  z-index: 11;
+}
+
+@media (max-width: 980px) {
+  .hero__inner       { flex-direction: column; align-items: flex-start; gap: 3rem; }
+  .hero__copy        { flex: none; }
+  .hero__slider-wrap { padding-right: 110px; align-self: center; }
+}
+@media (max-width: 560px) {
+  .hero__slider-wrap { display: none; }
+}
 
 .hero__scroll {
   position: absolute; left: 50%; bottom: 1.5rem;
