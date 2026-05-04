@@ -476,6 +476,7 @@
     <form id="mp-form" onsubmit="saveProject(event)">
       <div class="modal-body">
         <div class="g2">
+          <div class="fg s2" id="mp-client-row"><label class="fl">Kunde *</label><select class="fi" id="mp-client"><option value="">Kunde wählen…</option></select></div>
           <div class="fg s2"><label class="fl">Projektname *</label><input class="fi" id="mp-name" required placeholder="Website Redesign" /></div>
           <div class="fg s2"><label class="fl">Beschreibung</label><textarea class="fi" id="mp-desc" rows="2" placeholder="Kurze Beschreibung …"></textarea></div>
           <div class="fg"><label class="fl">Abrechnungsart</label>
@@ -739,13 +740,24 @@ async function openDrawer(id){
     openModal('ov-client');
   };
   $('dr-delete-btn').onclick = async () => {
-    if(!confirm(`${c.name} wirklich löschen?`)) return;
-    await sb.from('clients').delete().eq('id',id);
+    if(!confirm(`${c.name} wirklich löschen? Alle zugehörigen Zeiteinträge und Rechnungen werden ebenfalls gelöscht.`)) return;
+    // Delete in correct order to satisfy FK constraints
+    // 1. Time entries (client_id has no CASCADE)
+    const { error: e1 } = await sb.from('time_entries').delete().eq('client_id', id);
+    if(e1){ toast('Fehler beim Löschen: '+e1.message,'err'); return; }
+    // 2. Invoices (cascades to invoice_items automatically)
+    const { error: e2 } = await sb.from('invoices').delete().eq('client_id', id);
+    if(e2){ toast('Fehler beim Löschen: '+e2.message,'err'); return; }
+    // 3. Client (cascades to contacts_log and projects, projects cascade to remaining time_entries)
+    const { error: e3 } = await sb.from('clients').delete().eq('id', id);
+    if(e3){ toast('Fehler beim Löschen: '+e3.message,'err'); return; }
     closeDrawer(); toast('Kontakt gelöscht.'); loadCRM(); loadStats();
   };
   $('dr-new-proj-btn').onclick = () => {
     $('mp-title').textContent=`Projekt für ${c.name}`;
-    $('mp-form').reset(); openModal('ov-proj');
+    $('mp-form').reset();
+    $('mp-client-row').hidden = true; // client already known from drawer
+    openModal('ov-proj');
   };
 
   loadActivityLog(id);
@@ -827,25 +839,37 @@ async function loadProjects(){
   });
 }
 
-$('btn-new-proj').addEventListener('click',()=>{
-  $('mp-title').textContent='Neues Projekt'; $('mp-form').reset(); openModal('ov-proj');
+$('btn-new-proj').addEventListener('click', async () => {
+  $('mp-title').textContent='Neues Projekt'; $('mp-form').reset();
+  // Show client selector and populate it
+  $('mp-client-row').hidden = false;
+  const { data: clients } = await sb.from('clients').select('id,name,company').order('name');
+  const sel = $('mp-client');
+  sel.innerHTML = '<option value="">Kunde wählen…</option>';
+  (clients||[]).forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.id; o.textContent = c.name + (c.company ? ` — ${c.company}` : '');
+    sel.appendChild(o);
+  });
+  openModal('ov-proj');
 });
 
 async function saveProject(e){
   e.preventDefault();
-  const clientId = drawerClientId; // set when opened from drawer, else null
+  // Use drawer context if available, otherwise use the modal's client selector
+  const clientId = drawerClientId || $('mp-client').value || null;
+  if(!clientId){
+    toast('Bitte einen Kunden auswählen.','err'); return;
+  }
   const payload = { name:$('mp-name').value.trim(), description:$('mp-desc').value.trim()||null,
     rate_type:$('mp-rate-type').value, rate:parseFloat($('mp-rate').value)||null,
     budget_hours:parseFloat($('mp-budget').value)||null, status:$('mp-status').value,
     client_id: clientId };
-  if(!payload.client_id){
-    // If opened from time panel, need to pick a client — for now show error
-    toast('Bitte Kunden zuerst öffnen und dann Projekt anlegen.','err'); return;
-  }
   const { error } = await sb.from('projects').insert(payload);
   if(error){ toast('Fehler: '+error.message,'err'); return; }
   closeModal('ov-proj'); toast('Projekt erstellt.','ok');
-  loadProjects(); if(clientId) loadClientProjects(clientId);
+  loadProjects();
+  if(drawerClientId) loadClientProjects(drawerClientId);
 }
 
 // ── TIMER ────────────────────────────────────────────────────────────
