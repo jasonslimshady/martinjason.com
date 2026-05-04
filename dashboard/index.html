@@ -1477,7 +1477,7 @@ async function renderAnalytics() {
       }),
       gaReport({ dateRanges: dr,
         dimensions: [{name:'pagePath'},{name:'pageTitle'}],
-        metrics: [{name:'screenPageViews'},{name:'averageTimeOnPage'}],
+        metrics: [{name:'screenPageViews'},{name:'userEngagementDuration'}],
         orderBys: [{metric:{metricName:'screenPageViews'},desc:true}],
         limit: 10
       }),
