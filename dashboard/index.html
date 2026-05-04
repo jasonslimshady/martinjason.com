@@ -375,7 +375,7 @@
           <button class="btn btn--ghost btn--sm" id="btn-manual">+ Manuell</button>
         </div>
       </div>
-      <div class="card"><table class="dtable"><thead><tr><th>Beschreibung</th><th>Projekt</th><th>Datum</th><th>Dauer</th><th>Status</th></tr></thead><tbody id="time-body"></tbody></table></div>
+      <div class="card"><table class="dtable"><thead><tr><th>Beschreibung</th><th>Projekt</th><th>Datum</th><th>Uhrzeit</th><th>Dauer</th><th>Status</th></tr></thead><tbody id="time-body"></tbody></table></div>
     </section>
 
     <!-- INVOICES PANEL -->
@@ -514,16 +514,22 @@
         <div class="g2">
           <div class="fg s2"><label class="fl">Projekt *</label><select class="fi" id="mt-proj" required><option value="">Projekt wählen…</option></select></div>
           <div class="fg s2"><label class="fl">Beschreibung</label><input class="fi" id="mt-desc" placeholder="Was hast du gemacht?" /></div>
-          <div class="fg"><label class="fl">Stunden</label><input class="fi" id="mt-h" type="number" min="0" max="23" value="1" /></div>
-          <div class="fg"><label class="fl">Minuten</label><input class="fi" id="mt-m" type="number" min="0" max="59" value="0" /></div>
           <div class="fg"><label class="fl">Datum</label><input class="fi" id="mt-date" type="date" /></div>
-          <div class="fg"><label class="fl">Status</label>
+          <div class="fg" style="display:flex;gap:.5rem;align-items:flex-end">
+            <div style="flex:1"><label class="fl">Von</label><input class="fi" id="mt-von" type="time" /></div>
+            <div style="padding-bottom:.7rem;color:var(--ink-s);font-size:.875rem">–</div>
+            <div style="flex:1"><label class="fl">Bis</label><input class="fi" id="mt-bis" type="time" /></div>
+          </div>
+          <div class="fg"><label class="fl" id="mt-h-lbl">Stunden</label><input class="fi" id="mt-h" type="number" min="0" max="99" value="1" /></div>
+          <div class="fg"><label class="fl">Minuten</label><input class="fi" id="mt-m" type="number" min="0" max="59" value="0" /></div>
+          <div class="fg s2"><label class="fl">Status</label>
             <select class="fi" id="mt-invoiced">
               <option value="false">Offen</option>
               <option value="true">Fakturiert</option>
             </select>
           </div>
         </div>
+        <p id="mt-dur-hint" style="margin:.5rem 0 0;font-size:.8125rem;color:var(--ink-s)"></p>
       </div>
       <div class="modal-ft">
         <button type="button" class="btn btn--danger btn--sm" id="mt-delete-btn" hidden>Löschen</button>
@@ -924,7 +930,6 @@ function openTimeModal(entry = null) {
   $('mt-title').textContent = entry ? 'Eintrag bearbeiten' : 'Zeiteintrag erfassen';
   $('mt-delete-btn').hidden = !entry;
   $('mt-form').reset();
-  // Pre-fill all project options including paused/completed for edits
   const projSel = $('mt-proj');
   projSel.innerHTML = '<option value="">Projekt wählen…</option>';
   projectsCache.forEach(p => {
@@ -935,16 +940,26 @@ function openTimeModal(entry = null) {
   if (entry) {
     projSel.value          = entry.project_id || '';
     $('mt-desc').value     = entry.description || '';
-    $('mt-h').value        = Math.floor((entry.duration_minutes||0) / 60);
-    $('mt-m').value        = (entry.duration_minutes||0) % 60;
     $('mt-date').value     = entry.date || today();
     $('mt-invoiced').value = entry.is_invoiced ? 'true' : 'false';
+    // Pre-fill Von/Bis from stored timestamps if available
+    $('mt-von').value = entry.start_time ? fmtTimeOnly(entry.start_time) : '';
+    $('mt-bis').value = entry.end_time   ? fmtTimeOnly(entry.end_time)   : '';
+    // If no timestamps, fall back to manual duration
+    if (!entry.start_time) {
+      $('mt-h').value = Math.floor((entry.duration_minutes||0) / 60);
+      $('mt-m').value = (entry.duration_minutes||0) % 60;
+    }
   } else {
+    $('mt-date').value     = today();
+    $('mt-von').value      = '';
+    $('mt-bis').value      = '';
     $('mt-h').value        = 1;
     $('mt-m').value        = 0;
-    $('mt-date').value     = today();
     $('mt-invoiced').value = 'false';
   }
+  // Sync auto-calc state after pre-fill
+  calcDurFromVonBis();
   openModal('ov-time');
 }
 
@@ -956,20 +971,46 @@ $('mt-delete-btn').addEventListener('click', async () => {
   loadTimeEntries(); loadStats();
 });
 
+$('mt-von').addEventListener('input', calcDurFromVonBis);
+$('mt-bis').addEventListener('input', calcDurFromVonBis);
+
 async function saveManualTime(e){
   e.preventDefault();
-  const pid  = $('mt-proj').value;
-  const mins = parseInt($('mt-h').value||0)*60 + parseInt($('mt-m').value||0);
-  if (!pid)  { toast('Bitte ein Projekt wählen.','err'); return; }
-  if (!mins) { toast('Bitte Dauer eingeben.','err'); return; }
+  const pid     = $('mt-proj').value;
+  const dateStr = $('mt-date').value;
+  const von     = $('mt-von').value;
+  const bis     = $('mt-bis').value;
+  if (!pid) { toast('Bitte ein Projekt wählen.','err'); return; }
+
+  let mins, startISO = null, endISO = null;
+  if(von && bis){
+    const [vh,vm] = von.split(':').map(Number);
+    const [bh,bm] = bis.split(':').map(Number);
+    let total = (bh*60+bm)-(vh*60+vm);
+    const overnight = total < 0;
+    if(overnight) total += 24*60;
+    if(!total){ toast('Von und Bis sind identisch.','err'); return; }
+    mins = total;
+    startISO = new Date(`${dateStr}T${von}`).toISOString();
+    const endDate = overnight
+      ? new Date(new Date(dateStr).getTime()+86400000).toISOString().split('T')[0]
+      : dateStr;
+    endISO = new Date(`${endDate}T${bis}`).toISOString();
+  } else {
+    mins = parseInt($('mt-h').value||0)*60 + parseInt($('mt-m').value||0);
+    if(!mins){ toast('Bitte Dauer oder Von–Bis eingeben.','err'); return; }
+  }
+
   const proj = projectsCache.find(p => p.id === pid);
   const payload = {
     project_id:       pid,
     client_id:        proj?.client_id || null,
     description:      $('mt-desc').value.trim() || null,
     duration_minutes: mins,
-    date:             $('mt-date').value,
+    date:             dateStr,
     is_invoiced:      $('mt-invoiced').value === 'true',
+    start_time:       startISO,
+    end_time:         endISO,
   };
   let error;
   if (editTimeEntryId) {
@@ -990,12 +1031,17 @@ async function loadTimeEntries(){
   $('t-today').textContent=fmtDur(list.filter(e=>e.date===todayStr).reduce((s,e)=>s+e.duration_minutes,0));
   $('t-week').textContent=fmtDur(list.filter(e=>e.date>=weekAgo).reduce((s,e)=>s+e.duration_minutes,0));
   const tbody=$('time-body');
-  if(!list.length){ tbody.innerHTML=`<tr><td colspan="5"><div class="empty-st"><p class="empty-ttl">Noch keine Zeiteinträge</p><p class="empty-sub">Starte den Timer oder erfasse manuell.</p></div></td></tr>`; return; }
-  tbody.innerHTML=list.map(e=>`<tr data-id="${e.id}" title="Klicken zum Bearbeiten">
+  if(!list.length){ tbody.innerHTML=`<tr><td colspan="6"><div class="empty-st"><p class="empty-ttl">Noch keine Zeiteinträge</p><p class="empty-sub">Starte den Timer oder erfasse manuell.</p></div></td></tr>`; return; }
+  tbody.innerHTML=list.map(e=>{
+    const zeitStr = (e.start_time && e.end_time)
+      ? `${fmtTimeOnly(e.start_time)} – ${fmtTimeOnly(e.end_time)}`
+      : '—';
+    return `<tr data-id="${e.id}" title="Klicken zum Bearbeiten">
     <td>${esc(e.description||'—')}</td><td class="muted">${esc(e.projects?.name||'—')}</td>
-    <td class="muted">${fmtDate(e.date)}</td><td class="mono">${fmtDur(e.duration_minutes)}</td>
+    <td class="muted">${fmtDate(e.date)}</td><td class="muted mono">${zeitStr}</td>
+    <td class="mono">${fmtDur(e.duration_minutes)}</td>
     <td>${e.is_invoiced?'<span class="tag tag--green">Fakturiert</span>':'<span class="tag tag--muted">Offen</span>'}</td>
-  </tr>`).join('');
+  </tr>`;}).join('');
   // Store full entry data and wire click → edit modal
   const entryMap = Object.fromEntries(list.map(e => [e.id, e]));
   tbody.querySelectorAll('tr[data-id]').forEach(row =>
@@ -1354,6 +1400,32 @@ function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')
 function pad(n){ return String(n).padStart(2,'0'); }
 function today(){ return new Date().toISOString().split('T')[0]; }
 function daysFromNow(n){ const d=new Date(); d.setDate(d.getDate()+n); return d.toISOString().split('T')[0]; }
+function fmtTimeOnly(ts){ if(!ts) return ''; return new Date(ts).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit',hour12:false}); }
+
+// Von–Bis helpers
+function setDurLock(locked){
+  $('mt-h').disabled = locked;
+  $('mt-m').disabled = locked;
+  $('mt-h-lbl').textContent = locked ? 'Stunden (auto)' : 'Stunden';
+}
+function calcDurFromVonBis(){
+  const von = $('mt-von').value;
+  const bis = $('mt-bis').value;
+  const hint = $('mt-dur-hint');
+  if(von && bis){
+    const [vh,vm] = von.split(':').map(Number);
+    const [bh,bm] = bis.split(':').map(Number);
+    let total = (bh*60+bm)-(vh*60+vm);
+    if(total < 0) total += 24*60; // overnight
+    const h = Math.floor(total/60), m = total%60;
+    $('mt-h').value = h; $('mt-m').value = m;
+    setDurLock(true);
+    hint.textContent = total > 0 ? `→ ${h}h ${m}min automatisch berechnet` : 'Von und Bis sind identisch.';
+  } else {
+    setDurLock(false);
+    hint.textContent = '';
+  }
+}
 function toast(msg,type=''){ const el=document.createElement('div'); el.className='toast'+(type?' '+type:''); el.textContent=msg; $('toasts').appendChild(el); setTimeout(()=>el.remove(),3500); }
 
 boot();
