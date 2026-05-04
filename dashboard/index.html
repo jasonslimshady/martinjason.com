@@ -508,7 +508,7 @@
 <!-- MANUAL TIME MODAL -->
 <div class="overlay" id="ov-time">
   <div class="modal">
-    <div class="modal-hd"><span class="modal-ttl">Zeiteintrag erfassen</span><button class="modal-x" onclick="closeModal('ov-time')">✕</button></div>
+    <div class="modal-hd"><span class="modal-ttl" id="mt-title">Zeiteintrag erfassen</span><button class="modal-x" onclick="closeModal('ov-time')">✕</button></div>
     <form id="mt-form" onsubmit="saveManualTime(event)">
       <div class="modal-body">
         <div class="g2">
@@ -516,10 +516,17 @@
           <div class="fg s2"><label class="fl">Beschreibung</label><input class="fi" id="mt-desc" placeholder="Was hast du gemacht?" /></div>
           <div class="fg"><label class="fl">Stunden</label><input class="fi" id="mt-h" type="number" min="0" max="23" value="1" /></div>
           <div class="fg"><label class="fl">Minuten</label><input class="fi" id="mt-m" type="number" min="0" max="59" value="0" /></div>
-          <div class="fg s2"><label class="fl">Datum</label><input class="fi" id="mt-date" type="date" /></div>
+          <div class="fg"><label class="fl">Datum</label><input class="fi" id="mt-date" type="date" /></div>
+          <div class="fg"><label class="fl">Status</label>
+            <select class="fi" id="mt-invoiced">
+              <option value="false">Offen</option>
+              <option value="true">Fakturiert</option>
+            </select>
+          </div>
         </div>
       </div>
       <div class="modal-ft">
+        <button type="button" class="btn btn--danger btn--sm" id="mt-delete-btn" hidden>Löschen</button>
         <button type="button" class="btn btn--ghost btn--sm" onclick="closeModal('ov-time')">Abbrechen</button>
         <button type="submit" class="btn btn--primary btn--sm">Speichern</button>
       </div>
@@ -861,8 +868,10 @@ $('btn-new-proj').addEventListener('click', async () => {
 
 async function saveProject(e){
   e.preventDefault();
-  // Use drawer context if available, otherwise use the modal's client selector
-  const clientId = drawerClientId || $('mp-client').value || null;
+  // If client-row is visible the user is in Time Tracker context — always use the dropdown.
+  // Only fall back to drawerClientId when the dropdown is hidden (opened from a client drawer).
+  const fromDrawer = $('mp-client-row').hidden;
+  const clientId = fromDrawer ? drawerClientId : ($('mp-client').value || null);
   if(!clientId){
     toast('Bitte einen Kunden auswählen.','err'); return;
   }
@@ -906,18 +915,72 @@ $('btn-stop').addEventListener('click', async ()=>{
   loadTimeEntries(); loadStats();
 });
 
-$('btn-manual').addEventListener('click',()=>{ $('mt-form').reset(); $('mt-date').value=today(); openModal('ov-time'); });
+let editTimeEntryId = null;
+
+$('btn-manual').addEventListener('click', () => openTimeModal());
+
+function openTimeModal(entry = null) {
+  editTimeEntryId = entry ? entry.id : null;
+  $('mt-title').textContent = entry ? 'Eintrag bearbeiten' : 'Zeiteintrag erfassen';
+  $('mt-delete-btn').hidden = !entry;
+  $('mt-form').reset();
+  // Pre-fill all project options including paused/completed for edits
+  const projSel = $('mt-proj');
+  projSel.innerHTML = '<option value="">Projekt wählen…</option>';
+  projectsCache.forEach(p => {
+    const o = document.createElement('option');
+    o.value = p.id; o.textContent = `${p.name} — ${p.clients?.name||''}`;
+    projSel.appendChild(o);
+  });
+  if (entry) {
+    projSel.value          = entry.project_id || '';
+    $('mt-desc').value     = entry.description || '';
+    $('mt-h').value        = Math.floor((entry.duration_minutes||0) / 60);
+    $('mt-m').value        = (entry.duration_minutes||0) % 60;
+    $('mt-date').value     = entry.date || today();
+    $('mt-invoiced').value = entry.is_invoiced ? 'true' : 'false';
+  } else {
+    $('mt-h').value        = 1;
+    $('mt-m').value        = 0;
+    $('mt-date').value     = today();
+    $('mt-invoiced').value = 'false';
+  }
+  openModal('ov-time');
+}
+
+$('mt-delete-btn').addEventListener('click', async () => {
+  if (!editTimeEntryId || !confirm('Eintrag wirklich löschen?')) return;
+  const { error } = await sb.from('time_entries').delete().eq('id', editTimeEntryId);
+  if (error) { toast('Fehler: ' + error.message, 'err'); return; }
+  closeModal('ov-time'); toast('Eintrag gelöscht.');
+  loadTimeEntries(); loadStats();
+});
 
 async function saveManualTime(e){
   e.preventDefault();
-  const pid=$('mt-proj').value;
-  const mins=parseInt($('mt-h').value||0)*60+parseInt($('mt-m').value||0);
-  if(!mins){ toast('Bitte Dauer eingeben.','err'); return; }
-  const proj=projectsCache.find(p=>p.id===pid);
-  const { error }=await sb.from('time_entries').insert({ project_id:pid, client_id:proj?.client_id,
-    description:$('mt-desc').value.trim()||null, duration_minutes:mins, date:$('mt-date').value });
-  if(error){ toast('Fehler: '+error.message,'err'); return; }
-  closeModal('ov-time'); toast('Eintrag gespeichert.','ok'); loadTimeEntries(); loadStats();
+  const pid  = $('mt-proj').value;
+  const mins = parseInt($('mt-h').value||0)*60 + parseInt($('mt-m').value||0);
+  if (!pid)  { toast('Bitte ein Projekt wählen.','err'); return; }
+  if (!mins) { toast('Bitte Dauer eingeben.','err'); return; }
+  const proj = projectsCache.find(p => p.id === pid);
+  const payload = {
+    project_id:       pid,
+    client_id:        proj?.client_id || null,
+    description:      $('mt-desc').value.trim() || null,
+    duration_minutes: mins,
+    date:             $('mt-date').value,
+    is_invoiced:      $('mt-invoiced').value === 'true',
+  };
+  let error;
+  if (editTimeEntryId) {
+    ({ error } = await sb.from('time_entries').update(payload).eq('id', editTimeEntryId));
+  } else {
+    ({ error } = await sb.from('time_entries').insert(payload));
+  }
+  if (error) { toast('Fehler: '+error.message,'err'); return; }
+  closeModal('ov-time');
+  toast(editTimeEntryId ? 'Eintrag aktualisiert.' : 'Eintrag gespeichert.', 'ok');
+  loadTimeEntries(); loadStats();
 }
 
 async function loadTimeEntries(){
@@ -928,11 +991,16 @@ async function loadTimeEntries(){
   $('t-week').textContent=fmtDur(list.filter(e=>e.date>=weekAgo).reduce((s,e)=>s+e.duration_minutes,0));
   const tbody=$('time-body');
   if(!list.length){ tbody.innerHTML=`<tr><td colspan="5"><div class="empty-st"><p class="empty-ttl">Noch keine Zeiteinträge</p><p class="empty-sub">Starte den Timer oder erfasse manuell.</p></div></td></tr>`; return; }
-  tbody.innerHTML=list.map(e=>`<tr>
+  tbody.innerHTML=list.map(e=>`<tr data-id="${e.id}" title="Klicken zum Bearbeiten">
     <td>${esc(e.description||'—')}</td><td class="muted">${esc(e.projects?.name||'—')}</td>
     <td class="muted">${fmtDate(e.date)}</td><td class="mono">${fmtDur(e.duration_minutes)}</td>
     <td>${e.is_invoiced?'<span class="tag tag--green">Fakturiert</span>':'<span class="tag tag--muted">Offen</span>'}</td>
   </tr>`).join('');
+  // Store full entry data and wire click → edit modal
+  const entryMap = Object.fromEntries(list.map(e => [e.id, e]));
+  tbody.querySelectorAll('tr[data-id]').forEach(row =>
+    row.addEventListener('click', () => openTimeModal(entryMap[row.dataset.id]))
+  );
 }
 
 // ── INVOICES ──────────────────────────────────────────────────────────
