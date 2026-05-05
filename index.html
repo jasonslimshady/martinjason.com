@@ -155,7 +155,7 @@
          ================================================================== -->
     <section class="logos">
       <div class="container">
-        <p class="logos__label">Vertrauen aus 7 Jahren Erfahrung & 100+ Brands</p>
+        <p class="logos__label">Vertrauen aus 7 Jahren<br class="mobile-only"> Erfahrung & 100+ Brands</p>
         <div class="logos__row">
           <img class="logos__img" src="images/hye-black.avif" alt="Hye" />
           <img class="logos__img" src="images/mybugbar-black.avif" alt="MyBugBar" />
@@ -304,6 +304,17 @@
             </div>
           </a>
         </div>
+
+        <!-- Dot navigation — only rendered/used on mobile via CSS + JS -->
+        <div class="gallery-dots" aria-hidden="true">
+          <button class="gallery-dot is-active" aria-label="Galerie 1"></button>
+          <button class="gallery-dot" aria-label="Galerie 2"></button>
+          <button class="gallery-dot" aria-label="Galerie 3"></button>
+          <button class="gallery-dot" aria-label="Galerie 4"></button>
+          <button class="gallery-dot" aria-label="Galerie 5"></button>
+          <button class="gallery-dot" aria-label="Galerie 6"></button>
+        </div>
+
       </div>
     </section>
 
@@ -438,6 +449,42 @@
   </script>
   <script src="booking-popup.js"></script>
   <script src="booking-glass.js"></script>
+
+  <!-- Gallery mobile slider dots -->
+  <script>
+  (function () {
+    // Only wire up on mobile viewports
+    if (!window.matchMedia('(max-width: 560px)').matches) return;
+
+    var grid  = document.querySelector('.gallery-grid');
+    var dots  = document.querySelector('.gallery-dots');
+    if (!grid || !dots) return;
+
+    var cards  = Array.from(grid.querySelectorAll('.gallery-card'));
+    var dotEls = Array.from(dots.querySelectorAll('.gallery-dot'));
+
+    // IntersectionObserver: mark dot active when card is ≥55% visible inside the scroll container
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          var idx = cards.indexOf(entry.target);
+          dotEls.forEach(function (dot, i) {
+            dot.classList.toggle('is-active', i === idx);
+          });
+        }
+      });
+    }, { root: grid, threshold: 0.55 });
+
+    cards.forEach(function (card) { observer.observe(card); });
+
+    // Dot click → scroll card into view
+    dotEls.forEach(function (dot, i) {
+      dot.addEventListener('click', function () {
+        cards[i].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+      });
+    });
+  })();
+  </script>
 
   <!-- Hero card slider -->
   <script>
