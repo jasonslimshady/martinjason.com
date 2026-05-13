@@ -47,17 +47,16 @@
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   let ticking = false;
-  let lastY = window.scrollY;
 
   function update() {
-    const y = lastY;
-    // Move blobs at ~12% of scroll speed for a subtle parallax feel.
+    // Read scrollY inside rAF — layout is clean here, no forced reflow.
+    const y = window.scrollY;
     blobs.style.transform = `translate3d(0, ${y * -0.12}px, 0)`;
     ticking = false;
   }
 
   window.addEventListener('scroll', () => {
-    lastY = window.scrollY;
+    // Never read layout properties here — only schedule the rAF write pass.
     if (!ticking) {
       requestAnimationFrame(update);
       ticking = true;
