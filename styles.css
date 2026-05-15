@@ -637,7 +637,7 @@ ul { list-style: none; padding: 0; margin: 0; }
 }
 .tier--featured .tier__name { color: #fff; }
 .tier--featured .tier__price { color: #fff; }
-.tier--featured .tier__desc { color: #B8B8C2; }
+.tier--featured .tier__desc { color: #fff; }
 .tier--featured .tier__list { color: #B8B8C2; }
 .tier--featured .tier__tag { color: var(--color-accent); }
 
