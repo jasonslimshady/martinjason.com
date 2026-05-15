@@ -283,10 +283,57 @@
     }
     .reveal.is-in { opacity: 1; transform: translateY(0); }
 
+    /* ── FEATURED TIER — BLOB BACKGROUND ─────────────────────────────────
+       Animated glows behind the "Gallery Bundle" card.
+       ↓↓↓ EDIT THESE THREE HEX VALUES to change the card's color mood. ↓↓↓ */
+    :root {
+      --tier-blob-a: #2060E0;   /* Blob A — cool blue    (drifts top-left)   */
+      --tier-blob-b: #B04010;   /* Blob B — warm amber   (drifts mid-right)  */
+      --tier-blob-c: #604828;   /* Blob C — deep ochre   (drifts bottom)     */
+    }
+    /* Clip wrapper — keeps blobs inside the card radius without
+       clipping the .tier__badge that sits 12px above the card top */
+    .tier__blob-wrap {
+      position: absolute; inset: 0;
+      overflow: hidden; border-radius: inherit;
+      pointer-events: none; z-index: 0;
+    }
+    .tier__bg-blobs {
+      position: absolute; inset: -25%;
+      filter: blur(55px) saturate(130%);
+      will-change: transform;
+    }
+    .tier__blob {
+      position: absolute; border-radius: 50%;
+      opacity: 0.65; mix-blend-mode: screen;
+      animation: drift 38s ease-in-out infinite;
+    }
+    .tier__blob--a {
+      width: 130%; height: 130%;
+      background: radial-gradient(closest-side, var(--tier-blob-a) 0%, transparent 70%);
+      top: -40%; left: -20%; animation-duration: 42s;
+    }
+    .tier__blob--b {
+      width: 120%; height: 120%;
+      background: radial-gradient(closest-side, var(--tier-blob-b) 0%, transparent 70%);
+      top: 20%; right: -25%;
+      animation-duration: 56s; animation-direction: reverse;
+    }
+    .tier__blob--c {
+      width: 110%; height: 110%;
+      background: radial-gradient(closest-side, var(--tier-blob-c) 0%, transparent 70%);
+      bottom: -40%; left: 10%; animation-duration: 64s;
+    }
+    /* Lift all direct card children above the blob layer */
+    .tier--featured > *:not(.tier__blob-wrap) {
+      position: relative; z-index: 1;
+    }
+
     /* REDUCED MOTION */
     @media (prefers-reduced-motion: reduce) {
       .reveal { opacity: 1; transform: none; transition: none; }
       .blob { animation: none; }
+      .tier__blob { animation: none; }
       .hero__scroll span { animation: none; }
     }
 
@@ -455,7 +502,7 @@
             <div class="tier__head">
               <span class="tier__tag">Einstieg</span>
               <h3 class="tier__name">Gallery Sprint</h3>
-              <p class="tier__price">490<span>€</span><small>/ Produkt</small></p>
+              <p class="tier__price">690<span>€</span><small>/ Produkt</small></p>
             </div>
             <p class="tier__desc">
               Komplette Produktgalerie für ein Produkt. 6–10 Bilder nach Aufwand: Freisteller, Hero, Detail, Lifestyle,
@@ -470,11 +517,19 @@
           </article>
 
           <article class="tier tier--featured reveal" style="--reveal-delay: 80ms">
+            <!-- Animated blob background — colors controlled by --tier-blob-a/b/c in <style> -->
+            <div class="tier__blob-wrap" aria-hidden="true">
+              <div class="tier__bg-blobs">
+                <span class="tier__blob tier__blob--a"></span>
+                <span class="tier__blob tier__blob--b"></span>
+                <span class="tier__blob tier__blob--c"></span>
+              </div>
+            </div>
             <div class="tier__badge">Beliebt</div>
             <div class="tier__head">
               <span class="tier__tag">Bundle</span>
               <h3 class="tier__name">Gallery Bundle</h3>
-              <p class="tier__price">349<span>€</span><small>/ Produkt</small></p>
+              <p class="tier__price">549<span>€</span><small>/ Produkt</small></p>
             </div>
             <p class="tier__desc">
               Galerien ab 5 Produkten, für deinen Launch oder eine Kollektion. Grafiken für Landing Pages ebenfalls möglich.
