@@ -289,7 +289,7 @@
     :root {
       --tier-blob-a: #2060E0;   /* Blob A — cool blue    (drifts top-left)   */
       --tier-blob-b: #B04010;   /* Blob B — warm amber   (drifts mid-right)  */
-      --tier-blob-c: #604828;   /* Blob C — deep ochre   (drifts bottom)     */
+      --tier-blob-c: #767F4E;   /* Blob C — deep ochre   (drifts bottom)     */
     }
     /* Clip wrapper — keeps blobs inside the card radius without
        clipping the .tier__badge that sits 12px above the card top */
@@ -311,12 +311,12 @@
     .tier__blob--a {
       width: 130%; height: 130%;
       background: radial-gradient(closest-side, var(--tier-blob-a) 0%, transparent 30%);
-      top: -40%; left: -20%; animation-duration: 42s;
+      top: -50%; left: -50%; animation-duration: 42s;
     }
     .tier__blob--b {
       width: 120%; height: 120%;
       background: radial-gradient(closest-side, var(--tier-blob-b) 0%, transparent 30%);
-      top: 20%; right: -25%;
+      top: 20%; right: 20%;
       animation-duration: 56s; animation-direction: reverse;
     }
     .tier__blob--c {
@@ -326,7 +326,7 @@
     }
     /* Lift all direct card children above the blob layer */
     .tier--featured > *:not(.tier__blob-wrap) {
-      position: relative; z-index: 1;
+      z-index: 1;
     }
 
     /* REDUCED MOTION */
