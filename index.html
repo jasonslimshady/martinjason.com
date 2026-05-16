@@ -274,6 +274,78 @@
       100% { transform: translateY(8px); opacity: 0; }
     }
 
+    /* 7c. HERO PARALLAX ─────────────────────────────────────────────────────
+       Mouse-driven layer stack for the hero's right column.
+       All 7 images share an identical 2396×2739 canvas; they align perfectly
+       when positioned at inset:0 inside the clipping container.
+
+       ┌─ QUICK-TWEAK VARIABLES ──────────────────────────────────────────────┐
+       │ --px-max-move  Max pixel shift when mouse is at the viewport edge     │
+       │ --px-bleed     Edge buffer so a moving layer never shows a raw gap    │
+       │                Keep --px-bleed ≥ --px-max-move at all times           │
+       │ --px-width     Width of the right-column widget                       │
+       │ --px-radius    Corner radius                                          │
+       └──────────────────────────────────────────────────────────────────────┘ */
+    :root {
+      /* ── TWEAK THESE ─────────────────────────────────────────────────────── */
+      --px-max-move: 20px;                      /* Global intensity. ↑ = more dramatic */
+      --px-bleed:    22px;                      /* Edge buffer — keep ≥ --px-max-move  */
+      --px-width:    clamp(260px, 36vw, 420px); /* Widget column width                 */
+      --px-radius:   var(--radius-lg);          /* Corner rounding of the widget       */
+      /* ─────────────────────────────────────────────────────────────────────── */
+    }
+
+    /* Flex column — sits to the right of hero__copy */
+    .hero__parallax-wrap {
+      flex: 0 0 var(--px-width);
+      position: relative;
+      align-self: center;
+    }
+
+    /* Clipping box — overflow:hidden keeps the layer bleed invisible */
+    .hero__parallax {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 2396 / 2739;   /* Matches the source image proportions */
+      overflow: hidden;
+      border-radius: var(--px-radius);
+      box-shadow:
+        0 1px 3px  rgba(10,10,10,0.04),
+        0 8px 24px rgba(10,10,10,0.08),
+        0 32px 72px rgba(10,10,10,0.10);
+      isolation: isolate;
+    }
+
+    /* Each layer extends past the container on every side by --px-bleed.
+       That extra space lets translate3d shift the layer in any direction
+       without ever exposing a raw edge through the overflow clip.
+       ─────────────────────────────────────────────────────────────────
+       data-depth on each div controls how far it travels (0 = fixed,
+       1 = full --px-max-move). Edit those values in the HTML to retune
+       individual layers without touching this CSS. */
+    .parallax-layer {
+      position: absolute;
+      top:    calc(-1 * var(--px-bleed));
+      left:   calc(-1 * var(--px-bleed));
+      right:  calc(-1 * var(--px-bleed));
+      bottom: calc(-1 * var(--px-bleed));
+      transform: translate3d(0, 0, 0);
+      will-change: transform;
+    }
+
+    .parallax-layer img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      /* "top" keeps the person's head and top text visible when
+         cover needs to crop a few pixels to fill the bleed'd layer */
+      object-position: center top;
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
     /* 8. REVEAL — initial hidden state (prevents FOUC) */
     .reveal {
       opacity: 0; transform: translateY(18px);
@@ -335,6 +407,8 @@
       .blob { animation: none; }
       .tier__blob { animation: none; }
       .hero__scroll span { animation: none; }
+      /* Freeze all parallax layers */
+      .parallax-layer { transform: translate3d(0,0,0) !important; will-change: auto; }
     }
 
     /* RESPONSIVE — above-fold elements only */
@@ -343,12 +417,22 @@
       .nav__cta { margin-left: auto; }
       .hero__inner { flex-direction: column; align-items: flex-start; gap: 2.5rem; }
       .hero__copy { flex: none; }
+      /* Parallax: full-width on mobile, stacked below copy.
+         Scroll-based parallax is handled in JS. */
+      .hero__parallax-wrap {
+        flex: none;
+        width: min(100%, 380px);
+        margin-inline: auto;
+      }
     }
     @media (max-width: 560px) {
       .nav__brand-name { display: block; font-size: 0.72rem; letter-spacing: -0.01em; }
       .hero { padding-block-start: clamp(1.25rem, 3vh, 2rem); }
     }
   </style>
+
+  <!-- Parallax background (Layer 1) — preload so it renders before JS kicks in -->
+  <link rel="preload" href="images/Header%20Parallax%20Images/1.avif" as="image" type="image/avif" />
 
   <!-- Full stylesheet — non-render-blocking async load -->
   <link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -447,7 +531,94 @@
           </div>
         </div>
 
-        <!-- Right: animated card slider (swap --slide-bg for real image URLs later) 
+        <!-- ================================================================
+             Right: Parallax image stack
+             ─────────────────────────────────────────────────────────────
+             data-depth controls each layer's movement (0 = fixed, 1 = full
+             --px-max-move). Adjust these values to retune individual layers:
+               • Higher depth → element travels farther (feels "closer")
+               • Lower  depth → element barely moves   (feels "farther away")
+             ─────────────────────────────────────────────────────────────
+             Layer guide:
+               1  Background light/shadow — fixed base
+               2  "Material" folder UI (bottom-right)
+               3  "GALLERIES" typography header (top, spans width)
+               4  "effizienter" pill badge (right-center, small)
+               5  Jason at desk — main subject (kept subtle to avoid clipping)
+               6  "AI Generated" folder UI (bottom-left)
+               7  Quote text box (bottom-center, spans width)
+             ================================================================ -->
+        <div class="hero__parallax-wrap" aria-hidden="true">
+          <div class="hero__parallax" id="heroParallax">
+
+            <!-- Layer 1 — Background: studio light/shadow, NO movement -->
+            <div class="parallax-layer" data-depth="0">
+              <img
+                src="images/Header%20Parallax%20Images/1.avif"
+                alt="" width="2396" height="2739"
+                fetchpriority="high"
+                decoding="sync"
+              />
+            </div>
+
+            <!-- Layer 2 — "Material" folder (bottom-right), medium depth -->
+            <div class="parallax-layer" data-depth="0.50">
+              <img
+                src="images/Header%20Parallax%20Images/2.avif"
+                alt="" width="2396" height="2739"
+                decoding="async"
+              />
+            </div>
+
+            <!-- Layer 3 — "GALLERIES" headline (top, nearly full-width) — keep subtle -->
+            <div class="parallax-layer" data-depth="0.25">
+              <img
+                src="images/Header%20Parallax%20Images/3.avif"
+                alt="" width="2396" height="2739"
+                decoding="async"
+              />
+            </div>
+
+            <!-- Layer 4 — "effizienter" badge (small, right-center) — most dramatic -->
+            <div class="parallax-layer" data-depth="0.88">
+              <img
+                src="images/Header%20Parallax%20Images/4.avif"
+                alt="" width="2396" height="2739"
+                decoding="async"
+              />
+            </div>
+
+            <!-- Layer 5 — Jason at desk (main subject, ~40 % coverage) — very subtle -->
+            <div class="parallax-layer" data-depth="0.18">
+              <img
+                src="images/Header%20Parallax%20Images/5.avif"
+                alt="" width="2396" height="2739"
+                decoding="async"
+              />
+            </div>
+
+            <!-- Layer 6 — "AI Generated" folder (bottom-left), medium-high depth -->
+            <div class="parallax-layer" data-depth="0.62">
+              <img
+                src="images/Header%20Parallax%20Images/6.avif"
+                alt="" width="2396" height="2739"
+                decoding="async"
+              />
+            </div>
+
+            <!-- Layer 7 — Quote text box (bottom-center, wide) — keep moderate -->
+            <div class="parallax-layer" data-depth="0.38">
+              <img
+                src="images/Header%20Parallax%20Images/7.avif"
+                alt="" width="2396" height="2739"
+                decoding="async"
+              />
+            </div>
+
+          </div><!-- /.hero__parallax -->
+        </div><!-- /.hero__parallax-wrap -->
+
+        <!-- Right: animated card slider (swap --slide-bg for real image URLs later)
         <div class="hero__slider-wrap" aria-hidden="true">
           <div class="hero__slider">
             <div class="slide" data-pos="0" style="background-image: url('/images/slider-01.avif');"></div>
@@ -809,6 +980,139 @@
         cards[i].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
       });
     });
+  })();
+  </script>
+
+  <!-- ====================================================================
+       Hero Parallax
+       ==================================================================== -->
+  <script>
+  (function () {
+    'use strict';
+
+    // ╔═══════════════════════════════════════════════════════════════════════╗
+    // ║  PARALLAX CONFIGURATION — all tunable values live here.              ║
+    // ║  No need to touch anything below the closing ═══ line.               ║
+    // ╠═══════════════════════════════════════════════════════════════════════╣
+    var CONFIG = {
+
+      // ── DESKTOP (mouse-driven) ────────────────────────────────────────────
+      maxMove:    20,   // px — Max layer shift when the mouse reaches the viewport edge.
+                        //      Match (or keep ≤) the --px-bleed CSS variable.
+                        //      Raise for more drama, lower for subtlety.
+
+      smoothing: 0.07,  // 0–1 — Lerp factor (animation springiness) per frame.
+                        //      0.04 = very buttery/slow, 0.15 = snappy/fast.
+
+      // ── MOBILE (scroll-driven) ────────────────────────────────────────────
+      mobileMaxMove: 10,      // px — Max layer shift from scroll on mobile.
+      mobileSmoothingFactor: 0.09, // Lerp factor on mobile scroll.
+
+      // ── GENERAL ──────────────────────────────────────────────────────────
+      mobileBreakpoint: 980,  // px — Must match the CSS @media breakpoint above.
+    };
+    // ╚═══════════════════════════════════════════════════════════════════════╝
+
+    // ── Grab elements ────────────────────────────────────────────────────────
+    var parallaxEl = document.getElementById('heroParallax');
+    if (!parallaxEl) return;
+
+    var layers = Array.from(parallaxEl.querySelectorAll('.parallax-layer'));
+    if (!layers.length) return;
+
+    // Read each layer's depth from its data-depth attribute (0 = fixed, 1 = full maxMove)
+    var depths = layers.map(function (l) {
+      return parseFloat(l.dataset.depth) || 0;
+    });
+
+    // ── Bail out if the user prefers reduced motion ──────────────────────────
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    // ── State ────────────────────────────────────────────────────────────────
+    var targetX  = 0, targetY  = 0;   // Where we want to be
+    var currentX = 0, currentY = 0;   // Where we are now (lerped)
+    var isMobile = window.innerWidth <= CONFIG.mobileBreakpoint;
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+    function lerp(a, b, t) { return a + (b - a) * t; }
+
+    // Apply translate3d to every layer based on current interpolated position.
+    // currentX / currentY are in the -1..+1 range; multiply by maxMove for pixels.
+    function applyTransforms(cx, cy) {
+      var maxMove = isMobile ? CONFIG.mobileMaxMove : CONFIG.maxMove;
+      for (var i = 0; i < layers.length; i++) {
+        var d = depths[i];
+        if (d === 0) continue; // Layer 1 is always fixed — skip it
+        var tx = cx * maxMove * d;
+        var ty = cy * maxMove * d;
+        layers[i].style.transform = 'translate3d(' + tx.toFixed(2) + 'px, ' + ty.toFixed(2) + 'px, 0)';
+      }
+    }
+
+    // ── Animation loop ───────────────────────────────────────────────────────
+    // Runs every frame; only costs GPU time when there's visible movement.
+    var IDLE_THRESHOLD = 0.01; // Stop ticking once this close to target
+
+    function tick() {
+      var s = isMobile ? CONFIG.mobileSmoothingFactor : CONFIG.smoothing;
+      currentX = lerp(currentX, targetX, s);
+      currentY = lerp(currentY, targetY, s);
+
+      var stillMoving =
+        Math.abs(currentX - targetX) > IDLE_THRESHOLD ||
+        Math.abs(currentY - targetY) > IDLE_THRESHOLD ||
+        Math.abs(currentX)            > IDLE_THRESHOLD ||
+        Math.abs(currentY)            > IDLE_THRESHOLD;
+
+      if (stillMoving) {
+        applyTransforms(currentX, currentY);
+      }
+
+      requestAnimationFrame(tick);
+    }
+
+    // ── DESKTOP: Mouse moves anywhere on the page ────────────────────────────
+    // Normalise mouse X/Y to -1..+1 relative to the viewport centre.
+    // Moving the mouse to the far left of the screen → targetX = -1
+    // Moving to the far right                        → targetX = +1
+    document.addEventListener('mousemove', function (e) {
+      if (isMobile) return;
+      targetX = (e.clientX - window.innerWidth  / 2) / (window.innerWidth  / 2);
+      targetY = (e.clientY - window.innerHeight / 2) / (window.innerHeight / 2);
+    }, { passive: true });
+
+    // When the mouse leaves the page, spring layers back to centre
+    document.addEventListener('mouseleave', function () {
+      if (isMobile) return;
+      targetX = 0;
+      targetY = 0;
+    });
+
+    // ── MOBILE: Scroll position drives the Y axis ─────────────────────────────
+    // As the hero section moves from the bottom of the viewport to the top,
+    // targetY sweeps from +1 to -1 (layers drift upward — matching scroll direction).
+    // No horizontal shift on mobile.
+    function updateMobileTarget() {
+      if (!isMobile) return;
+      var rect = parallaxEl.getBoundingClientRect();
+      // offset: 0 when widget centre is at viewport centre; ±1 at ±(vh/2)
+      var offset = (rect.top + rect.height / 2 - window.innerHeight / 2) / (window.innerHeight / 2);
+      targetY = Math.max(-1, Math.min(1, offset));
+      targetX = 0;
+    }
+
+    window.addEventListener('scroll', updateMobileTarget, { passive: true });
+
+    // ── Handle viewport resize (e.g. orientation change) ─────────────────────
+    window.addEventListener('resize', function () {
+      isMobile = window.innerWidth <= CONFIG.mobileBreakpoint;
+      if (isMobile) { targetX = 0; }
+    }, { passive: true });
+
+    // ── Fire ─────────────────────────────────────────────────────────────────
+    updateMobileTarget(); // Set correct initial state on mobile
+    tick();               // Start the animation loop
+
   })();
   </script>
 
