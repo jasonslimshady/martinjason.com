@@ -497,13 +497,22 @@
   <link rel="preload" href="booking-popup.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="booking-popup.css"></noscript>
 
-  <!-- Microsoft Clarity -->
-  <script type="text/javascript">
-    (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "wkr32ce57m");
+  <!-- Microsoft Clarity — deferred to idle so it never touches the critical path -->
+  <script>
+    window.addEventListener('load', function () {
+      function loadClarity() {
+        (function(c,l,a,r,i,t,y){
+          c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+          t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+          y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+        })(window, document, "clarity", "script", "wkr32ce57m");
+      }
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadClarity, { timeout: 3000 });
+      } else {
+        setTimeout(loadClarity, 1000);
+      }
+    });
   </script>
 
   <!-- Google Analytics 4 — deferred until after page load to keep main thread clear -->
