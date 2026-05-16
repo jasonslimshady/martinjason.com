@@ -186,13 +186,22 @@
     var monthLabel = new Intl.DateTimeFormat('de-DE', { month: 'long', year: 'numeric' }).format(m);
     monthLabel = monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1);
 
-    var startDow  = (first.getDay() + 6) % 7;
+    // Mon–Fri only: 0=Mon … 4=Fri, 5=Sat, 6=Sun
+    var firstDow  = (first.getDay() + 6) % 7;
+    // Padding empty cells before the 1st weekday.
+    // If the month starts on Sat(5) or Sun(6) the first visible day is
+    // the following Monday → no padding needed (those weekend days are skipped).
+    var padding   = firstDow <= 4 ? firstDow : 0;
     var today     = todayKey();
     var available = state.slotsByDate;
 
     var cells = '';
-    for (var i = 0; i < startDow; i++) cells += '<div class="bp-cal-cell bp-cal-cell--empty"></div>';
+    for (var i = 0; i < padding; i++) cells += '<div class="bp-cal-cell bp-cal-cell--empty"></div>';
     for (var d = 1; d <= last.getDate(); d++) {
+      // Skip Saturday (dow 5) and Sunday (dow 6)
+      var dow = (new Date(year, month, d).getDay() + 6) % 7;
+      if (dow >= 5) continue;
+
       var dateKey    = year + '-' + pad2(month + 1) + '-' + pad2(d);
       var isPast     = dateKey < today;
       var hasSlots   = !!available[dateKey];
@@ -243,8 +252,7 @@
              '<div class="bp-cal-days">' +
                '<div class="bp-cal-dow">Mo</div><div class="bp-cal-dow">Di</div>' +
                '<div class="bp-cal-dow">Mi</div><div class="bp-cal-dow">Do</div>' +
-               '<div class="bp-cal-dow">Fr</div><div class="bp-cal-dow">Sa</div>' +
-               '<div class="bp-cal-dow">So</div>' + cells +
+               '<div class="bp-cal-dow">Fr</div>' + cells +
              '</div>' +
            '</div>';
   }
