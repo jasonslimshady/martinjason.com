@@ -58,10 +58,20 @@
     document.body.appendChild(svg);
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', injectFilter);
+  // Defer injection until the browser is idle after page load.
+  // The popup can't open until the user clicks, so this always runs in time.
+  function scheduleInject() {
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(injectFilter, { timeout: 2000 });
+    } else {
+      setTimeout(injectFilter, 500);
+    }
+  }
+
+  if (document.readyState === 'complete') {
+    scheduleInject();
   } else {
-    injectFilter();
+    window.addEventListener('load', scheduleInject);
   }
 
 }());

@@ -77,13 +77,7 @@
   ]
   </script>
 
-  <!-- Preconnect for fonts (fast async load) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
-  <!-- Google Fonts — non-render-blocking async load -->
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400;1,600&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400;1,600&display=optional"></noscript>
+  <!-- Fonts: system stack — zero network requests, zero layout shift -->
 
   <!-- =====================================================================
        Critical CSS — tokens + above-fold styles inlined for instant render.
@@ -113,9 +107,9 @@
       --glass-saturation:  180%;
       --glass-shadow:      0 1px 1px rgba(10,10,10,0.04), 0 8px 28px rgba(10,10,10,0.06);
       --glass-shadow-strong: 0 1px 1px rgba(10,10,10,0.05), 0 18px 48px rgba(10,10,10,0.10);
-      --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
-      --font-display: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
-      --font-serif: "Lora", "New York", "Georgia", serif;
+      --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+      --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+      --font-serif: "New York", "Georgia", serif;
       --fs-eyebrow:  0.78rem;
       --fs-body:     1.0625rem;
       --fs-lede:     1.25rem;
@@ -492,7 +486,8 @@
   </style>
 
   <!-- Parallax background (Layer 1) — preload so it renders before JS kicks in -->
-  <link rel="preload" href="images/Header%20Parallax%20Images/1.avif" as="image" type="image/avif" />
+  <link rel="preload" href="images/Header%20Parallax%20Images/1.avif" as="image" type="image/avif" fetchpriority="high" />
+  <link rel="preload" href="images/Header%20Parallax%20Images/5.avif" as="image" type="image/avif" fetchpriority="high" />
 
   <!-- Full stylesheet — non-render-blocking async load -->
   <link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -658,7 +653,8 @@
               <img
                 src="images/Header%20Parallax%20Images/5.avif"
                 alt="" width="2396" height="2739"
-                decoding="async"
+                fetchpriority="high"
+                decoding="sync"
               />
             </div>
 
@@ -1102,7 +1098,9 @@
     // ── State ────────────────────────────────────────────────────────────────
     var targetX  = 0, targetY  = 0;   // Where we want to be
     var currentX = 0, currentY = 0;   // Where we are now (lerped)
-    var isMobile = window.innerWidth <= CONFIG.mobileBreakpoint;
+    // isMobile is read lazily inside the first rAF — avoids forced reflow
+    // when layout is still dirty from parsing/style application.
+    var isMobile = false; // updated in first wake() before any layout reads
 
     // ── Helpers ──────────────────────────────────────────────────────────────
     function lerp(a, b, t) { return a + (b - a) * t; }
@@ -1128,6 +1126,8 @@
 
     function tick() {
       rafId = null;
+      // Read layout properties at the TOP of the rAF — layout is clean here.
+      isMobile = window.innerWidth <= CONFIG.mobileBreakpoint;
       var s = isMobile ? CONFIG.mobileSmoothingFactor : CONFIG.smoothing;
       currentX = lerp(currentX, targetX, s);
       currentY = lerp(currentY, targetY, s);
