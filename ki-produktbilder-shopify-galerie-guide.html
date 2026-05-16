@@ -565,11 +565,86 @@
       transition: width 0.1s linear;
     }
 
+    /* ── Checklist ──────────────────────────────────────────── */
+    .article-checklist {
+      list-style: none;
+      padding: 0;
+      margin: var(--space-3) 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .article-checklist li {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      font-size: var(--fs-body);
+      line-height: 1.6;
+      color: var(--color-ink-muted);
+    }
+
+    .article-checklist li::before {
+      content: "→";
+      color: var(--color-accent);
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 0.05em;
+    }
+
+    /* ── Table ───────────────────────────────────────────────── */
+    .article-table-wrap {
+      overflow-x: auto;
+      margin: var(--space-4) 0;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border);
+    }
+
+    .article-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.93rem;
+      background: var(--color-surface);
+    }
+
+    .article-table thead {
+      background: var(--color-surface-2);
+    }
+
+    .article-table th {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 600;
+      color: var(--color-ink-soft);
+      white-space: nowrap;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .article-table td {
+      padding: 0.8rem 1rem;
+      color: var(--color-ink-muted);
+      border-bottom: 1px solid var(--color-border);
+      line-height: 1.5;
+    }
+
+    .article-table tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .article-table tbody tr:hover td {
+      background: var(--color-surface-2);
+    }
+
     /* ── Responsive ─────────────────────────────────────────── */
     @media (max-width: 600px) {
       .author-card { flex-direction: column; }
       .faq-section { padding: var(--space-4) var(--space-3); }
       .article-cta { padding: var(--space-4) var(--space-3); }
+      .article-table th,
+      .article-table td { padding: 0.65rem 0.75rem; font-size: 0.88rem; }
     }
   </style>
 
@@ -653,7 +728,162 @@
           versteht, wie es in seinem Alltag funktioniert. Das Bild muss diese Arbeit übernehmen.
         </p>
 
-        <!-- Section 2: Tools -->
+        <!-- Section 2: Was eine Galerie wirklich verkauft -->
+        <h2>Was eine Galerie wirklich verkauft</h2>
+
+        <p>
+          Kunden kaufen kein Produktbild. Sie kaufen ein Gefühl: <em>Passt das zu mir? Kann ich dem Anbieter
+          vertrauen? Sieht das hochwertig aus?</em>
+        </p>
+
+        <p>Deine Galerie muss drei Fragen in Sekunden beantworten:</p>
+
+        <ul class="article-checklist">
+          <li><strong>Was ist das Produkt genau?</strong> (Detailaufnahmen, Materialien, Größenverhältnisse)</li>
+          <li><strong>Wie sieht es in der echten Welt aus?</strong> (Lifestyle- und Anwendungsbilder)</li>
+          <li><strong>Ist das eine professionelle Marke?</strong> (Konsistente Ästhetik, Stil, Farben)</li>
+        </ul>
+
+        <p>KI kann dir helfen, alle drei zu erfüllen — wenn du weißt wie.</p>
+
+        <!-- Section 2b: Workflow -->
+        <h2>Mein Workflow: Vom Referenzbild zur fertigen Galerie</h2>
+
+        <p>
+          Das ist kein theoretisches Framework. Das ist genau das, was ich für Kundenprojekte mache.
+        </p>
+
+        <h3>Schritt 1: Referenzbild &amp; Prompt in Figma</h3>
+
+        <p>
+          Ich starte immer in Figma. Nicht wegen des Designs — sondern wegen der Übersicht. Ich lade
+          ein oder mehrere Referenzbilder des Produkts direkt in den Canvas: echte Fotos,
+          Lieferantenbilder, manchmal auch nur ein Moodboard.
+        </p>
+
+        <p>
+          Dann schreibe ich einen Prompt, der zwei Dinge gleichzeitig tut: Er beschreibt das Bild das
+          ich haben will, und er gibt der KI das Produkt als visuellen Anker.
+        </p>
+
+        <p>Die Modelle die ich hauptsächlich nutze:</p>
+
+        <ul class="article-checklist">
+          <li>
+            <strong>ChatGPT Images (GPT-Image-1)</strong> — sehr stark bei konsistenten
+            Produktdarstellungen mit Kontext, gut steuerbar über Prompts
+          </li>
+          <li>
+            <strong>Nano Banana 2</strong> — exzellent für stylische, ästhetisch starke Bilder,
+            besonders wenn es um Lifestyle und Atmosphäre geht
+          </li>
+        </ul>
+
+        <p>
+          Das Ergebnis aus diesem Schritt ist noch nicht fertig. Es ist ein sehr guter Rohling —
+          manchmal 80% fertig, manchmal 60%. Das reicht nie für eine professionelle Galerie.
+          Aber es ist eine solide Basis.
+        </p>
+
+        <div class="callout callout--good">
+          <div class="callout__label">Was in Prompts funktioniert</div>
+          <p>
+            Lichtsituation konkret beschreiben · Stil referenzieren · Kontext geben ·
+            Kamerawinkel angeben
+          </p>
+        </div>
+
+        <div class="callout callout--bad">
+          <div class="callout__label">Was nicht funktioniert</div>
+          <p>
+            Zu viele Details auf einmal · Erwarten, dass KI das Produkt perfekt rendert (besonders bei Text,
+            Logos, komplexen Formen) · Keinen Referenzanker geben und hoffen, dass KI „rät"
+          </p>
+        </div>
+
+        <h3>Schritt 2: Nachbearbeitung in Photoshop mit Generative AI</h3>
+
+        <p>
+          Das ist der Schritt, der den Unterschied macht. Photoshop's KI-Features sind für diesen
+          Workflow gebaut. Ich nutze sie gezielt für vier Aufgaben:
+        </p>
+
+        <ul class="article-checklist">
+          <li>
+            <strong>Generative Fill / Expand</strong> — Das Bild hat das falsche Format? Mit Generative
+            Fill erweitere ich den Canvas und Photoshop füllt den Bereich kontextuell auf. Ein Quadratbild
+            wird zu einem breiten Banner — ohne sichtbare Kante.
+          </li>
+          <li>
+            <strong>Objekte einfügen &amp; anpassen</strong> — Manchmal fehlt ein Detail: ein Schatten,
+            ein Reflexionseffekt, ein zusätzliches Element im Hintergrund. Ich selektiere den Bereich,
+            beschreibe das Objekt im Prompt, und Photoshop generiert es direkt ins Bild.
+          </li>
+          <li>
+            <strong>Harmonize</strong> — Mein meistgenutztes Feature. Wenn ich ein neues Element ins
+            Bild einfüge, passt Harmonize Licht, Farbe und Ton automatisch an das restliche Bild an.
+            Das macht den Unterschied zwischen „da wurde etwas eingefügt" und „das sieht aus wie eine
+            echte Aufnahme".
+          </li>
+          <li>
+            <strong>Selections korrigieren</strong> — KI-Bilder haben fast immer kleine Fehler: eine
+            Kante die nicht stimmt, ein Detail das falsch gerendert wurde. Ich selektiere diese Bereiche
+            manuell und lasse Photoshop sie gezielt neu generieren — ohne das restliche Bild anzufassen.
+          </li>
+        </ul>
+
+        <p>
+          Dieser Schritt dauert je nach Bild zwischen 10 und 45 Minuten. Schnell ist er nicht.
+          Aber er ist der Grund, warum das Endergebnis professionell wirkt.
+        </p>
+
+        <h3>Schritt 3: Welche Bilder braucht eine Galerie wirklich?</h3>
+
+        <p>
+          Nicht jedes Produkt braucht die gleiche Galerie. Aber es gibt eine Grundstruktur,
+          die fast immer funktioniert:
+        </p>
+
+        <div class="article-table-wrap">
+          <table class="article-table">
+            <thead>
+              <tr>
+                <th>Bildtyp</th>
+                <th>Zweck</th>
+                <th>Aufwand</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Hero Shot</strong></td>
+                <td>Erstes Bild, sauberer Hintergrund, klares Produkt</td>
+                <td>Mittel</td>
+              </tr>
+              <tr>
+                <td><strong>Detail-Aufnahmen</strong></td>
+                <td>Material, Verarbeitung, besondere Features zeigen</td>
+                <td>Niedrig–Mittel</td>
+              </tr>
+              <tr>
+                <td><strong>Lifestyle / Anwendung</strong></td>
+                <td>Produkt im echten Kontext, Emotion erzeugen</td>
+                <td>Hoch</td>
+              </tr>
+              <tr>
+                <td><strong>Größenverhältnis</strong></td>
+                <td>Zeigt dem Kunden, wie groß/klein das Produkt wirklich ist</td>
+                <td>Niedrig</td>
+              </tr>
+              <tr>
+                <td><strong>Varianten</strong></td>
+                <td>Verschiedene Farben, Ausführungen konsistent darstellen</td>
+                <td>Mittel</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Section 3: Tools -->
         <h2>Tools: Was sonst noch funktioniert — und was nicht</h2>
 
         <p>
