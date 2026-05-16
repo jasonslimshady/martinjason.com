@@ -82,8 +82,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
   <!-- Google Fonts — non-render-blocking async load -->
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400;1,600&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400;1,600&display=swap"></noscript>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400;1,600&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400;1,600&display=optional"></noscript>
 
   <!-- =====================================================================
        Critical CSS — tokens + above-fold styles inlined for instant render.
@@ -511,20 +511,24 @@
     })(window, document, "clarity", "script", "wkr32ce57m");
   </script>
 
-  <!-- Google Analytics 4 -->
+  <!-- Google Analytics 4 — deferred until after page load to keep main thread clear -->
   <script>
-    const ignoreAnalytics = localStorage.getItem('ignore_analytics') === 'true';
-    if (!ignoreAnalytics) {
-      const gaScript = document.createElement('script');
+    // Queue gtag calls immediately so no events are lost before GA loads.
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    window.gtag = gtag;
+    gtag('js', new Date());
+    gtag('config', 'G-VGBWRTMZW2');
+
+    // Inject the GA4 script only after everything else has loaded.
+    window.addEventListener('load', function () {
+      var ignoreAnalytics = localStorage.getItem('ignore_analytics') === 'true';
+      if (ignoreAnalytics) return;
+      var gaScript = document.createElement('script');
       gaScript.async = true;
       gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-VGBWRTMZW2';
       document.head.appendChild(gaScript);
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      window.gtag = gtag;
-      gtag('js', new Date());
-      gtag('config', 'G-VGBWRTMZW2');
-    }
+    });
   </script>
 </head>
 <body>
@@ -705,11 +709,11 @@
       <div class="container">
         <p class="logos__label">Vertrauen aus 7 Jahren<br class="mobile-only"> Erfahrung & 100+ Brands</p>
         <div class="logos__row">
-          <img class="logos__img" src="images/hye-black.avif" alt="Hye" />
-          <img class="logos__img" src="images/mybugbar-black.avif" alt="MyBugBar" />
-          <img class="logos__img" src="images/sheko-black.avif" alt="Sheko" />
-          <img class="logos__img" src="images/natures-way-black.avif" alt="Nature's Way" />
-          <img class="logos__img" src="images/feierbar-black.avif" alt="Feierbar" />
+          <img class="logos__img" src="images/hye-black.avif" alt="Hye" width="150" height="100" />
+          <img class="logos__img" src="images/mybugbar-black.avif" alt="MyBugBar" width="150" height="100" />
+          <img class="logos__img" src="images/sheko-black.avif" alt="Sheko" width="150" height="100" />
+          <img class="logos__img" src="images/natures-way-black.avif" alt="Nature's Way" width="150" height="100" />
+          <img class="logos__img" src="images/feierbar-black.avif" alt="Feierbar" width="150" height="100" />
         </div>
       </div>
     </section>
@@ -984,7 +988,7 @@
   <footer class="footer">
     <div class="container footer__inner">
       <div class="footer__brand">
-        <img src="images/pacific-origins-logo-256x85.avif" alt="Pacific Origins" class="footer__pacific-logo" />
+        <img src="images/pacific-origins-logo-256x85.avif" alt="Pacific Origins" class="footer__pacific-logo" width="256" height="85" />
         <span class="footer__logo">Jason Martin</span>
         <p>AI Product Gallery Design</p>
       </div>
@@ -1117,10 +1121,13 @@
     }
 
     // ── Animation loop ───────────────────────────────────────────────────────
-    // Runs every frame; only costs GPU time when there's visible movement.
-    var IDLE_THRESHOLD = 0.01; // Stop ticking once this close to target
+    // Idles when nothing is moving — cancels rAF to free the main thread.
+    var IDLE_THRESHOLD = 0.01;
+    var rafId = null;       // Track the pending rAF so we can cancel it
+    var isRunning = false;  // Guard against double-starting the loop
 
     function tick() {
+      rafId = null;
       var s = isMobile ? CONFIG.mobileSmoothingFactor : CONFIG.smoothing;
       currentX = lerp(currentX, targetX, s);
       currentY = lerp(currentY, targetY, s);
@@ -1133,19 +1140,29 @@
 
       if (stillMoving) {
         applyTransforms(currentX, currentY);
+        rafId = requestAnimationFrame(tick); // Only re-queue while moving
+      } else {
+        isRunning = false; // Loop goes idle — no rAF queued
       }
+    }
 
-      requestAnimationFrame(tick);
+    // Wake the loop when an input event arrives (if not already running).
+    function wake() {
+      if (!isRunning) {
+        isRunning = true;
+        rafId = requestAnimationFrame(tick);
+      }
     }
 
     // ── DESKTOP: Mouse moves anywhere on the page ────────────────────────────
-    // Normalise mouse X/Y to -1..+1 relative to the viewport centre.
-    // Moving the mouse to the far left of the screen → targetX = -1
-    // Moving to the far right                        → targetX = +1
     document.addEventListener('mousemove', function (e) {
       if (isMobile) return;
-      targetX = (e.clientX - window.innerWidth  / 2) / (window.innerWidth  / 2);
-      targetY = (e.clientY - window.innerHeight / 2) / (window.innerHeight / 2);
+      // Read layout before writing — no forced reflow
+      var vw = window.innerWidth;
+      var vh = window.innerHeight;
+      targetX = (e.clientX - vw / 2) / (vw / 2);
+      targetY = (e.clientY - vh / 2) / (vh / 2);
+      wake();
     }, { passive: true });
 
     // When the mouse leaves the page, spring layers back to centre
@@ -1153,19 +1170,27 @@
       if (isMobile) return;
       targetX = 0;
       targetY = 0;
+      wake();
     });
 
     // ── MOBILE: Scroll position drives the Y axis ─────────────────────────────
-    // As the hero section moves from the bottom of the viewport to the top,
-    // targetY sweeps from +1 to -1 (layers drift upward — matching scroll direction).
-    // No horizontal shift on mobile.
+    // Reads are batched BEFORE any writes — prevents forced synchronous reflow.
+    var pendingScrollRaf = false;
     function updateMobileTarget() {
       if (!isMobile) return;
-      var rect = parallaxEl.getBoundingClientRect();
-      // offset: 0 when widget centre is at viewport centre; ±1 at ±(vh/2)
-      var offset = (rect.top + rect.height / 2 - window.innerHeight / 2) / (window.innerHeight / 2);
-      targetY = Math.max(-1, Math.min(1, offset));
-      targetX = 0;
+      // Schedule reads inside a rAF so layout is clean when we read getBoundingClientRect
+      if (!pendingScrollRaf) {
+        pendingScrollRaf = true;
+        requestAnimationFrame(function () {
+          pendingScrollRaf = false;
+          var rect = parallaxEl.getBoundingClientRect(); // read
+          var vh   = window.innerHeight;                 // read
+          var offset = (rect.top + rect.height / 2 - vh / 2) / (vh / 2);
+          targetY = Math.max(-1, Math.min(1, offset));   // write state only
+          targetX = 0;
+          wake(); // trigger render loop
+        });
+      }
     }
 
     window.addEventListener('scroll', updateMobileTarget, { passive: true });
@@ -1174,11 +1199,12 @@
     window.addEventListener('resize', function () {
       isMobile = window.innerWidth <= CONFIG.mobileBreakpoint;
       if (isMobile) { targetX = 0; }
+      wake();
     }, { passive: true });
 
     // ── Fire ─────────────────────────────────────────────────────────────────
     updateMobileTarget(); // Set correct initial state on mobile
-    tick();               // Start the animation loop
+    wake();               // Start the loop for the first frame
 
   })();
   </script>
