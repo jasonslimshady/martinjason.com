@@ -811,6 +811,8 @@ ul { list-style: none; padding: 0; margin: 0; }
   padding: 0.62rem 1.0rem;
   font-size: 0.88rem;
   white-space: nowrap;
+  position: relative;
+  z-index: 2; /* lift above glass-btn stacking context */
 }
 .insights__form input {
   flex: 1;
@@ -1105,11 +1107,10 @@ ul { list-style: none; padding: 0; margin: 0; }
   /* Hide the "Alle Artikel" button from the form-row on mobile; show it after the visual */
   .insights__alle-btn { display: none; }
   .insights__visual { padding-left: 0; }
-  /* Show the mobile-only Alle Artikel link below the visual — full-width, no wrapping */
+  /* Show the mobile-only Alle Artikel link below the visual — auto width, no wrapping */
   .insights__alle-mobile {
-    display: flex !important;
-    width: 100%;
-    justify-content: center;
+    display: inline-flex !important;
+    width: auto;
     white-space: nowrap;
   }
   /* Center privacy text on mobile under the stacked form */
