@@ -794,7 +794,7 @@ ul { list-style: none; padding: 0; margin: 0; }
 .insights__copy p { color: var(--color-ink-muted); max-width: 56ch; margin: 0 0 var(--space-3); }
 
 /* Desktop: form + "Alle Artikel lesen" side by side */
-.insights__form-row {
+.insights__cta-wrap {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -802,17 +802,15 @@ ul { list-style: none; padding: 0; margin: 0; }
   flex-wrap: nowrap;
 }
 .insights__form {
-  display: flex; gap: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
   flex-shrink: 0;
-  max-width: 360px;
 }
 .insights__alle-btn {
   flex-shrink: 0;
   padding: 0.62rem 1.0rem;
   font-size: 0.88rem;
   white-space: nowrap;
-  position: relative;
-  z-index: 2; /* lift above glass-btn stacking context */
 }
 .insights__form input {
   flex: 1;
@@ -837,7 +835,6 @@ ul { list-style: none; padding: 0; margin: 0; }
   margin-top: 0.7rem;
   font-size: 0.82rem;
   color: var(--color-ink-soft);
-  max-width: 360px;  /* matches form width */
   text-align: center;
 }
 .insights__visual { display: grid; place-items: center; padding-left: 1.5rem; }
@@ -1089,7 +1086,7 @@ ul { list-style: none; padding: 0; margin: 0; }
   }
 
   /* ── Insights: stack form column, restore button sizing, move Alle Artikel below visual ── */
-  .insights__form-row {
+  .insights__cta-wrap {
     flex-direction: column;
     align-items: stretch;
   }
