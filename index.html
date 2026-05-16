@@ -17,6 +17,66 @@
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="de_DE" />
 
+  <!-- Structured Data — WebSite + Organization + SiteNavigationElement -->
+  <script type="application/ld+json">
+  [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "@id": "https://martinjason.com/#website",
+      "name": "Martin, Jason",
+      "url": "https://martinjason.com",
+      "description": "Produktgrafiken für DTC Brands in Studioqualität – erstellt mit KI, nicht mit Kameras.",
+      "inLanguage": "de-DE",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://martinjason.com/?s={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "@id": "https://martinjason.com/#organization",
+      "name": "Martin, Jason",
+      "url": "https://martinjason.com",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://martinjason.com/images/google-search-logo.avif",
+        "width": 512,
+        "height": 512
+      },
+      "image": "https://martinjason.com/images/google-search-logo.avif",
+      "sameAs": ["https://www.linkedin.com/in/imjasonmartin/"]
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "@id": "https://martinjason.com/#webpage",
+      "url": "https://martinjason.com",
+      "name": "Martin, Jason — Produktgrafiken für DTC Brands in Studioqualität",
+      "isPartOf": { "@id": "https://martinjason.com/#website" },
+      "about": { "@id": "https://martinjason.com/#organization" },
+      "inLanguage": "de-DE"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "SiteNavigationElement",
+      "name": ["Leistungen", "Galerien", "Blog", "Über mich", "Termin buchen"],
+      "url": [
+        "https://martinjason.com/#services",
+        "https://martinjason.com/#work",
+        "https://martinjason.com/blog",
+        "https://martinjason.com/#about",
+        "https://martinjason.com/#contact"
+      ]
+    }
+  ]
+  </script>
+
   <!-- Preconnect for fonts (fast async load) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
