@@ -391,9 +391,9 @@ ul { list-style: none; padding: 0; margin: 0; }
 }
 .hero__title {
   font-family: var(--font-display);
-  font-size: clamp(1.95rem, 3.9vw, 3.0rem); /* slightly smaller than original clamp(2rem,4vw,3.4rem) */
+  font-size: clamp(1.55rem, 2.8vw, 2.2rem);
   font-weight: 600;
-  line-height: var(--lh-tight);
+  line-height: var(--lh-snug);
   letter-spacing: -0.025em;
   margin: 0 0 var(--space-3);
 }
@@ -559,9 +559,14 @@ ul { list-style: none; padding: 0; margin: 0; }
 /* =====================================================================
    7d. ABOUT
    ===================================================================== */
+/* Über mich heading size — scoped override */
+#about .section__title {
+  font-size: clamp(1.4rem, 2.6vw, 2.0rem);
+}
+
 .about__grid {
   display: grid;
-  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 0.72fr) minmax(0, 1fr);
   gap: clamp(2rem, 5vw, 4rem);
   align-items: center;
 }
@@ -782,19 +787,34 @@ ul { list-style: none; padding: 0; margin: 0; }
    ===================================================================== */
 .insights__inner {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
   gap: clamp(2rem, 5vw, 4rem);
   align-items: center;
 }
 .insights__copy p { color: var(--color-ink-muted); max-width: 56ch; margin: 0 0 var(--space-3); }
+
+/* Desktop: form + "Alle Artikel lesen" side by side */
+.insights__form-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: var(--space-3);
+  flex-wrap: nowrap;
+}
 .insights__form {
   display: flex; gap: 0.5rem;
-  margin-top: var(--space-3);
-  max-width: 460px;
+  flex: 1;
+  max-width: 360px;
+}
+.insights__alle-btn {
+  flex-shrink: 0;
+  padding: 0.62rem 1.0rem;
+  font-size: 0.88rem;
+  white-space: nowrap;
 }
 .insights__form input {
   flex: 1;
-  padding: 0.95rem 1.15rem;
+  padding: 0.62rem 0.95rem;
   border-radius: var(--radius-pill);
   border: 1px solid var(--color-border-strong);
   background: var(--color-surface);
@@ -807,12 +827,16 @@ ul { list-style: none; padding: 0; margin: 0; }
   border-color: var(--color-accent);
   box-shadow: 0 0 0 4px var(--color-accent-tint);
 }
+.insights__form .btn {
+  padding: 0.62rem 1.0rem;
+  font-size: 0.88rem;
+}
 .insights__privacy {
   margin-top: 0.7rem;
   font-size: 0.82rem;
   color: var(--color-ink-soft);
 }
-.insights__visual { display: grid; place-items: center; }
+.insights__visual { display: grid; place-items: center; padding-left: 1.5rem; }
 .insights__mock {
   width: min(360px, 100%);
   aspect-ratio: 3 / 4;
@@ -910,6 +934,13 @@ ul { list-style: none; padding: 0; margin: 0; }
 }
 .footer__brand p { color: var(--color-ink-muted); font-size: 0.92rem; margin: 0.3rem 0 0; }
 .footer__logo { font-weight: 600; letter-spacing: -0.01em; }
+.footer__pacific-logo {
+  display: block;
+  height: 28px;
+  width: auto;
+  margin-bottom: 0.5rem;
+  opacity: 0.75;
+}
 .footer__links { display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.95rem; color: var(--color-ink-muted); }
 .footer__links a:hover { color: var(--color-ink); }
 .footer__legal {
@@ -935,6 +966,7 @@ ul { list-style: none; padding: 0; margin: 0; }
   .gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
   .insights__inner { grid-template-columns: 1fr; }
+  .insights__visual { padding-left: 0; }
 
   .footer__inner { grid-template-columns: 1fr; }
   .footer__legal { text-align: left; }
@@ -954,15 +986,28 @@ ul { list-style: none; padding: 0; margin: 0; }
     letter-spacing: -0.01em;
   }
 
-  /* ── Hero: less top padding so eyebrow sits closer to the nav ── */
+  /* ── Hero: less top padding + smaller title for 3-row fit ── */
   .hero { padding-block-start: clamp(1.25rem, 3vh, 2rem); margin-top: 1rem; }
+  .hero__title { font-size: clamp(1.35rem, 6vw, 1.65rem); line-height: 1.2; }
 
-  /* ── Logo bar: single scrollable row with smaller images ── */
-  .logos__row {
+  /* ── Hero CTA buttons: one line ── */
+  .hero__cta {
     flex-wrap: nowrap;
-    gap: var(--space-3);
-    overflow-x: auto;
-    justify-content: flex-start;
+    gap: 0.5rem;
+  }
+  .hero__cta .btn {
+    padding: 0.65rem 0.9rem;
+    font-size: 0.85rem;
+    flex: 1;
+    justify-content: center;
+  }
+
+  /* ── Logo bar: centered wrap (no scroll) ── */
+  .logos__row {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    overflow-x: unset;
+    justify-content: center;
     scrollbar-width: none;
     padding-bottom: 2px;
   }
@@ -972,13 +1017,16 @@ ul { list-style: none; padding: 0; margin: 0; }
   /* ── Mobile-only <br> ── */
   .mobile-only { display: inline; }
 
-  /* ── Gallery: horizontal snap slider ── */
+  /* ── Gallery: horizontal snap slider (touch-action prevents vertical steal) ── */
   .gallery-grid {
     grid-template-columns: unset;
     display: flex;
     overflow-x: scroll;
+    overflow-y: hidden;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+    overscroll-behavior-x: contain;
     scroll-padding-inline-start: var(--container-pad);
     gap: 0.75rem;
     /* Bleed to screen edges */
@@ -991,6 +1039,7 @@ ul { list-style: none; padding: 0; margin: 0; }
   .gallery-card {
     flex: 0 0 82%;
     scroll-snap-align: start;
+    touch-action: pan-x;
   }
 
   /* ── Dot navigation ── */
@@ -1020,10 +1069,32 @@ ul { list-style: none; padding: 0; margin: 0; }
     background: var(--color-ink);
   }
 
-  /* ── Misc ── */
-  .insights__form { flex-direction: column; }
+  /* ── Insights: stack form column, restore button sizing, move Alle Artikel below visual ── */
+  .insights__form-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .insights__form {
+    max-width: 100%;
+    flex-direction: column;
+  }
   .insights__form input,
   .insights__form .btn { width: 100%; }
+  .insights__form .btn,
+  .insights__alle-btn {
+    padding: 0.85rem 1.4rem;
+    font-size: 0.98rem;
+  }
+  /* Hide the "Alle Artikel" button from the form-row on mobile; show it after the visual */
+  .insights__alle-btn { display: none; }
+  .insights__visual { padding-left: 0; }
+  /* Show the mobile-only Alle Artikel link below the visual */
+  .insights__alle-mobile { display: block !important; }
+
+  /* ── Über mich: smaller heading ── */
+  #about .section__title {
+    font-size: clamp(1.3rem, 5.5vw, 1.5rem);
+  }
 }
 
 
