@@ -1383,6 +1383,42 @@ let gaToken  = null;
 let gaStart  = '7daysAgo';
 let gaEnd    = 'today';
 
+const GA_TOKEN_KEY = 'ga4_token';
+const GA_EXPIRY_KEY = 'ga4_token_expiry';
+
+function gaSaveToken(token) {
+  gaToken = token;
+  localStorage.setItem(GA_TOKEN_KEY, token);
+  // Google access tokens expire after 1h; store with 55min safety margin
+  localStorage.setItem(GA_EXPIRY_KEY, Date.now() + 55 * 60 * 1000);
+}
+
+function gaLoadToken() {
+  const token  = localStorage.getItem(GA_TOKEN_KEY);
+  const expiry = parseInt(localStorage.getItem(GA_EXPIRY_KEY) || '0');
+  if (token && Date.now() < expiry) { gaToken = token; return true; }
+  return false;
+}
+
+function gaClearToken() {
+  gaToken = null;
+  localStorage.removeItem(GA_TOKEN_KEY);
+  localStorage.removeItem(GA_EXPIRY_KEY);
+}
+
+function getGaTokenSilent() {
+  return new Promise((resolve, reject) => {
+    if (!window.google) { reject(new Error('GIS nicht geladen')); return; }
+    const client = google.accounts.oauth2.initTokenClient({
+      client_id: CONFIG.GMAIL_CLIENT_ID,
+      scope: 'https://www.googleapis.com/auth/analytics.readonly',
+      prompt: '',
+      callback: (res) => { if (res.error) reject(new Error(res.error)); else resolve(res.access_token); }
+    });
+    client.requestAccessToken({ prompt: '' });
+  });
+}
+
 // Range preset buttons
 document.querySelectorAll('.ga-range-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -1407,7 +1443,8 @@ $('ga-custom-btn').addEventListener('click', () => {
 // Auth button
 $('ga-auth-btn').addEventListener('click', async () => {
   try {
-    gaToken = await getGaToken();
+    const token = await getGaToken();
+    gaSaveToken(token);
     renderAnalytics();
   } catch(e) {
     toast('Google-Anmeldung fehlgeschlagen: ' + e.message, 'err');
@@ -1425,6 +1462,16 @@ function getGaToken() {
     client.requestAccessToken();
   });
 }
+
+// Auto-restore token on load; try silent re-auth if expired
+(async function gaAutoInit() {
+  if (gaLoadToken()) { renderAnalytics(); return; }
+  try {
+    const token = await getGaTokenSilent();
+    gaSaveToken(token);
+    renderAnalytics();
+  } catch(_) { /* silent fail — user sees the connect button */ }
+})();
 
 async function gaReport(body) {
   const pid = CONFIG.GA4_PROPERTY_ID;
@@ -1644,7 +1691,7 @@ async function renderAnalytics() {
     $('ga-content').innerHTML = `<div class="ga-auth-wrap">
       <p style="font-weight:700;color:var(--red)">Fehler beim Laden</p>
       <p style="color:var(--ink-m);text-align:center;max-width:300px">${esc(e.message)}</p>
-      <button class="btn btn--ghost btn--sm" onclick="gaToken=null;$('ga-content').innerHTML='';location.reload()">Neu anmelden</button>
+      <button class="btn btn--ghost btn--sm" onclick="gaClearToken();$('ga-content').innerHTML='';location.reload()">Neu anmelden</button>
     </div>`;
   }
 }
