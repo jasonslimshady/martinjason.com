@@ -125,6 +125,13 @@
     .empty-sub{font-size:.8125rem;color:var(--ink-m);margin:0 0 1.125rem;max-width:240px}
 
     /* ANALYTICS */
+    .ga-breadcrumb{display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;font-size:.8125rem;color:var(--ink-s)}
+    .ga-breadcrumb-btn{background:none;border:none;padding:0;cursor:pointer;color:var(--accent);font-size:.8125rem;font-weight:500}
+    .ga-breadcrumb-btn:hover{text-decoration:underline}
+    .ga-breadcrumb-sep{color:var(--border-s)}
+    .ga-breadcrumb-cur{font-weight:500;color:var(--ink);max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .ga-pg-row{cursor:pointer;transition:background var(--fast)}
+    .ga-pg-row:hover{background:var(--surface-2)}
     .ga-toolbar{display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap}
     .ga-range-btn{padding:.375rem .875rem;border-radius:var(--r-pill);font-size:.8125rem;font-weight:500;background:var(--surface);color:var(--ink-m);border:1px solid var(--border-s);cursor:pointer;transition:all var(--fast)}
     .ga-range-btn.active,.ga-range-btn:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
@@ -1571,7 +1578,8 @@ async function renderAnalytics() {
       const title = r.dimensionValues[1].value || '—';
       const views = r.metricValues[0].value;
       const avg   = fmtSec(r.metricValues[1].value);
-      return `<tr>
+      const idx   = gaRegPage(path, title);
+      return `<tr class="ga-pg-row" onclick="gaOpenPage(${idx})">
         <td style="max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(path)}">${esc(path)}</td>
         <td class="muted" style="font-size:.8125rem;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(title.length > 35 ? title.slice(0,35)+'…' : title)}</td>
         <td class="mono">${parseInt(views).toLocaleString('de-DE')}</td>
@@ -1673,7 +1681,10 @@ async function renderAnalytics() {
       </div>
       <div class="ga-2col">
         <div class="card">
-          <div class="card-hd"><span class="card-ttl">Top Seiten</span></div>
+          <div class="card-hd">
+            <span class="card-ttl">Top Seiten</span>
+            <button class="btn btn--ghost btn--sm" onclick="gaShowAllPages()" style="font-size:.75rem">Alle Seiten →</button>
+          </div>
           <table class="dtable">
             <thead><tr><th>Pfad</th><th>Titel</th><th>Aufrufe</th><th>Ø Zeit</th></tr></thead>
             <tbody>${pageRows}</tbody>
@@ -1692,6 +1703,223 @@ async function renderAnalytics() {
       <p style="font-weight:700;color:var(--red)">Fehler beim Laden</p>
       <p style="color:var(--ink-m);text-align:center;max-width:300px">${esc(e.message)}</p>
       <button class="btn btn--ghost btn--sm" onclick="gaClearToken();$('ga-content').innerHTML='';location.reload()">Neu anmelden</button>
+    </div>`;
+  }
+}
+
+// ── GA PAGE REGISTRY ─────────────────────────────────────────────────
+// Stores page data so onclick handlers can reference by index (avoids quoting issues)
+const gaPageReg = [];
+function gaRegPage(path, title) {
+  const existing = gaPageReg.findIndex(p => p.path === path);
+  if (existing >= 0) return existing;
+  gaPageReg.push({ path, title });
+  return gaPageReg.length - 1;
+}
+
+// ── GA ALL PAGES VIEW ────────────────────────────────────────────────
+async function gaShowAllPages() {
+  $('ga-content').innerHTML = `<div class="ga-auth-wrap"><div class="spin"></div><p style="color:var(--ink-m);margin:0">Seiten werden geladen…</p></div>`;
+  try {
+    const dr = [{ startDate: gaStart, endDate: gaEnd }];
+    const report = await gaReport({ dateRanges: dr,
+      dimensions: [{name:'pagePath'},{name:'pageTitle'}],
+      metrics: [{name:'screenPageViews'},{name:'activeUsers'},{name:'userEngagementDuration'},{name:'bounceRate'}],
+      orderBys: [{metric:{metricName:'screenPageViews'},desc:true}],
+      limit: 100
+    });
+    const rows = (report?.rows || []).map(r => {
+      const path  = r.dimensionValues[0].value;
+      const title = r.dimensionValues[1].value || '—';
+      const views = parseInt(r.metricValues[0].value) || 0;
+      const users = parseInt(r.metricValues[1].value) || 0;
+      const avg   = fmtSec(r.metricValues[2].value);
+      const bounce = parseFloat(r.metricValues[3].value) || 0;
+      const idx   = gaRegPage(path, title);
+      return `<tr class="ga-pg-row" onclick="gaOpenPage(${idx})">
+        <td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(path)}">${esc(path)}</td>
+        <td class="muted" style="font-size:.8125rem;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(title)}">${esc(title.length > 40 ? title.slice(0,40)+'…' : title)}</td>
+        <td class="mono">${views.toLocaleString('de-DE')}</td>
+        <td class="mono">${users.toLocaleString('de-DE')}</td>
+        <td class="muted">${avg}</td>
+        <td class="muted">${(bounce*100).toFixed(0)}%</td>
+      </tr>`;
+    }).join('') || `<tr><td colspan="6"><div class="empty-st"><p class="empty-ttl">Keine Seitenaufrufe</p></div></td></tr>`;
+
+    $('ga-content').innerHTML = `
+      <div class="ga-breadcrumb">
+        <button class="ga-breadcrumb-btn" onclick="renderAnalytics()">← Analytics</button>
+        <span class="ga-breadcrumb-sep">/</span>
+        <span class="ga-breadcrumb-cur">Alle Seiten</span>
+      </div>
+      <div class="card">
+        <div class="card-hd">
+          <span class="card-ttl">Alle Seiten</span>
+          <span style="font-size:.75rem;color:var(--ink-s)">${(report?.rows||[]).length} Seiten · ${gaStart} – ${gaEnd}</span>
+        </div>
+        <table class="dtable">
+          <thead><tr><th>Pfad</th><th>Titel</th><th>Aufrufe</th><th>Nutzer</th><th>Ø Zeit</th><th>Absprung</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  } catch(e) {
+    $('ga-content').innerHTML = `<div class="ga-auth-wrap">
+      <p style="font-weight:700;color:var(--red)">Fehler beim Laden</p>
+      <p style="color:var(--ink-m)">${esc(e.message)}</p>
+      <button class="btn btn--ghost btn--sm" onclick="renderAnalytics()">← Zurück</button>
+    </div>`;
+  }
+}
+
+// ── GA PAGE DETAIL VIEW ──────────────────────────────────────────────
+function gaOpenPage(idx) {
+  const { path, title } = gaPageReg[idx] || {};
+  if (!path) return;
+  gaShowPageDetail(path, title);
+}
+
+async function gaShowPageDetail(path, title) {
+  $('ga-content').innerHTML = `<div class="ga-auth-wrap"><div class="spin"></div><p style="color:var(--ink-m);margin:0">Daten werden geladen…</p></div>`;
+  try {
+    const dr = [{ startDate: gaStart, endDate: gaEnd }];
+    const filter = { dimensionFilter: { filter: { fieldName: 'pagePath', stringFilter: { matchType: 'EXACT', value: path } } } };
+
+    const [overview, daily, sources, devices] = await Promise.all([
+      gaReport({ ...filter, dateRanges: dr,
+        metrics: [{name:'screenPageViews'},{name:'activeUsers'},{name:'userEngagementDuration'},{name:'bounceRate'}]
+      }),
+      gaReport({ ...filter, dateRanges: dr,
+        dimensions: [{name:'date'}],
+        metrics: [{name:'screenPageViews'}],
+        orderBys: [{dimension:{dimensionName:'date'}}]
+      }),
+      gaReport({ ...filter, dateRanges: dr,
+        dimensions: [{name:'sessionDefaultChannelGroup'}],
+        metrics: [{name:'sessions'}],
+        orderBys: [{metric:{metricName:'sessions'},desc:true}],
+        limit: 8
+      }),
+      gaReport({ ...filter, dateRanges: dr,
+        dimensions: [{name:'deviceCategory'}],
+        metrics: [{name:'activeUsers'}],
+        orderBys: [{metric:{metricName:'activeUsers'},desc:true}]
+      }),
+    ]);
+
+    const pgViews  = parseInt(gaMetric(overview,'screenPageViews')) || 0;
+    const pgUsers  = parseInt(gaMetric(overview,'activeUsers'))     || 0;
+    const pgAvg    = fmtSec(gaMetric(overview,'userEngagementDuration'));
+    const pgBounce = ((parseFloat(gaMetric(overview,'bounceRate'))||0)*100).toFixed(0);
+
+    // Daily views chart
+    const dailyRows = daily?.rows || [];
+    const maxV = Math.max(...dailyRows.map(r => parseInt(r.metricValues[0].value)||0), 1);
+    const chartBars = dailyRows.length
+      ? dailyRows.map(r => {
+          const d = r.dimensionValues[0].value;
+          const v = parseInt(r.metricValues[0].value) || 0;
+          const h = Math.max(3, Math.round((v / maxV) * 110));
+          const lbl = `${d.slice(6,8)}.${d.slice(4,6)}`;
+          return `<div class="ga-bar-col" title="${v} Aufrufe am ${lbl}">
+            <div style="font-size:.625rem;color:var(--ink-s);font-weight:500;min-height:14px">${v > 0 ? v : ''}</div>
+            <div class="ga-bar" style="height:${h}px"></div>
+            <div style="font-size:.5625rem;color:var(--ink-s);white-space:nowrap">${lbl}</div>
+          </div>`;
+        }).join('')
+      : '<p style="color:var(--ink-s);font-size:.875rem;margin:auto">Keine Daten.</p>';
+
+    // Traffic sources for this page
+    const srcColors = {'Direct':'#0A84FF','Organic Search':'#30D158','Referral':'#BF5AF2','Organic Social':'#FF9F0A','Paid Search':'#5E5CE6','Email':'#FF453A'};
+    const srcTotal  = (sources?.rows||[]).reduce((s,r) => s+(parseInt(r.metricValues[0].value)||0), 0) || 1;
+    const sourcesHTML = (sources?.rows||[]).map(r => {
+      const ch  = r.dimensionValues[0].value;
+      const val = parseInt(r.metricValues[0].value) || 0;
+      const pct = ((val/srcTotal)*100).toFixed(0);
+      const col = srcColors[ch] || '#8A8A92';
+      return `<div style="display:flex;align-items:center;gap:.75rem;padding:.5rem 1.125rem;border-bottom:1px solid var(--border)">
+        <div style="width:8px;height:8px;border-radius:50%;background:${col};flex-shrink:0"></div>
+        <span style="flex:1;font-size:.8125rem">${esc(ch)}</span>
+        <div style="width:80px;height:5px;background:var(--surface-2);border-radius:99px;overflow:hidden;flex-shrink:0">
+          <div style="height:100%;width:${pct}%;background:${col};border-radius:99px"></div>
+        </div>
+        <span style="font-size:.75rem;color:var(--ink-s);width:32px;text-align:right;flex-shrink:0">${pct}%</span>
+        <span style="font-size:.75rem;color:var(--ink-s);width:56px;text-align:right;flex-shrink:0">${val.toLocaleString('de-DE')}</span>
+      </div>`;
+    }).join('') || `<div class="empty-st"><p class="empty-ttl" style="font-size:.8125rem">Keine Daten</p></div>`;
+
+    // Device rows
+    const deviceIcons = {desktop:`<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><rect x="1" y="2" width="14" height="10" rx="1.5"/><path d="M5 14h6M8 12v2"/></svg>`, mobile:`<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><rect x="4" y="1" width="8" height="14" rx="1.5"/><circle cx="8" cy="12.5" r=".75" fill="currentColor" stroke="none"/></svg>`, tablet:`<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><rect x="2" y="1" width="12" height="14" rx="1.5"/><circle cx="8" cy="12.5" r=".75" fill="currentColor" stroke="none"/></svg>`};
+    const devTotal = (devices?.rows||[]).reduce((s,r) => s+(parseInt(r.metricValues[0].value)||0), 0) || 1;
+    const devHTML = (devices?.rows||[]).map(r => {
+      const dev  = r.dimensionValues[0].value.toLowerCase();
+      const val  = parseInt(r.metricValues[0].value) || 0;
+      const pct  = ((val/devTotal)*100).toFixed(0);
+      const icon = deviceIcons[dev] || deviceIcons.desktop;
+      return `<div style="display:flex;align-items:center;gap:.75rem;padding:.5rem 1.125rem;border-bottom:1px solid var(--border)">
+        <div style="width:24px;height:24px;border-radius:6px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--ink-m);flex-shrink:0">${icon}</div>
+        <span style="flex:1;font-size:.8125rem;text-transform:capitalize">${esc(dev)}</span>
+        <div style="width:80px;height:5px;background:var(--surface-2);border-radius:99px;overflow:hidden;flex-shrink:0">
+          <div style="height:100%;width:${pct}%;background:var(--accent);border-radius:99px"></div>
+        </div>
+        <span style="font-size:.75rem;color:var(--ink-s);width:32px;text-align:right;flex-shrink:0">${pct}%</span>
+        <span style="font-size:.75rem;color:var(--ink-s);width:44px;text-align:right;flex-shrink:0">${val.toLocaleString('de-DE')}</span>
+      </div>`;
+    }).join('') || `<div class="empty-st"><p class="empty-ttl" style="font-size:.8125rem">Keine Daten</p></div>`;
+
+    const shortTitle = title.length > 50 ? title.slice(0,50)+'…' : title;
+    $('ga-content').innerHTML = `
+      <div class="ga-breadcrumb">
+        <button class="ga-breadcrumb-btn" onclick="renderAnalytics()">← Analytics</button>
+        <span class="ga-breadcrumb-sep">/</span>
+        <span class="ga-breadcrumb-cur" title="${esc(path)}">${esc(path)}</span>
+      </div>
+      <div style="margin-bottom:.5rem">
+        <div style="font-size:1rem;font-weight:600;letter-spacing:-.02em">${esc(shortTitle)}</div>
+        <div style="font-size:.8125rem;color:var(--ink-s);margin-top:.125rem">${esc(path)}</div>
+      </div>
+      <div class="ga-metric-grid" style="margin-bottom:1rem">
+        <div class="ga-metric">
+          <div class="ga-metric-lbl">Seitenaufrufe</div>
+          <div class="ga-metric-val">${pgViews.toLocaleString('de-DE')}</div>
+          <div class="ga-metric-sub">Gesamt</div>
+        </div>
+        <div class="ga-metric">
+          <div class="ga-metric-lbl">Nutzer</div>
+          <div class="ga-metric-val">${pgUsers.toLocaleString('de-DE')}</div>
+          <div class="ga-metric-sub">Aktive Nutzer</div>
+        </div>
+        <div class="ga-metric">
+          <div class="ga-metric-lbl">Ø Verweildauer</div>
+          <div class="ga-metric-val">${pgAvg}</div>
+          <div class="ga-metric-sub">Engagement-Zeit</div>
+        </div>
+        <div class="ga-metric">
+          <div class="ga-metric-lbl">Absprungrate</div>
+          <div class="ga-metric-val">${pgBounce}%</div>
+          <div class="ga-metric-sub">Bounce Rate</div>
+        </div>
+      </div>
+      <div class="ga-chart-wrap" style="margin-bottom:1rem">
+        <div class="ga-chart-ttl">Tägliche Aufrufe</div>
+        <div style="display:flex;align-items:flex-end;gap:3px;height:148px;padding-top:.75rem">
+          ${chartBars}
+        </div>
+      </div>
+      <div class="ga-2col">
+        <div class="card">
+          <div class="card-hd"><span class="card-ttl">Traffic-Quellen</span></div>
+          ${sourcesHTML}
+        </div>
+        <div class="card">
+          <div class="card-hd"><span class="card-ttl">Geräte</span></div>
+          ${devHTML}
+        </div>
+      </div>`;
+  } catch(e) {
+    $('ga-content').innerHTML = `<div class="ga-auth-wrap">
+      <p style="font-weight:700;color:var(--red)">Fehler beim Laden</p>
+      <p style="color:var(--ink-m)">${esc(e.message)}</p>
+      <button class="btn btn--ghost btn--sm" onclick="renderAnalytics()">← Zurück</button>
     </div>`;
   }
 }
