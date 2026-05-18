@@ -1466,7 +1466,7 @@ async function renderAnalytics() {
   try {
     const dr = [{ startDate: gaStart, endDate: gaEnd }];
 
-    const [overview, daily, pages, events] = await Promise.all([
+    const [overview, daily, pages, events, sources] = await Promise.all([
       gaReport({ dateRanges: dr, metrics: [
         {name:'activeUsers'},{name:'sessions'},{name:'averageSessionDuration'},{name:'screenPageViews'}
       ]}),
@@ -1486,6 +1486,12 @@ async function renderAnalytics() {
         metrics: [{name:'eventCount'}],
         orderBys: [{metric:{metricName:'eventCount'},desc:true}],
         limit: 20
+      }),
+      gaReport({ dateRanges: dr,
+        dimensions: [{name:'sessionDefaultChannelGroup'}],
+        metrics: [{name:'sessions'},{name:'activeUsers'},{name:'bounceRate'}],
+        orderBys: [{metric:{metricName:'sessions'},desc:true}],
+        limit: 10
       }),
     ]);
 
@@ -1533,6 +1539,55 @@ async function renderAnalytics() {
       return `<tr><td>${esc(name)}</td><td class="mono">${count.toLocaleString('de-DE')}</td></tr>`;
     }).join('') || `<tr><td colspan="2"><div class="empty-st"><p class="empty-ttl">Keine Events</p></div></td></tr>`;
 
+    // Traffic sources
+    const srcChannelColors = {
+      'Direct':           {color:'#0A84FF', bg:'rgba(10,132,255,.12)'},
+      'Organic Search':   {color:'#30D158', bg:'rgba(48,209,88,.12)'},
+      'Referral':         {color:'#BF5AF2', bg:'rgba(191,90,242,.12)'},
+      'Organic Social':   {color:'#FF9F0A', bg:'rgba(255,159,10,.12)'},
+      'Paid Search':      {color:'#5E5CE6', bg:'rgba(94,92,230,.12)'},
+      'Email':            {color:'#FF453A', bg:'rgba(255,69,58,.12)'},
+      'Organic Video':    {color:'#FF6961', bg:'rgba(255,105,97,.12)'},
+      'Affiliates':       {color:'#64D2FF', bg:'rgba(100,210,255,.12)'},
+    };
+    const srcRows = sources?.rows || [];
+    const srcTotal = srcRows.reduce((s,r) => s + (parseInt(r.metricValues[0].value)||0), 0) || 1;
+    const srcMax   = Math.max(...srcRows.map(r => parseInt(r.metricValues[0].value)||0), 1);
+    const sourcesHTML = srcRows.length ? srcRows.map(r => {
+      const channel  = r.dimensionValues[0].value;
+      const sess     = parseInt(r.metricValues[0].value)||0;
+      const users    = parseInt(r.metricValues[1].value)||0;
+      const bounce   = parseFloat(r.metricValues[2].value)||0;
+      const pct      = ((sess / srcTotal) * 100).toFixed(1);
+      const barW     = Math.max(2, Math.round((sess / srcMax) * 100));
+      const col      = srcChannelColors[channel] || {color:'#8A8A92', bg:'rgba(138,138,146,.12)'};
+      const channelIcon = {
+        'Direct':         `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="M8 4v4l3 2"/></svg>`,
+        'Organic Search': `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><circle cx="6.5" cy="6.5" r="4.5"/><path d="M10 10l3.5 3.5"/></svg>`,
+        'Referral':       `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><path d="M6 8H3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-3m-4 0v5m0 0-2-2m2 2 2-2"/></svg>`,
+        'Organic Social': `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><circle cx="12" cy="4" r="1.8"/><circle cx="4" cy="8" r="1.8"/><circle cx="12" cy="12" r="1.8"/><path d="M5.7 9l4.6 2M10.3 5 5.7 7"/></svg>`,
+        'Paid Search':    `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><circle cx="6.5" cy="6.5" r="4.5"/><path d="M10 10l3.5 3.5"/><path d="M5 6.5h3M6.5 5v3"/></svg>`,
+        'Email':          `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="10" rx="1.5"/><path d="M1 4l7 5 7-5"/></svg>`,
+      }[channel] || `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/></svg>`;
+      return `<div style="display:flex;align-items:center;gap:.875rem;padding:.75rem 1.125rem;border-bottom:1px solid var(--border)">
+        <div style="width:28px;height:28px;border-radius:7px;background:${col.bg};display:flex;align-items:center;justify-content:center;color:${col.color};flex-shrink:0">${channelIcon}</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.3rem">
+            <span style="font-size:.8125rem;font-weight:600">${esc(channel)}</span>
+            <span style="font-size:.75rem;color:var(--ink-s)">${pct}%</span>
+          </div>
+          <div style="height:5px;background:var(--surface-2);border-radius:99px;overflow:hidden">
+            <div style="height:100%;width:${barW}%;background:${col.color};border-radius:99px;transition:width .4s var(--ease)"></div>
+          </div>
+          <div style="display:flex;gap:1rem;margin-top:.3rem">
+            <span style="font-size:.6875rem;color:var(--ink-s)">${sess.toLocaleString('de-DE')} Sessions</span>
+            <span style="font-size:.6875rem;color:var(--ink-s)">${users.toLocaleString('de-DE')} Nutzer</span>
+            <span style="font-size:.6875rem;color:var(--ink-s)">Absprung ${(bounce*100).toFixed(0)}%</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('') : `<div class="empty-st"><p class="empty-ttl">Keine Quellen-Daten</p></div>`;
+
     $('ga-content').innerHTML = `
       <div class="ga-metric-grid">
         <div class="ga-metric">
@@ -1561,6 +1616,13 @@ async function renderAnalytics() {
         <div style="display:flex;align-items:flex-end;gap:3px;height:148px;padding-top:.75rem">
           ${chartBars}
         </div>
+      </div>
+      <div class="card" style="margin-bottom:1rem">
+        <div class="card-hd">
+          <span class="card-ttl">Traffic-Quellen</span>
+          <span style="font-size:.75rem;color:var(--ink-s)">${srcTotal.toLocaleString('de-DE')} Sessions gesamt</span>
+        </div>
+        ${sourcesHTML}
       </div>
       <div class="ga-2col">
         <div class="card">
