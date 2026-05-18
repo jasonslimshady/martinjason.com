@@ -135,6 +135,11 @@
     .ga-toolbar{display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap}
     .ga-range-btn{padding:.375rem .875rem;border-radius:var(--r-pill);font-size:.8125rem;font-weight:500;background:var(--surface);color:var(--ink-m);border:1px solid var(--border-s);cursor:pointer;transition:all var(--fast)}
     .ga-range-btn.active,.ga-range-btn:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+    .ga-live-btn{padding:.375rem .875rem;border-radius:var(--r-pill);font-size:.8125rem;font-weight:600;background:var(--surface);color:var(--red);border:1px solid var(--red);cursor:pointer;transition:all var(--fast);display:inline-flex;align-items:center;gap:.4rem}
+    .ga-live-btn:hover,.ga-live-btn.active{background:var(--red);color:#fff;border-color:var(--red)}
+    .ga-live-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}
+    .ga-live-btn.active .ga-live-dot{animation:livepulse 1.2s ease-in-out infinite}
+    @keyframes livepulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
     .ga-metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1rem}
     .ga-metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:1.25rem 1.5rem}
     .ga-metric-lbl{font-size:.6875rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-s);margin-bottom:.375rem}
@@ -239,6 +244,21 @@
     .g2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
     .s2{grid-column:span 2}
     .modal-ft{display:flex;justify-content:flex-end;gap:.625rem;padding:.875rem 1.375rem;border-top:1px solid var(--border)}
+
+    /* REVENUE CHART */
+    .rev-bar-wrap{display:flex;gap:4px;align-items:flex-end;height:120px;padding-top:.75rem}
+    .rev-bar-col{display:flex;flex-direction:column;align-items:center;gap:.25rem;flex:1;min-width:0}
+    .rev-bar-fill{width:100%;max-width:32px;border-radius:4px 4px 0 0;transition:height .35s var(--ease),opacity var(--fast);cursor:default}
+    .rev-bar-fill:hover{opacity:.75}
+    .rev-bar-lbl{font-size:.5625rem;color:var(--ink-s);white-space:nowrap}
+    .rev-bar-val{font-size:.5625rem;color:var(--ink-s);white-space:nowrap;min-height:12px}
+    .rev-toolbar{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+    /* PDF SCAN UPLOAD */
+    .scan-drop{border:2px dashed var(--border-s);border-radius:var(--r-md);padding:2.5rem 1.5rem;text-align:center;cursor:pointer;transition:all var(--fast);background:var(--surface)}
+    .scan-drop:hover,.scan-drop.drag{border-color:var(--accent);background:var(--accent-t)}
+    .scan-drop input{display:none}
+    /* ALL INVOICES */
+    .inv-filter-bar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem}
 
     /* INVOICE BUILDER */
     .inv-steps{display:flex;gap:0;border-bottom:1px solid var(--border);padding:0 1.375rem;flex-shrink:0}
@@ -353,16 +373,17 @@
     <!-- ANALYTICS PANEL -->
     <section class="panel active" id="panel-analytics">
       <div class="stat-grid">
-        <div class="stat-card"><div class="stat-lbl">Aktive Kunden</div><div class="stat-val" id="s-clients">—</div><div class="stat-sub">Laufende Projekte</div></div>
-        <div class="stat-card"><div class="stat-lbl">Offene Leads</div><div class="stat-val" id="s-leads">—</div><div class="stat-sub">Im Pipeline</div></div>
-        <div class="stat-card"><div class="stat-lbl">Nicht fakturiert</div><div class="stat-val" id="s-hours">—</div><div class="stat-sub">Stunden offen</div></div>
-        <div class="stat-card"><div class="stat-lbl">Offene Rechnungen</div><div class="stat-val" id="s-invs">—</div><div class="stat-sub">Ausstehend</div></div>
+        <div class="stat-card" style="background:#D9E9D3;border-color:transparent"><div class="stat-lbl">Aktive Kunden</div><div class="stat-val" id="s-clients">—</div><div class="stat-sub">Laufende Projekte</div></div>
+        <div class="stat-card" style="background:#FCE5CD;border-color:transparent"><div class="stat-lbl">Offene Leads</div><div class="stat-val" id="s-leads">—</div><div class="stat-sub">Im Pipeline</div></div>
+        <div class="stat-card" style="background:#FFF3CC;border-color:transparent"><div class="stat-lbl">Nicht fakturiert</div><div class="stat-val" id="s-hours">—</div><div class="stat-sub">Stunden offen</div></div>
+        <div class="stat-card" style="background:#F3CDCC;border-color:transparent"><div class="stat-lbl">Offene Rechnungen</div><div class="stat-val" id="s-invs">—</div><div class="stat-sub">Ausstehend</div></div>
       </div>
       <!-- GA4 Toolbar -->
       <div class="ga-toolbar">
         <button class="ga-range-btn active" data-start="7daysAgo" data-end="today">Letzte 7 Tage</button>
         <button class="ga-range-btn" data-start="30daysAgo" data-end="today">Letzte 30 Tage</button>
         <button class="ga-range-btn" data-start="90daysAgo" data-end="today">Letzte 90 Tage</button>
+        <button class="ga-live-btn" id="ga-live-btn"><span class="ga-live-dot"></span>Live</button>
         <div style="display:flex;gap:.375rem;align-items:center;margin-left:auto;flex-wrap:wrap">
           <input type="date" class="fi" id="ga-from" style="width:140px;font-size:.8125rem;padding:.375rem .625rem" />
           <span style="color:var(--ink-s);font-size:.875rem">–</span>
@@ -424,7 +445,30 @@
 
     <!-- INVOICES PANEL -->
     <section class="panel" id="panel-invoices">
-      <div class="sec-hd"><span class="sec-ttl">Rechnungen</span><button class="btn btn--primary btn--sm" id="btn-new-invoice">+ Neue Rechnung</button></div>
+      <div class="sec-hd">
+        <span class="sec-ttl">Rechnungen</span>
+        <div style="display:flex;gap:.5rem;align-items:center">
+          <button class="btn btn--ghost btn--sm" id="btn-all-invoices">Alle Rechnungen</button>
+          <button class="btn btn--ghost btn--sm" id="btn-upload-invoice">Rechnung hinzufügen</button>
+          <button class="btn btn--primary btn--sm" id="btn-new-invoice">+ Neue Rechnung</button>
+        </div>
+      </div>
+      <!-- Revenue Chart -->
+      <div class="ga-chart-wrap" style="margin-bottom:1rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem">
+          <span class="ga-chart-ttl" style="margin:0">Umsatz</span>
+          <div class="rev-toolbar">
+            <select class="fi btn--sm" id="rev-year" style="width:90px;padding:.3rem .5rem;font-size:.8125rem"></select>
+            <select class="fi btn--sm" id="rev-client" style="width:160px;padding:.3rem .5rem;font-size:.8125rem">
+              <option value="">Alle Kunden</option>
+            </select>
+          </div>
+        </div>
+        <div class="rev-bar-wrap" id="rev-bars"></div>
+        <div style="display:flex;justify-content:flex-end;margin-top:.5rem">
+          <span style="font-size:.75rem;color:var(--ink-s)">Nur bezahlte Rechnungen · <strong id="rev-total-lbl">—</strong></span>
+        </div>
+      </div>
       <div class="stat-grid">
         <div class="stat-card"><div class="stat-lbl">Entwürfe</div><div class="stat-val" id="i-draft">—</div></div>
         <div class="stat-card"><div class="stat-lbl">Versendet</div><div class="stat-val" id="i-sent">—</div></div>
@@ -607,9 +651,73 @@
 <!-- INVOICE PRINT AREA (hidden, shown only when printing) -->
 <div id="print-area" style="display:none"></div>
 
+<!-- PDF SCAN MODAL -->
+<div class="overlay" id="ov-inv-scan">
+  <div class="modal modal--lg" style="display:flex;flex-direction:column;max-height:92vh">
+    <div class="modal-hd" style="flex-shrink:0">
+      <span class="modal-ttl" id="scan-modal-title">Rechnung hinzufügen</span>
+      <button class="modal-x" onclick="closeModal('ov-inv-scan')">✕</button>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:1.375rem" id="scan-body">
+      <label class="scan-drop" id="scan-drop-zone">
+        <input type="file" id="scan-file-input" accept="application/pdf" />
+        <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="color:var(--ink-s);margin-bottom:.75rem"><path d="M12 16V8m0 0-3 3m3-3 3 3"/><path d="M20 16.5A3.5 3.5 0 0 0 16.5 13H15a5 5 0 1 0-9.9 1"/><path d="M6 19h12"/></svg>
+        <p style="font-weight:600;margin:0 0 .25rem">PDF hier ablegen oder klicken</p>
+        <p style="font-size:.8125rem;color:var(--ink-s);margin:0">Rechnung als PDF hochladen — Daten werden automatisch erkannt</p>
+      </label>
+      <div id="scan-result" hidden></div>
+    </div>
+    <div class="modal-ft" style="flex-shrink:0" id="scan-ft">
+      <button class="btn btn--ghost btn--sm" onclick="closeModal('ov-inv-scan')">Abbrechen</button>
+      <button class="btn btn--primary btn--sm" id="scan-confirm-btn" hidden onclick="confirmScannedInvoice()">Bestätigen &amp; Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ALL INVOICES MODAL -->
+<div class="overlay" id="ov-all-invoices">
+  <div class="modal" style="max-width:860px;width:95vw;display:flex;flex-direction:column;max-height:92vh">
+    <div class="modal-hd" style="flex-shrink:0">
+      <span class="modal-ttl">Alle Rechnungen</span>
+      <button class="modal-x" onclick="closeModal('ov-all-invoices')">✕</button>
+    </div>
+    <div style="padding:1rem 1.375rem;border-bottom:1px solid var(--border);flex-shrink:0">
+      <div class="inv-filter-bar">
+        <input class="fi" id="allinv-search" placeholder="Suche nach Kunde, Nr. …" style="flex:1;min-width:160px;max-width:240px;font-size:.8125rem;padding:.375rem .625rem" />
+        <select class="fi" id="allinv-status" style="width:140px;font-size:.8125rem;padding:.375rem .5rem">
+          <option value="">Alle Status</option>
+          <option value="draft">Entwurf</option>
+          <option value="sent">Versendet</option>
+          <option value="paid">Bezahlt</option>
+          <option value="overdue">Überfällig</option>
+          <option value="cancelled">Storniert</option>
+        </select>
+        <select class="fi" id="allinv-year" style="width:100px;font-size:.8125rem;padding:.375rem .5rem">
+          <option value="">Alle Jahre</option>
+        </select>
+        <select class="fi" id="allinv-client" style="width:160px;font-size:.8125rem;padding:.375rem .5rem">
+          <option value="">Alle Kunden</option>
+        </select>
+        <span style="font-size:.8125rem;color:var(--ink-s);margin-left:auto" id="allinv-count"></span>
+      </div>
+    </div>
+    <div style="flex:1;overflow-y:auto">
+      <table class="dtable">
+        <thead><tr><th>Nr.</th><th>Kunde</th><th>Datum</th><th>Fällig</th><th>Betrag</th><th>Status</th></tr></thead>
+        <tbody id="allinv-body"></tbody>
+      </table>
+    </div>
+    <div class="modal-ft" style="flex-shrink:0;justify-content:space-between">
+      <span style="font-size:.8125rem;color:var(--ink-s)" id="allinv-total-lbl"></span>
+      <button class="btn btn--ghost btn--sm" onclick="closeModal('ov-all-invoices')">Schließen</button>
+    </div>
+  </div>
+</div>
+
 <div id="toasts"></div>
 
 <!-- SCRIPTS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
@@ -676,6 +784,7 @@ $('btn-signout').addEventListener('click', async () => {
 document.querySelectorAll('.nav-item[data-panel]').forEach(btn =>
   btn.addEventListener('click', () => {
     const id = btn.dataset.panel;
+    if (id !== 'analytics' && gaLiveTimer) gaStopLive();
     document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -1097,9 +1206,12 @@ async function loadTimeEntries(){
 const STATUS_TAG  = { draft:'tag--muted', sent:'tag--blue', paid:'tag--green', overdue:'tag--red', cancelled:'tag--muted' };
 const STATUS_LBL  = { draft:'Entwurf', sent:'Versendet', paid:'Bezahlt', overdue:'Überfällig', cancelled:'Storniert' };
 
+let allInvoicesCache = [];
+
 async function loadInvoices(){
-  const { data }=await sb.from('invoices').select('*,clients(name)').order('created_at',{ascending:false});
+  const { data }=await sb.from('invoices').select('*,clients(name,id)').order('created_at',{ascending:false});
   const list=data||[];
+  allInvoicesCache = list;
   $('i-draft').textContent=list.filter(i=>i.status==='draft').length;
   $('i-sent').textContent=list.filter(i=>i.status==='sent').length;
   $('i-paid').textContent=list.filter(i=>i.status==='paid').length;
@@ -1112,6 +1224,265 @@ async function loadInvoices(){
     <td class="fw6">${fmtEur(inv.total)}</td><td><span class="tag ${STATUS_TAG[inv.status]||'tag--muted'}">${STATUS_LBL[inv.status]||inv.status}</span></td>
   </tr>`).join('');
   document.querySelectorAll('#inv-body tr[data-id]').forEach(row=>row.addEventListener('click',()=>viewInvoice(row.dataset.id)));
+  renderRevenueChart();
+}
+
+// ── REVENUE CHART ──────────────────────────────────────────────────────
+function initRevenueFilters(){
+  const years = [...new Set(allInvoicesCache
+    .filter(i=>i.invoice_date)
+    .map(i=>new Date(i.invoice_date).getFullYear())
+  )].sort((a,b)=>b-a);
+  const curYear = new Date().getFullYear();
+  const sel = $('rev-year');
+  sel.innerHTML = years.map(y=>`<option value="${y}"${y===curYear?'selected':''}>${y}</option>`).join('');
+  if(!years.includes(curYear)) sel.innerHTML = `<option value="${curYear}" selected>${curYear}</option>` + sel.innerHTML;
+  // Client filter
+  const clients = [...new Map(allInvoicesCache
+    .filter(i=>i.clients?.id)
+    .map(i=>[i.clients.id, i.clients.name])
+  ).entries()].sort((a,b)=>a[1].localeCompare(b[1]));
+  $('rev-client').innerHTML = `<option value="">Alle Kunden</option>` +
+    clients.map(([id,name])=>`<option value="${id}">${esc(name)}</option>`).join('');
+}
+
+function renderRevenueChart(){
+  if(!allInvoicesCache.length) return;
+  initRevenueFilters();
+  const year     = parseInt($('rev-year').value) || new Date().getFullYear();
+  const clientId = $('rev-client').value;
+  const MONTHS   = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+  const monthly  = Array(12).fill(0);
+  allInvoicesCache
+    .filter(i => i.status==='paid' && i.invoice_date && new Date(i.invoice_date).getFullYear()===year)
+    .filter(i => !clientId || String(i.clients?.id)===clientId)
+    .forEach(i => { monthly[new Date(i.invoice_date).getMonth()] += (i.total||0); });
+  const maxVal = Math.max(...monthly, 1);
+  const total  = monthly.reduce((s,v)=>s+v, 0);
+  $('rev-total-lbl').textContent = fmtEur(total);
+  $('rev-bars').innerHTML = monthly.map((val, idx) => {
+    const h   = Math.max(val>0?4:0, Math.round((val/maxVal)*108));
+    const col = val > 0 ? 'var(--green)' : 'var(--border-s)';
+    return `<div class="rev-bar-col" title="${MONTHS[idx]}: ${fmtEur(val)}">
+      <div class="rev-bar-val">${val > 0 ? (val>=1000?(val/1000).toFixed(1)+'k' : Math.round(val)) : ''}</div>
+      <div class="rev-bar-fill" style="height:${h}px;background:${col}"></div>
+      <div class="rev-bar-lbl">${MONTHS[idx]}</div>
+    </div>`;
+  }).join('');
+}
+
+$('rev-year').addEventListener('change', renderRevenueChart);
+$('rev-client').addEventListener('change', renderRevenueChart);
+
+// ── ALL INVOICES MODAL ─────────────────────────────────────────────────
+$('btn-all-invoices').addEventListener('click', openAllInvoices);
+
+async function openAllInvoices(){
+  if(!allInvoicesCache.length){
+    const { data }=await sb.from('invoices').select('*,clients(name,id)').order('invoice_date',{ascending:false});
+    allInvoicesCache = data||[];
+  }
+  // Populate year + client filters
+  const years = [...new Set(allInvoicesCache.filter(i=>i.invoice_date).map(i=>new Date(i.invoice_date).getFullYear()))].sort((a,b)=>b-a);
+  $('allinv-year').innerHTML = `<option value="">Alle Jahre</option>` + years.map(y=>`<option value="${y}">${y}</option>`).join('');
+  const clients = [...new Map(allInvoicesCache.filter(i=>i.clients?.id).map(i=>[i.clients.id,i.clients.name])).entries()].sort((a,b)=>a[1].localeCompare(b[1]));
+  $('allinv-client').innerHTML = `<option value="">Alle Kunden</option>` + clients.map(([id,n])=>`<option value="${id}">${esc(n)}</option>`).join('');
+  renderAllInvoicesTable();
+  openModal('ov-all-invoices');
+}
+
+function renderAllInvoicesTable(){
+  const q      = $('allinv-search').value.toLowerCase();
+  const status = $('allinv-status').value;
+  const year   = $('allinv-year').value;
+  const cid    = $('allinv-client').value;
+  const list   = allInvoicesCache.filter(i => {
+    if(status && i.status!==status) return false;
+    if(year   && (!i.invoice_date || String(new Date(i.invoice_date).getFullYear())!==year)) return false;
+    if(cid    && String(i.clients?.id)!==cid) return false;
+    if(q && !( (i.invoice_number||'').toLowerCase().includes(q) || (i.clients?.name||'').toLowerCase().includes(q) )) return false;
+    return true;
+  });
+  const total = list.filter(i=>i.status==='paid').reduce((s,i)=>s+(i.total||0),0);
+  $('allinv-count').textContent = `${list.length} Rechnung${list.length!==1?'en':''}`;
+  $('allinv-total-lbl').textContent = `Bezahlt gesamt: ${fmtEur(total)}`;
+  const tbody = $('allinv-body');
+  if(!list.length){
+    tbody.innerHTML=`<tr><td colspan="6"><div class="empty-st"><p class="empty-ttl">Keine Rechnungen gefunden</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(inv=>`<tr data-id="${inv.id}" style="cursor:pointer">
+    <td class="mono">${esc(inv.invoice_number)}</td>
+    <td class="fw6">${esc(inv.clients?.name||'—')}</td>
+    <td class="muted">${fmtDate(inv.invoice_date)}</td>
+    <td class="muted">${inv.due_date?fmtDate(inv.due_date):'—'}</td>
+    <td class="fw6">${fmtEur(inv.total)}</td>
+    <td><span class="tag ${STATUS_TAG[inv.status]||'tag--muted'}">${STATUS_LBL[inv.status]||inv.status}</span></td>
+  </tr>`).join('');
+  tbody.querySelectorAll('tr[data-id]').forEach(r=>r.addEventListener('click',()=>{ closeModal('ov-all-invoices'); viewInvoice(r.dataset.id); }));
+}
+['allinv-search','allinv-status','allinv-year','allinv-client'].forEach(id=>$(id)?.addEventListener('input',renderAllInvoicesTable));
+['allinv-status','allinv-year','allinv-client'].forEach(id=>$(id)?.addEventListener('change',renderAllInvoicesTable));
+
+// ── PDF SCAN ───────────────────────────────────────────────────────────
+let scannedInvoiceData = {};
+
+$('btn-upload-invoice').addEventListener('click', () => {
+  resetScanModal();
+  openModal('ov-inv-scan');
+});
+
+function resetScanModal(){
+  $('scan-modal-title').textContent = 'Rechnung hinzufügen';
+  $('scan-result').hidden = true;
+  $('scan-result').innerHTML = '';
+  $('scan-confirm-btn').hidden = true;
+  $('scan-drop-zone').hidden = false;
+  $('scan-file-input').value = '';
+  scannedInvoiceData = {};
+}
+
+const scanDrop = $('scan-drop-zone');
+scanDrop.addEventListener('dragover', e=>{ e.preventDefault(); scanDrop.classList.add('drag'); });
+scanDrop.addEventListener('dragleave', ()=>scanDrop.classList.remove('drag'));
+scanDrop.addEventListener('drop', e=>{ e.preventDefault(); scanDrop.classList.remove('drag'); const f=e.dataTransfer.files[0]; if(f) processScanFile(f); });
+$('scan-file-input').addEventListener('change', e=>{ if(e.target.files[0]) processScanFile(e.target.files[0]); });
+
+async function processScanFile(file){
+  if(file.type!=='application/pdf'){ toast('Bitte eine PDF-Datei hochladen.','err'); return; }
+  $('scan-drop-zone').hidden = true;
+  $('scan-result').hidden = false;
+  $('scan-result').innerHTML = `<div class="ga-auth-wrap" style="min-height:160px"><div class="spin"></div><p style="color:var(--ink-m);margin:0">Rechnung wird analysiert…</p></div>`;
+  try {
+    if(typeof pdfjsLib==='undefined') throw new Error('PDF.js nicht geladen');
+    pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const buf  = await file.arrayBuffer();
+    const pdf  = await pdfjsLib.getDocument({data:buf}).promise;
+    let rawText = '';
+    for(let p=1;p<=pdf.numPages;p++){
+      const page    = await pdf.getPage(p);
+      const content = await page.getTextContent();
+      rawText += content.items.map(it=>it.str).join(' ') + '\n';
+    }
+    const { data:clients } = await sb.from('clients').select('id,name,company').order('name');
+    const parsed = parseInvoiceText(rawText, clients||[]);
+    scannedInvoiceData = parsed;
+    renderScanResult(parsed, clients||[], file.name);
+  } catch(e){
+    $('scan-result').innerHTML=`<div class="ga-auth-wrap" style="min-height:140px">
+      <p style="font-weight:700;color:var(--red)">Fehler beim Lesen der PDF</p>
+      <p style="color:var(--ink-m);font-size:.875rem">${esc(e.message)}</p>
+      <button class="btn btn--ghost btn--sm" onclick="resetScanModal()">Erneut versuchen</button>
+    </div>`;
+  }
+}
+
+function parseInvoiceText(text, clients){
+  const t = text.replace(/\s+/g,' ');
+  // Amounts: find all EUR values, pick the largest (likely the total)
+  const eurRx = /(\d{1,3}(?:\.\d{3})*),(\d{2})\s*€|€\s*(\d{1,3}(?:\.\d{3})*),(\d{2})|(\d{1,3}(?:\.\d{3})*),(\d{2})\s*EUR/g;
+  const amounts = [...t.matchAll(eurRx)].map(m=>{
+    const raw = (m[1]||m[3]||m[5]||'').replace(/\./g,'') + '.' + (m[2]||m[4]||m[6]||'00');
+    return parseFloat(raw)||0;
+  }).filter(v=>v>0);
+  const total = amounts.length ? Math.max(...amounts) : null;
+  // Dates: dd.mm.yyyy
+  const dateRx = /(\d{2})\.(\d{2})\.(\d{4})/g;
+  const dates  = [...t.matchAll(dateRx)].map(m=>`${m[3]}-${m[2]}-${m[1]}`);
+  const invDate  = dates[0] || null;
+  const dueDate  = dates.length>1 ? dates[dates.length-1] : null;
+  // Invoice number patterns
+  const numRx = /(?:Rechnung(?:s(?:nummer)?)?|Invoice(?:\s*No\.?)?|Nr\.?)[:\s#]*([A-Z0-9\-\/]{3,20})/i;
+  const numMatch = t.match(numRx);
+  const invNumber = numMatch ? numMatch[1].trim() : '';
+  // Match client name
+  let clientId = null, clientName = '';
+  for(const c of clients){
+    const names = [c.name, c.company].filter(Boolean);
+    for(const n of names){
+      if(n.length>2 && t.toLowerCase().includes(n.toLowerCase())){
+        clientId=c.id; clientName=c.name; break;
+      }
+    }
+    if(clientId) break;
+  }
+  return { total, invDate, dueDate, invNumber, clientId, clientName };
+}
+
+function renderScanResult(data, clients, filename){
+  $('scan-modal-title').textContent = `Gescannte Rechnung — ${filename}`;
+  const clientOpts = clients.map(c=>`<option value="${c.id}" ${c.id===data.clientId?'selected':''}>${esc(c.name)}</option>`).join('');
+  $('scan-result').innerHTML = `
+    <div style="background:var(--green-t);border:1px solid rgba(48,209,88,.25);border-radius:var(--r-sm);padding:.75rem 1rem;display:flex;align-items:center;gap:.625rem;margin-bottom:1.25rem">
+      <svg width="16" height="16" fill="none" stroke="#1a8c3a" stroke-width="2" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="M5 8l2 2 4-4"/></svg>
+      <span style="font-size:.875rem;font-weight:500;color:#1a8c3a">Rechnung erfolgreich gescannt. Bitte Daten prüfen und ggf. anpassen.</span>
+    </div>
+    <div class="g2">
+      <div class="fg s2">
+        <label class="fl">Kunde *</label>
+        <select class="fi" id="sc-client">${clientOpts}</select>
+      </div>
+      <div class="fg">
+        <label class="fl">Rechnungsnummer</label>
+        <input class="fi" id="sc-number" value="${esc(data.invNumber)}" placeholder="z.B. RE-2024-001" />
+      </div>
+      <div class="fg">
+        <label class="fl">Gesamt-Betrag (€) *</label>
+        <input class="fi" id="sc-total" type="number" step="0.01" min="0" value="${data.total||''}" placeholder="0.00" />
+      </div>
+      <div class="fg">
+        <label class="fl">Rechnungsdatum</label>
+        <input class="fi" id="sc-date" type="date" value="${data.invDate||''}" />
+      </div>
+      <div class="fg">
+        <label class="fl">Fälligkeitsdatum</label>
+        <input class="fi" id="sc-due" type="date" value="${data.dueDate||''}" />
+      </div>
+      <div class="fg">
+        <label class="fl">Status</label>
+        <select class="fi" id="sc-status">
+          <option value="draft">Entwurf</option>
+          <option value="sent">Versendet</option>
+          <option value="paid">Bezahlt</option>
+          <option value="overdue">Überfällig</option>
+        </select>
+      </div>
+      <div class="fg s2">
+        <label class="fl">Beschreibung / Notizen</label>
+        <textarea class="fi" id="sc-notes" rows="2" placeholder="Optionale Anmerkungen zur Rechnung"></textarea>
+      </div>
+    </div>`;
+  $('scan-confirm-btn').hidden = false;
+}
+
+async function confirmScannedInvoice(){
+  const clientId = $('sc-client')?.value;
+  const total    = parseFloat($('sc-total')?.value)||0;
+  if(!clientId){ toast('Bitte einen Kunden auswählen.','err'); return; }
+  if(!total)   { toast('Bitte einen Betrag eingeben.','err');  return; }
+  const taxRate = CONFIG.DEFAULT_TAX_RATE || 19;
+  const subtotal = parseFloat((total / (1 + taxRate/100)).toFixed(2));
+  const taxAmt   = parseFloat((total - subtotal).toFixed(2));
+  const invNum   = $('sc-number')?.value.trim() || `SCAN-${Date.now()}`;
+  const btn = $('scan-confirm-btn');
+  btn.disabled = true; btn.textContent = 'Wird gespeichert…';
+  const { data:inv, error } = await sb.from('invoices').insert({
+    client_id:   clientId,
+    invoice_number: invNum,
+    invoice_date:   $('sc-date')?.value || today(),
+    due_date:       $('sc-due')?.value  || null,
+    status:         $('sc-status')?.value || 'draft',
+    subtotal,
+    tax_rate:   taxRate,
+    tax_amount: taxAmt,
+    total,
+    notes: $('sc-notes')?.value.trim() || null,
+  }).select().single();
+  btn.disabled = false; btn.textContent = 'Bestätigen & Speichern';
+  if(error){ toast('Fehler: '+error.message,'err'); return; }
+  closeModal('ov-inv-scan');
+  toast('Rechnung gespeichert.','ok');
+  loadInvoices(); loadStats();
 }
 
 async function viewInvoice(id){
@@ -1446,6 +1817,206 @@ $('ga-custom-btn').addEventListener('click', () => {
   gaStart = from; gaEnd = to;
   if (gaToken) renderAnalytics();
 });
+
+// Live button
+let gaLiveTimer = null;
+$('ga-live-btn').addEventListener('click', () => {
+  if ($('ga-live-btn').classList.contains('active')) {
+    gaStopLive();
+    // Restore last range-btn state
+    const last = document.querySelector('.ga-range-btn[data-was-active]') || document.querySelector('.ga-range-btn');
+    document.querySelectorAll('.ga-range-btn').forEach(b => { b.classList.remove('active'); b.removeAttribute('data-was-active'); });
+    last.classList.add('active');
+    gaStart = last.dataset.start; gaEnd = last.dataset.end;
+    if (gaToken) renderAnalytics();
+  } else {
+    document.querySelectorAll('.ga-range-btn').forEach(b => {
+      if (b.classList.contains('active')) b.setAttribute('data-was-active','1');
+      b.classList.remove('active');
+    });
+    $('ga-live-btn').classList.add('active');
+    if (gaToken) { renderLive(); gaLiveTimer = setInterval(renderLive, 30000); }
+    else toast('Bitte zuerst Google Analytics verbinden.', 'err');
+  }
+});
+
+function gaStopLive() {
+  clearInterval(gaLiveTimer); gaLiveTimer = null;
+  $('ga-live-btn').classList.remove('active');
+}
+
+async function gaRealtimeReport(body) {
+  const pid = CONFIG.GA4_PROPERTY_ID;
+  const res = await fetch(`https://analyticsdata.googleapis.com/v1beta/properties/${pid}:runRealtimeReport`, {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + gaToken, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.error?.message || res.statusText); }
+  return res.json();
+}
+
+async function renderLive() {
+  if (!$('ga-live-btn').classList.contains('active')) return;
+  // Show spinner only on first load (when content is empty or shows overview)
+  const content = $('ga-content');
+  if (!content.querySelector('.ga-live-wrap')) {
+    content.innerHTML = `<div class="ga-auth-wrap"><div class="spin"></div><p style="color:var(--ink-m);margin:0">Live-Daten werden geladen…</p></div>`;
+  }
+  try {
+    const [active, pages, sources, devices, countries] = await Promise.all([
+      gaRealtimeReport({ metrics: [{name:'activeUsers'}] }),
+      gaRealtimeReport({
+        dimensions: [{name:'unifiedPagePathScreen'}],
+        metrics: [{name:'activeUsers'}],
+        orderBys: [{metric:{metricName:'activeUsers'},desc:true}],
+        limit: 10
+      }),
+      gaRealtimeReport({
+        dimensions: [{name:'sessionDefaultChannelGroup'}],
+        metrics: [{name:'activeUsers'}],
+        orderBys: [{metric:{metricName:'activeUsers'},desc:true}],
+        limit: 8
+      }),
+      gaRealtimeReport({
+        dimensions: [{name:'deviceCategory'}],
+        metrics: [{name:'activeUsers'}],
+        orderBys: [{metric:{metricName:'activeUsers'},desc:true}]
+      }),
+      gaRealtimeReport({
+        dimensions: [{name:'countryId'}],
+        metrics: [{name:'activeUsers'}],
+        orderBys: [{metric:{metricName:'activeUsers'},desc:true}],
+        limit: 8
+      }),
+    ]);
+
+    const now = new Date().toLocaleTimeString('de-DE', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const activeUsers = parseInt(active?.rows?.[0]?.metricValues?.[0]?.value || '0');
+
+    // Pages rows
+    const pgTotal = (pages?.rows||[]).reduce((s,r)=>s+(parseInt(r.metricValues[0].value)||0),0)||1;
+    const pgRows = (pages?.rows||[]).map(r => {
+      const path = r.dimensionValues[0].value;
+      const val  = parseInt(r.metricValues[0].value)||0;
+      const pct  = Math.round((val/pgTotal)*100);
+      return `<div style="display:flex;align-items:center;gap:.75rem;padding:.5rem 1.125rem;border-bottom:1px solid var(--border)">
+        <span style="flex:1;font-size:.8125rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0" title="${esc(path)}">${esc(path)}</span>
+        <div style="width:70px;height:5px;background:var(--surface-2);border-radius:99px;overflow:hidden;flex-shrink:0">
+          <div style="height:100%;width:${pct}%;background:var(--accent);border-radius:99px"></div>
+        </div>
+        <span style="font-size:.75rem;font-weight:600;width:24px;text-align:right;flex-shrink:0">${val}</span>
+      </div>`;
+    }).join('') || `<div class="empty-st"><p class="empty-ttl" style="font-size:.8125rem">Keine aktiven Nutzer</p></div>`;
+
+    // Sources
+    const srcColors = {'Direct':'#0A84FF','Organic Search':'#30D158','Referral':'#BF5AF2','Organic Social':'#FF9F0A','Paid Search':'#5E5CE6','Email':'#FF453A'};
+    const srcTotal = (sources?.rows||[]).reduce((s,r)=>s+(parseInt(r.metricValues[0].value)||0),0)||1;
+    const srcRows = (sources?.rows||[]).map(r => {
+      const ch  = r.dimensionValues[0].value;
+      const val = parseInt(r.metricValues[0].value)||0;
+      const pct = Math.round((val/srcTotal)*100);
+      const col = srcColors[ch]||'#8A8A92';
+      return `<div style="display:flex;align-items:center;gap:.75rem;padding:.5rem 1.125rem;border-bottom:1px solid var(--border)">
+        <div style="width:8px;height:8px;border-radius:50%;background:${col};flex-shrink:0"></div>
+        <span style="flex:1;font-size:.8125rem">${esc(ch)}</span>
+        <div style="width:70px;height:5px;background:var(--surface-2);border-radius:99px;overflow:hidden;flex-shrink:0">
+          <div style="height:100%;width:${pct}%;background:${col};border-radius:99px"></div>
+        </div>
+        <span style="font-size:.75rem;font-weight:600;width:24px;text-align:right;flex-shrink:0">${val}</span>
+      </div>`;
+    }).join('') || `<div class="empty-st"><p class="empty-ttl" style="font-size:.8125rem">Keine Daten</p></div>`;
+
+    // Devices
+    const devIcons = {desktop:`<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><rect x="1" y="2" width="14" height="10" rx="1.5"/><path d="M5 14h6M8 12v2"/></svg>`,mobile:`<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><rect x="4" y="1" width="8" height="14" rx="1.5"/><circle cx="8" cy="12.5" r=".75" fill="currentColor" stroke="none"/></svg>`,tablet:`<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><rect x="2" y="1" width="12" height="14" rx="1.5"/><circle cx="8" cy="12.5" r=".75" fill="currentColor" stroke="none"/></svg>`};
+    const devTotal2 = (devices?.rows||[]).reduce((s,r)=>s+(parseInt(r.metricValues[0].value)||0),0)||1;
+    const devRows = (devices?.rows||[]).map(r => {
+      const dev = r.dimensionValues[0].value.toLowerCase();
+      const val = parseInt(r.metricValues[0].value)||0;
+      const pct = Math.round((val/devTotal2)*100);
+      return `<div style="display:flex;align-items:center;gap:.75rem;padding:.5rem 1.125rem;border-bottom:1px solid var(--border)">
+        <div style="width:22px;height:22px;border-radius:6px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--ink-m);flex-shrink:0">${devIcons[dev]||devIcons.desktop}</div>
+        <span style="flex:1;font-size:.8125rem;text-transform:capitalize">${esc(dev)}</span>
+        <div style="width:70px;height:5px;background:var(--surface-2);border-radius:99px;overflow:hidden;flex-shrink:0">
+          <div style="height:100%;width:${pct}%;background:var(--accent);border-radius:99px"></div>
+        </div>
+        <span style="font-size:.75rem;font-weight:600;width:24px;text-align:right;flex-shrink:0">${val}</span>
+      </div>`;
+    }).join('') || `<div class="empty-st"><p class="empty-ttl" style="font-size:.8125rem">Keine Daten</p></div>`;
+
+    // Countries (flag via countryId = ISO 3166-1 alpha-2)
+    const ctryTotal = (countries?.rows||[]).reduce((s,r)=>s+(parseInt(r.metricValues[0].value)||0),0)||1;
+    const ctryRows = (countries?.rows||[]).map(r => {
+      const id  = r.dimensionValues[0].value.toLowerCase();
+      const val = parseInt(r.metricValues[0].value)||0;
+      const pct = Math.round((val/ctryTotal)*100);
+      const flag = id.length===2 ? String.fromCodePoint(...[...id.toUpperCase()].map(c=>0x1F1E6-65+c.charCodeAt(0))) : '🌐';
+      return `<div style="display:flex;align-items:center;gap:.75rem;padding:.5rem 1.125rem;border-bottom:1px solid var(--border)">
+        <span style="font-size:1rem;flex-shrink:0;line-height:1">${flag}</span>
+        <span style="flex:1;font-size:.8125rem;text-transform:uppercase">${esc(id)}</span>
+        <div style="width:70px;height:5px;background:var(--surface-2);border-radius:99px;overflow:hidden;flex-shrink:0">
+          <div style="height:100%;width:${pct}%;background:var(--green);border-radius:99px"></div>
+        </div>
+        <span style="font-size:.75rem;font-weight:600;width:24px;text-align:right;flex-shrink:0">${val}</span>
+      </div>`;
+    }).join('') || `<div class="empty-st"><p class="empty-ttl" style="font-size:.8125rem">Keine Daten</p></div>`;
+
+    content.innerHTML = `
+      <div class="ga-live-wrap">
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem">
+          <div style="display:flex;align-items:center;gap:.4rem;font-size:.8125rem;color:var(--red);font-weight:600">
+            <span style="width:7px;height:7px;border-radius:50%;background:var(--red);display:inline-block;animation:livepulse 1.2s ease-in-out infinite"></span>
+            LIVE
+          </div>
+          <span style="font-size:.75rem;color:var(--ink-s)">Letzte 30 Minuten · Zuletzt aktualisiert: ${now}</span>
+          <span style="font-size:.75rem;color:var(--ink-s);margin-left:auto">Auto-Refresh alle 30s</span>
+        </div>
+        <div style="background:var(--ink);border-radius:var(--r-md);padding:1.75rem 2rem;margin-bottom:1rem;display:flex;align-items:center;gap:1.5rem">
+          <div>
+            <div style="font-size:.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.5);margin-bottom:.25rem">Aktive Nutzer</div>
+            <div style="font-size:3.5rem;font-weight:700;letter-spacing:-.05em;line-height:1;color:#fff">${activeUsers}</div>
+            <div style="font-size:.8125rem;color:rgba(255,255,255,.45);margin-top:.375rem">Gerade auf der Website</div>
+          </div>
+          <div style="flex:1"></div>
+          <div style="display:flex;flex-direction:column;gap:.5rem;align-items:flex-end">
+            ${(devices?.rows||[]).map(r=>{
+              const dev=r.dimensionValues[0].value.toLowerCase();
+              const val=parseInt(r.metricValues[0].value)||0;
+              const devIcon={desktop:'🖥',mobile:'📱',tablet:'📲'}[dev]||'💻';
+              return `<div style="font-size:.8125rem;color:rgba(255,255,255,.6)">${devIcon} ${val} ${dev}</div>`;
+            }).join('')}
+          </div>
+        </div>
+        <div class="ga-2col" style="margin-bottom:1rem">
+          <div class="card">
+            <div class="card-hd"><span class="card-ttl">Aktive Seiten</span></div>
+            ${pgRows}
+          </div>
+          <div class="card">
+            <div class="card-hd"><span class="card-ttl">Traffic-Quellen</span></div>
+            ${srcRows}
+          </div>
+        </div>
+        <div class="ga-2col">
+          <div class="card">
+            <div class="card-hd"><span class="card-ttl">Geräte</span></div>
+            ${devRows}
+          </div>
+          <div class="card">
+            <div class="card-hd"><span class="card-ttl">Länder</span></div>
+            ${ctryRows}
+          </div>
+        </div>
+      </div>`;
+  } catch(e) {
+    gaStopLive();
+    $('ga-content').innerHTML = `<div class="ga-auth-wrap">
+      <p style="font-weight:700;color:var(--red)">Live-Fehler</p>
+      <p style="color:var(--ink-m);text-align:center;max-width:300px">${esc(e.message)}</p>
+      <button class="btn btn--ghost btn--sm" onclick="renderAnalytics()">Zurück</button>
+    </div>`;
+  }
+}
 
 // Auth button
 $('ga-auth-btn').addEventListener('click', async () => {
