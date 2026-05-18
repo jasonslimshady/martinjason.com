@@ -2080,7 +2080,7 @@ async function renderLive() {
         limit: 10
       }),
       gaRealtimeReport({
-        dimensions: [{name:'sessionDefaultChannelGroup'}],
+        dimensions: [{name:'firstUserDefaultChannelGroup'}],
         metrics: [{name:'activeUsers'}],
         orderBys: [{metric:{metricName:'activeUsers'},desc:true}],
         limit: 8
