@@ -254,7 +254,7 @@
     .rev-bar-val{font-size:.5625rem;color:var(--ink-s);white-space:nowrap;min-height:12px}
     .rev-toolbar{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
     /* PDF SCAN UPLOAD */
-    .scan-drop{border:2px dashed var(--border-s);border-radius:var(--r-md);padding:2.5rem 1.5rem;text-align:center;cursor:pointer;transition:all var(--fast);background:var(--surface)}
+    .scan-drop{border:2px dashed var(--border-s);border-radius:var(--r-md);padding:2.5rem 1.5rem;text-align:center;cursor:pointer;transition:all var(--fast);background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.375rem}
     .scan-drop:hover,.scan-drop.drag{border-color:var(--accent);background:var(--accent-t)}
     .scan-drop input{display:none}
     /* ALL INVOICES */
@@ -462,6 +462,14 @@
             <select class="fi btn--sm" id="rev-client" style="width:160px;padding:.3rem .5rem;font-size:.8125rem">
               <option value="">Alle Kunden</option>
             </select>
+            <div style="display:flex;border:1px solid var(--border-s);border-radius:var(--r-sm);overflow:hidden">
+              <button id="rev-type-bar" title="Balkendiagramm" style="padding:.3rem .6rem;background:var(--ink);border:none;cursor:pointer;display:flex;align-items:center">
+                <svg width="14" height="14" fill="none" stroke="#fff" stroke-width="1.8" viewBox="0 0 16 16"><rect x="1" y="9" width="3" height="6" rx="1"/><rect x="6.5" y="5" width="3" height="10" rx="1"/><rect x="12" y="1.5" width="3" height="13.5" rx="1"/></svg>
+              </button>
+              <button id="rev-type-line" title="Liniengraph" style="padding:.3rem .6rem;background:var(--surface);border:none;cursor:pointer;display:flex;align-items:center">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><polyline points="1,13 5,7 9,9 13,3 15,5"/></svg>
+              </button>
+            </div>
           </div>
         </div>
         <div class="rev-bar-wrap" id="rev-bars"></div>
@@ -475,7 +483,7 @@
         <div class="stat-card"><div class="stat-lbl">Bezahlt</div><div class="stat-val" id="i-paid">—</div></div>
         <div class="stat-card"><div class="stat-lbl">Überfällig</div><div class="stat-val" id="i-overdue" style="color:var(--red)">—</div></div>
       </div>
-      <div class="card"><table class="dtable"><thead><tr><th>Nr.</th><th>Kunde</th><th>Datum</th><th>Fällig</th><th>Betrag</th><th>Status</th></tr></thead><tbody id="inv-body"></tbody></table></div>
+      <div class="card"><table class="dtable"><thead><tr><th>Nr.</th><th>Kunde</th><th>Datum</th><th>Fällig</th><th>Betrag</th><th>Status</th><th style="width:36px"></th></tr></thead><tbody id="inv-body"></tbody></table></div>
     </section>
   </main>
 </div>
@@ -703,7 +711,7 @@
     </div>
     <div style="flex:1;overflow-y:auto">
       <table class="dtable">
-        <thead><tr><th>Nr.</th><th>Kunde</th><th>Datum</th><th>Fällig</th><th>Betrag</th><th>Status</th></tr></thead>
+        <thead><tr><th>Nr.</th><th>Kunde</th><th>Datum</th><th>Fällig</th><th>Betrag</th><th>Status</th><th style="width:36px"></th></tr></thead>
         <tbody id="allinv-body"></tbody>
       </table>
     </div>
@@ -1209,7 +1217,7 @@ const STATUS_LBL  = { draft:'Entwurf', sent:'Versendet', paid:'Bezahlt', overdue
 let allInvoicesCache = [];
 
 async function loadInvoices(){
-  const { data }=await sb.from('invoices').select('*,clients(name,id)').order('created_at',{ascending:false});
+  const { data }=await sb.from('invoices').select('*,paid_at,clients(name,id)').order('created_at',{ascending:false});
   const list=data||[];
   allInvoicesCache = list;
   $('i-draft').textContent=list.filter(i=>i.status==='draft').length;
@@ -1222,8 +1230,13 @@ async function loadInvoices(){
     <td class="mono">${esc(inv.invoice_number)}</td><td class="fw6">${esc(inv.clients?.name||'—')}</td>
     <td class="muted">${fmtDate(inv.invoice_date)}</td><td class="muted">${inv.due_date?fmtDate(inv.due_date):'—'}</td>
     <td class="fw6">${fmtEur(inv.total)}</td><td><span class="tag ${STATUS_TAG[inv.status]||'tag--muted'}">${STATUS_LBL[inv.status]||inv.status}</span></td>
+    <td style="width:36px;padding:.5rem .625rem"><button class="btn btn--icon btn--ghost inv-edit-btn" data-id="${inv.id}" title="Bearbeiten" style="width:28px;height:28px">${PENCIL_SVG}</button></td>
   </tr>`).join('');
-  document.querySelectorAll('#inv-body tr[data-id]').forEach(row=>row.addEventListener('click',()=>viewInvoice(row.dataset.id)));
+  document.querySelectorAll('#inv-body tr[data-id]').forEach(row=>row.addEventListener('click', e=>{
+    if(e.target.closest('.inv-edit-btn')) return;
+    viewInvoice(row.dataset.id);
+  }));
+  document.querySelectorAll('#inv-body .inv-edit-btn').forEach(btn=>btn.addEventListener('click', e=>{ e.stopPropagation(); openInvoiceEdit(btn.dataset.id); }));
   renderRevenueChart();
 }
 
@@ -1246,33 +1259,98 @@ function initRevenueFilters(){
     clients.map(([id,name])=>`<option value="${id}">${esc(name)}</option>`).join('');
 }
 
+let revChartType = localStorage.getItem('inv_chart_type') || 'bar';
+
+function setRevChartType(type){
+  revChartType = type;
+  localStorage.setItem('inv_chart_type', type);
+  const isBar = type==='bar';
+  $('rev-type-bar').style.background  = isBar  ? 'var(--ink)' : 'var(--surface)';
+  $('rev-type-bar').querySelector('svg').setAttribute('stroke', isBar  ? '#fff' : 'currentColor');
+  $('rev-type-line').style.background = !isBar ? 'var(--ink)' : 'var(--surface)';
+  $('rev-type-line').querySelector('svg').setAttribute('stroke', !isBar ? '#fff' : 'currentColor');
+  renderRevenueChart();
+}
+
 function renderRevenueChart(){
   if(!allInvoicesCache.length) return;
   initRevenueFilters();
+  // Sync toggle button visuals without triggering re-render
+  const isBar = revChartType==='bar';
+  $('rev-type-bar').style.background  = isBar  ? 'var(--ink)' : 'var(--surface)';
+  $('rev-type-bar').querySelector('svg').setAttribute('stroke', isBar  ? '#fff' : 'currentColor');
+  $('rev-type-line').style.background = !isBar ? 'var(--ink)' : 'var(--surface)';
+  $('rev-type-line').querySelector('svg').setAttribute('stroke', !isBar ? '#fff' : 'currentColor');
+
   const year     = parseInt($('rev-year').value) || new Date().getFullYear();
   const clientId = $('rev-client').value;
   const MONTHS   = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
   const monthly  = Array(12).fill(0);
   allInvoicesCache
-    .filter(i => i.status==='paid' && i.invoice_date && new Date(i.invoice_date).getFullYear()===year)
+    .filter(i => i.status==='paid')
     .filter(i => !clientId || String(i.clients?.id)===clientId)
-    .forEach(i => { monthly[new Date(i.invoice_date).getMonth()] += (i.total||0); });
+    .forEach(i => {
+      // prefer paid_at, fall back to invoice_date
+      const d = i.paid_at || i.invoice_date;
+      if(!d) return;
+      const dt = new Date(d);
+      if(dt.getFullYear()===year) monthly[dt.getMonth()] += (i.total||0);
+    });
   const maxVal = Math.max(...monthly, 1);
   const total  = monthly.reduce((s,v)=>s+v, 0);
   $('rev-total-lbl').textContent = fmtEur(total);
-  $('rev-bars').innerHTML = monthly.map((val, idx) => {
-    const h   = Math.max(val>0?4:0, Math.round((val/maxVal)*108));
-    const col = val > 0 ? 'var(--green)' : 'var(--border-s)';
-    return `<div class="rev-bar-col" title="${MONTHS[idx]}: ${fmtEur(val)}">
-      <div class="rev-bar-val">${val > 0 ? (val>=1000?(val/1000).toFixed(1)+'k' : Math.round(val)) : ''}</div>
-      <div class="rev-bar-fill" style="height:${h}px;background:${col}"></div>
-      <div class="rev-bar-lbl">${MONTHS[idx]}</div>
-    </div>`;
-  }).join('');
+
+  if(revChartType==='bar'){
+    $('rev-bars').innerHTML = monthly.map((val, idx) => {
+      const h   = Math.max(val>0?4:0, Math.round((val/maxVal)*108));
+      const col = val > 0 ? 'var(--green)' : 'var(--border-s)';
+      return `<div class="rev-bar-col" title="${MONTHS[idx]}: ${fmtEur(val)}">
+        <div class="rev-bar-val">${val>0?(val>=1000?(val/1000).toFixed(1)+'k':Math.round(val)):''}</div>
+        <div class="rev-bar-fill" style="height:${h}px;background:${col}"></div>
+        <div class="rev-bar-lbl">${MONTHS[idx]}</div>
+      </div>`;
+    }).join('');
+  } else {
+    // Line chart via inline SVG
+    const W=600, H=108, PAD=4;
+    const pts = monthly.map((val,i)=>{
+      const x = PAD + (i/(11))*( W - PAD*2);
+      const y = H - Math.max(val>0?4:0, Math.round((val/maxVal)*(H-PAD*2)));
+      return `${x},${y}`;
+    });
+    const filled = pts.map((p,i)=>{
+      const [x,y]=p.split(',');
+      return i===0?`M${x},${y}`:`L${x},${y}`;
+    }).join(' ');
+    const area = filled + ` L${600-PAD},${H} L${PAD},${H} Z`;
+    const dots = monthly.map((val,i)=>{
+      const [x,y]=pts[i].split(',');
+      return `<circle cx="${x}" cy="${y}" r="3.5" fill="${val>0?'var(--green)':'var(--border-s)'}" stroke="var(--surface)" stroke-width="1.5">
+        <title>${MONTHS[i]}: ${fmtEur(val)}</title></circle>`;
+    }).join('');
+    const labels = monthly.map((val,i)=>{
+      const x=PAD+(i/11)*(W-PAD*2);
+      return `<text x="${x}" y="${H+14}" text-anchor="middle" font-size="8" fill="var(--ink-s)">${MONTHS[i]}</text>`;
+    }).join('');
+    $('rev-bars').style.height='auto';
+    $('rev-bars').innerHTML = `<svg viewBox="0 0 ${W} ${H+20}" style="width:100%;overflow:visible">
+      <defs><linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="var(--green)" stop-opacity=".18"/>
+        <stop offset="100%" stop-color="var(--green)" stop-opacity="0"/>
+      </linearGradient></defs>
+      <path d="${area}" fill="url(#revGrad)"/>
+      <path d="${filled}" fill="none" stroke="var(--green)" stroke-width="2" stroke-linejoin="round"/>
+      ${dots}${labels}
+    </svg>`;
+    return; // skip the bar-wrap height reset below
+  }
+  $('rev-bars').style.height='';
 }
 
 $('rev-year').addEventListener('change', renderRevenueChart);
 $('rev-client').addEventListener('change', renderRevenueChart);
+$('rev-type-bar').addEventListener('click', ()=>setRevChartType('bar'));
+$('rev-type-line').addEventListener('click', ()=>setRevChartType('line'));
 
 // ── ALL INVOICES MODAL ─────────────────────────────────────────────────
 $('btn-all-invoices').addEventListener('click', openAllInvoices);
@@ -1318,11 +1396,133 @@ function renderAllInvoicesTable(){
     <td class="muted">${inv.due_date?fmtDate(inv.due_date):'—'}</td>
     <td class="fw6">${fmtEur(inv.total)}</td>
     <td><span class="tag ${STATUS_TAG[inv.status]||'tag--muted'}">${STATUS_LBL[inv.status]||inv.status}</span></td>
+    <td style="width:36px;padding:.5rem .625rem"><button class="btn btn--icon btn--ghost inv-edit-btn" data-id="${inv.id}" title="Bearbeiten" style="width:28px;height:28px">${PENCIL_SVG}</button></td>
   </tr>`).join('');
-  tbody.querySelectorAll('tr[data-id]').forEach(r=>r.addEventListener('click',()=>{ closeModal('ov-all-invoices'); viewInvoice(r.dataset.id); }));
+  tbody.querySelectorAll('tr[data-id]').forEach(r=>r.addEventListener('click', e=>{
+    if(e.target.closest('.inv-edit-btn')) return;
+    closeModal('ov-all-invoices'); viewInvoice(r.dataset.id);
+  }));
+  tbody.querySelectorAll('.inv-edit-btn').forEach(btn=>btn.addEventListener('click', e=>{ e.stopPropagation(); openInvoiceEdit(btn.dataset.id); }));
 }
 ['allinv-search','allinv-status','allinv-year','allinv-client'].forEach(id=>$(id)?.addEventListener('input',renderAllInvoicesTable));
 ['allinv-status','allinv-year','allinv-client'].forEach(id=>$(id)?.addEventListener('change',renderAllInvoicesTable));
+
+const PENCIL_SVG = `<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><path d="M11.5 2.5a1.414 1.414 0 0 1 2 2L5 13H3v-2L11.5 2.5Z"/></svg>`;
+
+// ── INVOICE EDIT ───────────────────────────────────────────────────────
+async function openInvoiceEdit(id){
+  const inv = allInvoicesCache.find(i=>i.id===id) || (await sb.from('invoices').select('*,paid_at,clients(name,id)').eq('id',id).single()).data;
+  if(!inv){ toast('Rechnung nicht gefunden.','err'); return; }
+  const { data:clients } = await sb.from('clients').select('id,name').order('name');
+  const clientOpts = (clients||[]).map(c=>`<option value="${c.id}" ${c.id===inv.client_id?'selected':''}>${esc(c.name)}</option>`).join('');
+
+  let ov = $('ov-inv-edit');
+  if(!ov){
+    ov = document.createElement('div'); ov.className='overlay'; ov.id='ov-inv-edit';
+    ov.innerHTML=`<div class="modal modal--lg" style="display:flex;flex-direction:column;max-height:92vh">
+      <div class="modal-hd" style="flex-shrink:0">
+        <span class="modal-ttl" id="inv-edit-title">Rechnung bearbeiten</span>
+        <button class="modal-x" onclick="closeModal('ov-inv-edit')">✕</button>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:1.375rem" id="inv-edit-body"></div>
+      <div class="modal-ft" style="flex-shrink:0">
+        <button class="btn btn--danger btn--sm" id="inv-edit-delete-btn">Löschen</button>
+        <div style="display:flex;gap:.5rem;margin-left:auto">
+          <button class="btn btn--ghost btn--sm" onclick="closeModal('ov-inv-edit')">Abbrechen</button>
+          <button class="btn btn--primary btn--sm" id="inv-edit-save-btn">Speichern</button>
+        </div>
+      </div>
+    </div>`;
+    document.body.appendChild(ov);
+    ov.addEventListener('click', e=>{ if(e.target===ov) closeModal('ov-inv-edit'); });
+  }
+
+  $('inv-edit-title').textContent = `Rechnung bearbeiten — ${inv.invoice_number||''}`;
+  $('inv-edit-body').innerHTML = `
+    <div class="g2">
+      <div class="fg s2">
+        <label class="fl">Kunde *</label>
+        <select class="fi" id="ie-client">${clientOpts}</select>
+      </div>
+      <div class="fg">
+        <label class="fl">Rechnungsnummer</label>
+        <input class="fi" id="ie-number" value="${esc(inv.invoice_number||'')}" />
+      </div>
+      <div class="fg">
+        <label class="fl">Gesamt-Betrag (€) *</label>
+        <input class="fi" id="ie-total" type="number" step="0.01" min="0" value="${inv.total||''}" />
+      </div>
+      <div class="fg">
+        <label class="fl">Rechnungsdatum</label>
+        <input class="fi" id="ie-date" type="date" value="${inv.invoice_date||''}" />
+      </div>
+      <div class="fg">
+        <label class="fl">Fälligkeitsdatum</label>
+        <input class="fi" id="ie-due" type="date" value="${inv.due_date||''}" />
+      </div>
+      <div class="fg">
+        <label class="fl">Status</label>
+        <select class="fi" id="ie-status" onchange="document.getElementById('ie-paid-at-row').style.display=this.value==='paid'?'':'none'">
+          <option value="draft" ${inv.status==='draft'?'selected':''}>Entwurf</option>
+          <option value="sent"  ${inv.status==='sent' ?'selected':''}>Versendet</option>
+          <option value="paid"  ${inv.status==='paid' ?'selected':''}>Bezahlt</option>
+          <option value="overdue" ${inv.status==='overdue'?'selected':''}>Überfällig</option>
+          <option value="cancelled" ${inv.status==='cancelled'?'selected':''}>Storniert</option>
+        </select>
+      </div>
+      <div class="fg" id="ie-paid-at-row" style="display:${inv.status==='paid'?'':'none'}">
+        <label class="fl">Bezahlt am</label>
+        <input class="fi" id="ie-paid-at" type="date" value="${inv.paid_at||''}" />
+      </div>
+      <div class="fg s2">
+        <label class="fl">Notizen</label>
+        <textarea class="fi" id="ie-notes" rows="2">${esc(inv.notes||'')}</textarea>
+      </div>
+    </div>`;
+
+  $('inv-edit-save-btn').onclick = () => saveInvoiceEdit(id);
+  $('inv-edit-delete-btn').onclick = () => deleteInvoice(id, inv.invoice_number);
+  openModal('ov-inv-edit');
+}
+
+async function saveInvoiceEdit(id){
+  const clientId = $('ie-client')?.value;
+  const total    = parseFloat($('ie-total')?.value)||0;
+  if(!clientId){ toast('Bitte einen Kunden auswählen.','err'); return; }
+  if(!total)   { toast('Bitte einen Betrag eingeben.','err');  return; }
+  const taxRate  = CONFIG.DEFAULT_TAX_RATE || 19;
+  const subtotal = parseFloat((total/(1+taxRate/100)).toFixed(2));
+  const taxAmt   = parseFloat((total-subtotal).toFixed(2));
+  const status   = $('ie-status')?.value || 'draft';
+  const paidAt   = status==='paid' ? ($('ie-paid-at')?.value || null) : null;
+  const btn = $('inv-edit-save-btn');
+  btn.disabled=true; btn.textContent='Speichern…';
+  const { error } = await sb.from('invoices').update({
+    client_id:      clientId,
+    invoice_number: $('ie-number')?.value.trim() || null,
+    invoice_date:   $('ie-date')?.value  || null,
+    due_date:       $('ie-due')?.value   || null,
+    status,
+    subtotal, tax_rate:taxRate, tax_amount:taxAmt, total,
+    paid_at: paidAt,
+    notes:   $('ie-notes')?.value.trim() || null,
+  }).eq('id', id);
+  btn.disabled=false; btn.textContent='Speichern';
+  if(error){ toast('Fehler: '+error.message,'err'); return; }
+  closeModal('ov-inv-edit');
+  toast('Rechnung aktualisiert.','ok');
+  loadInvoices(); loadStats();
+}
+
+async function deleteInvoice(id, num){
+  if(!confirm(`Rechnung ${num||''} wirklich löschen?`)) return;
+  const { error } = await sb.from('invoices').delete().eq('id', id);
+  if(error){ toast('Fehler: '+error.message,'err'); return; }
+  closeModal('ov-inv-edit');
+  closeModal('ov-all-invoices');
+  toast('Rechnung gelöscht.','ok');
+  loadInvoices(); loadStats();
+}
 
 // ── PDF SCAN ───────────────────────────────────────────────────────────
 let scannedInvoiceData = {};
@@ -1440,12 +1640,16 @@ function renderScanResult(data, clients, filename){
       </div>
       <div class="fg">
         <label class="fl">Status</label>
-        <select class="fi" id="sc-status">
+        <select class="fi" id="sc-status" onchange="document.getElementById('sc-paid-at-row').style.display=this.value==='paid'?'':'none'">
           <option value="draft">Entwurf</option>
           <option value="sent">Versendet</option>
           <option value="paid">Bezahlt</option>
           <option value="overdue">Überfällig</option>
         </select>
+      </div>
+      <div class="fg" id="sc-paid-at-row" style="display:none">
+        <label class="fl">Bezahlt am</label>
+        <input class="fi" id="sc-paid-at" type="date" value="" />
       </div>
       <div class="fg s2">
         <label class="fl">Beschreibung / Notizen</label>
@@ -1466,16 +1670,19 @@ async function confirmScannedInvoice(){
   const invNum   = $('sc-number')?.value.trim() || `SCAN-${Date.now()}`;
   const btn = $('scan-confirm-btn');
   btn.disabled = true; btn.textContent = 'Wird gespeichert…';
+  const status   = $('sc-status')?.value || 'draft';
+  const paidAt   = status==='paid' ? ($('sc-paid-at')?.value || today()) : null;
   const { data:inv, error } = await sb.from('invoices').insert({
     client_id:   clientId,
     invoice_number: invNum,
     invoice_date:   $('sc-date')?.value || today(),
     due_date:       $('sc-due')?.value  || null,
-    status:         $('sc-status')?.value || 'draft',
+    status,
     subtotal,
     tax_rate:   taxRate,
     tax_amount: taxAmt,
     total,
+    paid_at:    paidAt,
     notes: $('sc-notes')?.value.trim() || null,
   }).select().single();
   btn.disabled = false; btn.textContent = 'Bestätigen & Speichern';
@@ -1867,7 +2074,7 @@ async function renderLive() {
     const [active, pages, sources, devices, countries] = await Promise.all([
       gaRealtimeReport({ metrics: [{name:'activeUsers'}] }),
       gaRealtimeReport({
-        dimensions: [{name:'unifiedPagePathScreen'}],
+        dimensions: [{name:'unifiedScreenName'}],
         metrics: [{name:'activeUsers'}],
         orderBys: [{metric:{metricName:'activeUsers'},desc:true}],
         limit: 10
