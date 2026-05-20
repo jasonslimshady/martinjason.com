@@ -252,9 +252,13 @@
 
     /* 7a. NAV */
     .nav-wrap {
-      position: sticky; top: var(--space-2); z-index: 40;
+      position: fixed;
+      top: var(--space-2);
+      left: 0; right: 0;
+      z-index: 40;
       padding-inline: var(--container-pad);
     }
+    section[id] { scroll-margin-top: 80px; }
     .nav {
       max-width: var(--container-max); margin-inline: auto;
       display: flex; align-items: center; gap: var(--space-3);
@@ -291,35 +295,31 @@
     /* 7b. HERO */
     .hero {
       position: relative;
-      padding-block: clamp(6rem, 14vh, 11rem) clamp(4rem, 10vh, 8rem);
+      height: 100vh;
+      overflow: hidden;
     }
-    .hero__title {
-      font-family: var(--font-display);
-      font-size: clamp(1.55rem, 2.8vw, 2.2rem);
-      font-weight: 600; line-height: var(--lh-snug);
-      letter-spacing: -0.025em; margin: 0 0 var(--space-3);
+    .hero__cta-bar {
+      position: absolute;
+      bottom: 3.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+      z-index: 10;
     }
-    .hero__title em {
-      font-family: var(--font-serif); font-style: italic;
-      font-weight: 400; letter-spacing: -0.01em;
-    }
-    .hero__sub {
-      max-width: 52ch; font-size: 1.125rem;
-      color: var(--color-ink-muted); margin: 0 0 var(--space-4);
-    }
-    .hero__cta { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: var(--space-5); }
-    .hero__inner { display: flex; align-items: center; gap: clamp(2rem, 4vw, 3.5rem); }
-    .hero__copy { flex: 0 1 720px; min-width: 0; }
     .hero__scroll {
       position: absolute; left: 50%; bottom: 1.5rem;
       width: 22px; height: 36px;
-      border: 1px solid var(--color-border-strong);
+      border: 1px solid rgba(255,255,255,0.5);
       border-radius: 999px; transform: translateX(-50%);
       display: grid; place-items: center;
+      z-index: 10;
     }
     .hero__scroll span {
       display: block; width: 2px; height: 6px;
-      background: var(--color-ink-muted); border-radius: 1px;
+      background: rgba(255,255,255,0.8); border-radius: 1px;
       animation: scroll-hint 1.6s var(--ease-apple) infinite;
     }
     @keyframes scroll-hint {
@@ -328,46 +328,16 @@
       100% { transform: translateY(8px); opacity: 0; }
     }
 
-    /* 7c. HERO PARALLAX ─────────────────────────────────────────────────────
-       Mouse-driven layer stack for the hero's right column.
-       All 7 images share an identical 2396×2739 canvas; they align perfectly
-       when positioned at inset:0 inside the clipping container.
-
-       ┌─ QUICK-TWEAK VARIABLES ──────────────────────────────────────────────┐
-       │ --px-max-move  Max pixel shift when mouse is at the viewport edge     │
-       │ --px-bleed     Edge buffer so a moving layer never shows a raw gap    │
-       │                Keep --px-bleed ≥ --px-max-move at all times           │
-       │ --px-width     Width of the right-column widget                       │
-       │ --px-radius    Corner radius                                          │
-       └──────────────────────────────────────────────────────────────────────┘ */
+    /* 7c. HERO PARALLAX */
     :root {
-      /* ── TWEAK THESE ─────────────────────────────────────────────────────── */
-      --px-max-move: 20px;                      /* Global intensity. ↑ = more dramatic */
-      --px-bleed:    22px;                      /* Edge buffer — keep ≥ --px-max-move  */
-      --px-width:    clamp(260px, 36vw, 420px); /* Widget column width                 */
-      --px-radius:   var(--radius-lg);          /* Corner rounding of the widget       */
-      /* ─────────────────────────────────────────────────────────────────────── */
+      --px-max-move: 25px;
+      --px-bleed:    28px;
     }
 
-    /* Flex column — sits to the right of hero__copy */
-    .hero__parallax-wrap {
-      flex: 0 0 var(--px-width);
-      position: relative;
-      align-self: center;
-    }
-
-    /* Clipping box — overflow:hidden keeps the layer bleed invisible */
     .hero__parallax {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 2396 / 2739;   /* Matches the source image proportions */
+      position: absolute;
+      inset: 0;
       overflow: hidden;
-      border-radius: var(--px-radius);
-      box-shadow:
-        0 1px 3px  rgba(10,10,10,0.04),
-        0 8px 24px rgba(10,10,10,0.08),
-        0 32px 72px rgba(10,10,10,0.10);
-      isolation: isolate;
     }
 
     /* Each layer extends past the container on every side by --px-bleed.
@@ -469,25 +439,18 @@
     @media (max-width: 980px) {
       .nav__links { display: none; }
       .nav__cta { margin-left: auto; }
-      .hero__inner { flex-direction: column; align-items: flex-start; gap: 2.5rem; }
-      .hero__copy { flex: none; }
-      /* Parallax: full-width on mobile, stacked below copy.
-         Scroll-based parallax is handled in JS. */
-      .hero__parallax-wrap {
-        flex: none;
-        width: min(100%, 380px);
-        margin-inline: auto;
-      }
+      .hero__cta-bar { bottom: 2.5rem; }
     }
     @media (max-width: 560px) {
       .nav__brand-name { display: block; font-size: 0.72rem; letter-spacing: -0.01em; }
-      .hero { padding-block-start: clamp(1.25rem, 3vh, 2rem); }
+      .hero__cta-bar { flex-direction: column; align-items: center; bottom: 2rem; }
     }
   </style>
 
-  <!-- Parallax background (Layer 1) — preload so it renders before JS kicks in -->
-  <link rel="preload" href="images/Header%20Parallax%20Images/1.avif" as="image" type="image/avif" fetchpriority="high" />
-  <link rel="preload" href="images/Header%20Parallax%20Images/5.avif" as="image" type="image/avif" fetchpriority="high" />
+  <!-- Parallax layers 1, 3, 5 — preload so they render before JS kicks in -->
+  <link rel="preload" href="images/Homepage%20Header%20Parallax%20Images/1-hintergrund.avif" as="image" type="image/avif" fetchpriority="high" />
+  <link rel="preload" href="images/Homepage%20Header%20Parallax%20Images/3-headline.avif" as="image" type="image/avif" fetchpriority="high" />
+  <link rel="preload" href="images/Homepage%20Header%20Parallax%20Images/5-jason-freisteller.avif" as="image" type="image/avif" fetchpriority="high" />
 
   <!-- Full stylesheet — non-render-blocking async load -->
   <link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -583,132 +546,79 @@
   <main id="top">
 
     <!-- ==================================================================
-         HERO
+         HERO — Fullscreen parallax
          ================================================================== -->
     <section class="hero">
-      <div class="container hero__inner">
 
-        <!-- Left: copy -->
-        <div class="hero__copy">
-          <p class="eyebrow reveal">AI Product Gallery Designer</p>
-          <h1 class="hero__title reveal" style="--reveal-delay: 80ms">
-            Produktgrafiken für DTC Brands<br />
-            in <em>Studioqualität</em> – erstellt mit KI,<br />
-            nicht mit Kameras.
-          </h1>
-          <p class="hero__sub reveal" style="--reveal-delay: 160ms">
-            Ich baue Produktgalerien für deine Produktseite, die so aussehen wie ein €10k-Fotoshooting –
-            in einem Bruchteil der Zeit. Für DACH-DTC-Marken, denen die Conversion-Rate wichtig ist.
-          </p>
-          <div class="hero__cta reveal" style="--reveal-delay: 240ms">
-            <a class="btn btn--primary glass-btn" href="#work">Galerien ansehen</a>
-            <a class="btn btn--ghost" href="#contact">
-              Kostenloses Erstgespräch
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-            </a>
-          </div>
+      <!-- Fullscreen parallax layer stack
+           data-depth: 0 = fixed, 1 = full --px-max-move.
+           Higher depth → travels farther (feels "closer to viewer").
+           Layer order: 1 = lowest (background), 9 = highest (foreground). -->
+      <div class="hero__parallax" id="heroParallax" aria-hidden="true">
+
+        <!-- Layer 1 — Hintergrund, fixed -->
+        <div class="parallax-layer" data-depth="0">
+          <img src="images/Homepage%20Header%20Parallax%20Images/1-hintergrund.avif"
+               alt="" fetchpriority="high" decoding="sync" />
         </div>
 
-        <!-- ================================================================
-             Right: Parallax image stack
-             ─────────────────────────────────────────────────────────────
-             data-depth controls each layer's movement (0 = fixed, 1 = full
-             --px-max-move). Adjust these values to retune individual layers:
-               • Higher depth → element travels farther (feels "closer")
-               • Lower  depth → element barely moves   (feels "farther away")
-             ─────────────────────────────────────────────────────────────
-             Layer guide:
-               1  Background light/shadow — fixed base
-               2  "Material" folder UI (bottom-right)
-               3  "GALLERIES" typography header (top, spans width)
-               4  "effizienter" pill badge (right-center, small)
-               5  Jason at desk — main subject (kept subtle to avoid clipping)
-               6  "AI Generated" folder UI (bottom-left)
-               7  Quote text box (bottom-center, spans width)
-             ================================================================ -->
-        <div class="hero__parallax-wrap" aria-hidden="true">
-          <div class="hero__parallax" id="heroParallax">
-
-            <!-- Layer 1 — Background: studio light/shadow, NO movement -->
-            <div class="parallax-layer" data-depth="0">
-              <img
-                src="images/Header%20Parallax%20Images/1.avif"
-                alt="" width="423" height="484"
-                fetchpriority="high"
-                decoding="sync"
-              />
-            </div>
-
-            <!-- Layer 2 — "Material" folder (bottom-right), medium depth -->
-            <div class="parallax-layer" data-depth="0.75">
-              <img
-                src="images/Header%20Parallax%20Images/2.avif"
-                alt="" width="423" height="484"
-                decoding="async"
-              />
-            </div>
-
-            <!-- Layer 3 — "GALLERIES" headline (top, nearly full-width) — keep subtle -->
-            <div class="parallax-layer" data-depth="0.25">
-              <img
-                src="images/Header%20Parallax%20Images/3.avif"
-                alt="" width="423" height="484"
-                decoding="async"
-              />
-            </div>
-
-            <!-- Layer 4 — "effizienter" badge (small, right-center) — most dramatic -->
-            <div class="parallax-layer" data-depth="0.40">
-              <img
-                src="images/Header%20Parallax%20Images/4.avif"
-                alt="" width="423" height="484"
-                decoding="async"
-              />
-            </div>
-
-            <!-- Layer 5 — Jason at desk (main subject, ~40 % coverage) — very subtle -->
-            <div class="parallax-layer" data-depth="0.18">
-              <img
-                src="images/Header%20Parallax%20Images/5.avif"
-                alt="" width="423" height="484"
-                fetchpriority="high"
-                decoding="sync"
-              />
-            </div>
-
-            <!-- Layer 6 — "AI Generated" folder (bottom-left), medium-high depth -->
-            <div class="parallax-layer" data-depth="0.72">
-              <img
-                src="images/Header%20Parallax%20Images/6.avif"
-                alt="" width="423" height="484"
-                decoding="async"
-              />
-            </div>
-
-            <!-- Layer 7 — Quote text box (bottom-center, wide) — keep moderate -->
-            <div class="parallax-layer" data-depth="0.45">
-              <img
-                src="images/Header%20Parallax%20Images/7.avif"
-                alt="" width="423" height="484"
-                decoding="async"
-              />
-            </div>
-
-          </div><!-- /.hero__parallax -->
-        </div><!-- /.hero__parallax-wrap -->
-
-        <!-- Right: animated card slider (swap --slide-bg for real image URLs later)
-        <div class="hero__slider-wrap" aria-hidden="true">
-          <div class="hero__slider">
-            <div class="slide" data-pos="0" style="background-image: url('/images/slider-01.avif');"></div>
-            <div class="slide" data-pos="1" style="background-image: url('/images/slider-02.avif');"></div>
-            <div class="slide" data-pos="2" style="background-image: url('/images/slider-03.avif');"></div>
-            <div class="slide" data-pos="3" style="background-image: url('/images/slider-04.avif');"></div>
-            <div class="slide" data-pos="4" style="background-image: url('/images/slider-05.avif');"></div>
-            <div class="slide" data-pos="5" style="background-image: url('/images/slider-06.avif');"></div>
-          </div>
+        <!-- Layer 2 — Windows decoration -->
+        <div class="parallax-layer" data-depth="0.06">
+          <img src="images/Homepage%20Header%20Parallax%20Images/2-windows.avif"
+               alt="" decoding="async" />
         </div>
-        -->
+
+        <!-- Layer 3 — Headline "AI-COMMERCE DESIGN" — subtle -->
+        <div class="parallax-layer" data-depth="0.05">
+          <img src="images/Homepage%20Header%20Parallax%20Images/3-headline.avif"
+               alt="" fetchpriority="high" decoding="sync" />
+        </div>
+
+        <!-- Layer 4 — Folder "Material" -->
+        <div class="parallax-layer" data-depth="0.50">
+          <img src="images/Homepage%20Header%20Parallax%20Images/4-folder-material.avif"
+               alt="" decoding="async" />
+        </div>
+
+        <!-- Layer 5 — Jason Freisteller (main subject) — very subtle -->
+        <div class="parallax-layer" data-depth="0.10">
+          <img src="images/Homepage%20Header%20Parallax%20Images/5-jason-freisteller.avif"
+               alt="" fetchpriority="high" decoding="sync" />
+        </div>
+
+        <!-- Layer 6 — "günstiger & besser" badge — dramatic -->
+        <div class="parallax-layer" data-depth="0.65">
+          <img src="images/Homepage%20Header%20Parallax%20Images/6-gnstiger-besser.avif"
+               alt="" decoding="async" />
+        </div>
+
+        <!-- Layer 7 — Folder "AI Generated" -->
+        <div class="parallax-layer" data-depth="0.55">
+          <img src="images/Homepage%20Header%20Parallax%20Images/7-folder-ai-generated.avif"
+               alt="" decoding="async" />
+        </div>
+
+        <!-- Layer 8 — Transition overlay — very subtle -->
+        <div class="parallax-layer" data-depth="0.04">
+          <img src="images/Homepage%20Header%20Parallax%20Images/8-transition.avif"
+               alt="" decoding="async" />
+        </div>
+
+        <!-- Layer 9 — Zitat -->
+        <div class="parallax-layer" data-depth="0.35">
+          <img src="images/Homepage%20Header%20Parallax%20Images/9-zitat.avif"
+               alt="" decoding="async" />
+        </div>
+
+      </div><!-- /.hero__parallax -->
+
+      <!-- CTA buttons — below the visible image composition -->
+      <div class="hero__cta-bar">
+        <a class="btn btn--primary glass-btn" href="#work">Galerien ansehen</a>
+        <a class="btn btn--ghost" href="#contact">
+          Kostenloses Erstgespräch
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </a>
       </div>
 
       <a class="hero__scroll" href="#services" aria-label="Weiter scrollen">
@@ -1082,7 +992,7 @@
     var CONFIG = {
 
       // ── DESKTOP (mouse-driven) ────────────────────────────────────────────
-      maxMove:    20,   // px — Max layer shift when the mouse reaches the viewport edge.
+      maxMove:    25,   // px — Max layer shift when the mouse reaches the viewport edge.
                         //      Match (or keep ≤) the --px-bleed CSS variable.
                         //      Raise for more drama, lower for subtlety.
 
@@ -1090,7 +1000,7 @@
                         //      0.04 = very buttery/slow, 0.15 = snappy/fast.
 
       // ── MOBILE (scroll-driven) ────────────────────────────────────────────
-      mobileMaxMove: 10,      // px — Max layer shift from scroll on mobile.
+      mobileMaxMove: 15,      // px — Max layer shift from scroll on mobile.
       mobileSmoothingFactor: 0.09, // Lerp factor on mobile scroll.
 
       // ── GENERAL ──────────────────────────────────────────────────────────
