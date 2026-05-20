@@ -296,11 +296,12 @@
     .hero {
       position: relative;
       height: 100vh;
+      margin-top: -4rem;
       overflow: hidden;
     }
     .hero__cta-bar {
       position: absolute;
-      bottom: 3.5rem;
+      bottom: 5rem;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
@@ -308,6 +309,16 @@
       gap: 0.75rem;
       justify-content: center;
       z-index: 10;
+    }
+    .hero__cta-bar .btn--ghost {
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+              backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+      border-color: var(--glass-border);
+      box-shadow: var(--glass-shadow);
+    }
+    .hero__cta-bar .btn--ghost:hover {
+      background: var(--glass-bg-strong);
     }
     .hero__scroll {
       position: absolute; left: 50%; bottom: 1.5rem;
@@ -563,49 +574,49 @@
         </div>
 
         <!-- Layer 2 — Windows decoration -->
-        <div class="parallax-layer" data-depth="0.06">
+        <div class="parallax-layer" data-depth="0.2">
           <img src="images/Homepage%20Header%20Parallax%20Images/2-windows.avif"
                alt="" decoding="async" />
         </div>
 
-        <!-- Layer 3 — Headline "AI-COMMERCE DESIGN" — subtle -->
-        <div class="parallax-layer" data-depth="0.05">
+        <!-- Layer 3 — Headline "AI-COMMERCE DESIGN" -->
+        <div class="parallax-layer" data-depth="0.25">
           <img src="images/Homepage%20Header%20Parallax%20Images/3-headline.avif"
                alt="" fetchpriority="high" decoding="sync" />
         </div>
 
         <!-- Layer 4 — Folder "Material" -->
-        <div class="parallax-layer" data-depth="0.50">
+        <div class="parallax-layer" data-depth="0.30">
           <img src="images/Homepage%20Header%20Parallax%20Images/4-folder-material.avif"
                alt="" decoding="async" />
         </div>
 
-        <!-- Layer 5 — Jason Freisteller (main subject) — very subtle -->
-        <div class="parallax-layer" data-depth="0.10">
+        <!-- Layer 5 — Jason Freisteller (main subject) -->
+        <div class="parallax-layer" data-depth="0.20">
           <img src="images/Homepage%20Header%20Parallax%20Images/5-jason-freisteller.avif"
                alt="" fetchpriority="high" decoding="sync" />
         </div>
 
-        <!-- Layer 6 — "günstiger & besser" badge — dramatic -->
-        <div class="parallax-layer" data-depth="0.65">
+        <!-- Layer 6 — "günstiger & besser" badge -->
+        <div class="parallax-layer" data-depth="0.40">
           <img src="images/Homepage%20Header%20Parallax%20Images/6-gnstiger-besser.avif"
                alt="" decoding="async" />
         </div>
 
         <!-- Layer 7 — Folder "AI Generated" -->
-        <div class="parallax-layer" data-depth="0.55">
+        <div class="parallax-layer" data-depth="0.65">
           <img src="images/Homepage%20Header%20Parallax%20Images/7-folder-ai-generated.avif"
                alt="" decoding="async" />
         </div>
 
-        <!-- Layer 8 — Transition overlay — very subtle -->
-        <div class="parallax-layer" data-depth="0.04">
+        <!-- Layer 8 — Transition overlay, fixed -->
+        <div class="parallax-layer" data-depth="0">
           <img src="images/Homepage%20Header%20Parallax%20Images/8-transition.avif"
                alt="" decoding="async" />
         </div>
 
         <!-- Layer 9 — Zitat -->
-        <div class="parallax-layer" data-depth="0.35">
+        <div class="parallax-layer" data-depth="0.6">
           <img src="images/Homepage%20Header%20Parallax%20Images/9-zitat.avif"
                alt="" decoding="async" />
         </div>
