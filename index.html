@@ -321,9 +321,9 @@
       background: var(--glass-bg-strong);
     }
     .hero__scroll {
-      position: absolute; left: 50%; bottom: 1.5rem;
+      position: absolute; left: 50%;
       width: 22px; height: 36px;
-      border: 1px solid rgba(255,255,255,0.5);
+      border: 1px solid var(--color-border-strong);
       border-radius: 999px; transform: translateX(-50%);
       display: grid; place-items: center;
       z-index: 10;
@@ -487,10 +487,7 @@
       .hero__cta-bar { bottom: 0.5rem; }
       /* Allow scroll indicator to sit below the hero's bottom edge */
       .hero { overflow: visible; }
-      .hero__scroll {
-        bottom: -3rem;
-        border-color: var(--color-border-strong);
-      }
+      .hero__scroll { bottom: -3rem; }
       .hero__scroll span { background: var(--color-ink-muted); }
       /* Push logos section down so the scroll indicator has room */
       .logos { margin-top: 4rem; }
