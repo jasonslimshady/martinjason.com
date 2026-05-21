@@ -453,14 +453,34 @@
       .tier__blob { animation: none; }
       .hero__scroll span { animation: none; }
       /* Freeze all parallax layers */
-      .parallax-layer { transform: translate3d(0,0,0) !important; will-change: auto; }
+      .parallax-layer { animation: none !important; transform: translate3d(0,0,0) !important; will-change: auto; }
     }
+
+    /* MOBILE FLOAT ANIMATIONS — each layer drifts on a unique path.
+       Amplitudes are proportional to data-depth; all values stay within
+       the existing --px-bleed buffer so no raw edge is ever exposed. */
+    @keyframes px-l2 { to { transform: translate3d( 5px, -5px, 0); } }
+    @keyframes px-l3 { to { transform: translate3d(-6px, -4px, 0); } }
+    @keyframes px-l4 { to { transform: translate3d( 7px,  5px, 0); } }
+    @keyframes px-l5 { to { transform: translate3d(-5px,  3px, 0); } }
+    @keyframes px-l6 { to { transform: translate3d(12px, -8px, 0); } }
+    @keyframes px-l7 { to { transform: translate3d(-14px, 6px, 0); } }
+    @keyframes px-l9 { to { transform: translate3d(13px,  7px, 0); } }
 
     /* RESPONSIVE — above-fold elements only */
     @media (max-width: 980px) {
       .nav__links { display: none; }
       .nav__cta { margin-left: auto; }
+      .hero { height: 100svh; }
       .hero__cta-bar { bottom: 2.5rem; }
+      /* Floating animations replace JS-driven parallax on mobile */
+      .hero__parallax .parallax-layer:nth-child(2) { animation: px-l2 7s   ease-in-out infinite alternate; }
+      .hero__parallax .parallax-layer:nth-child(3) { animation: px-l3 8s   ease-in-out infinite alternate; }
+      .hero__parallax .parallax-layer:nth-child(4) { animation: px-l4 6s   ease-in-out infinite alternate; }
+      .hero__parallax .parallax-layer:nth-child(5) { animation: px-l5 9s   ease-in-out infinite alternate; }
+      .hero__parallax .parallax-layer:nth-child(6) { animation: px-l6 5s   ease-in-out infinite alternate; }
+      .hero__parallax .parallax-layer:nth-child(7) { animation: px-l7 4.5s ease-in-out infinite alternate; }
+      .hero__parallax .parallax-layer:nth-child(9) { animation: px-l9 6.5s ease-in-out infinite alternate; }
     }
     @media (max-width: 560px) {
       .nav__brand-name { display: block; font-size: 0.72rem; letter-spacing: -0.01em; }
@@ -581,50 +601,66 @@
 
         <!-- Layer 2 — Windows decoration -->
         <div class="parallax-layer" data-depth="0.2">
-          <img src="images/Homepage%20Header%20Parallax%20Images/2-windows.avif"
-               alt="" decoding="async" />
+          <picture>
+            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/2-windows.avif" type="image/avif">
+            <img src="images/Homepage%20Header%20Parallax%20Images/2-windows.avif" alt="" decoding="async" />
+          </picture>
         </div>
 
         <!-- Layer 3 — Headline "AI-COMMERCE DESIGN" -->
         <div class="parallax-layer" data-depth="0.25">
-          <img src="images/Homepage%20Header%20Parallax%20Images/3-headline.avif"
-               alt="" fetchpriority="high" decoding="sync" />
+          <picture>
+            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/3-headline.avif" type="image/avif">
+            <img src="images/Homepage%20Header%20Parallax%20Images/3-headline.avif" alt="" fetchpriority="high" decoding="sync" />
+          </picture>
         </div>
 
         <!-- Layer 4 — Folder "Material" -->
         <div class="parallax-layer" data-depth="0.30">
-          <img src="images/Homepage%20Header%20Parallax%20Images/4-folder-material.avif"
-               alt="" decoding="async" />
+          <picture>
+            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/4-folder-material.avif" type="image/avif">
+            <img src="images/Homepage%20Header%20Parallax%20Images/4-folder-material.avif" alt="" decoding="async" />
+          </picture>
         </div>
 
         <!-- Layer 5 — Jason Freisteller (main subject) -->
         <div class="parallax-layer" data-depth="0.20">
-          <img src="images/Homepage%20Header%20Parallax%20Images/5-jason-freisteller.avif"
-               alt="" fetchpriority="high" decoding="sync" />
+          <picture>
+            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/5-jason-freisteller.avif" type="image/avif">
+            <img src="images/Homepage%20Header%20Parallax%20Images/5-jason-freisteller.avif" alt="" fetchpriority="high" decoding="sync" />
+          </picture>
         </div>
 
         <!-- Layer 6 — "günstiger & besser" badge -->
         <div class="parallax-layer" data-depth="0.55">
-          <img src="images/Homepage%20Header%20Parallax%20Images/6-gnstiger-besser.avif"
-               alt="" decoding="async" />
+          <picture>
+            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/6-gnstiger-besser.avif" type="image/avif">
+            <img src="images/Homepage%20Header%20Parallax%20Images/6-gnstiger-besser.avif" alt="" decoding="async" />
+          </picture>
         </div>
 
         <!-- Layer 7 — Folder "AI Generated" -->
         <div class="parallax-layer" data-depth="0.65">
-          <img src="images/Homepage%20Header%20Parallax%20Images/7-folder-ai-generated.avif"
-               alt="" decoding="async" />
+          <picture>
+            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/7-folder-ai-generated.avif" type="image/avif">
+            <img src="images/Homepage%20Header%20Parallax%20Images/7-folder-ai-generated.avif" alt="" decoding="async" />
+          </picture>
         </div>
 
         <!-- Layer 8 — Transition overlay, fixed -->
         <div class="parallax-layer" data-depth="0">
-          <img src="images/Homepage%20Header%20Parallax%20Images/8-transition.avif"
-               alt="" decoding="async" />
+          <picture>
+            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/8-transition.avif" type="image/avif">
+            <img src="images/Homepage%20Header%20Parallax%20Images/8-transition.avif" alt="" decoding="async" />
+          </picture>
         </div>
 
         <!-- Layer 9 — Zitat -->
         <div class="parallax-layer" data-depth="0.6">
-          <img src="images/Homepage%20Header%20Parallax%20Images/9-zitat.avif"
-               alt="" decoding="async" />
+          <picture>
+            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/9-zitat.avif" type="image/avif">
+            <img src="images/Homepage%20Header%20Parallax%20Images/9-zitat.avif" alt="" decoding="async" />
+          </picture>
         </div>
 
       </div><!-- /.hero__parallax -->
@@ -1052,8 +1088,10 @@
 
     // Apply translate3d to every layer based on current interpolated position.
     // currentX / currentY are in the -1..+1 range; multiply by maxMove for pixels.
+    // On mobile, CSS float animations handle the layers — JS must not interfere.
     function applyTransforms(cx, cy) {
-      var maxMove = isMobile ? CONFIG.mobileMaxMove : CONFIG.maxMove;
+      if (isMobile) return;
+      var maxMove = CONFIG.maxMove;
       for (var i = 0; i < layers.length; i++) {
         var d = depths[i];
         if (d === 0) continue; // Layer 1 is always fixed — skip it
@@ -1119,32 +1157,10 @@
       wake();
     });
 
-    // ── MOBILE: Scroll position drives the Y axis ─────────────────────────────
-    // Reads are batched BEFORE any writes — prevents forced synchronous reflow.
-    var pendingScrollRaf = false;
-    function updateMobileTarget() {
-      if (!isMobile) return;
-      // Schedule reads inside a rAF so layout is clean when we read getBoundingClientRect
-      if (!pendingScrollRaf) {
-        pendingScrollRaf = true;
-        requestAnimationFrame(function () {
-          pendingScrollRaf = false;
-          var rect = parallaxEl.getBoundingClientRect(); // read
-          var vh   = window.innerHeight;                 // read
-          var offset = (rect.top + rect.height / 2 - vh / 2) / (vh / 2);
-          targetY = Math.max(-1, Math.min(1, offset));   // write state only
-          targetX = 0;
-          wake(); // trigger render loop
-        });
-      }
-    }
-
-    window.addEventListener('scroll', updateMobileTarget, { passive: true });
-
     // ── Handle viewport resize (e.g. orientation change) ─────────────────────
     window.addEventListener('resize', function () {
       isMobile = window.innerWidth <= CONFIG.mobileBreakpoint;
-      if (isMobile) { targetX = 0; }
+      if (isMobile) { targetX = 0; targetY = 0; }
       wake();
     }, { passive: true });
 
@@ -1162,8 +1178,7 @@
     }
 
     // ── Fire ─────────────────────────────────────────────────────────────────
-    updateMobileTarget(); // Set correct initial state on mobile
-    wake();               // Start the loop for the first frame
+    wake(); // Start the loop for the first frame (desktop only; mobile uses CSS animations)
 
   })();
   </script>
