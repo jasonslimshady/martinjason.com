@@ -1068,6 +1068,7 @@
     var IDLE_THRESHOLD = 0.01;
     var rafId = null;       // Track the pending rAF so we can cancel it
     var isRunning = false;  // Guard against double-starting the loop
+    var isVisible = true;   // Controlled by IntersectionObserver
 
     function tick() {
       rafId = null;
@@ -1093,7 +1094,7 @@
 
     // Wake the loop when an input event arrives (if not already running).
     function wake() {
-      if (!isRunning) {
+      if (!isRunning && isVisible) {
         isRunning = true;
         rafId = requestAnimationFrame(tick);
       }
@@ -1146,6 +1147,19 @@
       if (isMobile) { targetX = 0; }
       wake();
     }, { passive: true });
+
+    // ── IntersectionObserver — pause rAF when hero is off-screen ────────────
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) {
+        isVisible = entries[0].isIntersecting;
+        if (!isVisible) {
+          if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+          isRunning = false;
+        } else {
+          wake();
+        }
+      }, { threshold: 0 }).observe(parallaxEl);
+    }
 
     // ── Fire ─────────────────────────────────────────────────────────────────
     updateMobileTarget(); // Set correct initial state on mobile
