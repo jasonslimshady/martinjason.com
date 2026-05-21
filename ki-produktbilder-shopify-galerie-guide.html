@@ -648,14 +648,15 @@
     }
   </style>
 
-  <!-- Google Analytics 4 -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VGBWRTMZW2"></script>
+  <!-- Analytics — loaded by cookie-consent.js after user consent -->
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', 'G-VGBWRTMZW2');
   </script>
+  <link rel="preload" href="cookie-consent.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="cookie-consent.css"></noscript>
 </head>
 <body>
 
@@ -1150,6 +1151,7 @@
       });
     })();
   </script>
+  <script src="cookie-consent.js" defer></script>
 
 </body>
 </html>
