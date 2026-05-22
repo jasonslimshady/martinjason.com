@@ -846,11 +846,17 @@
             Inkl. Teardown von 3 echten DACH-Marken.
           </p>
           <div class="insights__cta-wrap">
-            <form class="insights__form reveal" style="--reveal-delay: 240ms" onsubmit="event.preventDefault(); alert('Lead-Magnet-Formular wird in v0.2 verbunden.');">
+            <form id="insights-form" class="insights__form reveal" style="--reveal-delay: 240ms">
               <label class="visually-hidden" for="email">E-Mail-Adresse</label>
-              <input id="email" type="email" required placeholder="deine@email.com" />
+              <input id="email" type="email" required placeholder="deine@email.com" autocomplete="email" />
               <button class="btn btn--primary glass-btn" type="submit">Guide anfordern</button>
             </form>
+            <p id="insights-success" hidden class="insights__privacy" style="color:var(--accent,#0A84FF);margin-top:.75rem;">
+              Danke! Schau gleich in dein Postfach.
+            </p>
+            <p id="insights-error" hidden class="insights__privacy" style="color:#FF453A;margin-top:.75rem;">
+              Etwas ist schiefgelaufen – bitte versuch es nochmal.
+            </p>
             <a class="btn btn--ghost insights__alle-btn reveal" href="/blog" style="--reveal-delay: 280ms">
               Alle Artikel lesen
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
