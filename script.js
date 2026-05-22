@@ -72,3 +72,68 @@
   const el = document.getElementById('year');
   if (el) el.textContent = String(new Date().getFullYear());
 })();
+
+
+/* ---------------------------------------------------------------------
+   4. Klaviyo newsletter signup — Insights section
+   --------------------------------------------------------------------- */
+(function setupNewsletterForm() {
+  const form    = document.getElementById('insights-form');
+  const success = document.getElementById('insights-success');
+  const error   = document.getElementById('insights-error');
+  if (!form) return;
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const email  = form.querySelector('input[type="email"]').value.trim();
+    const btn    = form.querySelector('button[type="submit"]');
+    const orig   = btn.textContent;
+
+    btn.disabled    = true;
+    btn.textContent = 'Wird gesendet …';
+    error.hidden    = true;
+
+    try {
+      const res = await fetch(
+        'https://a.klaviyo.com/client/subscriptions/?company_id=RVcS5i',
+        {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            revision: '2023-10-15',
+          },
+          body: JSON.stringify({
+            data: {
+              type: 'subscription',
+              attributes: {
+                profile: {
+                  data: {
+                    type: 'profile',
+                    attributes: { email },
+                  },
+                },
+              },
+              relationships: {
+                list: {
+                  data: { type: 'list', id: 'WnGrcN' },
+                },
+              },
+            },
+          }),
+        }
+      );
+
+      if (res.ok || res.status === 202) {
+        form.hidden    = true;
+        success.hidden = false;
+      } else {
+        throw new Error(res.status);
+      }
+    } catch (_) {
+      error.hidden    = false;
+      btn.disabled    = false;
+      btn.textContent = orig;
+    }
+  });
+})();
