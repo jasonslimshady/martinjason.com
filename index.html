@@ -851,17 +851,17 @@
               <input id="email" type="email" required placeholder="deine@email.com" autocomplete="email" />
               <button class="btn btn--primary glass-btn" type="submit">Guide anfordern</button>
             </form>
-            <p id="insights-success" hidden class="insights__privacy" style="color:var(--accent,#0A84FF);margin-top:.75rem;">
-              Danke! Schau gleich in dein Postfach.
-            </p>
-            <p id="insights-error" hidden class="insights__privacy" style="color:#FF453A;margin-top:.75rem;">
-              Etwas ist schiefgelaufen – bitte versuch es nochmal.
-            </p>
             <a class="btn btn--ghost insights__alle-btn reveal" href="/blog" style="--reveal-delay: 280ms">
               Alle Artikel lesen
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
             </a>
           </div>
+          <p id="insights-success" hidden class="insights__feedback" style="color:var(--color-accent,#0A84FF);">
+            Gesendet, bestätige jetzt deine E-Mail!
+          </p>
+          <p id="insights-error" hidden class="insights__feedback" style="color:#FF453A;">
+            Etwas ist schiefgelaufen – bitte versuch es nochmal.
+          </p>
           <p class="insights__privacy reveal" style="--reveal-delay: 300ms; margin-top: 10px;">
             Kein Spam. Abmeldung jederzeit. DSGVO-konform.
           </p>
