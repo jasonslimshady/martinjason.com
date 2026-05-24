@@ -62,7 +62,7 @@
     '      </div>' +
     '      <h2 class="blog-featured__title">Wie man KI-Produktgalerien erstellt, die konvertieren: <em>Clarity Labs Case Study</em></h2>' +
     '      <p class="blog-featured__excerpt">' +
-    '        Wie wir für Clarity Labs eine vollständige KI-Produktgalerie entwickelt haben — von der ersten Bildstrategie bis zur finalen Umsetzung.' +
+    '        Wie wir für Clarity Labs eine vollständige KI-Produktgalerie entwickelt haben — von einem einzigen Freisteller bis zur finalen Produktgalerie.' +
     '      </p>' +
     '      <span class="blog-card__read">Jetzt lesen →</span>' +
     '    </div>' +
