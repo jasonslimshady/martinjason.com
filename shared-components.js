@@ -54,8 +54,7 @@
 
   var ARTICLE_FEATURED_PROMO_HTML =
     '<div class="article-featured-promo">' +
-    '  <p class="eyebrow reveal">Featured · Case Study</p>' +
-    '  <a class="blog-featured reveal" href="/clarity-labs-case-study" style="--reveal-delay: 80ms">' +
+    '  <a class="blog-featured reveal" href="/clarity-labs-case-study">' +
     '    <div class="blog-featured__copy">' +
     '      <div class="blog-featured__meta">' +
     '        <span class="blog-card__tag">Case Study</span>' +
@@ -63,7 +62,7 @@
     '      </div>' +
     '      <h2 class="blog-featured__title">Wie man KI-Produktgalerien erstellt, die konvertieren: <em>Clarity Labs Case Study</em></h2>' +
     '      <p class="blog-featured__excerpt">' +
-    '        Wie wir für Clarity Labs eine vollständige KI-Produktgalerie entwickelt haben — von der ersten Bildstrategie bis zur finalen Umsetzung. Mit konkreten Zahlen, ehrlichen Fehlern und Learnings, die du direkt anwenden kannst.' +
+    '        Wie wir für Clarity Labs eine vollständige KI-Produktgalerie entwickelt haben — von der ersten Bildstrategie bis zur finalen Umsetzung.' +
     '      </p>' +
     '      <span class="blog-card__read">Jetzt lesen →</span>' +
     '    </div>' +
