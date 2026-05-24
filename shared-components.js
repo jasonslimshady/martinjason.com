@@ -54,8 +54,7 @@
 
   var ARTICLE_FEATURED_PROMO_HTML =
     '<div class="article-featured-promo">' +
-    '  <p class="eyebrow reveal">Featured · Case Study</p>' +
-    '  <a class="blog-featured reveal" href="/clarity-labs-case-study" style="--reveal-delay: 80ms">' +
+    '  <a class="blog-featured reveal" href="/clarity-labs-case-study">' +
     '    <div class="blog-featured__copy">' +
     '      <div class="blog-featured__meta">' +
     '        <span class="blog-card__tag">Case Study</span>' +
