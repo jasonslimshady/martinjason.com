@@ -75,7 +75,25 @@
 
 
 /* ---------------------------------------------------------------------
-   4. Klaviyo newsletter signup — Insights section
+   4. Blog-featured slideshow — auto-advances every 2.5 s
+   --------------------------------------------------------------------- */
+(function setupFeaturedSlideshow() {
+  var slideshows = document.querySelectorAll('.blog-featured__slideshow');
+  slideshows.forEach(function (wrap) {
+    var slides = Array.prototype.slice.call(wrap.querySelectorAll('.blog-featured__image'));
+    if (slides.length < 2) return;
+    var current = 0;
+    setInterval(function () {
+      slides[current].classList.remove('is-active');
+      current = (current + 1) % slides.length;
+      slides[current].classList.add('is-active');
+    }, 2500);
+  });
+})();
+
+
+/* ---------------------------------------------------------------------
+   5. Klaviyo newsletter signup — Insights section
    --------------------------------------------------------------------- */
 (function setupNewsletterForm() {
   const form    = document.getElementById('insights-form');
