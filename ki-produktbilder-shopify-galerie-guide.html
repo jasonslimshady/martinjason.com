@@ -443,6 +443,8 @@
       left: 50%;
       transform: translate(-50%, 50%);
       z-index: 999;
+      color: #fff;
+      text-decoration: none;
     }
     .article-cta .btn--primary:hover { transform: translate(-50%, 50%) translateY(-2px); }
 
@@ -623,6 +625,8 @@
   </script>
   <link rel="preload" href="cookie-consent.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="cookie-consent.css"></noscript>
+  <link rel="preload" href="booking-popup.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="booking-popup.css"></noscript>
 </head>
 <body>
 
@@ -939,7 +943,7 @@
           <div class="article-cta__image-wrap">
             <img src="images/Blog/fuerdichumgesetzt.avif" alt="" />
           </div>
-          <a class="btn btn--primary glass-btn nav__cta" href="/#contact">→ Projekt besprechen</a>
+          <a class="btn btn--primary glass-btn nav__cta" href="#contact" data-booking>Projekt besprechen</a>
         </div>
 
         <!-- ── FAQ ───────────────────────────────────────── -->
@@ -1112,6 +1116,9 @@
     })();
   </script>
   <script src="cookie-consent.js" defer></script>
+  <script>window.BOOKING_API_BASE = 'https://project-bh9tx.vercel.app';</script>
+  <script src="booking-popup.js" defer></script>
+  <script src="booking-glass.js" defer></script>
 
 </body>
 </html>
