@@ -420,65 +420,34 @@
 
     /* ── CTA Banner ─────────────────────────────────────────── */
     .article-cta {
-      background: var(--color-ink);
+      position: relative;
       border-radius: var(--radius-xl);
-      padding: var(--space-5);
       margin: var(--space-6) 0;
-      color: #fff;
-      text-align: center;
+      overflow: visible;
+      padding: 0;
     }
 
-    .article-cta__eyebrow {
-      font-size: var(--fs-eyebrow);
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      font-weight: 500;
-      color: rgba(255,255,255,0.5);
-      margin: 0 0 var(--space-2);
+    .article-cta__image-wrap {
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      line-height: 0;
     }
 
-    .article-cta__title {
-      font-family: var(--font-display);
-      font-size: clamp(1.4rem, 3vw, 2rem);
-      font-weight: 700;
-      letter-spacing: -0.025em;
-      line-height: 1.2;
-      margin: 0 0 var(--space-2);
-      color: #fff;
-    }
-
-    .article-cta__title em {
-      font-family: var(--font-serif);
-      font-style: italic;
-      font-weight: 400;
-      color: rgba(255,255,255,0.75);
-    }
-
-    .article-cta__body {
-      color: rgba(255,255,255,0.7);
-      font-size: 1rem;
-      line-height: 1.6;
-      margin: 0 0 var(--space-4);
-      max-width: 50ch;
-      margin-inline: auto;
-      margin-bottom: var(--space-4);
+    .article-cta__image-wrap img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: cover;
     }
 
     .article-cta .btn--primary {
-      background: #fff;
-      color: var(--color-ink);
-      border: 0;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.75rem 1.75rem;
-      border-radius: var(--radius-pill);
-      font-weight: 600;
-      font-size: 1rem;
-      transition: opacity var(--dur-fast) var(--ease-apple),
-                  transform var(--dur-fast) var(--ease-apple);
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translate(-50%, 50%);
+      z-index: 999;
     }
-    .article-cta .btn--primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .article-cta .btn--primary:hover { transform: translate(-50%, 50%) translateY(-2px); }
 
     /* ── Author section ─────────────────────────────────────── */
     .author-section {
@@ -642,7 +611,7 @@
     @media (max-width: 600px) {
       .author-card { flex-direction: column; }
       .faq-section { padding: var(--space-4) var(--space-3); }
-      .article-cta { padding: var(--space-4) var(--space-3); }
+
       .article-table th,
       .article-table td { padding: 0.65rem 0.75rem; font-size: 0.88rem; }
     }
@@ -970,16 +939,10 @@
 
         <!-- ── CTA Banner ─────────────────────────────────── -->
         <div class="article-cta reveal">
-          <p class="article-cta__eyebrow">Für dich umgesetzt</p>
-          <h2 class="article-cta__title">
-            Du willst das nicht<br /><em>selbst machen?</em>
-          </h2>
-          <p class="article-cta__body">
-            Dieser Workflow funktioniert. Aber er braucht Zeit, Erfahrung mit den Tools, und ein Auge
-            für Details die den Unterschied machen. Wenn du eine Produktgalerie willst die wirklich
-            verkauft — ohne selbst stundenlang in Figma und Photoshop zu sitzen — dann arbeite mit mir.
-          </p>
-          <a class="btn btn--primary" href="/#contact">→ Projekt besprechen</a>
+          <div class="article-cta__image-wrap">
+            <img src="images/Blog/fuerdichumgesetzt.avif" alt="" />
+          </div>
+          <a class="btn btn--primary glass-btn nav__cta" href="/#contact">→ Projekt besprechen</a>
         </div>
 
         <!-- ── FAQ ───────────────────────────────────────── -->
