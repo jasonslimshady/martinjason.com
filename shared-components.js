@@ -53,9 +53,9 @@
   // The Clarity Labs featured promo is omitted on the Clarity Labs page itself.
 
   var ARTICLE_FEATURED_PROMO_HTML =
-    '<section class="article-featured-promo reveal" aria-label="Featured Case Study">' +
-    '  <p class="eyebrow">Featured · Case Study</p>' +
-    '  <a class="blog-featured" href="/clarity-labs-case-study">' +
+    '<div class="article-featured-promo">' +
+    '  <p class="eyebrow reveal">Featured · Case Study</p>' +
+    '  <a class="blog-featured reveal" href="/clarity-labs-case-study" style="--reveal-delay: 80ms">' +
     '    <div class="blog-featured__copy">' +
     '      <div class="blog-featured__meta">' +
     '        <span class="blog-card__tag">Case Study</span>' +
@@ -76,7 +76,7 @@
     '      />' +
     '    </div>' +
     '  </a>' +
-    '</section>';
+    '</div>';
 
   var ARTICLE_CTA_HTML =
     '<div class="article-cta reveal">' +
