@@ -459,6 +459,8 @@
   }
 
   .ai-showcase__prompt {
+    /* Shift 10rem lower than the desktop overlap position */
+    top: calc(100% - 75px + 10rem);
     width: calc(100vw - 2 * var(--container-pad));
     min-width: 0;
     border-radius: 18px;
@@ -470,7 +472,8 @@
   .ai-showcase__prompt-content { font-size: 14px; }
 
   .ai-showcase__results {
-    top: calc(100% + clamp(120px, 16vh, 150px));
+    /* Clear prompt (10rem shift) + prompt height (~90px) + 24px gap */
+    top: calc(100% + 10rem + 120px);
     width: calc(100vw - 2 * var(--container-pad));
     display: grid;
     grid-template-columns: 1fr 1fr;
