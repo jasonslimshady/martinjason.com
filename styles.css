@@ -86,7 +86,7 @@
 .ai-showcase {
   position: relative;
   height: 500vh;
-  margin-bottom: 15rem;
+  margin-bottom: -9rem;
 }
 
 /* Sticky panel — full viewport, flex column, centered content */
@@ -386,6 +386,7 @@
   width: 100%;
   aspect-ratio: 1 / 1;
   overflow: hidden;
+  border-radius: 15px;
   background: var(--color-surface-2);
 }
 
