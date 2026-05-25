@@ -682,7 +682,7 @@
                   <span class="ai-showcase__chip-img-wrap">
                     <img src="/images/Showcase/showcase-start-image.avif" width="24" height="24" alt="" aria-hidden="true">
                   </span>
-                  <span class="ai-showcase__chip-name">Produkt</span>
+                  <span class="ai-showcase__chip-name">Dein Produkt</span>
                 </span><span class="ai-showcase__typed" id="aiTyped"></span>
               </div>
               <div class="ai-showcase__prompt-toolbar">
@@ -1073,7 +1073,7 @@
     var header      = section.querySelector('.ai-showcase__header');
 
     /* Build typed text as individual char <span>s */
-    var PROMPT_TEXT = 'Erstelle Produktfotos für diesen Artikel.';
+    var PROMPT_TEXT = 'Erstelle ein Produktgalerie für dieses Produkt.';
     var chars = PROMPT_TEXT.split('').map(function (ch) {
       var s = document.createElement('span');
       s.className = 'char';
