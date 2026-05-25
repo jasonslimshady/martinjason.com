@@ -97,7 +97,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow: hidden;
+  overflow: visible;
   padding-top: 80px;
 }
 
@@ -205,7 +205,7 @@
 /* The bordered frame — light theme version of Lovart's dark frame */
 .ai-showcase__portrait-frame {
   position: relative;
-  width: clamp(140px, 20vh, 220px);
+  width: clamp(210px, 30vh, 330px);
   aspect-ratio: 3 / 4;
   border: 1px solid var(--color-border-strong);
   background: var(--color-surface);
@@ -242,7 +242,7 @@
    JS drives opacity + translateY directly (no CSS transition). */
 .ai-showcase__prompt {
   position: absolute;
-  bottom: -16px;
+  top: calc(100% + 16px);
   left: 50%;
   transform: translateX(-50%) translateY(110px);
   opacity: 0;
@@ -358,7 +358,7 @@
 .ai-showcase__results {
   position: absolute;
   /* portrait is ~20vh tall (3:4 ratio), plus 8px gap, plus ~110px for prompt clearance */
-  top: calc(100% + clamp(100px, 14vh, 140px));
+  top: calc(100% + clamp(148px, 19vh, 190px));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -450,7 +450,7 @@
   .ai-showcase__heading { font-size: clamp(1.4rem, 6vw, 2rem); }
 
   .ai-showcase__portrait-frame {
-    width: clamp(110px, 17vh, 180px);
+    width: clamp(165px, 25vh, 270px);
   }
 
   .ai-showcase__prompt {
@@ -465,7 +465,7 @@
   .ai-showcase__prompt-content { font-size: 14px; }
 
   .ai-showcase__results {
-    top: calc(100% + clamp(80px, 13vh, 120px));
+    top: calc(100% + clamp(120px, 16vh, 150px));
     width: calc(100vw - 2 * var(--container-pad));
     display: grid;
     grid-template-columns: 1fr 1fr;
