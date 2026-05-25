@@ -78,247 +78,397 @@
 @media (max-width:600px){.author-card{flex-direction:column}.faq-section{padding:var(--space-4) var(--space-3)}.article-table th,.article-table td{padding:0.65rem 0.75rem;font-size:0.88rem}}
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   AI SHOWCASE — Scroll-pinned storytelling
-   450vh outer  ·  100dvh sticky  ·  5 steps × 70vh
+   AI SHOWCASE — Lovart-style, light theme
+   Centered portrait → prompt slides up → results in
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-/* Outer: 450vh creates 350vh of "stickable" scroll space → 70vh per step */
+/* 400vh outer: 300vh of stickable scroll space */
 .ai-showcase {
   position: relative;
-  height: 450vh;
+  height: 400vh;
 }
 
-/* Sticky panel — locks to viewport top while user scrolls through */
+/* Sticky panel — full viewport, flex column, centered content */
 .ai-showcase__sticky {
   position: sticky;
   top: 0;
   height: 100vh;
   height: 100dvh;
-  overflow: hidden;
-}
-
-/* Two-column grid: left = text+prompt, right = images */
-.ai-showcase__inner {
-  width: 100%;
-  max-width: 1200px;
-  margin-inline: auto;
-  padding-inline: var(--container-pad);
-  padding-top: 80px;
-  height: 100%;
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  gap: clamp(2.5rem, 5vw, 5rem);
-  align-items: center;
-}
-
-/* ── LEFT ───────────────────────────────────────────── */
-
-.ai-showcase__left {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-}
-
-/* Fixed-height stage — all 5 steps overlay each other absolutely,
-   preventing any layout shift when the active step changes */
-.ai-showcase__steps {
-  position: relative;
-  height: 220px;
+  align-items: center;
   overflow: hidden;
+  padding-top: 80px;
 }
 
-.ai-step {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transform: translateY(14px);
-  transition:
-    opacity 500ms var(--ease-apple),
-    transform 500ms var(--ease-apple);
+/* ── Heading block ──────────────────────────────────── */
+
+.ai-showcase__header {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: clamp(20px, 3vh, 36px) var(--container-pad) 0;
+  text-align: center;
 }
 
-.ai-step.is-active {
-  opacity: 1;
-  transform: translateY(0);
+.ai-showcase__eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-ink-soft);
+  margin: 0;
 }
 
-.ai-showcase__title {
+.ai-showcase__heading {
   font-family: var(--font-display);
-  font-size: clamp(1.8rem, 3vw, 2.75rem);
+  font-size: clamp(1.75rem, 3.5vw, 3rem);
   font-weight: 600;
-  line-height: var(--lh-tight);
-  letter-spacing: -0.022em;
-  margin: 0 0 var(--space-2);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+  margin: 0;
+}
+
+.ai-showcase__subline {
+  font-size: clamp(0.88rem, 1.2vw, 1.05rem);
+  color: var(--color-ink-muted);
+  max-width: 52ch;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── Stage ──────────────────────────────────────────── */
+
+/* Fills remaining viewport height; composition lives inside */
+.ai-showcase__stage {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: clamp(14px, 2vh, 30px);
+  overflow: visible;
+}
+
+/* Relative context for absolute prompt + results children */
+.ai-showcase__composition {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: visible;
+}
+
+/* ── Portrait frame ─────────────────────────────────── */
+
+.ai-showcase__portrait-outer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  position: relative;
+  z-index: 3;
+}
+
+/* Shared label bar (used above portrait and above each result card) */
+.ai-showcase__img-meta,
+.ai-result__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 15px;
+  user-select: none;
+}
+
+.ai-img-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 1;
+  color: var(--color-ink-muted);
+}
+
+.ai-img-dims {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 1;
+  color: var(--color-ink-soft);
+  opacity: 0.5;
+}
+
+/* The bordered frame — light theme version of Lovart's dark frame */
+.ai-showcase__portrait-frame {
+  position: relative;
+  width: clamp(140px, 20vh, 220px);
+  aspect-ratio: 3 / 4;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  overflow: visible; /* corners stick out */
+}
+
+.ai-showcase__portrait-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* 4 corner markers — 7×7 white squares that sit on the border */
+.ai-corner {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  background: #fff;
+  border: 1px solid var(--color-border-strong);
+  z-index: 2;
+  pointer-events: none;
+}
+.ai-corner--tl { top: -3.5px;    left: -3.5px; }
+.ai-corner--tr { top: -3.5px;    right: -3.5px; }
+.ai-corner--bl { bottom: -3.5px; left: -3.5px; }
+.ai-corner--br { bottom: -3.5px; right: -3.5px; }
+
+/* ── Prompt box ─────────────────────────────────────── */
+
+/* Absolute, centred horizontally below portrait.
+   JS drives opacity + translateY directly (no CSS transition). */
+.ai-showcase__prompt {
+  position: absolute;
+  bottom: -16px;
+  left: 50%;
+  transform: translateX(-50%) translateY(110px);
+  opacity: 0;
+  width: clamp(280px, 34vw, 476px);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 22px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  z-index: 10;
+}
+
+.ai-showcase__prompt-content {
+  font-family: var(--font-sans);
+  font-size: clamp(15px, 1.3vw, 18px);
+  line-height: 1.45;
+  color: var(--color-ink);
+  margin-bottom: 16px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0;
+}
+
+/* Product chip: thumbnail + name */
+.ai-showcase__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-surface-2);
+  border-radius: 12px;
+  padding: 4px 9px 4px 4px;
+  margin-right: 10px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.ai-showcase__chip-img-wrap {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--color-surface-2);
+  flex-shrink: 0;
+}
+
+.ai-showcase__chip-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ai-showcase__chip-name {
+  font-family: var(--font-sans);
+  font-size: clamp(15px, 1.3vw, 18px);
+  line-height: 1;
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+
+/* Typed text — individual .char spans animated by JS */
+.ai-showcase__typed {
+  font-size: clamp(15px, 1.3vw, 18px);
+  line-height: 1.45;
   color: var(--color-ink);
 }
 
-.ai-showcase__desc {
-  font-size: 1.05rem;
-  line-height: var(--lh-body);
-  color: var(--color-ink-muted);
-  max-width: 44ch;
-  margin: 0;
+.ai-showcase__typed .char {
+  display: inline;
 }
 
-/* Progress dots */
-.ai-showcase__dots {
+/* Toolbar row */
+.ai-showcase__prompt-toolbar {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
 }
 
-.ai-showcase__dot {
-  width: 7px;
-  height: 7px;
+.ai-showcase__toolbar-btn,
+.ai-showcase__submit-btn {
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: var(--color-border-strong);
-  flex-shrink: 0;
-  transition:
-    background 300ms var(--ease-apple),
-    transform  300ms var(--ease-apple);
-}
-
-.ai-showcase__dot.is-active {
-  background: var(--color-ink);
-  transform: scale(1.6);
-}
-
-/* Prompt box — dark card, slides in after step 0 */
-.ai-showcase__prompt {
-  background: var(--color-ink);
-  border-radius: var(--radius-lg);
-  padding: var(--space-3) var(--space-4);
-  opacity: 0;
-  transform: translateY(10px);
-  pointer-events: none;
-  user-select: none;
-  transition:
-    opacity   600ms var(--ease-apple) 80ms,
-    transform 600ms var(--ease-apple) 80ms;
-}
-
-.ai-showcase__prompt.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-  user-select: text;
-}
-
-.ai-showcase__prompt-label {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  font-weight: 500;
-  color: rgba(255,255,255,0.40);
-  margin-bottom: 0.6rem;
-}
-
-.ai-showcase__prompt-text {
-  font-size: 0.93rem;
-  line-height: 1.6;
-  color: rgba(255,255,255,0.88);
-  margin: 0;
-}
-
-/* ── RIGHT ──────────────────────────────────────────── */
-
-/* Fixed-height bounding box — all frames are absolute children */
-.ai-showcase__right {
-  position: relative;
-  height: clamp(320px, 65vh, 560px);
   display: flex;
   align-items: center;
   justify-content: center;
+  border: none;
+  cursor: default;
 }
 
-/* All frames stacked; only .is-active is visible */
-.ai-frame {
+.ai-showcase__toolbar-btn {
+  background: transparent;
+  color: var(--color-ink-muted);
+}
+
+.ai-showcase__toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ai-showcase__submit-btn {
+  background: var(--color-ink);
+  color: #fff;
+}
+
+/* ── Results grid ──────────────────────────────────── */
+
+/* Absolute row below the composition's natural height (= portrait height).
+   Left-centred with translateX(-50%); JS animates each card in. */
+.ai-showcase__results {
   position: absolute;
+  /* portrait is ~20vh tall (3:4 ratio), plus 8px gap, plus ~110px for prompt clearance */
+  top: calc(100% + clamp(100px, 14vh, 140px));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: clamp(12px, 1.5vw, 20px);
+  width: clamp(320px, 76vw, 1100px);
+}
+
+/* Each result card: meta bar + square image frame */
+.ai-result {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   opacity: 0;
-  transform: scale(0.96) translateY(12px);
-  transition:
-    opacity   650ms var(--ease-apple),
-    transform 650ms var(--ease-apple);
-  border-radius: 20px;
+  transform: translateY(-20px) scale(1.15);
+  /* JS drives opacity + transform directly */
+}
+
+/* 1:1 image frame for 960×960 results */
+.ai-result__frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
   overflow: hidden;
-  box-shadow:
-    0 2px 4px rgba(10,10,10,0.06),
-    0 16px 48px rgba(10,10,10,0.14),
-    0 48px 96px rgba(10,10,10,0.07);
-  will-change: opacity, transform;
-  backface-visibility: hidden;
+  background: var(--color-surface-2);
 }
 
-.ai-frame.is-active {
-  opacity: 1;
-  transform: scale(1) translateY(0);
+/* Loading skeleton */
+.ai-result__skeleton {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(180deg, var(--color-surface-2) 0%, var(--color-surface) 100%);
+  transition: opacity 500ms var(--ease-apple);
 }
 
-.ai-frame img {
+.ai-result.is-visible .ai-result__skeleton { opacity: 0; }
+
+.ai-result__pulse {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.04);
+  animation: ai-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes ai-pulse {
+  0%, 100% { opacity: 0; }
+  50%       { opacity: 1; }
+}
+
+/* Image starts blurred/scaled, animates to sharp when card becomes visible */
+.ai-result__frame img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  position: relative;
+  z-index: 1;
+  transform: scale(1.1);
+  filter: blur(16px);
+  opacity: 0;
+  transition:
+    transform 800ms var(--ease-apple),
+    filter    800ms var(--ease-apple),
+    opacity   600ms var(--ease-apple);
 }
 
-/* Portrait 720×960 — sized by height, width follows 3:4 ratio */
-.ai-frame--portrait {
-  height: 100%;
-  width: auto;
-  aspect-ratio: 3 / 4;
-  max-height: 100%;
+.ai-result.is-visible .ai-result__frame img {
+  transform: scale(1);
+  filter: blur(0);
+  opacity: 1;
 }
 
-/* Square 960×960 — sized by height, width follows 1:1 ratio */
-.ai-frame--square {
-  height: 100%;
-  width: auto;
-  aspect-ratio: 1 / 1;
-  max-height: 100%;
-}
-
-/* Reduced motion: instant cut instead of fade */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .ai-step,
-  .ai-frame,
-  .ai-showcase__prompt { transition: none; }
+  .ai-result__frame img { transition: none; }
+  .ai-result__pulse { animation: none; }
 }
 
-/* ── Mobile (≤ 680px) ───────────────────────────────── */
+/* ── Mobile (≤ 768px) ─────────────────────────────── */
 
-@media (max-width: 680px) {
-  .ai-showcase { height: 300vh; }
+@media (max-width: 768px) {
+  .ai-showcase { height: 380vh; }
 
-  .ai-showcase__sticky { align-items: flex-start; }
+  .ai-showcase__sticky { overflow: visible; }
 
-  .ai-showcase__inner {
-    grid-template-columns: 1fr;
-    align-items: start;
-    padding-top: 70px;
-    gap: var(--space-3);
+  .ai-showcase__subline { display: none; }
+
+  .ai-showcase__heading { font-size: clamp(1.4rem, 6vw, 2rem); }
+
+  .ai-showcase__portrait-frame {
+    width: clamp(110px, 17vh, 180px);
   }
 
-  /* Image moves above text on mobile */
-  .ai-showcase__right {
-    order: -1;
-    height: 220px;
-    width: 100%;
+  .ai-showcase__prompt {
+    width: calc(100vw - 2 * var(--container-pad));
+    min-width: 0;
+    border-radius: 18px;
+    padding: 12px;
   }
 
-  .ai-frame--portrait,
-  .ai-frame--square {
-    height: 100%;
-    width: auto;
-    max-width: 80%;
+  .ai-showcase__chip-name,
+  .ai-showcase__typed,
+  .ai-showcase__prompt-content { font-size: 14px; }
+
+  .ai-showcase__results {
+    top: calc(100% + clamp(80px, 13vh, 120px));
+    width: calc(100vw - 2 * var(--container-pad));
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
   }
-
-  .ai-showcase__steps { height: 175px; }
-
-  .ai-showcase__title { font-size: clamp(1.35rem, 5.5vw, 1.75rem); }
-
-  .ai-showcase__prompt { display: none; }
 }

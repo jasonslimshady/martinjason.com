@@ -637,109 +637,118 @@
     </section>
 
     <!-- ==================================================================
-         AI SHOWCASE — Sticky scroll storytelling
-         5 steps: original photo → 4 AI results. Placed directly after hero.
+         AI SHOWCASE — Lovart-style sticky scroll (light theme)
+         Centered portrait → prompt types in → 4 results appear left-to-right
          ================================================================== -->
     <section id="ai-process" class="ai-showcase">
       <div class="ai-showcase__sticky">
-        <div class="ai-showcase__inner">
 
-          <!-- LEFT: step text · dots · prompt box -->
-          <div class="ai-showcase__left">
+        <!-- Centered heading -->
+        <div class="ai-showcase__header">
+          <p class="ai-showcase__eyebrow">KI-Bildgenerierung</p>
+          <h2 class="ai-showcase__heading">Aus einem Foto.<br>Eine ganze Galerie.</h2>
+          <p class="ai-showcase__subline">Schick mir dein Produktfoto – ich liefere eine komplette Galerie in Studioqualität zurück.</p>
+        </div>
 
-            <div class="ai-showcase__steps" aria-live="polite">
+        <!-- Stage: portrait is in-flow; prompt + results are absolute children -->
+        <div class="ai-showcase__stage">
+          <div class="ai-showcase__composition">
 
-              <div class="ai-step is-active" data-step="0">
-                <p class="eyebrow">So entsteht eine KI-Galerie</p>
-                <h2 class="ai-showcase__title">Dein Produkt.<br>Einmal einsenden.</h2>
-                <p class="ai-showcase__desc">Du schickst mir dein bestehendes Produktfoto. Das ist der Ausgangspunkt – aus einem Bild entsteht eine komplette Galerie.</p>
+            <!-- Portrait with Lovart corner-marker frame -->
+            <div class="ai-showcase__portrait-outer">
+              <div class="ai-showcase__img-meta">
+                <span class="ai-img-label">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 13 13" aria-hidden="true"><path fill="currentColor" d="M7.719 3.656a1.219 1.219 0 1 0 0 2.438 1.219 1.219 0 0 0 0-2.438"></path><path fill="currentColor" fill-rule="evenodd" d="M1.625 2.573c0-.524.424-.948.948-.948h7.854c.524 0 .948.424.948.948v7.854a.95.95 0 0 1-.948.948H2.573a.95.95 0 0 1-.948-.948zm8.938 7.415-2.5-2.5a.677.677 0 0 0-.958 0l-.51.508a.135.135 0 0 1-.19 0L4.805 6.4a.677.677 0 0 0-.942-.015L2.438 7.726V2.573c0-.075.06-.135.135-.135h7.854c.075 0 .136.06.136.135z" clip-rule="evenodd"></path></svg>
+                  Image
+                </span>
+                <span class="ai-img-dims">720 × 960</span>
+              </div>
+              <div class="ai-showcase__portrait-frame">
+                <span class="ai-corner ai-corner--tl"></span>
+                <span class="ai-corner ai-corner--tr"></span>
+                <span class="ai-corner ai-corner--bl"></span>
+                <span class="ai-corner ai-corner--br"></span>
+                <img src="/images/Showcase/showcase-start-image.avif"
+                     alt="Ausgangs-Produktfoto"
+                     width="720" height="960"
+                     loading="lazy" decoding="async" />
+              </div>
+            </div>
+
+            <!-- Prompt box — absolute, slides up on scroll, JS-driven -->
+            <div class="ai-showcase__prompt" id="aiPrompt" aria-hidden="true">
+              <div class="ai-showcase__prompt-content">
+                <span class="ai-showcase__chip">
+                  <span class="ai-showcase__chip-img-wrap">
+                    <img src="/images/Showcase/showcase-start-image.avif" width="24" height="24" alt="" aria-hidden="true">
+                  </span>
+                  <span class="ai-showcase__chip-name">Produkt</span>
+                </span><span class="ai-showcase__typed" id="aiTyped"></span>
+              </div>
+              <div class="ai-showcase__prompt-toolbar">
+                <button class="ai-showcase__toolbar-btn" type="button" tabindex="-1" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 18 18"><path fill="currentColor" fill-opacity="0.6" d="M3.75 11.438V8.062a.563.563 0 0 1 1.125 0v3.376a3.94 3.94 0 0 0 3.938 3.937h.374a3.94 3.94 0 0 0 3.938-3.937V5.25a2.625 2.625 0 0 0-5.25 0v5.906a1.031 1.031 0 1 0 2.063 0V5.812a.562.562 0 1 1 1.124 0v5.344a2.156 2.156 0 1 1-4.312 0V5.25a3.75 3.75 0 0 1 7.5 0v6.188A5.063 5.063 0 0 1 9.188 16.5h-.376a5.063 5.063 0 0 1-5.062-5.062"></path></svg>
+                </button>
+                <div class="ai-showcase__toolbar-right">
+                  <button class="ai-showcase__submit-btn" type="button" tabindex="-1" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 18 18"><path fill="currentColor" d="M8.437 15V4.358l-3.54 3.54a.562.562 0 1 1-.795-.796l4.5-4.5.043-.038a.563.563 0 0 1 .753.038l4.5 4.5a.563.563 0 0 1-.796.796l-3.54-3.54V15a.563.563 0 0 1-1.125 0"></path></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4 result cards — absolute row, JS animates in left-to-right -->
+            <div class="ai-showcase__results">
+
+              <div class="ai-result" data-idx="0">
+                <div class="ai-result__meta">
+                  <span class="ai-img-label"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 13 13" aria-hidden="true"><path fill="currentColor" d="M7.719 3.656a1.219 1.219 0 1 0 0 2.438 1.219 1.219 0 0 0 0-2.438"></path><path fill="currentColor" fill-rule="evenodd" d="M1.625 2.573c0-.524.424-.948.948-.948h7.854c.524 0 .948.424.948.948v7.854a.95.95 0 0 1-.948.948H2.573a.95.95 0 0 1-.948-.948zm8.938 7.415-2.5-2.5a.677.677 0 0 0-.958 0l-.51.508a.135.135 0 0 1-.19 0L4.805 6.4a.677.677 0 0 0-.942-.015L2.438 7.726V2.573c0-.075.06-.135.135-.135h7.854c.075 0 .136.06.136.135z" clip-rule="evenodd"></path></svg> Image</span>
+                  <span class="ai-img-dims">960 × 960</span>
+                </div>
+                <div class="ai-result__frame">
+                  <div class="ai-result__skeleton"><div class="ai-result__pulse"></div></div>
+                  <img src="/images/Showcase/showcase-result-1.avif" width="960" height="960" alt="KI-Galerie Variante 1" loading="lazy" decoding="async">
+                </div>
               </div>
 
-              <div class="ai-step" data-step="1">
-                <p class="eyebrow">01 / 04</p>
-                <h2 class="ai-showcase__title">KI generiert<br>die erste Variante.</h2>
-                <p class="ai-showcase__desc">Auf Basis des Prompts entstehen in Sekunden verschiedene Bildwelten – fertig für PDPs, Ads und Lookbooks.</p>
+              <div class="ai-result" data-idx="1">
+                <div class="ai-result__meta">
+                  <span class="ai-img-label"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 13 13" aria-hidden="true"><path fill="currentColor" d="M7.719 3.656a1.219 1.219 0 1 0 0 2.438 1.219 1.219 0 0 0 0-2.438"></path><path fill="currentColor" fill-rule="evenodd" d="M1.625 2.573c0-.524.424-.948.948-.948h7.854c.524 0 .948.424.948.948v7.854a.95.95 0 0 1-.948.948H2.573a.95.95 0 0 1-.948-.948zm8.938 7.415-2.5-2.5a.677.677 0 0 0-.958 0l-.51.508a.135.135 0 0 1-.19 0L4.805 6.4a.677.677 0 0 0-.942-.015L2.438 7.726V2.573c0-.075.06-.135.135-.135h7.854c.075 0 .136.06.136.135z" clip-rule="evenodd"></path></svg> Image</span>
+                  <span class="ai-img-dims">960 × 960</span>
+                </div>
+                <div class="ai-result__frame">
+                  <div class="ai-result__skeleton"><div class="ai-result__pulse"></div></div>
+                  <img src="/images/Showcase/showcase-result-2.avif" width="960" height="960" alt="KI-Galerie Variante 2" loading="lazy" decoding="async">
+                </div>
               </div>
 
-              <div class="ai-step" data-step="2">
-                <p class="eyebrow">02 / 04</p>
-                <h2 class="ai-showcase__title">Stil &amp; Stimmung.<br>Passt?</h2>
-                <p class="ai-showcase__desc">Jede Variante zeigt dein Produkt in einem anderen visuellen Kontext – selber Output, verschiedene Emotionen.</p>
+              <div class="ai-result" data-idx="2">
+                <div class="ai-result__meta">
+                  <span class="ai-img-label"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 13 13" aria-hidden="true"><path fill="currentColor" d="M7.719 3.656a1.219 1.219 0 1 0 0 2.438 1.219 1.219 0 0 0 0-2.438"></path><path fill="currentColor" fill-rule="evenodd" d="M1.625 2.573c0-.524.424-.948.948-.948h7.854c.524 0 .948.424.948.948v7.854a.95.95 0 0 1-.948.948H2.573a.95.95 0 0 1-.948-.948zm8.938 7.415-2.5-2.5a.677.677 0 0 0-.958 0l-.51.508a.135.135 0 0 1-.19 0L4.805 6.4a.677.677 0 0 0-.942-.015L2.438 7.726V2.573c0-.075.06-.135.135-.135h7.854c.075 0 .136.06.136.135z" clip-rule="evenodd"></path></svg> Image</span>
+                  <span class="ai-img-dims">960 × 960</span>
+                </div>
+                <div class="ai-result__frame">
+                  <div class="ai-result__skeleton"><div class="ai-result__pulse"></div></div>
+                  <img src="/images/Showcase/showcase-result-3.avif" width="960" height="960" alt="KI-Galerie Variante 3" loading="lazy" decoding="async">
+                </div>
               </div>
 
-              <div class="ai-step" data-step="3">
-                <p class="eyebrow">03 / 04</p>
-                <h2 class="ai-showcase__title">Details,<br>die überzeugen.</h2>
-                <p class="ai-showcase__desc">Lichtstimmung, Hintergrund, Materialien – alles steuerbar. Kein Fotostudio, keine langen Wartezeiten.</p>
+              <div class="ai-result" data-idx="3">
+                <div class="ai-result__meta">
+                  <span class="ai-img-label"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 13 13" aria-hidden="true"><path fill="currentColor" d="M7.719 3.656a1.219 1.219 0 1 0 0 2.438 1.219 1.219 0 0 0 0-2.438"></path><path fill="currentColor" fill-rule="evenodd" d="M1.625 2.573c0-.524.424-.948.948-.948h7.854c.524 0 .948.424.948.948v7.854a.95.95 0 0 1-.948.948H2.573a.95.95 0 0 1-.948-.948zm8.938 7.415-2.5-2.5a.677.677 0 0 0-.958 0l-.51.508a.135.135 0 0 1-.19 0L4.805 6.4a.677.677 0 0 0-.942-.015L2.438 7.726V2.573c0-.075.06-.135.135-.135h7.854c.075 0 .136.06.136.135z" clip-rule="evenodd"></path></svg> Image</span>
+                  <span class="ai-img-dims">960 × 960</span>
+                </div>
+                <div class="ai-result__frame">
+                  <div class="ai-result__skeleton"><div class="ai-result__pulse"></div></div>
+                  <img src="/images/Showcase/showcase-result-4.avif" width="960" height="960" alt="KI-Galerie Variante 4" loading="lazy" decoding="async">
+                </div>
               </div>
 
-              <div class="ai-step" data-step="4">
-                <p class="eyebrow">04 / 04</p>
-                <h2 class="ai-showcase__title">Galerie fertig.<br>In Studioqualität.</h2>
-                <p class="ai-showcase__desc">Das Ergebnis: professionelle Produktgrafiken, die auf PDPs sofort wirken – geliefert in 5 Werktagen.</p>
-              </div>
+            </div><!-- /.ai-showcase__results -->
 
-            </div><!-- /.ai-showcase__steps -->
+          </div><!-- /.ai-showcase__composition -->
+        </div><!-- /.ai-showcase__stage -->
 
-            <div class="ai-showcase__dots" aria-hidden="true">
-              <span class="ai-showcase__dot is-active"></span>
-              <span class="ai-showcase__dot"></span>
-              <span class="ai-showcase__dot"></span>
-              <span class="ai-showcase__dot"></span>
-              <span class="ai-showcase__dot"></span>
-            </div>
-
-            <div class="ai-showcase__prompt" aria-hidden="true">
-              <span class="ai-showcase__prompt-label">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
-                Prompt
-              </span>
-              <p class="ai-showcase__prompt-text">Produktfoto, neutraler Studiohintergrund, weiches Seitenlicht, hochwertig und modern, für E-Commerce Produktseiten</p>
-            </div>
-
-          </div><!-- /.ai-showcase__left -->
-
-          <!-- RIGHT: image frames — stacked, one active at a time -->
-          <div class="ai-showcase__right">
-
-            <div class="ai-frame ai-frame--portrait is-active" data-step="0">
-              <img src="/images/Showcase/showcase-start-image.avif"
-                   alt="Ausgangs-Produktfoto"
-                   width="720" height="960"
-                   loading="lazy" decoding="async" />
-            </div>
-
-            <div class="ai-frame ai-frame--square" data-step="1">
-              <img src="/images/Showcase/showcase-result-1.avif"
-                   alt="KI-Galerie Variante 1"
-                   width="960" height="960"
-                   loading="lazy" decoding="async" />
-            </div>
-
-            <div class="ai-frame ai-frame--square" data-step="2">
-              <img src="/images/Showcase/showcase-result-2.avif"
-                   alt="KI-Galerie Variante 2"
-                   width="960" height="960"
-                   loading="lazy" decoding="async" />
-            </div>
-
-            <div class="ai-frame ai-frame--square" data-step="3">
-              <img src="/images/Showcase/showcase-result-3.avif"
-                   alt="KI-Galerie Variante 3"
-                   width="960" height="960"
-                   loading="lazy" decoding="async" />
-            </div>
-
-            <div class="ai-frame ai-frame--square" data-step="4">
-              <img src="/images/Showcase/showcase-result-4.avif"
-                   alt="KI-Galerie Variante 4"
-                   width="960" height="960"
-                   loading="lazy" decoding="async" />
-            </div>
-
-          </div><!-- /.ai-showcase__right -->
-
-        </div><!-- /.ai-showcase__inner -->
       </div><!-- /.ai-showcase__sticky -->
     </section>
 
@@ -1048,46 +1057,85 @@
   <script src="booking-glass.js" defer></script>
   <script src="cookie-consent.js" defer></script>
 
-  <!-- AI Showcase: scroll-driven step switcher -->
+  <!-- AI Showcase: continuous scroll-driven animation (Lovart-style) -->
   <script>
   (function () {
     'use strict';
 
-    var section = document.getElementById('ai-process');
-    if (!section) return;
+    var section  = document.getElementById('ai-process');
+    var prompt   = document.getElementById('aiPrompt');
+    var typedEl  = document.getElementById('aiTyped');
+    if (!section || !prompt || !typedEl) return;
 
-    var steps  = Array.from(section.querySelectorAll('.ai-step'));
-    var frames = Array.from(section.querySelectorAll('.ai-frame'));
-    var dots   = Array.from(section.querySelectorAll('.ai-showcase__dot'));
-    var prompt = section.querySelector('.ai-showcase__prompt');
-    var N      = steps.length; // 5 steps (0–4)
-    var active = -1;
-    var ticking = false;
+    var results = Array.from(section.querySelectorAll('.ai-result'));
 
-    function computeStep() {
+    /* Build typed text as individual char <span>s */
+    var PROMPT_TEXT = 'Erstelle ein Set KI-generierter Produktfotos für diese Marke.';
+    var chars = PROMPT_TEXT.split('').map(function (ch) {
+      var s = document.createElement('span');
+      s.className = 'char';
+      s.textContent = ch === ' ' ? ' ' : ch;
+      s.style.opacity = '0';
+      return s;
+    });
+    chars.forEach(function (c) { typedEl.appendChild(c); });
+
+    /* ── Helpers ──────────────────────────────────── */
+    function c01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+    function mr(v, a, b) { return c01((v - a) / (b - a)); }
+
+    function getP() {
       var rect = section.getBoundingClientRect();
-      var scrollable = section.offsetHeight - window.innerHeight;
-      if (scrollable <= 0) return 0;
-      var progress = Math.max(0, Math.min(1, -rect.top / scrollable));
-      return Math.min(Math.floor(progress * N), N - 1);
+      var sc   = section.offsetHeight - window.innerHeight;
+      return sc > 0 ? c01(-rect.top / sc) : 0;
     }
 
-    function applyStep(step) {
-      if (step === active) return;
-      active = step;
-      steps.forEach(function (el, i)  { el.classList.toggle('is-active', i === step); });
-      frames.forEach(function (el, i) { el.classList.toggle('is-active', i === step); });
-      dots.forEach(function (el, i)   { el.classList.toggle('is-active', i === step); });
-      if (prompt) prompt.classList.toggle('is-visible', step > 0);
+    /* ── Animation phases (scroll progress 0→1)
+       A  0.05–0.28  Prompt slides up
+       B  0.18–0.52  Characters type in (staggered)
+       C0 0.42–0.56  Result 1
+       C1 0.52–0.66  Result 2
+       C2 0.62–0.76  Result 3
+       C3 0.72–0.86  Result 4
+    ─────────────────────────────────────────────── */
+    var rPhases = [[0.42,0.56],[0.52,0.66],[0.62,0.76],[0.72,0.86]];
+
+    var ticking = false;
+    var lastP   = -1;
+
+    function update() {
+      var p = getP();
+      if (Math.abs(p - lastP) < 0.0004) return;
+      lastP = p;
+
+      /* Prompt box */
+      var pa = mr(p, 0.05, 0.28);
+      prompt.style.opacity   = pa;
+      prompt.style.transform = 'translateX(-50%) translateY(' + ((1 - pa) * 110) + 'px)';
+
+      /* Character typing */
+      var N = chars.length;
+      for (var i = 0; i < N; i++) {
+        chars[i].style.opacity = mr(p, 0.18 + (i / N) * 0.30, 0.22 + (i / N) * 0.30);
+      }
+
+      /* Result cards */
+      results.forEach(function (el, i) {
+        var ph = rPhases[i];
+        var rp = mr(p, ph[0], ph[1]);
+        el.style.opacity   = rp;
+        el.style.transform = 'translateY(' + ((1 - rp) * -20) + 'px) scale(' + (1 + (1 - rp) * 0.15) + ')';
+        el.classList.toggle('is-visible', rp > 0.5);
+      });
     }
 
     window.addEventListener('scroll', function () {
       if (ticking) return;
       ticking = true;
-      requestAnimationFrame(function () { ticking = false; applyStep(computeStep()); });
+      requestAnimationFrame(function () { ticking = false; update(); });
     }, { passive: true });
 
-    applyStep(computeStep());
+    update();
   })();
   </script>
 
