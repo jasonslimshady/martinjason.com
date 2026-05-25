@@ -637,6 +637,113 @@
     </section>
 
     <!-- ==================================================================
+         AI SHOWCASE — Sticky scroll storytelling
+         5 steps: original photo → 4 AI results. Placed directly after hero.
+         ================================================================== -->
+    <section id="ai-process" class="ai-showcase">
+      <div class="ai-showcase__sticky">
+        <div class="ai-showcase__inner">
+
+          <!-- LEFT: step text · dots · prompt box -->
+          <div class="ai-showcase__left">
+
+            <div class="ai-showcase__steps" aria-live="polite">
+
+              <div class="ai-step is-active" data-step="0">
+                <p class="eyebrow">So entsteht eine KI-Galerie</p>
+                <h2 class="ai-showcase__title">Dein Produkt.<br>Einmal einsenden.</h2>
+                <p class="ai-showcase__desc">Du schickst mir dein bestehendes Produktfoto. Das ist der Ausgangspunkt – aus einem Bild entsteht eine komplette Galerie.</p>
+              </div>
+
+              <div class="ai-step" data-step="1">
+                <p class="eyebrow">01 / 04</p>
+                <h2 class="ai-showcase__title">KI generiert<br>die erste Variante.</h2>
+                <p class="ai-showcase__desc">Auf Basis des Prompts entstehen in Sekunden verschiedene Bildwelten – fertig für PDPs, Ads und Lookbooks.</p>
+              </div>
+
+              <div class="ai-step" data-step="2">
+                <p class="eyebrow">02 / 04</p>
+                <h2 class="ai-showcase__title">Stil &amp; Stimmung.<br>Passt?</h2>
+                <p class="ai-showcase__desc">Jede Variante zeigt dein Produkt in einem anderen visuellen Kontext – selber Output, verschiedene Emotionen.</p>
+              </div>
+
+              <div class="ai-step" data-step="3">
+                <p class="eyebrow">03 / 04</p>
+                <h2 class="ai-showcase__title">Details,<br>die überzeugen.</h2>
+                <p class="ai-showcase__desc">Lichtstimmung, Hintergrund, Materialien – alles steuerbar. Kein Fotostudio, keine langen Wartezeiten.</p>
+              </div>
+
+              <div class="ai-step" data-step="4">
+                <p class="eyebrow">04 / 04</p>
+                <h2 class="ai-showcase__title">Galerie fertig.<br>In Studioqualität.</h2>
+                <p class="ai-showcase__desc">Das Ergebnis: professionelle Produktgrafiken, die auf PDPs sofort wirken – geliefert in 5 Werktagen.</p>
+              </div>
+
+            </div><!-- /.ai-showcase__steps -->
+
+            <div class="ai-showcase__dots" aria-hidden="true">
+              <span class="ai-showcase__dot is-active"></span>
+              <span class="ai-showcase__dot"></span>
+              <span class="ai-showcase__dot"></span>
+              <span class="ai-showcase__dot"></span>
+              <span class="ai-showcase__dot"></span>
+            </div>
+
+            <div class="ai-showcase__prompt" aria-hidden="true">
+              <span class="ai-showcase__prompt-label">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+                Prompt
+              </span>
+              <p class="ai-showcase__prompt-text">Produktfoto, neutraler Studiohintergrund, weiches Seitenlicht, hochwertig und modern, für E-Commerce Produktseiten</p>
+            </div>
+
+          </div><!-- /.ai-showcase__left -->
+
+          <!-- RIGHT: image frames — stacked, one active at a time -->
+          <div class="ai-showcase__right">
+
+            <div class="ai-frame ai-frame--portrait is-active" data-step="0">
+              <img src="/images/Showcase/showcase-start-image.avif"
+                   alt="Ausgangs-Produktfoto"
+                   width="720" height="960"
+                   loading="lazy" decoding="async" />
+            </div>
+
+            <div class="ai-frame ai-frame--square" data-step="1">
+              <img src="/images/Showcase/showcase-result-1.avif"
+                   alt="KI-Galerie Variante 1"
+                   width="960" height="960"
+                   loading="lazy" decoding="async" />
+            </div>
+
+            <div class="ai-frame ai-frame--square" data-step="2">
+              <img src="/images/Showcase/showcase-result-2.avif"
+                   alt="KI-Galerie Variante 2"
+                   width="960" height="960"
+                   loading="lazy" decoding="async" />
+            </div>
+
+            <div class="ai-frame ai-frame--square" data-step="3">
+              <img src="/images/Showcase/showcase-result-3.avif"
+                   alt="KI-Galerie Variante 3"
+                   width="960" height="960"
+                   loading="lazy" decoding="async" />
+            </div>
+
+            <div class="ai-frame ai-frame--square" data-step="4">
+              <img src="/images/Showcase/showcase-result-4.avif"
+                   alt="KI-Galerie Variante 4"
+                   width="960" height="960"
+                   loading="lazy" decoding="async" />
+            </div>
+
+          </div><!-- /.ai-showcase__right -->
+
+        </div><!-- /.ai-showcase__inner -->
+      </div><!-- /.ai-showcase__sticky -->
+    </section>
+
+    <!-- ==================================================================
          LOGO BAR (placeholder — swap with anonymized client logos later)
          ================================================================== -->
     <section class="logos">
@@ -940,6 +1047,49 @@
   <script src="booking-popup.js" defer></script>
   <script src="booking-glass.js" defer></script>
   <script src="cookie-consent.js" defer></script>
+
+  <!-- AI Showcase: scroll-driven step switcher -->
+  <script>
+  (function () {
+    'use strict';
+
+    var section = document.getElementById('ai-process');
+    if (!section) return;
+
+    var steps  = Array.from(section.querySelectorAll('.ai-step'));
+    var frames = Array.from(section.querySelectorAll('.ai-frame'));
+    var dots   = Array.from(section.querySelectorAll('.ai-showcase__dot'));
+    var prompt = section.querySelector('.ai-showcase__prompt');
+    var N      = steps.length; // 5 steps (0–4)
+    var active = -1;
+    var ticking = false;
+
+    function computeStep() {
+      var rect = section.getBoundingClientRect();
+      var scrollable = section.offsetHeight - window.innerHeight;
+      if (scrollable <= 0) return 0;
+      var progress = Math.max(0, Math.min(1, -rect.top / scrollable));
+      return Math.min(Math.floor(progress * N), N - 1);
+    }
+
+    function applyStep(step) {
+      if (step === active) return;
+      active = step;
+      steps.forEach(function (el, i)  { el.classList.toggle('is-active', i === step); });
+      frames.forEach(function (el, i) { el.classList.toggle('is-active', i === step); });
+      dots.forEach(function (el, i)   { el.classList.toggle('is-active', i === step); });
+      if (prompt) prompt.classList.toggle('is-visible', step > 0);
+    }
+
+    window.addEventListener('scroll', function () {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () { ticking = false; applyStep(computeStep()); });
+    }, { passive: true });
+
+    applyStep(computeStep());
+  })();
+  </script>
 
   <!-- Gallery mobile slider dots -->
   <script>
