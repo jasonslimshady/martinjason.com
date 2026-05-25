@@ -1070,6 +1070,7 @@
     var results     = Array.from(section.querySelectorAll('.ai-result'));
     var composition = section.querySelector('.ai-showcase__composition');
     var resultsGrid = section.querySelector('.ai-showcase__results');
+    var header      = section.querySelector('.ai-showcase__header');
 
     /* Build typed text as individual char <span>s */
     var PROMPT_TEXT = 'Erstelle Produktfotos für diesen Artikel.';
@@ -1103,14 +1104,15 @@
     /* Phase D: result cards appear staggered after composition has scrolled up */
     var rPhases = [[0.73,0.80],[0.78,0.85],[0.83,0.90],[0.88,0.95]];
 
-    /* How far to translate the composition upward during Phase C.
-       Measured once at p=0 (before any transforms) so the results grid's
-       initial bottom position is used to calculate the needed lift. */
+    /* How far to lift everything upward during Phase C.
+       MUST be measured after the section is in the viewport (p > 0) so that
+       getBoundingClientRect() reflects the sticky-pinned layout, not the
+       off-screen page position from initial page load. */
     var compTransY = -200;
     var measured   = false;
 
-    function measureLift() {
-      if (measured || !resultsGrid) return;
+    function measureLift(p) {
+      if (measured || !resultsGrid || p <= 0) return;
       measured = true;
       var rb       = resultsGrid.getBoundingClientRect().bottom;
       var overflow = rb - window.innerHeight;
@@ -1121,8 +1123,8 @@
     var lastP   = -1;
 
     function update() {
-      measureLift();
       var p = getP();
+      measureLift(p);                          /* no-op until section is live */
       if (Math.abs(p - lastP) < 0.0004) return;
       lastP = p;
 
@@ -1137,12 +1139,15 @@
         chars[i].style.opacity = mr(p, 0.18 + (i / N) * 0.30, 0.22 + (i / N) * 0.30);
       }
 
-      /* Phase C: Whole composition scrolls up — portrait + prompt rise,
-         results slide into the visible viewport area from below */
-      var pc = mr(p, 0.55, 0.73);
-      if (composition) {
-        composition.style.transform = 'translateY(' + (pc * compTransY) + 'px)';
-      }
+      /* Phase C: header + portrait + prompt + results all scroll up as one unit.
+         composition translateY carries portrait, prompt (abs child) and results
+         (abs child) with it. header translates by the same amount so the whole
+         visible block rises together. Movement stops once Phase C ends, freezing
+         everything in place while Phase D runs. */
+      var pc   = mr(p, 0.55, 0.73);
+      var lift = pc * compTransY;
+      if (header)      header.style.transform      = 'translateY(' + lift + 'px)';
+      if (composition) composition.style.transform = 'translateY(' + lift + 'px)';
 
       /* Phase D: Individual result cards appear left-to-right */
       results.forEach(function (el, i) {
