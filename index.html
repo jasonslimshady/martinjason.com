@@ -1067,14 +1067,16 @@
     var typedEl  = document.getElementById('aiTyped');
     if (!section || !prompt || !typedEl) return;
 
-    var results = Array.from(section.querySelectorAll('.ai-result'));
+    var results     = Array.from(section.querySelectorAll('.ai-result'));
+    var composition = section.querySelector('.ai-showcase__composition');
+    var resultsGrid = section.querySelector('.ai-showcase__results');
 
     /* Build typed text as individual char <span>s */
-    var PROMPT_TEXT = 'Erstelle ein Set KI-generierter Produktfotos für diese Marke.';
+    var PROMPT_TEXT = 'Erstelle Produktfotos für diesen Artikel.';
     var chars = PROMPT_TEXT.split('').map(function (ch) {
       var s = document.createElement('span');
       s.className = 'char';
-      s.textContent = ch === ' ' ? ' ' : ch;
+      s.textContent = ch;
       s.style.opacity = '0';
       return s;
     });
@@ -1098,28 +1100,51 @@
        C2 0.62–0.76  Result 3
        C3 0.72–0.86  Result 4
     ─────────────────────────────────────────────── */
-    var rPhases = [[0.42,0.56],[0.52,0.66],[0.62,0.76],[0.72,0.86]];
+    /* Phase D: result cards appear staggered after composition has scrolled up */
+    var rPhases = [[0.73,0.80],[0.78,0.85],[0.83,0.90],[0.88,0.95]];
+
+    /* How far to translate the composition upward during Phase C.
+       Measured once at p=0 (before any transforms) so the results grid's
+       initial bottom position is used to calculate the needed lift. */
+    var compTransY = -200;
+    var measured   = false;
+
+    function measureLift() {
+      if (measured || !resultsGrid) return;
+      measured = true;
+      var rb       = resultsGrid.getBoundingClientRect().bottom;
+      var overflow = rb - window.innerHeight;
+      compTransY   = overflow > 0 ? -(overflow + 80) : -80;
+    }
 
     var ticking = false;
     var lastP   = -1;
 
     function update() {
+      measureLift();
       var p = getP();
       if (Math.abs(p - lastP) < 0.0004) return;
       lastP = p;
 
-      /* Prompt box */
+      /* Phase A: Prompt slides up from below */
       var pa = mr(p, 0.05, 0.28);
       prompt.style.opacity   = pa;
       prompt.style.transform = 'translateX(-50%) translateY(' + ((1 - pa) * 110) + 'px)';
 
-      /* Character typing */
+      /* Phase B: Characters type in staggered */
       var N = chars.length;
       for (var i = 0; i < N; i++) {
         chars[i].style.opacity = mr(p, 0.18 + (i / N) * 0.30, 0.22 + (i / N) * 0.30);
       }
 
-      /* Result cards */
+      /* Phase C: Whole composition scrolls up — portrait + prompt rise,
+         results slide into the visible viewport area from below */
+      var pc = mr(p, 0.55, 0.73);
+      if (composition) {
+        composition.style.transform = 'translateY(' + (pc * compTransY) + 'px)';
+      }
+
+      /* Phase D: Individual result cards appear left-to-right */
       results.forEach(function (el, i) {
         var ph = rPhases[i];
         var rp = mr(p, ph[0], ph[1]);
