@@ -2,6 +2,7 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "framework": null,
+  "outputDirectory": ".",
   "headers": [
     {
       "source": "/(.*\\.(css|js|avif|webp|png|jpg|jpeg|svg|woff2|woff|ttf|otf|ico|gif))",
