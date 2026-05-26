@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/avif" sizes="128x128" href="/images/favicon.avif">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Conversion durch Bildlogik: Mein Framework für PDP-Galerien — Jason Martin</title>
+  <meta name="description" content="Wie ich an jede Galerie herangehe — vom ersten Briefing bis zum letzten Bild. Das Framework aus fünf Jahren Performance Creative für PDP-Galerien." />
+  <link rel="canonical" href="https://martinjason.com/pdp-galerie-conversion-framework" />
+
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="Conversion durch Bildlogik: Mein Framework für PDP-Galerien" />
+  <meta property="og:description" content="Wie ich an jede Galerie herangehe — vom ersten Briefing bis zum letzten Bild. Das Framework aus fünf Jahren Performance Creative für PDP-Galerien." />
+  <meta property="og:url" content="https://martinjason.com/pdp-galerie-conversion-framework" />
+  <meta property="og:locale" content="de_DE" />
+  <meta property="og:site_name" content="Jason Martin" />
+  <meta property="article:author" content="Jason Martin" />
+  <meta property="article:published_time" content="2025-11-01" />
+  <meta property="article:section" content="Bildlogik" />
+  <meta property="article:tag" content="PDP Galerie Framework" />
+  <meta property="article:tag" content="Produktgalerie Conversion" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Conversion durch Bildlogik: Mein Framework für PDP-Galerien" />
+  <meta name="twitter:description" content="Das Framework aus fünf Jahren Performance Creative — vom Briefing bis zum letzten Bild." />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Article",
+        "headline": "Conversion durch Bildlogik: Mein Framework für PDP-Galerien",
+        "description": "Wie ich an jede Galerie herangehe — vom ersten Briefing bis zum letzten Bild. Das Framework aus fünf Jahren Performance Creative für PDP-Galerien.",
+        "author": { "@type": "Person", "name": "Jason Martin", "url": "https://martinjason.com" },
+        "publisher": { "@type": "Person", "name": "Jason Martin", "url": "https://martinjason.com" },
+        "datePublished": "2025-11-01",
+        "dateModified": "2025-11-01",
+        "url": "https://martinjason.com/pdp-galerie-conversion-framework",
+        "inLanguage": "de",
+        "keywords": ["pdp galerie framework", "produktgalerie conversion optimieren", "pdp bilder strategie", "produktseite galerie aufbau", "performance creative produktbilder"]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Funktioniert dieses Framework auch für günstigere Produkte unter €30?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Ja — mit Anpassungen. Bei Impulskaufprodukten unter €30 ist die Galerie kürzer (4–5 Bilder statt 8) und Phase 4 (Einwände entkräften) entfällt oft, weil der Kaufrisiko-Level niedrig genug ist. Phase 1 (starkes erstes Bild) und Phase 3 (Kontext) sind aber bei jedem Preispunkt entscheidend." }
+          },
+          {
+            "@type": "Question",
+            "name": "Wie unterscheidet sich das Framework für B2B vs. B2C?",
+            "acceptedAnswer": { "@type": "Answer", "text": "B2B-Käufer brauchen mehr Phase 2 (Qualität und Spezifikationen) und mehr Phase 4 (Einwände und Kompatibilität). B2C-Käufer brauchen mehr Phase 3 (emotionaler Kontext) und Phase 5 (Social Proof). Der Grundrahmen bleibt gleich, die Gewichtung verschiebt sich." }
+          },
+          {
+            "@type": "Question",
+            "name": "Kann ich das Framework für KI-generierte Galerien genauso nutzen?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Exakt. Das Framework ist produktionsagnostisch — es definiert, was in welchem Slot kommuniziert werden muss. Ob das Bild im Studio aufgenommen oder mit KI generiert wird, ist die Ausführungsentscheidung danach." }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-VGBWRTMZW2');
+  </script>
+  <link rel="preload" href="cookie-consent.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="cookie-consent.css"></noscript>
+  <link rel="preload" href="booking-popup.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="booking-popup.css"></noscript>
+</head>
+<body>
+
+  <div class="reading-progress" id="reading-progress" role="progressbar" aria-label="Lesefortschritt"></div>
+
+  <div class="bg" aria-hidden="true">
+    <div class="bg-blobs">
+      <span class="blob blob--a"></span>
+      <span class="blob blob--b"></span>
+      <span class="blob blob--c"></span>
+    </div>
+    <div class="bg-grain"></div>
+  </div>
+
+  <header class="nav-wrap"></header>
+
+  <main>
+    <div class="article-wrap">
+
+      <header class="article-header article-header--grid">
+        <div class="article-header__content">
+          <a class="article-header__back reveal" href="/blog.html">← Zurück zum Blog</a>
+          <div class="article-header__meta reveal" style="--reveal-delay: 40ms">
+            <span class="article-tag">Bildlogik</span>
+            <span class="article-header__date">
+              <time datetime="2025-11-01">November 2025</time>
+            </span>
+            <span class="article-header__read-time">5 Min. Lesezeit</span>
+          </div>
+          <h1 class="article-title reveal" style="--reveal-delay: 80ms">
+            Conversion durch Bildlogik:<br />
+            Mein <em>Framework</em> für PDP-Galerien
+          </h1>
+          <p class="article-lede reveal" style="--reveal-delay: 140ms">
+            Schöne Bilder und Bilder, die verkaufen, sind nicht dasselbe. Die meisten Briefings
+            für Produktgalerien optimieren auf Ersteres: „Wir wollen tolle Bilder, die das
+            Produkt gut darstellen."
+          </p>
+          <p class="article-lede reveal" style="--reveal-delay: 200ms">
+            Nach fünf Jahren im Performance Creative und mit Dutzenden Galerien für
+            DACH-E-Commerce-Shops habe ich ein Framework entwickelt, das jeden Schritt an
+            einer einzigen Frage ausrichtet: Was muss der Käufer an genau diesem Punkt sehen,
+            um zur nächsten Entscheidung weiterzugehen?
+          </p>
+        </div>
+        <div class="article-header__media">
+          <img class="article-header__image" src="/images/Blog/Blog Artikel/conversion-durch-bildlogik-mein-framework-fr-pdp-galerien.avif" alt="Conversion durch Bildlogik: Mein Framework für PDP-Galerien" loading="eager" />
+        </div>
+      </header>
+
+      <article class="article-body" id="article-body">
+
+        <p>
+          Die sechs Bildtypen, aus denen das Framework aufgebaut ist:
+          <a href="/hero-detail-lifestyle-produktgalerie">Hero, Detail, Lifestyle: Die Anatomie einer Produktgalerie</a>.
+        </p>
+
+        <h2>Die Grundthese: Eine Galerie ist ein Gesprächsverlauf</h2>
+
+        <p>
+          Stell dir vor, ein Käufer betritt einen guten stationären Laden. Ein erfahrener
+          Verkäufer führt ihn durch das Produkt:
+        </p>
+
+        <ul class="article-checklist">
+          <li><strong>Erster Eindruck</strong> — „Das ist das Produkt, und das macht es besonders."</li>
+          <li><strong>Vertrauensaufbau</strong> — „So sieht es aus nächster Nähe aus. Das Material, die Verarbeitung."</li>
+          <li><strong>Kontextualisierung</strong> — „Hier siehst du, wie es in deinem Alltag aussieht."</li>
+          <li><strong>Einwandbehandlung</strong> — „Du fragst dich, ob es passt? Hier drei Varianten."</li>
+          <li><strong>Abschluss</strong> — „Andere haben es bereits. Und hier ist, warum es sich lohnt."</li>
+        </ul>
+
+        <p>
+          Genau das sollte eine Produktgalerie leisten. Bild für Bild, in dieser logischen
+          Reihenfolge. Jedes Bild hat eine Aufgabe. Kein Bild ist Dekoration.
+        </p>
+
+        <h2>Das Framework: Fünf Phasen, eine Logik</h2>
+
+        <ul class="mistake-list">
+
+          <li class="mistake-list__item">
+            <span class="mistake-list__number">1</span>
+            <div class="mistake-list__content">
+              <h3>Phase 1: Orientierung (Bild 1–2)</h3>
+              <p>
+                <strong>Aufgabe:</strong> Dem Käufer schnell das Wesentliche zeigen. Das erste
+                Bild beantwortet die implizite Frage: „Bin ich hier richtig?"
+              </p>
+              <p><strong>Anforderungen an Bild 1:</strong> Produkt dominant, klar erkennbar,
+              neutraler Hintergrund, beste Seite des Produkts, muss alleine stehen können
+              (Mobile-Nutzer sehen oft nur dieses Bild).</p>
+              <p><strong>Anforderungen an Bild 2:</strong> Zweite Perspektive oder wichtigste
+              Produkteigenschaft. Bei Produkten mit mehreren Varianten: Variantenübersicht.</p>
+              <div class="callout callout--bad">
+                <div class="callout__label">Was ich vermeide</div>
+                <p>Zwei sehr ähnliche Bilder in den ersten zwei Slots. Jeder Slot muss etwas anderes kommunizieren.</p>
+              </div>
+            </div>
+          </li>
+
+          <li class="mistake-list__item">
+            <span class="mistake-list__number">2</span>
+            <div class="mistake-list__content">
+              <h3>Phase 2: Vertrauen aufbauen (Bild 3–4)</h3>
+              <p>
+                <strong>Aufgabe:</strong> Qualitätszweifel eliminieren, bevor sie entstehen.
+                Die häufigste Frage in Köpfen interessierter Käufer: „Sieht das in echt
+                genauso aus?"
+              </p>
+              <p><strong>Anforderungen:</strong> Nahaufnahme mit Materialfokus — Textur,
+              Oberfläche, Verarbeitungsdetail. Lesbarkeit kleiner Details. Ein Detail, das
+              nicht in der Produktbeschreibung steht, aber Qualität signalisiert.</p>
+            </div>
+          </li>
+
+          <li class="mistake-list__item">
+            <span class="mistake-list__number">3</span>
+            <div class="mistake-list__content">
+              <h3>Phase 3: Kontext schaffen (Bild 5–6)</h3>
+              <p>
+                <strong>Aufgabe:</strong> Die mentale Lücke zwischen „das ist ein schönes Produkt"
+                und „das will ich in meinem Leben" schließen.
+              </p>
+              <p>
+                <strong>Die wichtigste Briefing-Frage:</strong> Wer ist der Mensch, der dieses
+                Produkt kauft? Welchen Moment in seinem Tag würde er an dieses Produkt erinnern?
+                Zeig genau diesen Moment.
+              </p>
+              <div class="callout callout--bad">
+                <div class="callout__label">Was ich vermeide</div>
+                <p>
+                  Überproduzierte Lifestyle-Bilder, die mehr nach Fotostudio-Katalog aussehen
+                  als nach echtem Leben. Das löst Distanz aus, keine Identifikation.
+                </p>
+              </div>
+            </div>
+          </li>
+
+          <li class="mistake-list__item">
+            <span class="mistake-list__number">4</span>
+            <div class="mistake-list__content">
+              <h3>Phase 4: Einwände entkräften (Bild 7)</h3>
+              <p>
+                <strong>Aufgabe:</strong> Die häufigste Kaufhürde direkt ansprechen. Dieses
+                Bild ist kein schönes Bild — es ist ein funktionales Bild mit einer einzigen
+                Aufgabe: den wichtigsten verbleibenden Zweifel ausräumen.
+              </p>
+              <table class="article-table">
+                <tbody>
+                  <tr><td>Größenreferenz-Bild</td><td>„In der Hand gehalten" oder Maßstab zu bekanntem Objekt</td></tr>
+                  <tr><td>Kompatibilitätsbild</td><td>„Passt zu X, Y, Z"</td></tr>
+                  <tr><td>Pflegebild</td><td>„maschinenwaschbar" visuell kommuniziert</td></tr>
+                  <tr><td>Nachhaltigkeit</td><td>„aus recycelten Materialien", „verpackungsfrei"</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </li>
+
+          <li class="mistake-list__item">
+            <span class="mistake-list__number">5</span>
+            <div class="mistake-list__content">
+              <h3>Phase 5: Abschluss und Impuls (Bild 8)</h3>
+              <p>
+                <strong>Aufgabe:</strong> Den Käufer, der bis hierher gescrollt hat, zum
+                Handeln bewegen. Wer alle acht Bilder gesehen hat, hat mehr Zeit investiert
+                als 90% der Besucher — er braucht jetzt einen abschließenden Impuls.
+              </p>
+              <ul class="article-checklist">
+                <li>Social Proof: Kundenstimme oder Bewertungszitat mit Produktbild</li>
+                <li>Bundle-Hinweis: „Wird häufig zusammen mit X gekauft"</li>
+                <li>USP-Zusammenfassung: Die drei wichtigsten Produktvorteile als visuelles Layout</li>
+                <li>Marken-Statement: Warum dieses Produkt, warum von dir</li>
+              </ul>
+              <div class="callout callout--bad">
+                <div class="callout__label">Was ich vermeide</div>
+                <p>
+                  Das letzte Bild ist ein weiterer Detail-Shot. Das verschenkt den
+                  wertvollsten Konversionspunkt der gesamten Galerie.
+                </p>
+              </div>
+            </div>
+          </li>
+
+        </ul>
+
+        <h2>Das Briefing-Dokument, das ich für jede Galerie erstelle</h2>
+
+        <p>
+          Bevor ich ein einziges Bild produziere oder generiere, beantworte ich mit dem
+          Kunden diese fünf Fragen schriftlich:
+        </p>
+
+        <ul class="article-checklist">
+          <li><strong>Wer ist der Käufer?</strong> Nicht „25–45, online-affin" — sondern: Was ist seine typische Frage vor dem Kauf?</li>
+          <li><strong>Was ist der wichtigste Kaufgrund?</strong> Das Argument, das in jedem Bild durchklingt.</li>
+          <li><strong>Was ist der häufigste Einwand?</strong> Das, was Phase-4-Bild ansprechen muss.</li>
+          <li><strong>Welche drei Wörter soll der Käufer nach der Galerie über das Produkt denken?</strong> Das Briefing für die emotionale Wirkung.</li>
+          <li><strong>Welches Bild wäre das letzte, das du aus der Galerie streichen würdest?</strong> Das ist das wichtigste Bild — starte damit.</li>
+        </ul>
+
+        <p>
+          Dieses Briefing-Gespräch dauert 30 Minuten. Es ist die wertvollste halbe Stunde
+          im gesamten Galerien-Prozess.
+        </p>
+
+        <p>
+          Die häufigsten Fehler, die dieses Framework verhindert:
+          <a href="/dtc-produktgalerie-fehler">5 häufige Fehler in DTC-Produktgalerien</a>.
+        </p>
+
+        <div class="article-global-cta-slot"></div>
+
+        <section class="faq-section reveal" aria-label="Häufige Fragen">
+          <p class="faq-section__eyebrow">FAQ</p>
+          <h2 class="faq-section__title">Häufige Fragen zum PDP-Galerie-Framework</h2>
+
+          <ul class="faq-list" role="list">
+
+            <li class="faq-item">
+              <button class="faq-question" aria-expanded="false" aria-controls="faq-1">
+                Funktioniert dieses Framework auch für Produkte unter €30?
+                <span class="faq-question__icon" aria-hidden="true">+</span>
+              </button>
+              <div id="faq-1" class="faq-answer" role="region">
+                Ja — mit Anpassungen. Bei Impulskaufprodukten unter €30 ist die Galerie kürzer
+                (4–5 Bilder statt 8) und Phase 4 (Einwände entkräften) entfällt oft, weil der
+                Kaufrisiko-Level niedrig genug ist. Phase 1 (starkes erstes Bild) und Phase 3
+                (Kontext) sind aber bei jedem Preispunkt entscheidend.
+              </div>
+            </li>
+
+            <li class="faq-item">
+              <button class="faq-question" aria-expanded="false" aria-controls="faq-2">
+                Wie unterscheidet sich das Framework für B2B vs. B2C?
+                <span class="faq-question__icon" aria-hidden="true">+</span>
+              </button>
+              <div id="faq-2" class="faq-answer" role="region">
+                B2B-Käufer brauchen mehr Phase 2 (Qualität und Spezifikationen) und mehr
+                Phase 4 (Einwände und Kompatibilität). B2C-Käufer brauchen mehr Phase 3
+                (emotionaler Kontext) und Phase 5 (Social Proof). Der Grundrahmen bleibt
+                gleich, die Gewichtung verschiebt sich.
+              </div>
+            </li>
+
+            <li class="faq-item">
+              <button class="faq-question" aria-expanded="false" aria-controls="faq-3">
+                Kann ich das Framework für KI-generierte Galerien genauso nutzen?
+                <span class="faq-question__icon" aria-hidden="true">+</span>
+              </button>
+              <div id="faq-3" class="faq-answer" role="region">
+                Exakt. Das Framework ist produktionsagnostisch — es definiert, was in welchem
+                Slot kommuniziert werden muss. Ob das Bild im Studio aufgenommen oder mit
+                KI generiert wird, ist die Ausführungsentscheidung danach.
+              </div>
+            </li>
+
+          </ul>
+        </section>
+
+        <div class="article-global-author-slot"></div>
+
+      </article>
+    </div>
+  </main>
+
+  <footer class="footer"></footer>
+
+  <script src="/shared-components.js"></script>
+  <script src="script.js"></script>
+  <script>
+    (function () {
+      const bar = document.getElementById('reading-progress');
+      const article = document.getElementById('article-body');
+      if (!bar || !article) return;
+      function update() {
+        const rect = article.getBoundingClientRect();
+        const scrolled = Math.max(0, -rect.top);
+        const progress = Math.min(100, (scrolled / (article.offsetHeight - window.innerHeight)) * 100);
+        bar.style.width = progress + '%';
+      }
+      window.addEventListener('scroll', update, { passive: true });
+      update();
+    })();
+    (function () {
+      const questions = document.querySelectorAll('.faq-question');
+      questions.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          const answerId = btn.getAttribute('aria-controls');
+          const answer = document.getElementById(answerId);
+          const isOpen = btn.getAttribute('aria-expanded') === 'true';
+          questions.forEach(function (q) {
+            q.setAttribute('aria-expanded', 'false');
+            const a = document.getElementById(q.getAttribute('aria-controls'));
+            if (a) a.classList.remove('is-open');
+          });
+          if (!isOpen && answer) {
+            btn.setAttribute('aria-expanded', 'true');
+            answer.classList.add('is-open');
+          }
+        });
+      });
+    })();
+  </script>
+  <script src="cookie-consent.js" defer></script>
+</body>
+</html>
