@@ -301,6 +301,10 @@
       #print-area{position:fixed;top:0;left:0;width:100%;background:#fff}
     }
 
+    /* KLAVIYO */
+    .klv-range{padding:.375rem .875rem;border-radius:var(--r-pill);font-size:.8125rem;font-weight:500;background:var(--surface);color:var(--ink-m);border:1px solid var(--border-s);cursor:pointer;transition:all var(--fast)}
+    .klv-range.active,.klv-range:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+
     /* TOAST */
     #toasts{position:fixed;bottom:1.5rem;right:1.5rem;z-index:200;display:flex;flex-direction:column;gap:.5rem}
     .toast{background:var(--ink);color:#fff;padding:.5625rem 1rem;border-radius:var(--r-md);font-size:.875rem;font-weight:500;box-shadow:0 4px 16px rgba(10,10,10,.25);animation:tin .3s var(--ease) forwards}
@@ -354,6 +358,10 @@
     <button class="nav-item" data-panel="invoices">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2.5" y="1.5" width="11" height="13" rx="1.5"/><path d="M5 5.5h6M5 8h6M5 10.5h3.5"/></svg>Rechnungen
       <span class="nav-badge" id="badge-inv" hidden>0</span>
+    </button>
+    <div class="sb-sec">Marketing</div>
+    <button class="nav-item" data-panel="klaviyo">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="3.5" width="13" height="9" rx="1.5"/><path d="M1.5 5.5l6.5 4 6.5-4"/></svg>Klaviyo
     </button>
     <div class="sb-spacer"></div>
     <div class="sb-user">
@@ -484,6 +492,81 @@
         <div class="stat-card"><div class="stat-lbl">Überfällig</div><div class="stat-val" id="i-overdue" style="color:var(--red)">—</div></div>
       </div>
       <div class="card"><table class="dtable"><thead><tr><th>Nr.</th><th>Kunde</th><th>Datum</th><th>Fällig</th><th>Betrag</th><th>Status</th><th style="width:36px"></th></tr></thead><tbody id="inv-body"></tbody></table></div>
+    </section>
+
+    <!-- KLAVIYO PANEL -->
+    <section class="panel" id="panel-klaviyo">
+      <!-- Toolbar -->
+      <div class="ga-toolbar">
+        <button class="klv-range active" data-days="30">Letzte 30 Tage</button>
+        <button class="klv-range" data-days="7">Letzte 7 Tage</button>
+        <button class="klv-range" data-days="90">Letzte 90 Tage</button>
+        <div style="display:flex;gap:.375rem;align-items:center;margin-left:auto;flex-wrap:wrap">
+          <input type="date" class="fi" id="klv-from" style="width:140px;font-size:.8125rem;padding:.375rem .625rem" />
+          <span style="color:var(--ink-s);font-size:.875rem">–</span>
+          <input type="date" class="fi" id="klv-to" style="width:140px;font-size:.8125rem;padding:.375rem .625rem" />
+          <button class="btn btn--ghost btn--sm" id="klv-custom-btn">Anwenden</button>
+        </div>
+      </div>
+
+      <!-- Stat Cards -->
+      <div class="stat-grid">
+        <div class="stat-card" style="background:#D9E9D3;border-color:transparent">
+          <div class="stat-lbl">Abonnenten gesamt</div>
+          <div class="stat-val" id="klv-total">—</div>
+          <div class="stat-sub">Alle Profile</div>
+        </div>
+        <div class="stat-card" style="background:#D9E3F3;border-color:transparent">
+          <div class="stat-lbl">Neue Anmeldungen</div>
+          <div class="stat-val" id="klv-signups">—</div>
+          <div class="stat-sub">Im Zeitraum</div>
+        </div>
+        <div class="stat-card" style="background:#FFF3CC;border-color:transparent">
+          <div class="stat-lbl">Ø Öffnungsrate</div>
+          <div class="stat-val" id="klv-open">—</div>
+          <div class="stat-sub">Email-Kampagnen</div>
+        </div>
+        <div class="stat-card" style="background:#FCE5CD;border-color:transparent">
+          <div class="stat-lbl">Ø Klickrate</div>
+          <div class="stat-val" id="klv-click">—</div>
+          <div class="stat-sub">Email-Kampagnen</div>
+        </div>
+      </div>
+
+      <!-- Sign-up Growth Chart -->
+      <div class="ga-chart-wrap" style="margin-bottom:1rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+          <span class="ga-chart-ttl" style="margin:0">Anmeldungen</span>
+          <span style="font-size:.75rem;color:var(--ink-s)" id="klv-signups-total"></span>
+        </div>
+        <div class="rev-bar-wrap" id="klv-bars" style="height:100px"></div>
+      </div>
+
+      <!-- Lists -->
+      <div class="card" style="margin-bottom:1rem">
+        <div class="card-hd">
+          <span class="card-ttl">Listen</span>
+          <span style="font-size:.75rem;color:var(--ink-s)" id="klv-lists-count"></span>
+        </div>
+        <table class="dtable">
+          <thead><tr><th>Listenname</th><th>Abonnenten</th><th>Erstellt</th></tr></thead>
+          <tbody id="klv-lists-body"></tbody>
+        </table>
+      </div>
+
+      <!-- Campaigns -->
+      <div class="card">
+        <div class="card-hd">
+          <span class="card-ttl">Kampagnen</span>
+          <span style="font-size:.75rem;color:var(--ink-s)" id="klv-campaigns-count"></span>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="dtable" style="min-width:700px">
+            <thead><tr><th>Kampagne</th><th>Gesendet</th><th>Empfänger</th><th>Öffnungen</th><th>Öffnungsrate</th><th>Klicks</th><th>Klickrate</th><th>Abmeld.</th></tr></thead>
+            <tbody id="klv-campaigns-body"></tbody>
+          </table>
+        </div>
+      </div>
     </section>
   </main>
 </div>
@@ -739,6 +822,7 @@ const PANELS = {
   crm:      { title:'CRM',           sub:'Leads & aktive Kunden' },
   time:     { title:'Zeiterfassung', sub:'Projekte & Stunden' },
   invoices: { title:'Rechnungen',    sub:'Entwürfe, versendet, bezahlt' },
+  klaviyo:  { title:'Klaviyo',       sub:'Email Marketing — Abonnenten & Kampagnen' },
 };
 const STAGE_CFG = [
   { id:'new_lead',    label:'Neuer Lead',  color:'#8A8A92', tag:'tag--muted' },
@@ -789,6 +873,7 @@ $('btn-signout').addEventListener('click', async () => {
 });
 
 // ── NAVIGATION ──────────────────────────────────────────────────────
+let klvLoaded = false;
 document.querySelectorAll('.nav-item[data-panel]').forEach(btn =>
   btn.addEventListener('click', () => {
     const id = btn.dataset.panel;
@@ -799,6 +884,13 @@ document.querySelectorAll('.nav-item[data-panel]').forEach(btn =>
     $('panel-'+id).classList.add('active');
     $('tb-title').textContent = PANELS[id].title;
     $('tb-sub').textContent   = PANELS[id].sub;
+    if (id === 'klaviyo' && !klvLoaded) {
+      klvLoaded = true;
+      const { start, end } = klvISORange(klvDays);
+      $('klv-from').value = start;
+      $('klv-to').value   = end;
+      loadKlaviyo(start, end);
+    }
   })
 );
 
@@ -2701,6 +2793,164 @@ async function gaShowPageDetail(path, title) {
     </div>`;
   }
 }
+
+// ── KLAVIYO ──────────────────────────────────────────────────────────
+let klvDays = 30;
+
+function klvISORange(days) {
+  const end = new Date();
+  const start = new Date();
+  start.setDate(start.getDate() - days);
+  return {
+    start: start.toISOString().split('T')[0],
+    end: end.toISOString().split('T')[0],
+  };
+}
+
+function klvSetLoading() {
+  ['klv-total','klv-signups','klv-open','klv-click'].forEach(id => $(id).textContent = '…');
+  $('klv-bars').innerHTML = '<div style="display:flex;align-items:center;gap:.5rem;color:var(--ink-s);font-size:.8125rem"><div class="spin" style="width:14px;height:14px;border-width:2px"></div>Wird geladen…</div>';
+  $('klv-lists-body').innerHTML = '';
+  $('klv-campaigns-body').innerHTML = '';
+  $('klv-lists-count').textContent = '';
+  $('klv-campaigns-count').textContent = '';
+  $('klv-signups-total').textContent = '';
+}
+
+async function loadKlaviyo(start, end) {
+  klvSetLoading();
+  try {
+    const res = await fetch(`/api/klaviyo?resource=overview&start=${start}&end=${end}`);
+    if (!res.ok) {
+      const { error } = await res.json().catch(() => ({}));
+      throw new Error(error || res.statusText);
+    }
+    const { lists, profiles, campaignValues, signups } = await res.json();
+
+    // ── Total subscribers (from profiles meta, fallback to list sum) ──
+    const profileTotal = profiles?.meta?.total;
+    const listSum = (lists.data || []).reduce((s, l) => s + (l.attributes?.profile_count || 0), 0);
+    $('klv-total').textContent = (profileTotal ?? listSum).toLocaleString('de-DE');
+
+    // ── New sign-ups (sum of metric aggregate values) ──
+    const sigDates = signups?.data?.attributes?.dates || [];
+    const sigVals  = signups?.data?.attributes?.data?.[0]?.measurements || [];
+    const totalSignups = sigVals.reduce((s, v) => s + (v || 0), 0);
+    $('klv-signups').textContent = totalSignups.toLocaleString('de-DE');
+    $('klv-signups-total').textContent = sigDates.length ? `${sigDates.length} Tage` : '';
+
+    // ── Campaign averages ──
+    const cvList = campaignValues?.data || [];
+    if (cvList.length) {
+      const avgOpen  = cvList.reduce((s, c) => s + (c.attributes?.open_rate || 0), 0) / cvList.length;
+      const avgClick = cvList.reduce((s, c) => s + (c.attributes?.click_rate || 0), 0) / cvList.length;
+      $('klv-open').textContent  = (avgOpen  * 100).toFixed(1) + '%';
+      $('klv-click').textContent = (avgClick * 100).toFixed(1) + '%';
+    } else {
+      $('klv-open').textContent  = '—';
+      $('klv-click').textContent = '—';
+    }
+
+    klvRenderChart(sigDates, sigVals);
+    klvRenderLists(lists.data || []);
+    klvRenderCampaigns(cvList);
+  } catch (err) {
+    toast('Klaviyo Fehler: ' + err.message, 'err');
+    $('klv-bars').innerHTML = `<div style="color:var(--red);font-size:.8125rem">Fehler: ${esc(err.message)}</div>`;
+  }
+}
+
+function klvRenderChart(dates, vals) {
+  if (!dates.length) {
+    $('klv-bars').innerHTML = '<div class="empty-st" style="padding:1.5rem"><p class="empty-ttl" style="margin:0">Keine Anmeldedaten</p></div>';
+    return;
+  }
+  const maxVal = Math.max(...vals, 1);
+  const H = 84; // usable height in px
+  // For > 45 days, only show every Nth label to avoid crowding
+  const labelEvery = dates.length > 45 ? 7 : dates.length > 14 ? 3 : 1;
+  $('klv-bars').innerHTML = dates.map((dateStr, i) => {
+    const v = vals[i] || 0;
+    const h = Math.max(v > 0 ? 3 : 0, Math.round((v / maxVal) * H));
+    const col = v > 0 ? 'var(--accent)' : 'var(--border-s)';
+    const lbl = (() => {
+      if (i % labelEvery !== 0) return '';
+      const d = new Date(dateStr);
+      return `${d.getDate()}.${d.getMonth() + 1}`;
+    })();
+    return `<div class="rev-bar-col" title="${new Date(dateStr).toLocaleDateString('de-DE')}: ${v}">
+      <div class="rev-bar-val">${v > 0 ? v : ''}</div>
+      <div class="rev-bar-fill" style="height:${h}px;background:${col}"></div>
+      <div class="rev-bar-lbl">${lbl}</div>
+    </div>`;
+  }).join('');
+}
+
+function klvRenderLists(lists) {
+  $('klv-lists-count').textContent = lists.length ? `${lists.length} Listen` : '';
+  if (!lists.length) {
+    $('klv-lists-body').innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--ink-s);padding:1.5rem">Keine Listen gefunden</td></tr>`;
+    return;
+  }
+  $('klv-lists-body').innerHTML = lists
+    .sort((a, b) => (b.attributes?.profile_count || 0) - (a.attributes?.profile_count || 0))
+    .map(l => `<tr>
+      <td class="fw6">${esc(l.attributes?.name || '—')}</td>
+      <td>${(l.attributes?.profile_count || 0).toLocaleString('de-DE')}</td>
+      <td class="muted">${l.attributes?.created ? new Date(l.attributes.created).toLocaleDateString('de-DE') : '—'}</td>
+    </tr>`).join('');
+}
+
+function klvRenderCampaigns(campaigns) {
+  $('klv-campaigns-count').textContent = campaigns.length ? `${campaigns.length} Kampagnen` : '';
+  if (!campaigns.length) {
+    $('klv-campaigns-body').innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--ink-s);padding:1.5rem">Keine Kampagnen im Zeitraum</td></tr>`;
+    return;
+  }
+  const sorted = [...campaigns].sort((a, b) => {
+    const tA = a.attributes?.send_time || '';
+    const tB = b.attributes?.send_time || '';
+    return tB.localeCompare(tA);
+  });
+  $('klv-campaigns-body').innerHTML = sorted.map(c => {
+    const a = c.attributes || {};
+    const openPct  = ((a.open_rate  || 0) * 100).toFixed(1) + '%';
+    const clickPct = ((a.click_rate || 0) * 100).toFixed(1) + '%';
+    const openCol  = (a.open_rate  || 0) >= 0.2 ? 'var(--green)' : (a.open_rate  || 0) >= 0.1 ? 'var(--orange)' : 'inherit';
+    const clickCol = (a.click_rate || 0) >= 0.03 ? 'var(--green)' : 'inherit';
+    return `<tr>
+      <td class="fw6" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(a.campaign_name || '—')}</td>
+      <td class="muted">${a.send_time ? new Date(a.send_time).toLocaleDateString('de-DE') : '—'}</td>
+      <td>${(a.recipients || 0).toLocaleString('de-DE')}</td>
+      <td>${(a.unique_opens || 0).toLocaleString('de-DE')}</td>
+      <td style="font-weight:600;color:${openCol}">${openPct}</td>
+      <td>${(a.unique_clicks || 0).toLocaleString('de-DE')}</td>
+      <td style="font-weight:600;color:${clickCol}">${clickPct}</td>
+      <td class="muted">${(a.unsubscribes || 0).toLocaleString('de-DE')}</td>
+    </tr>`;
+  }).join('');
+}
+
+// Toolbar wiring
+document.querySelectorAll('.klv-range').forEach(btn =>
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.klv-range').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    klvDays = parseInt(btn.dataset.days);
+    const { start, end } = klvISORange(klvDays);
+    $('klv-from').value = start;
+    $('klv-to').value   = end;
+    loadKlaviyo(start, end);
+  })
+);
+
+$('klv-custom-btn').addEventListener('click', () => {
+  const s = $('klv-from').value;
+  const e = $('klv-to').value;
+  if (!s || !e) { toast('Bitte Start- und Enddatum wählen.', 'err'); return; }
+  document.querySelectorAll('.klv-range').forEach(b => b.classList.remove('active'));
+  loadKlaviyo(s, e);
+});
 
 // ── GMAIL SEND ────────────────────────────────────────────────────────
 let currentPreviewInv=null;
