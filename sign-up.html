@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/avif" sizes="128x128" href="/images/favicon.avif">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Newsletter – KI-Bildlogik für DTC Brands · Jason Martin</title>
+  <meta name="description" content="Praxisnahe Frameworks, ehrliche Einschätzungen und die neuesten Entwicklungen rund um KI-Produktgalerien — monatlich in deinem Postfach." />
+  <meta name="theme-color" content="#F7F5F1" />
+
+  <!-- Fonts — same as blog.html -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Page-specific styles -->
+  <style>
+    /* ── Sign-up hero — centered, full-bleed ─────────────────────────── */
+    .signup-hero {
+      padding-block: clamp(6rem, 14vh, 10rem) clamp(3rem, 6vh, 5rem);
+      text-align: center;
+    }
+
+    .signup-hero__inner {
+      max-width: 600px;
+      margin-inline: auto;
+    }
+
+    .signup-hero .page-hero__title {
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      margin-inline: auto;
+    }
+
+    .signup-hero .page-hero__lede {
+      margin-inline: auto;
+      margin-bottom: 0;
+    }
+
+    /* Form area — centered column */
+    .signup-hero__form-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.65rem;
+      margin-top: var(--space-4);
+    }
+
+    /* Reuse insights__form but override min-width for centered layout */
+    .signup-hero .insights__form {
+      width: 100%;
+      max-width: 480px;
+      justify-content: center;
+    }
+
+    .signup-hero .insights__form input {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .signup-hero .insights__privacy {
+      color: var(--color-ink-soft);
+      font-size: 0.82rem;
+      margin: 0;
+      text-align: center;
+    }
+
+    .signup-hero .insights__feedback {
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin: 0;
+      text-align: center;
+    }
+
+    #insights-success { color: var(--color-accent); }
+    #insights-error   { color: #D94A4A; }
+
+    /* ── Section divider label ──────────────────────────────────────── */
+    .blog-section-label {
+      padding-bottom: var(--space-3);
+    }
+
+    /* ── Mobile tweaks ──────────────────────────────────────────────── */
+    @media (max-width: 560px) {
+      .signup-hero .insights__form {
+        flex-direction: column;
+      }
+      .signup-hero .insights__form input,
+      .signup-hero .insights__form .btn {
+        width: 100%;
+      }
+    }
+  </style>
+
+  <!-- Analytics — loaded by cookie-consent.js after user consent -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-VGBWRTMZW2');
+  </script>
+  <link rel="preload" href="cookie-consent.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="cookie-consent.css"></noscript>
+</head>
+<body>
+
+  <div class="bg" aria-hidden="true">
+    <div class="bg-blobs">
+      <span class="blob blob--a"></span>
+      <span class="blob blob--b"></span>
+      <span class="blob blob--c"></span>
+    </div>
+    <div class="bg-grain"></div>
+  </div>
+
+  <header class="nav-wrap"></header>
+
+  <main>
+
+    <!-- ==================================================================
+         SIGN-UP HERO — centered heading + newsletter form
+         ================================================================== -->
+    <section class="page-hero signup-hero">
+      <div class="container">
+        <div class="signup-hero__inner">
+          <p class="eyebrow reveal">Newsletter</p>
+          <h1 class="page-hero__title reveal" style="--reveal-delay: 80ms">
+            KI-Bildlogik direkt<br>in dein Postfach.
+          </h1>
+          <p class="page-hero__lede reveal" style="--reveal-delay: 160ms">
+            Praxisnahe Frameworks, ehrliche Einschätzungen und die neuesten Entwicklungen
+            rund um KI-Produktgalerien und DTC-Conversion — monatlich, ohne Spam.
+          </p>
+
+          <div class="signup-hero__form-area reveal" style="--reveal-delay: 240ms">
+            <form class="insights__form" id="insights-form" novalidate>
+              <input
+                type="email"
+                placeholder="deine@email.de"
+                required
+                autocomplete="email"
+                aria-label="E-Mail-Adresse"
+              />
+              <button class="btn btn--primary glass-btn" type="submit">
+                Jetzt anmelden
+              </button>
+            </form>
+            <p class="insights__feedback" id="insights-success" hidden>
+              ✓ Du bist dabei — schau bald in dein Postfach.
+            </p>
+            <p class="insights__feedback" id="insights-error" hidden>
+              Etwas ist schiefgelaufen. Bitte versuche es erneut.
+            </p>
+            <p class="insights__privacy">Kein Spam. Abmeldung jederzeit möglich.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         FEATURED ARTICLE
+         ================================================================== -->
+    <section class="section" style="padding-top: 0; padding-bottom: var(--space-4);">
+      <div class="container">
+        <a class="blog-featured reveal" href="/clarity-labs-case-study" style="--reveal-delay: 80ms">
+          <div class="blog-featured__copy">
+            <div class="blog-featured__meta">
+              <span class="blog-card__tag">Case Study</span>
+              <span class="blog-card__date">Juni 2026</span>
+            </div>
+            <h2 class="blog-featured__title">Wie man KI-Produktgalerien erstellt, die konvertieren:</br><em>Clarity Labs Case Study</em></h2>
+            <p class="blog-featured__excerpt">
+              Wie wir für Clarity Labs eine vollständige KI-Produktgalerie entwickelt haben — von einem einzigen Freisteller bis zur finalen Produktgalerie.
+            </p>
+            <span class="blog-card__read">Jetzt lesen →</span>
+          </div>
+          <div class="blog-featured__image-wrap blog-featured__slideshow">
+            <img class="blog-featured__image is-active" src="/images/Blog/Case Study/claritylabscasestudy-1.avif" alt="Clarity Labs Case Study" loading="eager" />
+            <img class="blog-featured__image" src="/images/Blog/Case Study/claritylabscasestudy-2.avif" alt="Clarity Labs Case Study" loading="lazy" />
+            <img class="blog-featured__image" src="/images/Blog/Case Study/claritylabscasestudy-3.avif" alt="Clarity Labs Case Study" loading="lazy" />
+            <img class="blog-featured__image" src="/images/Blog/Case Study/claritylabscasestudy-4.avif" alt="Clarity Labs Case Study" loading="lazy" />
+            <img class="blog-featured__image" src="/images/Blog/Case Study/claritylabscasestudy-5.avif" alt="Clarity Labs Case Study" loading="lazy" />
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         BLOG GRID
+         ================================================================== -->
+    <section class="section" style="padding-top: 0;">
+      <div class="container">
+        <div class="blog-grid">
+
+          <article class="blog-card reveal">
+            <div class="blog-card__image-wrap">
+              <img
+                class="blog-card__image"
+                src="images/Blog/Blog Artikel/ki-produktbilder-fuer-shopify-tools-fehler-und-was-wirklich-konvertiert.avif"
+                alt="KI-Produktbilder für Shopify: Tools, Fehler und was wirklich konvertiert"
+                loading="lazy"
+              />
+            </div>
+            <div class="blog-card__meta">
+              <span class="blog-card__tag">KI-Bilder</span>
+              <span class="blog-card__date">Mai 2026</span>
+            </div>
+            <h2 class="blog-card__title">KI-Produktbilder für Shopify: Tools, Fehler und was wirklich konvertiert</h2>
+            <p class="blog-card__excerpt">
+              Nicht jedes Produkt braucht die gleiche Galerie. Und nicht jedes Tool hält, was es verspricht.
+              Eine ehrliche Einschätzung zu scalable.so, den 5 häufigsten Fehlern — und wie viele Bilder dein Produkt wirklich braucht.
+            </p>
+            <a class="blog-card__read" href="/ki-produktbilder-shopify-galerie-guide">Jetzt lesen →</a>
+          </article>
+
+          <article class="blog-card reveal" style="--reveal-delay: 80ms">
+            <div class="blog-card__image-wrap">
+              <img
+                class="blog-card__image"
+                src="images/Blog/Blog Artikel/warum-deine-pdp-galerie-mehr-umsatz-macht-als-jede-anzeige.avif"
+                alt="Warum deine PDP-Galerie mehr Umsatz macht als jede Anzeige"
+                loading="lazy"
+              />
+            </div>
+            <div class="blog-card__meta">
+              <span class="blog-card__tag">PDP-Strategie</span>
+              <span class="blog-card__date">April 2026</span>
+            </div>
+            <h2 class="blog-card__title">Warum deine PDP-Galerie mehr Umsatz macht als jede Anzeige</h2>
+            <p class="blog-card__excerpt">
+              Anzeigen bringen Traffic — aber die Galerie entscheidet, ob er konvertiert.
+              Warum das erste Bild deiner Produktseite wichtiger ist als dein gesamtes Ad-Budget.
+            </p>
+            <a class="blog-card__read" href="/pdp-galerie-umsatz-vs-anzeigen">Jetzt lesen →</a>
+          </article>
+
+          <article class="blog-card reveal" style="--reveal-delay: 80ms">
+            <div class="blog-card__image-wrap">
+              <img
+                class="blog-card__image"
+                src="images/Blog/Blog Artikel/hero-detail-lifestyle-die-anatomie-einer-produktgalerie.avif"
+                alt="Hero, Detail, Lifestyle: Die Anatomie einer Produktgalerie"
+                loading="lazy"
+              />
+            </div>
+            <div class="blog-card__meta">
+              <span class="blog-card__tag">Bildlogik</span>
+              <span class="blog-card__date">März 2026</span>
+            </div>
+            <h2 class="blog-card__title">Hero, Detail, Lifestyle: Die Anatomie einer Produktgalerie</h2>
+            <p class="blog-card__excerpt">
+              Nicht jedes Bild hat dieselbe Aufgabe. Ein Blick auf die sechs Bildtypen, die
+              jede starke PDP-Galerie enthält — und warum ihre Reihenfolge nicht zufällig ist.
+            </p>
+            <a class="blog-card__read" href="/hero-detail-lifestyle-produktgalerie">Jetzt lesen →</a>
+          </article>
+
+          <article class="blog-card reveal" style="--reveal-delay: 160ms">
+            <div class="blog-card__image-wrap">
+              <img
+                class="blog-card__image"
+                src="images/Blog/Blog Artikel/ki-bilder-vs-fotostudio-was-wirklich-den-unterschied-macht.avif"
+                alt="KI-Bilder vs. Fotostudio: Was wirklich den Unterschied macht"
+                loading="lazy"
+              />
+            </div>
+            <div class="blog-card__meta">
+              <span class="blog-card__tag">KI-Bilder</span>
+              <span class="blog-card__date">Februar 2026</span>
+            </div>
+            <h2 class="blog-card__title">KI-Bilder vs. Fotostudio: Was wirklich den Unterschied macht</h2>
+            <p class="blog-card__excerpt">
+              KI gewinnt nicht bei jedem Bildtyp — aber bei vielen. Eine ehrliche Einschätzung,
+              wann KI-Galerien das Studio schlagen und wann nicht.
+            </p>
+            <a class="blog-card__read" href="/ki-bilder-vs-fotostudio">Jetzt lesen →</a>
+          </article>
+
+          <article class="blog-card reveal" style="--reveal-delay: 80ms">
+            <div class="blog-card__image-wrap">
+              <img
+                class="blog-card__image"
+                src="images/Blog/Blog Artikel/5-hufige-fehler-in-dtc-produktgalerien.avif"
+                alt="5 häufige Fehler in DTC-Produktgalerien"
+                loading="lazy"
+              />
+            </div>
+            <div class="blog-card__meta">
+              <span class="blog-card__tag">PDP-Strategie</span>
+              <span class="blog-card__date">Dezember 2025</span>
+            </div>
+            <h2 class="blog-card__title">5 häufige Fehler in DTC-Produktgalerien</h2>
+            <p class="blog-card__excerpt">
+              Von zu wenig Kontext bis zum falschen Bildformat: Die fünf Fehler, die ich in
+              fast jeder DTC-Galerie sehe — und wie du sie vermeidest.
+            </p>
+            <a class="blog-card__read" href="/dtc-produktgalerie-fehler">Jetzt lesen →</a>
+          </article>
+
+          <article class="blog-card reveal" style="--reveal-delay: 160ms">
+            <div class="blog-card__image-wrap">
+              <img
+                class="blog-card__image"
+                src="images/Blog/Blog Artikel/conversion-durch-bildlogik-mein-framework-fr-pdp-galerien.avif"
+                alt="Conversion durch Bildlogik: Mein Framework für PDP-Galerien"
+                loading="lazy"
+              />
+            </div>
+            <div class="blog-card__meta">
+              <span class="blog-card__tag">Bildlogik</span>
+              <span class="blog-card__date">November 2025</span>
+            </div>
+            <h2 class="blog-card__title">Conversion durch Bildlogik: Mein Framework für PDP-Galerien</h2>
+            <p class="blog-card__excerpt">
+              Wie ich an jede Galerie herangehe — vom ersten Briefing bis zum letzten Bild.
+              Das Framework, das aus fünf Jahren Performance Creative entstanden ist.
+            </p>
+            <a class="blog-card__read" href="/pdp-galerie-conversion-framework">Jetzt lesen →</a>
+          </article>
+
+          <article class="blog-card reveal">
+            <div class="blog-card__image-wrap">
+              <img class="blog-card__image" src="images/Blog/Blog Artikel/ki-bilder-erstellen-der-komplette-guide-2026.avif" alt="KI Bilder erstellen: Der komplette Guide 2026" loading="lazy" />
+            </div>
+            <div class="blog-card__meta">
+              <span class="blog-card__tag">KI-Bilder</span>
+              <span class="blog-card__date">Mai 2026</span>
+            </div>
+            <h2 class="blog-card__title">KI Bilder erstellen: Der komplette Guide 2026</h2>
+            <p class="blog-card__excerpt">
+              Die besten Tools, Prompts und Strategien für professionelle KI-Bilder im E-Commerce.
+              Von der Prompt-Formel bis zur fertigen Produktgalerie — alles was du brauchst.
+            </p>
+            <a class="blog-card__read" href="/ki-bilder-erstellen-guide">Jetzt lesen →</a>
+          </article>
+
+          <article class="blog-card reveal" style="--reveal-delay: 80ms">
+            <div class="blog-card__image-wrap">
+              <img class="blog-card__image" src="images/Blog/Blog Artikel/ki-bilder-diese-5-fehler-kosten-dich-kunden.avif" alt="KI Bilder: Diese 5 Fehler kosten dich Kunden" loading="lazy" />
+            </div>
+            <div class="blog-card__meta">
+              <span class="blog-card__tag">KI-Bilder</span>
+              <span class="blog-card__date">Mai 2026</span>
+            </div>
+            <h2 class="blog-card__title">KI Bilder: Diese 5 Fehler kosten dich Kunden</h2>
+            <p class="blog-card__excerpt">
+              Die 5 häufigsten Fehler bei KI-generierten Bildern im E-Commerce — von deutschen Prompts
+              bis zur fehlenden Nachbearbeitung. Und wie du sie von Anfang an vermeidest.
+            </p>
+            <a class="blog-card__read" href="/ki-bilder-fehler">Jetzt lesen →</a>
+          </article>
+
+          <article class="blog-card reveal" style="--reveal-delay: 160ms">
+            <div class="blog-card__image-wrap">
+              <img class="blog-card__image" src="images/Blog/Blog Artikel/ki-bilder-kostenlos-die-7-besten-tools-2026.avif" alt="KI Bilder kostenlos: Die 7 besten Tools 2026" loading="lazy" />
+            </div>
+            <div class="blog-card__meta">
+              <span class="blog-card__tag">KI-Bilder</span>
+              <span class="blog-card__date">Mai 2026</span>
+            </div>
+            <h2 class="blog-card__title">KI Bilder kostenlos: Die 7 besten Tools 2026</h2>
+            <p class="blog-card__excerpt">
+              DALL·E 3, Adobe Firefly, Stable Diffusion und mehr im direkten Vergleich. Was kostenlos
+              funktioniert — und wann sich der Upgrade auf einen bezahlten Plan wirklich lohnt.
+            </p>
+            <a class="blog-card__read" href="/ki-bilder-kostenlos-tools">Jetzt lesen →</a>
+          </article>
+
+          <article class="blog-card reveal">
+            <div class="blog-card__image-wrap">
+              <img class="blog-card__image" src="images/Blog/Blog Artikel/ki-bilder-fr-shopify-der-einstieg-fuer-shop-betreiber.avif" alt="KI Bilder für Shopify: Der Einstieg für Shop-Betreiber" loading="lazy" />
+            </div>
+            <div class="blog-card__meta">
+              <span class="blog-card__tag">KI-Bilder</span>
+              <span class="blog-card__date">Mai 2026</span>
+            </div>
+            <h2 class="blog-card__title">KI Bilder für Shopify: Der Einstieg für Shop-Betreiber</h2>
+            <p class="blog-card__excerpt">
+              Ohne Vorkenntnisse, ohne Fotostudio: Drei konkrete Workflows für Shopify-Betreiber —
+              von DALL·E 3 für den schnellen Start bis Midjourney für skalierbare Qualität.
+            </p>
+            <a class="blog-card__read" href="/ki-bilder-shopify-einstieg">Jetzt lesen →</a>
+          </article>
+
+          <article class="blog-card reveal" style="--reveal-delay: 80ms">
+            <div class="blog-card__image-wrap">
+              <img class="blog-card__image" src="images/Blog/Blog Artikel/ki-bilder-fuer-social-media-mehr-reichweite-weniger-aufwand.avif" alt="KI Bilder für Social Media: Mehr Reichweite, weniger Aufwand" loading="lazy" />
+            </div>
+            <div class="blog-card__meta">
+              <span class="blog-card__tag">KI-Bilder</span>
+              <span class="blog-card__date">Mai 2026</span>
+            </div>
+            <h2 class="blog-card__title">KI Bilder für Social Media: Mehr Reichweite, weniger Aufwand</h2>
+            <p class="blog-card__excerpt">
+              Plattformspezifische Strategien, fertige Prompt-Vorlagen und der monatliche Batch-Workflow
+              für Instagram, LinkedIn und TikTok — in 4 Stunden einen ganzen Monat Content produzieren.
+            </p>
+            <a class="blog-card__read" href="/ki-bilder-social-media">Jetzt lesen →</a>
+          </article>
+
+          <article class="blog-card reveal" style="--reveal-delay: 160ms">
+            <div class="blog-card__image-wrap">
+              <img class="blog-card__image" src="images/Blog/Blog Artikel/ki-bildgenerierung-2026-5-trends-die-dein-marketing-verndern.avif" alt="KI Bildgenerierung 2026: 5 Trends, die dein Marketing verändern" loading="lazy" />
+            </div>
+            <div class="blog-card__meta">
+              <span class="blog-card__tag">KI-Bilder</span>
+              <span class="blog-card__date">Mai 2026</span>
+            </div>
+            <h2 class="blog-card__title">KI Bildgenerierung 2026: 5 Trends, die dein Marketing verändern</h2>
+            <p class="blog-card__excerpt">
+              Von KI-Video über Character Consistency bis zu Google AI Overviews — die fünf Entwicklungen,
+              die DACH-Unternehmen in den nächsten 12–18 Monaten kennen müssen.
+            </p>
+            <a class="blog-card__read" href="/ki-bildgenerierung-trends-2026">Jetzt lesen →</a>
+          </article>
+
+          <article class="blog-card reveal">
+            <div class="blog-card__image-wrap">
+              <img class="blog-card__image" src="images/Blog/Blog Artikel/ki-fotografie-vs-fotograf-was-lohnt-sich-2026.avif" alt="KI Fotografie vs. Fotograf: Was lohnt sich 2026?" loading="lazy" />
+            </div>
+            <div class="blog-card__meta">
+              <span class="blog-card__tag">KI-Bilder</span>
+              <span class="blog-card__date">Mai 2026</span>
+            </div>
+            <h2 class="blog-card__title">KI Fotografie vs. Fotograf: Was lohnt sich 2026?</h2>
+            <p class="blog-card__excerpt">
+              Ehrlicher Kostenvergleich, Qualitätscheck und Entscheidungsmatrix — wann KI ausreicht,
+              wann der Fotograf die bessere Wahl ist, und warum der hybride Ansatz oft gewinnt.
+            </p>
+            <a class="blog-card__read" href="/ki-fotografie-vs-fotograf">Jetzt lesen →</a>
+          </article>
+
+          <article class="blog-card reveal" style="--reveal-delay: 80ms">
+            <div class="blog-card__image-wrap">
+              <img class="blog-card__image" src="images/Blog/Blog Artikel/ki-illustration-fr-marken-stil-konsistenz-behalten.avif" alt="KI Illustration für Marken: Stil &amp; Konsistenz behalten" loading="lazy" />
+            </div>
+            <div class="blog-card__meta">
+              <span class="blog-card__tag">KI-Bilder</span>
+              <span class="blog-card__date">Mai 2026</span>
+            </div>
+            <h2 class="blog-card__title">KI Illustration für Marken: Stil &amp; Konsistenz behalten</h2>
+            <p class="blog-card__excerpt">
+              Brand-Prompt-Template, fünf visuelle Dimensionen und der Kalibrierungsprozess —
+              so produzierst du KI-Bilder, die sofort als deine Marke erkennbar sind.
+            </p>
+            <a class="blog-card__read" href="/ki-illustration-marken-konsistenz">Jetzt lesen →</a>
+          </article>
+
+          <article class="blog-card reveal" style="--reveal-delay: 160ms">
+            <div class="blog-card__image-wrap">
+              <img class="blog-card__image" src="images/Blog/Blog Artikel/produktfotos-mit-ki-erstellen-schritt-fr-schritt-anleitung.avif" alt="Produktfotos mit KI erstellen: Schritt-für-Schritt Anleitung" loading="lazy" />
+            </div>
+            <div class="blog-card__meta">
+              <span class="blog-card__tag">KI-Bilder</span>
+              <span class="blog-card__date">Mai 2026</span>
+            </div>
+            <h2 class="blog-card__title">Produktfotos mit KI erstellen: Schritt-für-Schritt Anleitung</h2>
+            <p class="blog-card__excerpt">
+              Von der Prompt-Formel bis zur Nachbearbeitung für Shopify — professionelle E-Commerce-Bilder
+              ohne Fotostudio, mit Prompt-Templates nach Produktkategorie.
+            </p>
+            <a class="blog-card__read" href="/produktfotos-ki-erstellen">Jetzt lesen →</a>
+          </article>
+
+          <article class="blog-card reveal">
+            <div class="blog-card__image-wrap">
+              <img class="blog-card__image" src="images/Blog/Blog Artikel/shopify-produktbilder-mit-ki-so-steigerst-du-conversion.avif" alt="Shopify Produktbilder mit KI: So steigerst du Conversion" loading="lazy" />
+            </div>
+            <div class="blog-card__meta">
+              <span class="blog-card__tag">KI-Bilder</span>
+              <span class="blog-card__date">Mai 2026</span>
+            </div>
+            <h2 class="blog-card__title">Shopify Produktbilder mit KI: So steigerst du Conversion</h2>
+            <p class="blog-card__excerpt">
+              Die 5 Bildtypen jeder konvertierenden PDP, Prompt-Vorlagen nach Produktkategorie,
+              A/B-Testing-Strategie und Shopify-SEO-Tipps für mehr Umsatz.
+            </p>
+            <a class="blog-card__read" href="/shopify-produktbilder-ki-conversion">Jetzt lesen →</a>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer"></footer>
+
+  <script src="/shared-components.js"></script>
+  <script src="script.js"></script>
+  <script src="cookie-consent.js" defer></script>
+
+</body>
+</html>
