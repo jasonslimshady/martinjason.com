@@ -984,11 +984,13 @@
             <p class="insights__privacy">Kein Spam. Abmeldung jederzeit möglich.</p>
           </div>
           <div class="insights__visual reveal" style="--reveal-delay: 120ms" aria-hidden="true">
-            <div class="insights__mock glass">
-              <img src="images/Blog/Blog Artikel/ki-bilder-vs-fotostudio-was-wirklich-den-unterschied-macht.avif"
-                   alt="" aria-hidden="true"
-                   style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.25;">
-              <div class="insights__mock-cover">
+            <div class="insights__mock glass" style="aspect-ratio:auto;display:flex;flex-direction:column;padding:0;">
+              <div style="aspect-ratio:1/1;overflow:hidden;flex-shrink:0;border-radius:var(--radius-lg) var(--radius-lg) 0 0;">
+                <img src="images/Blog/Blog Artikel/ki-bilder-vs-fotostudio-was-wirklich-den-unterschied-macht.avif"
+                     alt="" aria-hidden="true"
+                     style="width:100%;height:100%;object-fit:cover;display:block;">
+              </div>
+              <div class="insights__mock-cover" style="padding:var(--space-3);">
                 <span class="insights__mock-tag">Insights</span>
                 <h3>KI-Bilder vs. Fotostudio:<br>Was wirklich den<br>Unterschied macht</h3>
                 <p class="insights__mock-byline">Jason Martin, wöchentlich</p>
