@@ -1128,9 +1128,9 @@
     function measureLift(p) {
       if (measured || !resultsGrid || p <= 0) return;
       measured = true;
-      var rb       = resultsGrid.getBoundingClientRect().bottom;
-      var overflow = rb - window.innerHeight;
-      compTransY   = overflow > 0 ? -(overflow + 80) : -80;
+      var rect       = resultsGrid.getBoundingClientRect();
+      var gridCenter = (rect.top + rect.bottom) / 2;
+      compTransY     = Math.round(window.innerHeight / 2 - gridCenter);
     }
 
     var ticking = false;
