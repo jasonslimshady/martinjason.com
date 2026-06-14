@@ -491,3 +491,8 @@
     gap: 8px;
   }
 }
+
+/* ── Gallery card hover image swap ───────────────────────────────────── */
+.gallery-card__image-wrap{position:relative;overflow:hidden;display:block;}
+.gallery-card__image--hover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity 0.4s ease;pointer-events:none;}
+.gallery-card:hover .gallery-card__image--hover{opacity:1;}
