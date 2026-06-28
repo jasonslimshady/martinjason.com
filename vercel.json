@@ -3,6 +3,13 @@
   "trailingSlash": false,
   "framework": null,
   "outputDirectory": ".",
+  "redirects": [
+    {
+      "source": "/iphone-fotos-ki-produktgalerie",
+      "destination": "/aus-iphone-fotos-eine-komplette-AI-Galerie-f%C3%BCr-eine-Produktseite-generieren",
+      "statusCode": 301
+    }
+  ],
   "headers": [
     {
       "source": "/(.*\\.(css|js|avif|webp|png|jpg|jpeg|svg|woff2|woff|ttf|otf|ico|gif))",

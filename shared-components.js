@@ -118,7 +118,8 @@
   var ctaSlot = document.querySelector('.article-global-cta-slot');
   if (ctaSlot) {
     var isClarity = window.location.pathname.indexOf('clarity-labs-case-study') !== -1;
-    ctaSlot.innerHTML = (isClarity ? '' : ARTICLE_FEATURED_PROMO_HTML) + ARTICLE_CTA_HTML;
+    var isIphoneGalerie = window.location.pathname.indexOf('aus-iphone-fotos-eine-komplette-AI-Galerie') !== -1;
+    ctaSlot.innerHTML = ((isClarity || isIphoneGalerie) ? '' : ARTICLE_FEATURED_PROMO_HTML) + ARTICLE_CTA_HTML;
   }
 
   var authorSlot = document.querySelector('.article-global-author-slot');
