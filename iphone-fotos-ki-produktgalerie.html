@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/avif" sizes="128x128" href="/images/favicon.avif">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- SEO: Title & Description -->
+  <title>Wie ich aus iPhone Fotos eine komplette AI-Galerie für eine Produktseite generiere — Jason Martin</title>
+  <meta name="description" content="Mein kompletter Workflow von iPhone-Fotos zur fertigen PDP-Galerie: Claude übernimmt Recherche, Galerie-Planung und Prompts, Figma ist die Steuerzentrale, ChatGPT Images 2.0 generiert über Referenzbilder. Schritt für Schritt." />
+  <link rel="canonical" href="https://martinjason.com/iphone-fotos-ki-produktgalerie" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="Wie ich aus iPhone Fotos eine komplette AI-Galerie für eine Produktseite generiere" />
+  <meta property="og:description" content="Mein kompletter Workflow von iPhone-Fotos zur fertigen PDP-Galerie: Claude für Recherche, Galerie-Planung und Prompts, Figma als Steuerzentrale, ChatGPT Images 2.0 für die Generierung." />
+  <meta property="og:url" content="https://martinjason.com/iphone-fotos-ki-produktgalerie" />
+  <meta property="og:locale" content="de_DE" />
+  <meta property="og:site_name" content="Jason Martin" />
+  <meta property="article:author" content="Jason Martin" />
+  <meta property="article:published_time" content="2026-06-27" />
+  <meta property="article:section" content="Workflow" />
+  <meta property="article:tag" content="KI-Produktbilder" />
+  <meta property="article:tag" content="Produktgalerie" />
+  <meta property="article:tag" content="ChatGPT Images" />
+  <meta property="article:tag" content="Figma" />
+  <meta property="article:tag" content="Claude" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Wie ich aus iPhone Fotos eine komplette AI-Galerie für eine Produktseite generiere" />
+  <meta name="twitter:description" content="Mein kompletter Workflow von iPhone-Fotos zur fertigen PDP-Galerie: Claude für Recherche, Planung und Prompts, Figma als Steuerzentrale, ChatGPT Images 2.0 für die Generierung." />
+
+  <!-- Structured Data: Article -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Wie ich aus iPhone Fotos eine komplette AI-Galerie für eine Produktseite generiere",
+    "description": "Mein kompletter Workflow von iPhone-Fotos zur fertigen PDP-Galerie: Claude übernimmt Recherche, Galerie-Planung und Prompts, Figma ist die Steuerzentrale, ChatGPT Images 2.0 generiert über Referenzbilder.",
+    "author": {
+      "@type": "Person",
+      "name": "Jason Martin",
+      "url": "https://martinjason.com"
+    },
+    "publisher": {
+      "@type": "Person",
+      "name": "Jason Martin",
+      "url": "https://martinjason.com"
+    },
+    "datePublished": "2026-06-27",
+    "dateModified": "2026-06-27",
+    "url": "https://martinjason.com/iphone-fotos-ki-produktgalerie",
+    "inLanguage": "de",
+    "keywords": ["KI-Produktbilder", "Produktgalerie", "ChatGPT Images", "Figma", "PDP", "Referenzbilder", "E-Commerce", "DTC"]
+  }
+  </script>
+
+  <!-- Structured Data: HowTo -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "Aus iPhone-Fotos eine komplette AI-Produktgalerie generieren",
+    "description": "Workflow in fünf Schritten: Claude für Recherche, Planung und Prompts, Figma als Steuerzentrale, ChatGPT Images 2.0 für die Generierung.",
+    "totalTime": "PT4H",
+    "step": [
+      { "@type": "HowToStep", "name": "iPhone-Fotos, Briefing & Recherche mit Claude", "text": "Ein paar ehrliche iPhone-Fotos des Produkts aus verschiedenen Winkeln, plus ein kurzes Briefing. Mit Claude recherchiere ich Produkt, Zielgruppe und Wettbewerb und kläre, welche Fragen die Galerie beantworten muss." },
+      { "@type": "HowToStep", "name": "Galerie planen mit Claude & Setup in Figma", "text": "Claude erstellt aus der Recherche einen konkreten Galerie-Plan: welche Szenen, in welcher Reihenfolge, mit welchem Zweck. Diesen Plan baue ich mit Referenzbildern auf einem Figma-Canvas auf." },
+      { "@type": "HowToStep", "name": "Prompts mit Claude & Generierung mit ChatGPT Images 2.0", "text": "Claude schreibt für jede geplante Szene einen präzisen Prompt. Mit den iPhone-Fotos als Referenzanker generiere ich damit jede Szene in ChatGPT Images 2.0." },
+      { "@type": "HowToStep", "name": "Auswahl & Komposition in Figma", "text": "Die besten Generierungen zurück in Figma holen, in das Galerie-System einsortieren und auf Konsistenz prüfen." },
+      { "@type": "HowToStep", "name": "Feinschliff & Export", "text": "Details korrigieren, Formate für die PDP exportieren — fertige Galerie." }
+    ]
+  }
+  </script>
+
+  <!-- Structured Data: FAQ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Reichen wirklich iPhone-Fotos als Ausgangsmaterial?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Ja. Ich brauche keine Studio-Aufnahmen, sondern ehrliche Referenzfotos: das Produkt scharf, gut ausgeleuchtet, aus mehreren Winkeln. Die dienen der KI als visueller Anker, damit Form, Material und Proportionen stimmen. Die Studioqualität entsteht danach im Prozess."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Welche Rolle spielt Claude in deinem Workflow?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Claude ist der denkende Teil des Prozesses. Ich nutze es, um das Produkt, die Zielgruppe und den Wettbewerb zu recherchieren, daraus einen konkreten Galerie-Plan abzuleiten (welche Szenen in welcher Reihenfolge) und für jede einzelne Szene den passenden Bild-Prompt zu schreiben. So ist jedes Bild strategisch begründet, statt nur hübsch."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Warum Figma und nicht direkt nur ChatGPT?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Figma ist meine Steuerzentrale. Referenzbilder, Prompts, Varianten und das fertige Galerie-Layout liegen auf einem Canvas nebeneinander. So sehe ich sofort, ob die Galerie als System konsistent ist — und nicht nur Bild für Bild. Claude plant und textet, ChatGPT Images 2.0 generiert, Figma hält Übersicht und Komposition."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Wie hältst du die Bilder über die ganze Galerie konsistent?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Über konsequente Referenzbilder und wiederverwendete Prompt-Bausteine: gleiche Lichtsprache, gleicher Look, gleiche Bildstimmung. Jede neue Szene baut auf dem etablierten Anker auf, statt bei null anzufangen. Konsistenz ist der eigentliche Job — nicht das einzelne hübsche Bild."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Wie lange dauert eine komplette Galerie mit diesem Workflow?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Für eine vollständige PDP-Galerie mit Hero, Details, Lifestyle und Feature-Tiles: meist innerhalb weniger Werktage statt der Wochen, die ein Fotoshooting mit Planung, Set und Postproduktion braucht."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Sieht das nicht nach KI aus?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Nur wenn man den Prozess abkürzt. Der Unterschied zwischen einem KI-Dump und einer verkaufenden Galerie liegt im Referenzanker, in der Konsistenz und im Feinschliff. Genau diese Schritte machen die meisten nicht — und genau die entscheiden, ob das Ergebnis professionell wirkt."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Scoped styles for this article's figures, image slots & step layout -->
+  <style>
+    .article-figure{margin:var(--space-4) 0;display:flex;flex-direction:column;gap:0.6rem}
+    .article-figure img{width:100%;height:auto;border-radius:var(--radius-md);border:1px solid var(--color-border);display:block}
+    .article-figure figcaption{font-size:0.86rem;color:var(--color-ink-soft);line-height:1.5}
+    /* labelled placeholder for screenshots still to be added */
+    .img-slot{position:relative;width:100%;aspect-ratio:16/10;border-radius:var(--radius-md);border:1.5px dashed var(--color-border-strong);background:var(--color-surface-2);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:0.5rem;padding:1.5rem}
+    .img-slot__label{font-size:0.74rem;text-transform:uppercase;letter-spacing:0.14em;color:var(--color-accent);font-weight:600}
+    .img-slot__hint{font-size:0.95rem;color:var(--color-ink-muted);max-width:46ch;margin:0}
+    .img-slot__file{font-size:0.78rem;color:var(--color-ink-soft);font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+    .img-slot--wide{aspect-ratio:16/7}
+    .img-slot--tall{aspect-ratio:4/5}
+    /* two-up for before/after */
+    .img-duo{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2);margin:var(--space-4) 0}
+    .img-duo .img-slot{margin:0;aspect-ratio:4/5}
+    @media (max-width:560px){.img-duo{grid-template-columns:1fr}}
+    /* numbered process steps */
+    .process-step{display:grid;grid-template-columns:auto 1fr;gap:1rem;margin:var(--space-5) 0 var(--space-3)}
+    .process-step__num{width:2.4rem;height:2.4rem;border-radius:50%;background:var(--color-ink);color:var(--color-bg);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:1.05rem;flex-shrink:0}
+    .process-step__head{align-self:center}
+    .process-step__head h3{margin:0;font-family:var(--font-display);font-size:1.25rem;font-weight:600;letter-spacing:-0.015em;color:var(--color-ink)}
+    .process-step__kicker{font-size:0.74rem;text-transform:uppercase;letter-spacing:0.14em;color:var(--color-ink-soft)}
+    /* compact prompt block */
+    .prompt-block{background:var(--color-surface-2);border:1px solid var(--color-border);border-left:3px solid var(--color-accent);border-radius:var(--radius-sm);padding:1rem 1.1rem;margin:var(--space-3) 0;font-size:0.95rem;line-height:1.55;color:var(--color-ink)}
+    .prompt-block__label{display:block;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.14em;color:var(--color-accent);font-weight:600;margin-bottom:0.4rem}
+    .prompt-block em{color:var(--color-ink-muted);font-style:italic}
+  </style>
+
+  <!-- Analytics — loaded by cookie-consent.js after user consent -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-VGBWRTMZW2');
+  </script>
+  <link rel="preload" href="cookie-consent.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="cookie-consent.css"></noscript>
+  <link rel="preload" href="booking-popup.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="booking-popup.css"></noscript>
+</head>
+<body>
+
+  <!-- Reading progress indicator -->
+  <div class="reading-progress" id="reading-progress" role="progressbar" aria-label="Lesefortschritt"></div>
+
+  <div class="bg" aria-hidden="true">
+    <div class="bg-blobs">
+      <span class="blob blob--a"></span>
+      <span class="blob blob--b"></span>
+      <span class="blob blob--c"></span>
+    </div>
+    <div class="bg-grain"></div>
+  </div>
+
+  <header class="nav-wrap"></header>
+
+  <main>
+    <div class="article-wrap">
+
+      <!-- ── Article Header ───────────────────────────────── -->
+      <header class="article-header article-header--grid">
+        <div class="article-header__content">
+          <a class="article-header__back reveal" href="/blog.html">← Zurück zum Blog</a>
+          <div class="article-header__meta reveal" style="--reveal-delay: 40ms">
+            <span class="article-tag">Workflow</span>
+            <span class="article-header__date">
+              <time datetime="2026-06-27">Juni 2026</time>
+            </span>
+            <span class="article-header__read-time">9 Min. Lesezeit</span>
+          </div>
+          <h1 class="article-title reveal" style="--reveal-delay: 80ms">
+            Wie ich aus iPhone Fotos eine komplette<br />
+            <em>AI-Galerie</em> für eine Produktseite generiere
+          </h1>
+          <p class="article-lede reveal" style="--reveal-delay: 140ms">
+            Kein Fotostudio, kein Set, kein Shooting-Tag. Ein paar ehrliche iPhone-Fotos
+            rein — eine vollständige, konsistente PDP-Galerie raus.
+          </p>
+          <p class="article-lede reveal is-in" style="--reveal-delay: 200ms">
+            Das ist kein Theorie-Framework. Es ist exakt der Prozess, den ich für Kundenprojekte
+            nutze: <strong>Claude</strong> recherchiert, plant die Galerie und schreibt die Prompts,
+            <strong>Figma</strong> ist die Steuerzentrale, <strong>ChatGPT Images 2.0</strong>
+            generiert über Referenzbilder. In diesem Artikel zeige ich dir jeden Schritt.
+          </p>
+        </div>
+        <div class="article-header__media">
+          <img class="article-header__image" src="/images/Showcase/showcase-result-1.avif" alt="Fertige KI-Produktgalerie aus iPhone-Fotos generiert" loading="eager" />
+        </div>
+      </header>
+
+      <!-- ── Article Body ─────────────────────────────────── -->
+      <article class="article-body" id="article-body">
+
+        <!-- Intro / what this is -->
+        <div class="callout callout--good">
+          <div class="callout__label">Worum es hier geht</div>
+          <p>
+            Die meisten DTC-Brands stecken bei Produktbildern fest zwischen zwei schlechten Optionen:
+            ein teures Fotoshooting, das Wochen dauert — oder ein KI-Tool, das auf Knopfdruck
+            generische Bilder ausspuckt, die nach KI aussehen. Mein Weg liegt dazwischen: die
+            Geschwindigkeit von KI, aber mit der Kontrolle und Konsistenz eines Designers.
+          </p>
+        </div>
+
+        <!-- Was dieses System macht -->
+        <h2>Was dieses System macht</h2>
+
+        <p>
+          Aus wenigen iPhone-Fotos eines Produkts erzeuge ich eine komplette Galerie für die
+          Produktseite — Hero-Shot, Detailaufnahmen, Lifestyle-Szenen und Feature-Tiles. Alles
+          in einem konsistenten visuellen System, fertig zum Hochladen in Shopify oder die
+          jeweilige Plattform.
+        </p>
+
+        <p>Konkret heißt das:</p>
+
+        <ul class="article-checklist">
+          <li><strong>Input:</strong> 3–6 iPhone-Fotos des Produkts plus ein kurzes Briefing zu Marke und Stil.</li>
+          <li><strong>Output:</strong> eine vollständige PDP-Galerie in Studioqualität, konsistent über alle Bilder.</li>
+          <li><strong>Tempo:</strong> wenige Werktage statt Wochen — ohne Set, Location oder Logistik.</li>
+        </ul>
+
+        <!-- Input / Output table -->
+        <div class="article-table-wrap">
+          <table class="article-table">
+            <thead>
+              <tr>
+                <th>Klassisches Fotoshooting</th>
+                <th>Dieser Workflow</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Studio buchen, Set bauen, Termin koordinieren</td>
+                <td>iPhone-Fotos am Schreibtisch aufnehmen</td>
+              </tr>
+              <tr>
+                <td>Fixe Anzahl Shots, Nachbesserung teuer</td>
+                <td>Beliebig viele Varianten, jederzeit anpassbar</td>
+              </tr>
+              <tr>
+                <td>Lifestyle-Szenen = neue Location, neues Budget</td>
+                <td>Jede Szene per Prompt, ohne Mehraufwand vor Ort</td>
+              </tr>
+              <tr>
+                <td>Wochen bis zur fertigen Galerie</td>
+                <td>Wenige Werktage</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Drei Werkzeuge, drei Rollen -->
+        <h2>Drei Werkzeuge, drei klare Rollen</h2>
+
+        <p>
+          Das Geheimnis ist nicht ein einzelnes Tool, sondern die Arbeitsteilung. Jedes Werkzeug
+          macht genau das, worin es am besten ist:
+        </p>
+
+        <div class="article-table-wrap">
+          <table class="article-table">
+            <thead>
+              <tr>
+                <th>Werkzeug</th>
+                <th>Rolle</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Claude</strong></td>
+                <td>Denkt. Recherchiert Produkt, Zielgruppe &amp; Wettbewerb, plant die Galerie und schreibt für jede Szene den Prompt.</td>
+              </tr>
+              <tr>
+                <td><strong>Figma</strong></td>
+                <td>Organisiert. Steuerzentrale für Referenzbilder, Varianten und das finale Galerie-Layout.</td>
+              </tr>
+              <tr>
+                <td><strong>ChatGPT Images 2.0</strong></td>
+                <td>Generiert. Erzeugt aus Referenzfoto + Prompt jede einzelne Galerie-Szene.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          Die meisten springen direkt zum Generieren und überspringen das Denken und Planen davor.
+          Genau deshalb sehen ihre Ergebnisse nach KI aus.
+        </p>
+
+        <!-- So läuft der Prozess ab -->
+        <h2>So läuft der Prozess ab</h2>
+
+        <p>
+          Fünf Schritte. Der wichtigste Teil passiert nicht beim Generieren, sondern davor und
+          danach — bei Recherche und Planung mit Claude und beim Feinschliff am Ende. Genau das
+          überspringen die meisten.
+        </p>
+
+        <!-- Step 1 -->
+        <div class="process-step">
+          <div class="process-step__num">1</div>
+          <div class="process-step__head">
+            <span class="process-step__kicker">Input &amp; Recherche</span>
+            <h3>iPhone-Fotos, Briefing &amp; Recherche mit Claude</h3>
+          </div>
+        </div>
+
+        <p>
+          Ich starte mit ein paar ehrlichen Fotos des echten Produkts — mit dem iPhone, bei
+          Tageslicht, aus verschiedenen Winkeln. Sie müssen nicht schön sein. Sie müssen nur
+          <em>klar</em> sein: Form, Material, Proportionen, Beschriftung. Diese Fotos sind der
+          visuelle Anker, an dem sich später jede Generierung orientiert.
+        </p>
+
+        <p>
+          Parallel lasse ich <strong>Claude das Produkt recherchieren</strong>: Was ist es genau,
+          wer kauft es, wie positioniert sich der Wettbewerb, welche Einwände hat die Zielgruppe?
+          Aus dieser Recherche entsteht die eigentliche Grundlage der Galerie — nämlich die Frage,
+          <em>welche Geschichte</em> die Bilder erzählen müssen, damit jemand kauft. Ein hübsches
+          Bild ohne diese Antwort ist nur Dekoration.
+        </p>
+
+        <div class="prompt-block">
+          <span class="prompt-block__label">So briefe ich Claude für die Recherche</span>
+          „Hier ist ein DTC-Produkt: [Produkt + Marke + Link/Beschreibung]. Recherchiere
+          Zielgruppe, typische Kaufeinwände und wie ähnliche Marken ihre Produktbilder aufbauen.
+          Was muss eine Produktgalerie zeigen, damit diese Zielgruppe kauft?“
+        </div>
+
+        <div class="callout callout--good">
+          <div class="callout__label">Was gute Referenzfotos ausmacht</div>
+          <p>
+            Produkt scharf &amp; formatfüllend · gleichmäßiges Licht ohne harte Schatten ·
+            mehrere Winkel (Front, Seite, Detail) · echte Farben, nicht überbelichtet
+          </p>
+        </div>
+
+        <figure class="article-figure">
+          <div class="img-slot img-slot--wide">
+            <span class="img-slot__label">Screenshot folgt</span>
+            <p class="img-slot__hint">Deine iPhone-Ausgangsfotos des Produkts (3–6 Aufnahmen, verschiedene Winkel).</p>
+            <span class="img-slot__file">/images/Blog/iphone-galerie/01-iphone-input.avif</span>
+          </div>
+          <figcaption>Der Ausgangspunkt: rohe iPhone-Fotos des Produkts.</figcaption>
+        </figure>
+
+        <!-- Step 2 -->
+        <div class="process-step">
+          <div class="process-step__num">2</div>
+          <div class="process-step__head">
+            <span class="process-step__kicker">Planung &amp; Setup</span>
+            <h3>Galerie planen mit Claude &amp; Setup in Figma</h3>
+          </div>
+        </div>
+
+        <p>
+          Aus der Recherche lasse ich <strong>Claude einen konkreten Galerie-Plan ableiten</strong>:
+          welche Szenen die Galerie braucht, in welcher Reihenfolge und mit welchem Zweck. Nicht
+          „mach ein paar schöne Bilder“, sondern eine durchdachte Abfolge — Hero, Detail, Lifestyle,
+          Feature-Tiles, Größenverhältnis — bei der jedes Bild eine konkrete Kundenfrage beantwortet.
+        </p>
+
+        <div class="prompt-block">
+          <span class="prompt-block__label">So lasse ich Claude die Galerie planen</span>
+          „Auf Basis der Recherche: Plane eine Produktgalerie für die PDP. Liste jede Szene mit
+          Bildtyp, Zweck (welche Kundenfrage sie beantwortet), Bildausschnitt und Stimmung. Sortiere
+          sie in der Reihenfolge, in der ein Käufer sie sehen sollte.“
+        </div>
+
+        <p>
+          Diesen Plan baue ich dann in Figma als Steuerzentrale auf. Auf einem Canvas liegen
+          nebeneinander: die iPhone-Fotos, Referenzbilder für den gewünschten Look (Lichtstimmung,
+          Hintergründe, Bildsprache) und das Galerie-Layout mit einem Platzhalter pro geplanter
+          Szene.
+        </p>
+
+        <p>
+          Warum Figma und nicht direkt drauflos generieren? Weil eine Galerie ein <em>System</em>
+          ist, kein Stapel Einzelbilder. In Figma sehe ich auf einen Blick, ob Hero, Detail und
+          Lifestyle zusammenpassen — gleiche Lichtsprache, gleicher Stil, gleiche Stimmung. Diese
+          Übersicht ist der Unterschied zwischen einer Galerie, die wie aus einer Hand wirkt, und
+          einem Sammelsurium aus Tool-Outputs.
+        </p>
+
+        <figure class="article-figure">
+          <div class="img-slot">
+            <span class="img-slot__label">Screenshot folgt</span>
+            <p class="img-slot__hint">Dein Figma-Canvas: iPhone-Fotos, Referenzbilder und Galerie-Layout nebeneinander.</p>
+            <span class="img-slot__file">/images/Blog/iphone-galerie/02-figma-canvas.avif</span>
+          </div>
+          <figcaption>Figma als Steuerzentrale: Referenzen, Moodboard und Galerie-Struktur auf einem Board.</figcaption>
+        </figure>
+
+        <!-- Step 3 -->
+        <div class="process-step">
+          <div class="process-step__num">3</div>
+          <div class="process-step__head">
+            <span class="process-step__kicker">Prompts &amp; Generierung</span>
+            <h3>Prompts mit Claude &amp; Generierung mit ChatGPT Images 2.0</h3>
+          </div>
+        </div>
+
+        <p>
+          Für jede Szene aus dem Galerie-Plan lasse ich <strong>Claude den passenden Bild-Prompt
+          schreiben</strong>. Das ist effizienter und präziser, als jeden Prompt von Hand zu tippen
+          — und vor allem konsistent: Claude kennt aus der Recherche und dem Plan den roten Faden
+          und hält Licht, Stil und Stimmung über alle Szenen hinweg gleich.
+        </p>
+
+        <div class="prompt-block">
+          <span class="prompt-block__label">So lasse ich Claude die Bild-Prompts schreiben</span>
+          „Schreibe für jede Szene aus dem Galerie-Plan einen Bild-Prompt für ChatGPT Images 2.0.
+          Binde das Produkt an die angehängten Referenzfotos (Form, Farbe, Beschriftung unverändert).
+          Halte Lichtsprache und Stil über alle Prompts konsistent und gib pro Szene das Format an.“
+        </div>
+
+        <p>
+          Diese Prompts gebe ich dann zusammen mit den iPhone-Fotos als Referenzbilder an ChatGPT
+          Images 2.0. Der Trick dahinter: Das Foto liefert das <em>Produkt</em> (Form, Material,
+          Proportionen), der von Claude geschriebene Prompt liefert den <em>Kontext</em> (Licht,
+          Umgebung, Stimmung, Kamerawinkel). So sieht ein fertiger Prompt für einen Hero-Shot aus:
+        </p>
+
+        <div class="prompt-block">
+          <span class="prompt-block__label">Prompt — Hero-Shot (von Claude)</span>
+          „Nutze das beigefügte Produkt exakt wie auf den Referenzfotos — gleiche Form, gleiche
+          Farbe, gleiche Beschriftung. Studio-Produktaufnahme auf einem ruhigen, sandfarbenen
+          Hintergrund, weiches Tageslicht von links, sanfter Schlagschatten, leicht erhöhter
+          Blickwinkel. Premium, minimalistisch, hohe Schärfe. Quadratformat.“
+          <em>→ Referenzfotos angehängt.</em>
+        </div>
+
+        <p>
+          Für Lifestyle-Szenen ändere ich nur den Kontext-Teil — der Produktanker bleibt identisch.
+          So bleibt das Produkt über alle Bilder hinweg dasselbe, während sich die Umgebung ändert:
+        </p>
+
+        <div class="prompt-block">
+          <span class="prompt-block__label">Prompt — Lifestyle (von Claude)</span>
+          „Gleiches Produkt wie in den Referenzfotos, unverändert. Platziere es natürlich auf einer
+          hellen Steinoberfläche in einer modernen Küche, morgendliches Licht, im Hintergrund
+          unscharf eine Pflanze und eine Kaffeetasse. Warme, einladende Stimmung, redaktioneller
+          Look. Hochformat 4:5.“
+          <em>→ Referenzfotos angehängt.</em>
+        </div>
+
+        <p>
+          Das Ergebnis aus diesem Schritt ist noch nicht final. Es ist ein sehr guter Rohling —
+          oft 70–90 % fertig. Ich generiere pro Szene mehrere Varianten und ziehe die besten zurück
+          nach Figma.
+        </p>
+
+        <div class="callout callout--good">
+          <div class="callout__label">Was in Prompts funktioniert</div>
+          <p>
+            Produkt explizit an die Referenz binden · Licht &amp; Kamerawinkel konkret beschreiben ·
+            Stil &amp; Stimmung benennen · Format vorgeben · pro Szene mehrere Varianten ziehen
+          </p>
+        </div>
+
+        <div class="callout callout--bad">
+          <div class="callout__label">Was nicht funktioniert</div>
+          <p>
+            Ohne Referenzanker generieren und hoffen, dass die KI das Produkt „errät“ ·
+            zehn Anforderungen in einen Satz packen · feine Beschriftungen oder Logos perfekt
+            erwarten · die erste Generierung ungeprüft übernehmen
+          </p>
+        </div>
+
+        <div class="img-duo">
+          <div class="img-slot img-slot--tall">
+            <span class="img-slot__label">Vorher</span>
+            <p class="img-slot__hint">iPhone-Foto als Referenz</p>
+            <span class="img-slot__file">/images/Blog/iphone-galerie/03a-vorher.avif</span>
+          </div>
+          <div class="img-slot img-slot--tall">
+            <span class="img-slot__label">Nachher</span>
+            <p class="img-slot__hint">Generierte Szene aus ChatGPT Images 2.0</p>
+            <span class="img-slot__file">/images/Blog/iphone-galerie/03b-nachher.avif</span>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="process-step">
+          <div class="process-step__num">4</div>
+          <div class="process-step__head">
+            <span class="process-step__kicker">Komposition</span>
+            <h3>Auswahl &amp; Aufbau der Galerie in Figma</h3>
+          </div>
+        </div>
+
+        <p>
+          Zurück in Figma setze ich die besten Generierungen in das Galerie-Layout ein. Hier
+          entscheidet sich, ob die Galerie funktioniert: Ich prüfe die Reihenfolge (welches Bild
+          beantwortet welche Kundenfrage?), die Konsistenz über alle Szenen und ob jede Aufnahme
+          einen eigenen Zweck hat — kein „füllt die Galerie“-Bild.
+        </p>
+
+        <div class="article-table-wrap">
+          <table class="article-table">
+            <thead>
+              <tr>
+                <th>Bildtyp</th>
+                <th>Welche Frage es beantwortet</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Hero-Shot</strong></td><td>Was ist das — und wirkt die Marke hochwertig?</td></tr>
+              <tr><td><strong>Detail-Aufnahmen</strong></td><td>Material, Verarbeitung, Qualität im Close-up</td></tr>
+              <tr><td><strong>Lifestyle / Anwendung</strong></td><td>Wie sieht das in meinem Leben aus?</td></tr>
+              <tr><td><strong>Feature-Tiles</strong></td><td>Welche konkreten Vorteile hat es?</td></tr>
+              <tr><td><strong>Größenverhältnis</strong></td><td>Wie groß ist es wirklich?</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <figure class="article-figure">
+          <div class="img-slot">
+            <span class="img-slot__label">Screenshot folgt</span>
+            <p class="img-slot__hint">Galerie-Board in Figma: alle finalen Szenen in der richtigen Reihenfolge.</p>
+            <span class="img-slot__file">/images/Blog/iphone-galerie/04-galerie-board.avif</span>
+          </div>
+          <figcaption>Die Galerie als System: jede Szene mit eigenem Zweck, konsistent im Look.</figcaption>
+        </figure>
+
+        <!-- Step 5 -->
+        <div class="process-step">
+          <div class="process-step__num">5</div>
+          <div class="process-step__head">
+            <span class="process-step__kicker">Feinschliff</span>
+            <h3>Korrekturen &amp; Export</h3>
+          </div>
+        </div>
+
+        <p>
+          Der letzte Schritt macht aus „gut generiert“ ein „sieht aus wie ein echtes Shooting“.
+          KI-Bilder haben fast immer kleine Fehler: eine Kante, die nicht stimmt, ein falsch
+          gerendertes Detail, eine Beschriftung, die nicht exakt sitzt. Diese Stellen korrigiere
+          ich gezielt — entweder durch erneutes, eng geführtes Generieren der betroffenen Region
+          oder per Retusche. Danach exportiere ich alle Formate, die die Produktseite braucht.
+        </p>
+
+        <p>
+          Dieser Feinschliff ist nicht schnell. Aber er ist der Grund, warum das Endergebnis
+          professionell wirkt — und nicht wie der KI-Dump, den deine Konkurrenz hochlädt.
+        </p>
+
+        <!-- Das Ergebnis -->
+        <h2>Das Ergebnis</h2>
+
+        <p>
+          Was am Anfang ein paar iPhone-Fotos waren, ist am Ende eine vollständige, verkaufende
+          Galerie. Gleiches Produkt, gleiche Bildsprache, jede Szene mit eigener Aufgabe.
+        </p>
+
+        <figure class="article-figure">
+          <div class="img-slot img-slot--wide">
+            <span class="img-slot__label">Screenshot folgt</span>
+            <p class="img-slot__hint">Die fertige PDP-Galerie — alle finalen Bilder im Überblick.</p>
+            <span class="img-slot__file">/images/Blog/iphone-galerie/05-ergebnis.avif</span>
+          </div>
+          <figcaption>Von iPhone-Fotos zur fertigen Produktgalerie.</figcaption>
+        </figure>
+
+        <!-- Warum dieser Weg funktioniert -->
+        <h2>Warum dieser Weg funktioniert</h2>
+
+        <p>
+          Der Vorsprung liegt nicht im Tool. ChatGPT Images 2.0 kann jeder öffnen. Der Unterschied
+          sind die vier Dinge, die die meisten weglassen:
+        </p>
+
+        <ul class="article-checklist">
+          <li><strong>Die Recherche &amp; Planung.</strong> Claude klärt vorab, welche Geschichte die Galerie erzählen muss — jedes Bild ist strategisch begründet, nicht nur dekorativ.</li>
+          <li><strong>Der Referenzanker.</strong> Das echte Produkt steuert jede Generierung — die KI rät nicht, sie arbeitet mit deinem Produkt.</li>
+          <li><strong>Die Konsistenz.</strong> Claude hält die Prompts auf Linie, Figma als Steuerzentrale sorgt dafür, dass die Galerie als System funktioniert, nicht als Bildersammlung.</li>
+          <li><strong>Der Feinschliff.</strong> Die letzten 10–20 % entscheiden, ob es nach Studio oder nach KI aussieht.</li>
+        </ul>
+
+        <!-- global: Clarity Labs promo + article-cta — injected by shared-components.js -->
+        <div class="article-global-cta-slot"></div>
+
+        <!-- ── FAQ ───────────────────────────────────────── -->
+        <section class="faq-section reveal" aria-label="Häufige Fragen">
+          <p class="faq-section__eyebrow">FAQ</p>
+          <h2 class="faq-section__title">Häufige Fragen zu diesem Workflow</h2>
+
+          <ul class="faq-list" role="list">
+
+            <li class="faq-item">
+              <button class="faq-question" aria-expanded="false" aria-controls="faq-claude">
+                Welche Rolle spielt Claude in deinem Workflow?
+                <span class="faq-question__icon" aria-hidden="true">+</span>
+              </button>
+              <div id="faq-claude" class="faq-answer" role="region">
+                Claude ist der denkende Teil des Prozesses. Ich nutze es, um das Produkt, die
+                Zielgruppe und den Wettbewerb zu recherchieren, daraus einen konkreten Galerie-Plan
+                abzuleiten (welche Szenen in welcher Reihenfolge) und für jede einzelne Szene den
+                passenden Bild-Prompt zu schreiben. So ist jedes Bild strategisch begründet, statt
+                nur hübsch.
+              </div>
+            </li>
+
+            <li class="faq-item">
+              <button class="faq-question" aria-expanded="false" aria-controls="faq-1">
+                Reichen wirklich iPhone-Fotos als Ausgangsmaterial?
+                <span class="faq-question__icon" aria-hidden="true">+</span>
+              </button>
+              <div id="faq-1" class="faq-answer" role="region">
+                Ja. Ich brauche keine Studio-Aufnahmen, sondern ehrliche Referenzfotos: das Produkt
+                scharf, gut ausgeleuchtet, aus mehreren Winkeln. Die dienen der KI als visueller
+                Anker, damit Form, Material und Proportionen stimmen. Die Studioqualität entsteht
+                danach im Prozess.
+              </div>
+            </li>
+
+            <li class="faq-item">
+              <button class="faq-question" aria-expanded="false" aria-controls="faq-2">
+                Warum Figma und nicht direkt nur ChatGPT?
+                <span class="faq-question__icon" aria-hidden="true">+</span>
+              </button>
+              <div id="faq-2" class="faq-answer" role="region">
+                Figma ist meine Steuerzentrale. Referenzbilder, Prompts, Varianten und das fertige
+                Galerie-Layout liegen auf einem Canvas nebeneinander. So sehe ich sofort, ob die
+                Galerie als System konsistent ist — und nicht nur Bild für Bild. Claude plant und
+                textet, ChatGPT Images 2.0 generiert, Figma hält Übersicht und Komposition.
+              </div>
+            </li>
+
+            <li class="faq-item">
+              <button class="faq-question" aria-expanded="false" aria-controls="faq-3">
+                Wie hältst du die Bilder über die ganze Galerie konsistent?
+                <span class="faq-question__icon" aria-hidden="true">+</span>
+              </button>
+              <div id="faq-3" class="faq-answer" role="region">
+                Über konsequente Referenzbilder und wiederverwendete Prompt-Bausteine: gleiche
+                Lichtsprache, gleicher Look, gleiche Bildstimmung. Jede neue Szene baut auf dem
+                etablierten Anker auf, statt bei null anzufangen. Konsistenz ist der eigentliche
+                Job — nicht das einzelne hübsche Bild.
+              </div>
+            </li>
+
+            <li class="faq-item">
+              <button class="faq-question" aria-expanded="false" aria-controls="faq-4">
+                Wie lange dauert eine komplette Galerie mit diesem Workflow?
+                <span class="faq-question__icon" aria-hidden="true">+</span>
+              </button>
+              <div id="faq-4" class="faq-answer" role="region">
+                Für eine vollständige PDP-Galerie mit Hero, Details, Lifestyle und Feature-Tiles:
+                meist innerhalb weniger Werktage statt der Wochen, die ein Fotoshooting mit Planung,
+                Set und Postproduktion braucht.
+              </div>
+            </li>
+
+            <li class="faq-item">
+              <button class="faq-question" aria-expanded="false" aria-controls="faq-5">
+                Sieht das nicht nach KI aus?
+                <span class="faq-question__icon" aria-hidden="true">+</span>
+              </button>
+              <div id="faq-5" class="faq-answer" role="region">
+                Nur wenn man den Prozess abkürzt. Der Unterschied zwischen einem KI-Dump und einer
+                verkaufenden Galerie liegt im Referenzanker, in der Konsistenz und im Feinschliff.
+                Genau diese Schritte machen die meisten nicht — und genau die entscheiden, ob das
+                Ergebnis professionell wirkt.
+              </div>
+            </li>
+
+          </ul>
+        </section>
+
+        <!-- global: author section — injected by shared-components.js -->
+        <div class="article-global-author-slot"></div>
+
+      </article>
+    </div><!-- /.article-wrap -->
+  </main>
+
+  <footer class="footer"></footer>
+
+  <script src="/shared-components.js"></script>
+  <script src="script.js"></script>
+  <script>
+    // Reading progress bar
+    (function () {
+      const bar = document.getElementById('reading-progress');
+      const article = document.getElementById('article-body');
+      if (!bar || !article) return;
+
+      function update() {
+        const rect = article.getBoundingClientRect();
+        const articleH = article.offsetHeight;
+        const scrolled = Math.max(0, -rect.top);
+        const progress = Math.min(100, (scrolled / (articleH - window.innerHeight)) * 100);
+        bar.style.width = progress + '%';
+      }
+
+      window.addEventListener('scroll', update, { passive: true });
+      update();
+    })();
+
+    // FAQ accordion
+    (function () {
+      const questions = document.querySelectorAll('.faq-question');
+      questions.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          const answerId = btn.getAttribute('aria-controls');
+          const answer = document.getElementById(answerId);
+          const isOpen = btn.getAttribute('aria-expanded') === 'true';
+
+          // Close all
+          questions.forEach(function (q) {
+            const aId = q.getAttribute('aria-controls');
+            const a = document.getElementById(aId);
+            q.setAttribute('aria-expanded', 'false');
+            if (a) a.classList.remove('is-open');
+          });
+
+          // Open clicked (if was closed)
+          if (!isOpen && answer) {
+            btn.setAttribute('aria-expanded', 'true');
+            answer.classList.add('is-open');
+          }
+        });
+      });
+    })();
+  </script>
+  <script src="cookie-consent.js" defer></script>
+  <script>window.BOOKING_API_BASE = 'https://project-bh9tx.vercel.app';</script>
+  <script src="booking-popup.js" defer></script>
+  <script src="booking-glass.js" defer></script>
+
+</body>
+</html>
