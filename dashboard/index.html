@@ -1266,7 +1266,7 @@ $('btn-stop').addEventListener('click', async ()=>{
     const logEntry = { start:sessionStart, stop:sessionEnd, minutes:sessionMins };
 
     if(timerResumeEntryId){
-      const { data:existing } = await sb.from('time_entries').select('duration_minutes,time_logs,start_time').eq('id',timerResumeEntryId).single();
+      const { data:existing } = await sb.from('time_entries').select('*').eq('id',timerResumeEntryId).single();
       if(existing){
         const logs = Array.isArray(existing.time_logs) ? [...existing.time_logs, logEntry] : [logEntry];
         const totalMins = (existing.duration_minutes||0) + sessionMins;
@@ -1432,7 +1432,7 @@ async function saveManualTime(e){
 }
 
 async function loadTimeEntries(){
-  const { data }=await sb.from('time_entries').select('*,time_logs,projects(name)').order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30);
+  const { data }=await sb.from('time_entries').select('*,projects(name)').order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30);
   const list=data||[];
   const todayStr=today(), weekAgo=new Date(Date.now()-7*864e5).toISOString().split('T')[0];
   $('t-today').textContent=fmtDur(list.filter(e=>e.date===todayStr).reduce((s,e)=>s+e.duration_minutes,0));
