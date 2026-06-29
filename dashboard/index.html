@@ -1381,7 +1381,6 @@ function openTimeModal(entry = null) {
       $('mt-bis').value = '';
       $('mt-h').value = Math.floor((entry.duration_minutes||0) / 60);
       $('mt-m').value = (entry.duration_minutes||0) % 60;
-      setDurLock(true);
     } else {
       $('mt-von').value = entry.start_time ? fmtTimeOnly(entry.start_time) : '';
       $('mt-bis').value = entry.end_time   ? fmtTimeOnly(entry.end_time)   : '';
@@ -1399,6 +1398,7 @@ function openTimeModal(entry = null) {
     $('mt-m').value        = 0;
     $('mt-invoiced').value = 'false';
   }
+  setDurLock(false);
   if(!hasLogs) calcDurFromVonBis();
   // Render time_logs history
   const logsSection = $('mt-logs-section');
