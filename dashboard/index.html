@@ -457,6 +457,7 @@
       <div class="sec-hd">
         <span class="sec-ttl">Rechnungen</span>
         <div style="display:flex;gap:.5rem;align-items:center">
+          <button class="btn btn--ghost btn--sm" id="btn-inv-reminders">Erinnerungen</button>
           <button class="btn btn--ghost btn--sm" id="btn-all-invoices">Alle Rechnungen</button>
           <button class="btn btn--ghost btn--sm" id="btn-upload-invoice">Rechnung hinzufügen</button>
           <button class="btn btn--primary btn--sm" id="btn-new-invoice">+ Neue Rechnung</button>
@@ -491,6 +492,13 @@
         <div class="stat-card"><div class="stat-lbl">Versendet</div><div class="stat-val" id="i-sent">—</div></div>
         <div class="stat-card"><div class="stat-lbl">Bezahlt</div><div class="stat-val" id="i-paid">—</div></div>
         <div class="stat-card"><div class="stat-lbl">Überfällig</div><div class="stat-val" id="i-overdue" style="color:var(--red)">—</div></div>
+      </div>
+      <div class="card" id="inv-reminders-card" hidden style="margin-bottom:1rem">
+        <div class="card-hd">
+          <span class="card-ttl">Anstehende Erinnerungen</span>
+          <button class="btn btn--ghost btn--sm" id="btn-new-reminder">+ Neue Erinnerung</button>
+        </div>
+        <div id="inv-reminders-list"></div>
       </div>
       <div class="card"><table class="dtable"><thead><tr><th>Nr.</th><th>Kunde</th><th>Datum</th><th>Fällig</th><th>Betrag</th><th>Status</th><th style="width:36px"></th></tr></thead><tbody id="inv-body"></tbody></table></div>
     </section>
@@ -830,6 +838,50 @@
   </div>
 </div>
 
+<!-- INVOICE REMINDER MODAL -->
+<div class="overlay" id="ov-reminder">
+  <div class="modal">
+    <div class="modal-hd"><span class="modal-ttl" id="rem-title">Neue Rechnungserinnerung</span><button class="modal-x" onclick="closeModal('ov-reminder')">&#10005;</button></div>
+    <form id="rem-form" onsubmit="saveReminder(event)">
+      <div class="modal-body">
+        <div class="g2">
+          <div class="fg s2"><label class="fl">Kunde *</label><select class="fi" id="rem-client" required><option value="">Kunde wählen…</option></select></div>
+          <div class="fg"><label class="fl">Erinnerungsdatum *</label><input class="fi" id="rem-date" type="date" required /></div>
+          <div class="fg"><label class="fl">Uhrzeit</label><input class="fi" id="rem-time" type="time" value="09:00" /></div>
+          <div class="fg s2"><label class="fl">Notiz</label><textarea class="fi" id="rem-note" rows="2" placeholder="z.B. Monatsrechnung für April, Projekt XY abrechnen…"></textarea></div>
+        </div>
+      </div>
+      <div class="modal-ft">
+        <button type="button" class="btn btn--danger btn--sm" id="rem-delete-btn" hidden>Löschen</button>
+        <button type="button" class="btn btn--ghost btn--sm" onclick="closeModal('ov-reminder')">Abbrechen</button>
+        <button type="submit" class="btn btn--primary btn--sm" id="rem-save-btn">Speichern</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- REMINDERS LIST MODAL -->
+<div class="overlay" id="ov-reminders-list">
+  <div class="modal" style="max-width:680px;width:95vw;display:flex;flex-direction:column;max-height:92vh">
+    <div class="modal-hd" style="flex-shrink:0">
+      <span class="modal-ttl">Rechnungserinnerungen</span>
+      <button class="modal-x" onclick="closeModal('ov-reminders-list')">&#10005;</button>
+    </div>
+    <div style="padding:.75rem 1.375rem;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;justify-content:space-between;align-items:center">
+      <select class="fi" id="rem-filter" style="width:160px;font-size:.8125rem;padding:.375rem .5rem">
+        <option value="pending">Ausstehend</option>
+        <option value="done">Erledigt</option>
+        <option value="">Alle</option>
+      </select>
+      <button class="btn btn--primary btn--sm" id="rem-list-new-btn">+ Neue Erinnerung</button>
+    </div>
+    <div style="flex:1;overflow-y:auto" id="rem-all-list"></div>
+    <div class="modal-ft" style="flex-shrink:0">
+      <button class="btn btn--ghost btn--sm" onclick="closeModal('ov-reminders-list')">Schließen</button>
+    </div>
+  </div>
+</div>
+
 <div id="toasts"></div>
 
 <!-- SCRIPTS -->
@@ -875,7 +927,7 @@ function showApp(user){
   const ini = (user.email||'JM').slice(0,2).toUpperCase();
   $('sb-av').textContent=$('sb-av').textContent=ini;
   $('sb-email').textContent = user.email||'';
-  loadStats(); loadCRM(); loadTimeEntries(); loadInvoices(); loadProjects();
+  loadStats(); loadCRM(); loadTimeEntries(); loadInvoices(); loadProjects(); loadInvReminders();
 }
 
 $('login-form').addEventListener('submit', async e => {
@@ -1266,7 +1318,7 @@ $('btn-stop').addEventListener('click', async ()=>{
     const logEntry = { start:sessionStart, stop:sessionEnd, minutes:sessionMins };
 
     if(timerResumeEntryId){
-      const { data:existing } = await sb.from('time_entries').select('duration_minutes,time_logs,start_time').eq('id',timerResumeEntryId).single();
+      const { data:existing } = await sb.from('time_entries').select('*').eq('id',timerResumeEntryId).single();
       if(existing){
         const logs = Array.isArray(existing.time_logs) ? [...existing.time_logs, logEntry] : [logEntry];
         const totalMins = (existing.duration_minutes||0) + sessionMins;
@@ -1432,7 +1484,7 @@ async function saveManualTime(e){
 }
 
 async function loadTimeEntries(){
-  const { data }=await sb.from('time_entries').select('*,time_logs,projects(name)').order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30);
+  const { data }=await sb.from('time_entries').select('*,projects(name)').order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30);
   const list=data||[];
   const todayStr=today(), weekAgo=new Date(Date.now()-7*864e5).toISOString().split('T')[0];
   $('t-today').textContent=fmtDur(list.filter(e=>e.date===todayStr).reduce((s,e)=>s+e.duration_minutes,0));
@@ -3128,6 +3180,179 @@ $('klv-custom-btn').addEventListener('click', () => {
   document.querySelectorAll('.klv-range').forEach(b => b.classList.remove('active'));
   loadKlaviyo(s, e);
 });
+
+// ── INVOICE REMINDERS ────────────────────────────────────────────────
+let editReminderId = null;
+
+$('btn-inv-reminders').addEventListener('click', openRemindersListModal);
+$('btn-new-reminder').addEventListener('click', () => openReminderModal());
+$('rem-list-new-btn').addEventListener('click', () => { closeModal('ov-reminders-list'); openReminderModal(); });
+$('rem-filter').addEventListener('change', renderRemindersAllList);
+
+$('rem-delete-btn').addEventListener('click', async () => {
+  if(!editReminderId || !confirm('Erinnerung wirklich löschen?')) return;
+  const { error } = await sb.from('invoice_reminders').delete().eq('id', editReminderId);
+  if(error){ toast('Fehler: '+error.message,'err'); return; }
+  closeModal('ov-reminder'); toast('Erinnerung gelöscht.');
+  loadInvReminders();
+});
+
+async function openReminderModal(reminder = null){
+  editReminderId = reminder ? reminder.id : null;
+  $('rem-title').textContent = reminder ? 'Erinnerung bearbeiten' : 'Neue Rechnungserinnerung';
+  $('rem-delete-btn').hidden = !reminder;
+  $('rem-form').reset();
+  const { data:clients } = await sb.from('clients').select('id,name,company').order('name');
+  const sel = $('rem-client');
+  sel.innerHTML = '<option value="">Kunde wählen…</option>';
+  (clients||[]).forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.id; o.textContent = c.name + (c.company ? ` — ${c.company}` : '');
+    sel.appendChild(o);
+  });
+  if(reminder){
+    sel.value = reminder.client_id || '';
+    const d = new Date(reminder.remind_at);
+    $('rem-date').value = d.toISOString().split('T')[0];
+    $('rem-time').value = d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit',hour12:false});
+    $('rem-note').value = reminder.note || '';
+  } else {
+    $('rem-date').value = daysFromNow(7);
+    $('rem-time').value = '09:00';
+  }
+  openModal('ov-reminder');
+}
+
+async function saveReminder(e){
+  e.preventDefault();
+  const clientId = $('rem-client').value;
+  const dateStr = $('rem-date').value;
+  const timeStr = $('rem-time').value || '09:00';
+  if(!clientId){ toast('Bitte einen Kunden wählen.','err'); return; }
+  if(!dateStr){ toast('Bitte ein Datum wählen.','err'); return; }
+  const remindAt = new Date(`${dateStr}T${timeStr}`).toISOString();
+  const note = $('rem-note').value.trim() || null;
+
+  const btn = $('rem-save-btn');
+  btn.disabled = true; btn.textContent = 'Speichern…';
+
+  const payload = { client_id:clientId, remind_at:remindAt, note, status:'pending' };
+
+  let error;
+  if(editReminderId){
+    ({ error } = await sb.from('invoice_reminders').update(payload).eq('id', editReminderId));
+  } else {
+    ({ error } = await sb.from('invoice_reminders').insert(payload));
+  }
+  btn.disabled = false; btn.textContent = 'Speichern';
+  if(error){ toast('Fehler: '+error.message,'err'); return; }
+  closeModal('ov-reminder');
+  toast(editReminderId ? 'Erinnerung aktualisiert.' : 'Erinnerung gespeichert.', 'ok');
+  loadInvReminders();
+}
+
+async function loadInvReminders(){
+  const { data } = await sb.from('invoice_reminders').select('*,clients(name,company)').eq('status','pending').order('remind_at',{ascending:true});
+  const list = data||[];
+  const card = $('inv-reminders-card');
+  const container = $('inv-reminders-list');
+  if(!list.length){
+    card.hidden = true;
+    return;
+  }
+  card.hidden = false;
+  const now = new Date();
+  container.innerHTML = list.map(r => {
+    const d = new Date(r.remind_at);
+    const overdue = d < now;
+    const clientLabel = r.clients?.name + (r.clients?.company && r.clients.company !== r.clients.name ? ` — ${r.clients.company}` : '');
+    return `<div style="display:flex;align-items:center;gap:.875rem;padding:.75rem 1.125rem;border-bottom:1px solid var(--border)">
+      <div style="width:32px;height:32px;border-radius:50%;background:${overdue?'var(--red-t)':'var(--orange-t)'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="14" height="14" fill="none" stroke="${overdue?'var(--red)':'#b87000'}" stroke-width="1.8" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5V8l2.5 2.5"/></svg>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.875rem;font-weight:600">${esc(clientLabel)}</div>
+        <div style="font-size:.75rem;color:var(--ink-s)">${r.note ? esc(r.note) : 'Rechnung erstellen'}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:.8125rem;font-weight:500;${overdue?'color:var(--red)':''}">${fmtDate(r.remind_at)}</div>
+        <div style="font-size:.6875rem;color:var(--ink-s)">${d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})} Uhr</div>
+      </div>
+      <div style="display:flex;gap:.25rem;flex-shrink:0">
+        <button class="btn btn--icon btn--ghost rem-done-btn" data-id="${r.id}" title="Erledigt" style="width:28px;height:28px;color:var(--green)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 16 16"><path d="M3 8.5l3.5 3.5 6.5-7"/></svg></button>
+        <button class="btn btn--icon btn--ghost rem-edit-btn" data-id="${r.id}" title="Bearbeiten" style="width:28px;height:28px">${PENCIL_SVG}</button>
+      </div>
+    </div>`;
+  }).join('');
+  container.querySelectorAll('.rem-done-btn').forEach(btn => btn.addEventListener('click', async () => {
+    await sb.from('invoice_reminders').update({status:'done'}).eq('id', btn.dataset.id);
+    toast('Erinnerung als erledigt markiert.','ok');
+    loadInvReminders();
+  }));
+  container.querySelectorAll('.rem-edit-btn').forEach(btn => btn.addEventListener('click', async () => {
+    const rem = list.find(r => r.id === btn.dataset.id);
+    if(rem) openReminderModal(rem);
+  }));
+}
+
+async function openRemindersListModal(){
+  await renderRemindersAllList();
+  openModal('ov-reminders-list');
+}
+
+async function renderRemindersAllList(){
+  const filter = $('rem-filter').value;
+  let query = sb.from('invoice_reminders').select('*,clients(name,company)').order('remind_at',{ascending:true});
+  if(filter) query = query.eq('status', filter);
+  const { data } = await query;
+  const list = data||[];
+  const container = $('rem-all-list');
+  const now = new Date();
+
+  if(!list.length){
+    container.innerHTML = `<div class="empty-st" style="padding:2rem"><p class="empty-ttl">Keine Erinnerungen</p><p class="empty-sub">Erstelle eine neue Erinnerung, um rechtzeitig an Rechnungen erinnert zu werden.</p></div>`;
+    return;
+  }
+  container.innerHTML = list.map(r => {
+    const d = new Date(r.remind_at);
+    const overdue = r.status === 'pending' && d < now;
+    const isDone = r.status === 'done';
+    const clientLabel = r.clients?.name + (r.clients?.company && r.clients.company !== r.clients.name ? ` — ${r.clients.company}` : '');
+    return `<div style="display:flex;align-items:center;gap:.875rem;padding:.75rem 1.125rem;border-bottom:1px solid var(--border);${isDone?'opacity:.55':''}">
+      <div style="width:32px;height:32px;border-radius:50%;background:${isDone?'var(--green-t)':overdue?'var(--red-t)':'var(--orange-t)'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        ${isDone
+          ? '<svg width="14" height="14" fill="none" stroke="#1a8c3a" stroke-width="2" viewBox="0 0 16 16"><path d="M3 8.5l3.5 3.5 6.5-7"/></svg>'
+          : `<svg width="14" height="14" fill="none" stroke="${overdue?'var(--red)':'#b87000'}" stroke-width="1.8" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5V8l2.5 2.5"/></svg>`}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.875rem;font-weight:600">${esc(clientLabel)}</div>
+        <div style="font-size:.75rem;color:var(--ink-s)">${r.note ? esc(r.note) : 'Rechnung erstellen'}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:.8125rem;font-weight:500;${overdue&&!isDone?'color:var(--red)':''}">${fmtDate(r.remind_at)}</div>
+        <div style="font-size:.6875rem;color:var(--ink-s)">${d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})} Uhr</div>
+      </div>
+      <div style="display:flex;gap:.25rem;flex-shrink:0">
+        ${!isDone ? `<button class="btn btn--icon btn--ghost reml-done-btn" data-id="${r.id}" title="Erledigt" style="width:28px;height:28px;color:var(--green)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 16 16"><path d="M3 8.5l3.5 3.5 6.5-7"/></svg></button>` : ''}
+        <button class="btn btn--icon btn--ghost reml-edit-btn" data-id="${r.id}" title="Bearbeiten" style="width:28px;height:28px">${PENCIL_SVG}</button>
+        <button class="btn btn--icon btn--ghost reml-del-btn" data-id="${r.id}" title="Löschen" style="width:28px;height:28px;color:var(--red)"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><path d="M3 4h10M5.5 4V3a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v1M6.5 7v4M9.5 7v4"/><path d="M4 4l.5 9a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1L12 4"/></svg></button>
+      </div>
+    </div>`;
+  }).join('');
+  container.querySelectorAll('.reml-done-btn').forEach(btn => btn.addEventListener('click', async () => {
+    await sb.from('invoice_reminders').update({status:'done'}).eq('id', btn.dataset.id);
+    toast('Erledigt.','ok'); renderRemindersAllList(); loadInvReminders();
+  }));
+  container.querySelectorAll('.reml-edit-btn').forEach(btn => btn.addEventListener('click', async () => {
+    const rem = list.find(r => r.id === btn.dataset.id);
+    if(rem){ closeModal('ov-reminders-list'); openReminderModal(rem); }
+  }));
+  container.querySelectorAll('.reml-del-btn').forEach(btn => btn.addEventListener('click', async () => {
+    if(!confirm('Erinnerung löschen?')) return;
+    await sb.from('invoice_reminders').delete().eq('id', btn.dataset.id);
+    toast('Gelöscht.'); renderRemindersAllList(); loadInvReminders();
+  }));
+}
 
 // ── GMAIL SEND ────────────────────────────────────────────────────────
 let currentPreviewInv=null;
