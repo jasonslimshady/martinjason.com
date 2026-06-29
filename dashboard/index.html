@@ -444,11 +444,12 @@
       <div class="sec-hd">
         <span class="sec-ttl">Letzte Einträge</span>
         <div style="display:flex;gap:.5rem">
+          <button class="btn btn--ghost btn--sm" id="btn-manage-proj">Projekte verwalten</button>
           <button class="btn btn--ghost btn--sm" id="btn-new-proj">+ Neues Projekt</button>
           <button class="btn btn--ghost btn--sm" id="btn-manual">+ Manuell</button>
         </div>
       </div>
-      <div class="card"><table class="dtable"><thead><tr><th>Beschreibung</th><th>Projekt</th><th>Datum</th><th>Uhrzeit</th><th>Dauer</th><th>Status</th></tr></thead><tbody id="time-body"></tbody></table></div>
+      <div class="card"><table class="dtable"><thead><tr><th>Beschreibung</th><th>Projekt</th><th>Datum</th><th>Uhrzeit</th><th>Dauer</th><th>Status</th><th style="width:36px"></th></tr></thead><tbody id="time-body"></tbody></table></div>
     </section>
 
     <!-- INVOICES PANEL -->
@@ -716,6 +717,25 @@
         <button type="submit" class="btn btn--primary btn--sm">Speichern</button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- PROJECT MANAGEMENT MODAL -->
+<div class="overlay" id="ov-proj-manage">
+  <div class="modal" style="max-width:720px;width:95vw;display:flex;flex-direction:column;max-height:92vh">
+    <div class="modal-hd" style="flex-shrink:0">
+      <span class="modal-ttl">Projekte verwalten</span>
+      <button class="modal-x" onclick="closeModal('ov-proj-manage')">&#10005;</button>
+    </div>
+    <div style="flex:1;overflow-y:auto">
+      <table class="dtable">
+        <thead><tr><th>Projekt</th><th>Kunde</th><th>Satz</th><th>Status</th><th style="width:80px"></th></tr></thead>
+        <tbody id="proj-manage-body"></tbody>
+      </table>
+    </div>
+    <div class="modal-ft" style="flex-shrink:0">
+      <button class="btn btn--ghost btn--sm" onclick="closeModal('ov-proj-manage')">Schließen</button>
+    </div>
   </div>
 </div>
 
@@ -1025,9 +1045,10 @@ async function openDrawer(id){
     closeDrawer(); toast('Kontakt gelöscht.'); loadCRM(); loadStats();
   };
   $('dr-new-proj-btn').onclick = () => {
+    editProjectId = null;
     $('mp-title').textContent=`Projekt für ${c.name}`;
     $('mp-form').reset();
-    $('mp-client-row').hidden = true; // client already known from drawer
+    $('mp-client-row').hidden = true;
     openModal('ov-proj');
   };
 
@@ -1110,9 +1131,11 @@ async function loadProjects(){
   });
 }
 
+let editProjectId = null;
+
 $('btn-new-proj').addEventListener('click', async () => {
+  editProjectId = null;
   $('mp-title').textContent='Neues Projekt'; $('mp-form').reset();
-  // Show client selector and populate it
   $('mp-client-row').hidden = false;
   const { data: clients } = await sb.from('clients').select('id,name,company').order('name');
   const sel = $('mp-client');
@@ -1125,10 +1148,68 @@ $('btn-new-proj').addEventListener('click', async () => {
   openModal('ov-proj');
 });
 
+async function openEditProject(id){
+  const { data:p } = await sb.from('projects').select('*,clients(name,company)').eq('id',id).single();
+  if(!p) return;
+  editProjectId = id;
+  $('mp-title').textContent = 'Projekt bearbeiten';
+  $('mp-client-row').hidden = false;
+  const { data: clients } = await sb.from('clients').select('id,name,company').order('name');
+  const sel = $('mp-client');
+  sel.innerHTML = '<option value="">Kunde wählen…</option>';
+  (clients||[]).forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.id; o.textContent = c.name + (c.company ? ` — ${c.company}` : '');
+    sel.appendChild(o);
+  });
+  sel.value = p.client_id || '';
+  $('mp-name').value = p.name || '';
+  $('mp-desc').value = p.description || '';
+  $('mp-rate-type').value = p.rate_type || 'hourly';
+  $('mp-rate').value = p.rate || '';
+  $('mp-budget').value = p.budget_hours || '';
+  $('mp-status').value = p.status || 'active';
+  openModal('ov-proj');
+}
+
+async function deleteProject(id, name){
+  if(!confirm(`Projekt "${name}" wirklich löschen? Alle zugehörigen Zeiteinträge werden ebenfalls gelöscht.`)) return;
+  const { error } = await sb.from('projects').delete().eq('id', id);
+  if(error){ toast('Fehler: '+error.message,'err'); return; }
+  toast('Projekt gelöscht.','ok');
+  loadProjects(); loadTimeEntries(); loadStats();
+  openProjectManagement();
+}
+
+$('btn-manage-proj').addEventListener('click', () => openProjectManagement());
+
+async function openProjectManagement(){
+  const { data } = await sb.from('projects').select('*,clients(name)').order('created_at',{ascending:false});
+  const list = data||[];
+  const ST_TAG = { active:'tag--green', paused:'tag--orange', completed:'tag--blue', cancelled:'tag--muted' };
+  const ST_LBL = { active:'Aktiv', paused:'Pausiert', completed:'Abgeschlossen', cancelled:'Abgebrochen' };
+  const tbody = $('proj-manage-body');
+  if(!list.length){
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-st"><p class="empty-ttl">Noch keine Projekte</p><p class="empty-sub">Erstelle das erste Projekt.</p></div></td></tr>`;
+  } else {
+    tbody.innerHTML = list.map(p=>`<tr>
+      <td class="fw6">${esc(p.name)}</td>
+      <td class="muted">${esc(p.clients?.name||'—')}</td>
+      <td class="muted">${p.rate_type==='hourly'?`€${p.rate||0}/h`:`Festpreis €${p.rate||0}`}</td>
+      <td><span class="tag ${ST_TAG[p.status]||'tag--muted'}">${ST_LBL[p.status]||p.status}</span></td>
+      <td style="white-space:nowrap">
+        <button class="btn btn--icon btn--ghost proj-edit-btn" data-id="${p.id}" title="Bearbeiten" style="width:28px;height:28px">${PENCIL_SVG}</button>
+        <button class="btn btn--icon btn--ghost proj-del-btn" data-id="${p.id}" data-name="${esc(p.name)}" title="Löschen" style="width:28px;height:28px;color:var(--red)"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><path d="M3 4h10M5.5 4V3a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v1M6.5 7v4M9.5 7v4"/><path d="M4 4l.5 9a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1L12 4"/></svg></button>
+      </td>
+    </tr>`).join('');
+    tbody.querySelectorAll('.proj-edit-btn').forEach(btn=>btn.addEventListener('click', ()=>{ closeModal('ov-proj-manage'); openEditProject(btn.dataset.id); }));
+    tbody.querySelectorAll('.proj-del-btn').forEach(btn=>btn.addEventListener('click', ()=>deleteProject(btn.dataset.id, btn.dataset.name)));
+  }
+  openModal('ov-proj-manage');
+}
+
 async function saveProject(e){
   e.preventDefault();
-  // If client-row is visible the user is in Time Tracker context — always use the dropdown.
-  // Only fall back to drawerClientId when the dropdown is hidden (opened from a client drawer).
   const fromDrawer = $('mp-client-row').hidden;
   const clientId = fromDrawer ? drawerClientId : ($('mp-client').value || null);
   if(!clientId){
@@ -1138,9 +1219,15 @@ async function saveProject(e){
     rate_type:$('mp-rate-type').value, rate:parseFloat($('mp-rate').value)||null,
     budget_hours:parseFloat($('mp-budget').value)||null, status:$('mp-status').value,
     client_id: clientId };
-  const { error } = await sb.from('projects').insert(payload);
+  let error;
+  if(editProjectId){
+    ({ error } = await sb.from('projects').update(payload).eq('id', editProjectId));
+  } else {
+    ({ error } = await sb.from('projects').insert(payload));
+  }
   if(error){ toast('Fehler: '+error.message,'err'); return; }
-  closeModal('ov-proj'); toast('Projekt erstellt.','ok');
+  closeModal('ov-proj'); toast(editProjectId ? 'Projekt aktualisiert.' : 'Projekt erstellt.','ok');
+  editProjectId = null;
   loadProjects();
   if(drawerClientId) loadClientProjects(drawerClientId);
 }
@@ -1284,7 +1371,7 @@ async function loadTimeEntries(){
   $('t-today').textContent=fmtDur(list.filter(e=>e.date===todayStr).reduce((s,e)=>s+e.duration_minutes,0));
   $('t-week').textContent=fmtDur(list.filter(e=>e.date>=weekAgo).reduce((s,e)=>s+e.duration_minutes,0));
   const tbody=$('time-body');
-  if(!list.length){ tbody.innerHTML=`<tr><td colspan="6"><div class="empty-st"><p class="empty-ttl">Noch keine Zeiteinträge</p><p class="empty-sub">Starte den Timer oder erfasse manuell.</p></div></td></tr>`; return; }
+  if(!list.length){ tbody.innerHTML=`<tr><td colspan="7"><div class="empty-st"><p class="empty-ttl">Noch keine Zeiteinträge</p><p class="empty-sub">Starte den Timer oder erfasse manuell.</p></div></td></tr>`; return; }
   tbody.innerHTML=list.map(e=>{
     const zeitStr = (e.start_time && e.end_time)
       ? `${fmtTimeOnly(e.start_time)} – ${fmtTimeOnly(e.end_time)}`
@@ -1294,11 +1381,30 @@ async function loadTimeEntries(){
     <td class="muted">${fmtDate(e.date)}</td><td class="muted mono">${zeitStr}</td>
     <td class="mono">${fmtDur(e.duration_minutes)}</td>
     <td>${e.is_invoiced?'<span class="tag tag--green">Fakturiert</span>':'<span class="tag tag--muted">Offen</span>'}</td>
+    <td style="padding:.5rem .625rem"><button class="btn btn--icon btn--ghost te-restart-btn" data-proj="${e.project_id}" title="Timer für dieses Projekt starten" style="width:28px;height:28px;color:var(--green)"><svg width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M5 3.5v9l7-4.5z"/></svg></button></td>
   </tr>`;}).join('');
-  // Store full entry data and wire click → edit modal
   const entryMap = Object.fromEntries(list.map(e => [e.id, e]));
   tbody.querySelectorAll('tr[data-id]').forEach(row =>
-    row.addEventListener('click', () => openTimeModal(entryMap[row.dataset.id]))
+    row.addEventListener('click', e => {
+      if(e.target.closest('.te-restart-btn')) return;
+      openTimeModal(entryMap[row.dataset.id]);
+    })
+  );
+  tbody.querySelectorAll('.te-restart-btn').forEach(btn =>
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const pid = btn.dataset.proj;
+      if(!pid) return;
+      if(timerTick){ toast('Timer läuft bereits. Bitte zuerst stoppen.','err'); return; }
+      const sel = $('timer-proj');
+      if([...sel.options].some(o=>o.value===pid)){
+        sel.value = pid;
+        $('btn-start').click();
+        $('panel-time').scrollTo({top:0,behavior:'smooth'});
+      } else {
+        toast('Projekt ist nicht aktiv oder nicht verfügbar.','err');
+      }
+    })
   );
 }
 
