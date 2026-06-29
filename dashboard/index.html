@@ -2383,8 +2383,10 @@ function openInvoicePreviewModal(inv){
     ov=document.createElement('div'); ov.className='overlay'; ov.id=id;
     ov.innerHTML=`<div class="modal modal--lg"><div class="modal-hd"><span class="modal-ttl">Rechnung</span><button class="modal-x" onclick="closeModal('${id}')">✕</button></div>
       <div id="invprev-body" style="padding:0;max-height:70vh;overflow-y:auto"></div>
-      <div class="modal-ft" id="invprev-ft">
+      <div class="modal-ft" id="invprev-ft" style="flex-wrap:wrap">
         <button class="btn btn--ghost btn--sm" onclick="closeModal('${id}')">Schließen</button>
+        <button class="btn btn--ghost btn--sm" id="inv-refresh-client-btn" title="Kundendaten (Adresse / USt-IdNr.) neu aus dem Kundenprofil übernehmen" hidden>🔄 Kundendaten</button>
+        <button class="btn btn--ghost btn--sm" id="inv-refresh-date-btn" title="Rechnungsdatum & -nummer auf das heutige Datum setzen" hidden>📅 Datum heute</button>
         <button class="btn btn--ghost btn--sm" onclick="printInvoice()">🖨 PDF drucken</button>
         <button class="btn btn--accent btn--sm" id="inv-send-gmail-btn">✉ Per Gmail senden</button>
       </div></div>`;
@@ -2396,6 +2398,12 @@ function openInvoicePreviewModal(inv){
   document.getElementById('invprev-body').innerHTML=`<div style="padding:0">${html}</div>`;
   $('print-area').innerHTML=html;
   currentPreviewInv=inv;
+
+  // Draft-only actions: re-pull client data, or stamp today's date + number.
+  const isDraft = !inv.status || inv.status==='draft';
+  const rcBtn = $('inv-refresh-client-btn'), rdBtn = $('inv-refresh-date-btn');
+  if(rcBtn){ rcBtn.hidden = !isDraft; rcBtn.onclick = refreshInvoiceClientData; }
+  if(rdBtn){ rdBtn.hidden = !isDraft; rdBtn.onclick = refreshInvoiceDate; }
 
   const oldPdfBtn = document.getElementById('invprev-pdf-btn');
   if(oldPdfBtn) oldPdfBtn.remove();
@@ -2414,6 +2422,54 @@ function openInvoicePreviewModal(inv){
 
   openModal(id);
   document.getElementById('inv-send-gmail-btn').onclick=()=>sendViaGmail(inv);
+}
+
+// Re-render the open preview (and the print area) after an in-place edit.
+function rerenderInvoicePreview(inv){
+  currentPreviewInv = inv;
+  const html = buildInvoiceHTML(inv, true);
+  const b = $('invprev-body'); if(b) b.innerHTML = `<div style="padding:0">${html}</div>`;
+  if($('print-area')) $('print-area').innerHTML = html;
+  const ov = document.getElementById('ov-invpreview');
+  if(ov) ov.querySelector('.modal-ttl').textContent = `Rechnung ${inv.invoice_number||''}`;
+}
+
+// Draft action: re-pull the client's current data (address / USt-IdNr. …)
+// and write it into the invoice's "Billed to" block.
+async function refreshInvoiceClientData(){
+  const inv = currentPreviewInv; if(!inv) return;
+  if(inv.status && inv.status!=='draft'){ toast('Nur bei Entwürfen möglich.','err'); return; }
+  if(!inv.client_id){ toast('Kein Kunde verknüpft.','err'); return; }
+  const btn = $('inv-refresh-client-btn'); if(btn){ btn.disabled=true; }
+  const { data:client, error:cErr } = await sb.from('clients').select('*').eq('id', inv.client_id).single();
+  if(cErr || !client){ if(btn) btn.disabled=false; toast('Kunde nicht gefunden.','err'); return; }
+  const meta = parseInvMeta(inv);
+  const newBillTo = defaultBillTo(client);
+  const notes = invMetaToNotes({ billing_period: meta.billing_period, bill_to: newBillTo });
+  const { error } = await sb.from('invoices').update({ notes }).eq('id', inv.id);
+  if(btn) btn.disabled=false;
+  if(error){ toast('Fehler: '+error.message,'err'); return; }
+  try{ localStorage.setItem(billToKey(inv.client_id), newBillTo); }catch(e){}
+  inv.notes = notes; inv.clients = client;
+  rerenderInvoicePreview(inv);
+  loadInvoices();
+  toast('Kundendaten in die Rechnung übernommen.','ok');
+}
+
+// Draft action: set the invoice date AND the invoice number to today.
+async function refreshInvoiceDate(){
+  const inv = currentPreviewInv; if(!inv) return;
+  if(inv.status && inv.status!=='draft'){ toast('Nur bei Entwürfen möglich.','err'); return; }
+  const btn = $('inv-refresh-date-btn'); if(btn){ btn.disabled=true; }
+  const newDate = today();
+  const newNum  = await nextInvoiceNumber(inv.id);
+  const { error } = await sb.from('invoices').update({ invoice_date:newDate, invoice_number:newNum }).eq('id', inv.id);
+  if(btn) btn.disabled=false;
+  if(error){ toast('Fehler: '+error.message,'err'); return; }
+  inv.invoice_date = newDate; inv.invoice_number = newNum;
+  rerenderInvoicePreview(inv);
+  loadInvoices();
+  toast(`Datum & Nummer auf heute gesetzt: #${newNum}`,'ok');
 }
 
 // ── INVOICE RENDERING HELPERS ─────────────────────────────────────────
@@ -2520,12 +2576,13 @@ function buildInvoiceHTML(inv, forModal=false){
   </div>`;
 }
 
-async function nextInvoiceNumber(){
+async function nextInvoiceNumber(excludeId){
   // Match the PDF style: INV-DD-MM-YYYY (e.g. INV-31-05-2026), shown as "#INV-…".
   const d=new Date();
   const base=`INV-${pad(d.getDate())}-${pad(d.getMonth()+1)}-${d.getFullYear()}`;
-  const { data }=await sb.from('invoices').select('invoice_number').like('invoice_number',`${base}%`);
-  const existing=new Set((data||[]).map(r=>r.invoice_number));
+  const { data }=await sb.from('invoices').select('id,invoice_number').like('invoice_number',`${base}%`);
+  // Exclude the invoice being updated so it never collides with itself.
+  const existing=new Set((data||[]).filter(r=>r.id!==excludeId).map(r=>r.invoice_number));
   if(!existing.has(base)) return base;
   let n=2; while(existing.has(`${base}-${n}`)) n++;
   return `${base}-${n}`;
