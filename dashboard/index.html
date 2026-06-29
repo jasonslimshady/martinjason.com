@@ -1988,6 +1988,8 @@ async function deleteInvoice(id, num){
   if(error){ toast('Fehler: '+error.message,'err'); return; }
   closeModal('ov-inv-edit');
   closeModal('ov-all-invoices');
+  closeModal('ov-invpreview');
+  if(currentPreviewInv && currentPreviewInv.id===id) currentPreviewInv=null;
   toast('Rechnung gelöscht.','ok');
   loadInvoices(); loadStats();
 }
@@ -2389,6 +2391,7 @@ function openInvoicePreviewModal(inv){
         <button class="btn btn--ghost btn--sm" onclick="closeModal('${id}')">Schließen</button>
         <button class="btn btn--ghost btn--sm" id="inv-refresh-client-btn" title="Kundendaten (Adresse / USt-IdNr.) neu aus dem Kundenprofil übernehmen" hidden>🔄 Kundendaten</button>
         <button class="btn btn--ghost btn--sm" id="inv-refresh-date-btn" title="Rechnungsdatum & -nummer auf das heutige Datum setzen" hidden>📅 Datum heute</button>
+        <button class="btn btn--danger btn--sm" id="inv-delete-draft-btn" title="Diesen Rechnungsentwurf löschen" hidden>🗑 Entwurf löschen</button>
         <button class="btn btn--ghost btn--sm" onclick="printInvoice()">🖨 PDF drucken</button>
         <button class="btn btn--accent btn--sm" id="inv-send-gmail-btn">✉ Per Gmail senden</button>
       </div></div>`;
@@ -2401,11 +2404,12 @@ function openInvoicePreviewModal(inv){
   $('print-area').innerHTML=html;
   currentPreviewInv=inv;
 
-  // Draft-only actions: re-pull client data, or stamp today's date + number.
+  // Draft-only actions: re-pull client data, stamp today's date, or delete.
   const isDraft = !inv.status || inv.status==='draft';
-  const rcBtn = $('inv-refresh-client-btn'), rdBtn = $('inv-refresh-date-btn');
+  const rcBtn = $('inv-refresh-client-btn'), rdBtn = $('inv-refresh-date-btn'), delBtn = $('inv-delete-draft-btn');
   if(rcBtn){ rcBtn.hidden = !isDraft; rcBtn.onclick = refreshInvoiceClientData; }
   if(rdBtn){ rdBtn.hidden = !isDraft; rdBtn.onclick = refreshInvoiceDate; }
+  if(delBtn){ delBtn.hidden = !isDraft; delBtn.onclick = ()=>deleteInvoice(inv.id, inv.invoice_number); }
 
   const oldPdfBtn = document.getElementById('invprev-pdf-btn');
   if(oldPdfBtn) oldPdfBtn.remove();
