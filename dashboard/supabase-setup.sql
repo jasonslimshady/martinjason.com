@@ -36,6 +36,8 @@ CREATE TABLE IF NOT EXISTS clients (
   company           TEXT,
   phone             TEXT,
   website           TEXT,
+  address           TEXT,                   -- postal address for invoices ("Billed to")
+  vat_id            TEXT,                   -- optional VAT / USt-IdNr. for invoices
   pipeline_stage    TEXT        NOT NULL DEFAULT 'new_lead'
                     CHECK (pipeline_stage IN (
                       'new_lead', 'contacted', 'proposal',
@@ -52,6 +54,24 @@ CREATE TABLE IF NOT EXISTS clients (
 CREATE TRIGGER clients_updated_at
   BEFORE UPDATE ON clients
   FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+
+-- Migration helper: add address + vat_id columns to clients if the table
+-- already exists from an earlier setup (safe to run multiple times).
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'clients' AND column_name = 'address'
+  ) THEN
+    ALTER TABLE clients ADD COLUMN address TEXT;
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'clients' AND column_name = 'vat_id'
+  ) THEN
+    ALTER TABLE clients ADD COLUMN vat_id TEXT;
+  END IF;
+END $$;
 
 
 -- ============================================================
