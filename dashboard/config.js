@@ -41,6 +41,39 @@ const CONFIG = {
     tax_id:  '',
   },
 
+  // ----------------------------------------------------------
+  //  Invoice company profile — DEFAULTS
+  //  These are the pre-filled defaults for the generated invoice
+  //  (English layout). They can be edited live in the dashboard
+  //  under  Rechnungen → Einstellungen,  which stores per-browser
+  //  overrides in localStorage. The logo is uploaded there too.
+  // ----------------------------------------------------------
+  INVOICE_ISSUER: {
+    // The "Pay to" block — the company that issues the invoice.
+    name:    'Pacific Origins LLC',
+    address: '5830 E 2nd St, Ste 7000 #35505\n82609 Casper\nWyoming U.S.A.',
+  },
+
+  INVOICE_ACCOUNT: {
+    // The "Account" block — where the client pays.
+    bank: 'Wise, Rue du Trône 100, 3rd floor, Brussels, 1050, Belgium',
+    name: 'Jason Martin',
+    iban: 'BE11 9676 2405 7748',
+    bic:  'TRWIBEB1XXX',
+  },
+
+  // Legal note printed at the bottom of every invoice.
+  INVOICE_LEGAL_NOTE: 'Service provider established in United States (non-EU). Place of supply: Germany. VAT reverse charge according to §13b UStG. Tax liability of the service recipient pursuant to §13b UStG. The recipient is liable to account for and pay the German VAT',
+
+  // Label + amount for the tax line (reverse charge = 0).
+  INVOICE_VAT_LABEL: 'VAT (reverse charge)',
+
+  // Currency code shown next to every amount (e.g. EUR, USD).
+  INVOICE_CURRENCY: 'EUR',
+
+  // Default logo (data URL). Leave empty — upload one in the dashboard.
+  INVOICE_LOGO: '',
+
   DEFAULT_TAX_RATE: 0,
 
   // Default payment term in days

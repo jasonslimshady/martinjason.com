@@ -271,7 +271,7 @@
     .te-row:hover{background:var(--surface-2)}
     .te-check{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border-s);background:var(--surface);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.625rem;color:#fff;transition:all var(--fast)}
     .te-row.checked .te-check{background:var(--accent);border-color:var(--accent)}
-    .li-row{display:grid;grid-template-columns:1fr 80px 80px 80px 28px;gap:.5rem;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--border)}
+    .li-row{display:grid;grid-template-columns:1fr 140px 28px;gap:.5rem;align-items:start;padding:.5rem 0;border-bottom:1px solid var(--border)}
     .li-row:last-child{border-bottom:none}
     .li-hd{font-size:.6875rem;font-weight:600;color:var(--ink-s);text-transform:uppercase;letter-spacing:.04em}
     .li-total{font-size:.875rem;font-weight:600;text-align:right}
@@ -279,26 +279,48 @@
     .inv-sum-row{display:flex;justify-content:space-between;font-size:.875rem;padding:.25rem 0}
     .inv-sum-row.total{font-weight:700;font-size:1rem;border-top:1px solid var(--border-s);padding-top:.625rem;margin-top:.25rem}
 
-    /* INVOICE PREVIEW PRINT */
-    .inv-preview{padding:2rem;max-width:680px}
-    .inv-preview-hd{display:flex;justify-content:space-between;margin-bottom:2rem;align-items:flex-start}
-    .inv-from{font-size:.875rem;line-height:1.6}
-    .inv-num{font-size:1.5rem;font-weight:700;letter-spacing:-.03em;text-align:right}
-    .inv-meta{font-size:.8125rem;color:var(--ink-m);text-align:right;margin-top:.25rem}
-    .inv-to{background:var(--surface-2);border-radius:var(--r-sm);padding:.875rem 1rem;margin-bottom:1.5rem;font-size:.875rem;line-height:1.6}
-    .inv-table{width:100%;border-collapse:collapse;margin-bottom:1.5rem}
-    .inv-table th{text-align:left;font-size:.75rem;font-weight:600;color:var(--ink-s);text-transform:uppercase;letter-spacing:.04em;padding:.5rem .75rem;border-bottom:2px solid var(--border-s)}
-    .inv-table td{padding:.75rem;font-size:.875rem;border-bottom:1px solid var(--border)}
-    .inv-table td:last-child,.inv-table th:last-child{text-align:right}
-    .inv-totals{max-width:260px;margin-left:auto}
-    .inv-tot-row{display:flex;justify-content:space-between;font-size:.875rem;padding:.3125rem 0}
-    .inv-tot-row.final{font-weight:700;font-size:1rem;border-top:2px solid var(--ink);padding-top:.625rem;margin-top:.25rem}
-    .inv-footer{font-size:.8125rem;color:var(--ink-m);margin-top:2rem;padding-top:1rem;border-top:1px solid var(--border)}
+    /* ============================================================
+       INVOICE DOCUMENT  (English, matches the print/PDF layout)
+       ============================================================ */
+    .inv-preview{max-width:820px;margin:0 auto}
+    .inv-doc{background:#fff;color:#0a0a0a;font-family:Arial,Helvetica,"Inter",sans-serif;font-size:13px;line-height:1.5;padding:46px 54px;max-width:820px;margin:0 auto}
+    .inv-doc *{box-sizing:border-box}
+    .invd-top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;margin-bottom:26px}
+    .invd-title{font-size:34px;font-weight:800;letter-spacing:-.01em;margin:0 0 4px;line-height:1}
+    .invd-sub{font-size:14px;color:#333}
+    .invd-logo{max-height:80px;max-width:240px;width:auto;object-fit:contain;display:block}
+    .invd-meta{border-collapse:collapse;margin-bottom:26px}
+    .invd-meta td{padding:1px 0;font-size:13px;vertical-align:top}
+    .invd-meta-k{padding-right:42px;width:92px}
+    .invd-parties{display:flex;gap:48px;margin-bottom:22px}
+    .invd-party{flex:1;line-height:1.55}
+    .invd-h{font-weight:700;font-size:14px;margin-bottom:12px}
+    .invd-name{font-weight:700;margin-bottom:2px}
+    .invd-period{margin-bottom:22px;font-size:13px}
+    .invd-items{width:100%;border-collapse:collapse;margin-bottom:8px}
+    .invd-items th{text-align:left;font-weight:700;font-size:14px;border-bottom:1px solid #b9b9b9;padding:0 16px 9px 0}
+    .invd-items th.c-amt,.invd-items td.c-amt{text-align:right;padding-right:0;white-space:nowrap}
+    .invd-items th.c-pos{width:88px}
+    .invd-items th.c-amt{width:130px}
+    .invd-items td{padding:15px 16px 15px 0;font-size:13px;vertical-align:top}
+    .invd-items td.c-pos{width:88px}
+    .invd-items tbody tr:last-child td{border-bottom:1px solid #b9b9b9}
+    .invd-totals{margin-left:auto;width:360px;margin:14px 0 30px auto}
+    .invd-tot-row{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:1px solid #d8d8d8;font-size:14px}
+    .invd-tot-row.b span:first-child{font-weight:700}
+    .invd-account{margin-bottom:22px;font-size:13px;line-height:1.55}
+    .invd-acc-bank{margin:0 0 14px}
+    .invd-acc-line{display:flex;gap:6px}
+    .invd-acc-k{width:90px;flex-shrink:0}
+    .invd-legal{font-size:13px;line-height:1.6;text-align:justify;border-top:1px solid #b9b9b9;padding-top:18px}
 
     @media print{
+      html,body{height:auto!important;overflow:visible!important}
       body *{visibility:hidden!important}
       #print-area,#print-area *{visibility:visible!important}
-      #print-area{position:fixed;top:0;left:0;width:100%;background:#fff}
+      #print-area{position:absolute;top:0;left:0;width:100%;background:#fff}
+      .inv-doc{padding:0;max-width:100%;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      @page{size:A4;margin:18mm 15mm}
     }
 
     /* KLAVIYO */
@@ -457,6 +479,7 @@
       <div class="sec-hd">
         <span class="sec-ttl">Rechnungen</span>
         <div style="display:flex;gap:.5rem;align-items:center">
+          <button class="btn btn--ghost btn--sm" id="btn-inv-settings" title="Logo & Firmendaten für Rechnungen">⚙ Einstellungen</button>
           <button class="btn btn--ghost btn--sm" id="btn-inv-reminders">Erinnerungen</button>
           <button class="btn btn--ghost btn--sm" id="btn-all-invoices">Alle Rechnungen</button>
           <button class="btn btn--ghost btn--sm" id="btn-upload-invoice">Rechnung hinzufügen</button>
@@ -882,6 +905,22 @@
   </div>
 </div>
 
+<!-- INVOICE SETTINGS MODAL (logo + company / pay-to / account / legal note) -->
+<div class="overlay" id="ov-inv-settings">
+  <div class="modal modal--lg" style="display:flex;flex-direction:column;max-height:92vh">
+    <div class="modal-hd" style="flex-shrink:0">
+      <span class="modal-ttl">Rechnungseinstellungen</span>
+      <button class="modal-x" onclick="closeModal('ov-inv-settings')">✕</button>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:1.375rem" id="inv-settings-body"></div>
+    <div class="modal-ft" style="flex-shrink:0">
+      <button class="btn btn--ghost btn--sm" id="inv-settings-reset-btn" style="margin-right:auto">Auf Standard zurücksetzen</button>
+      <button class="btn btn--ghost btn--sm" onclick="closeModal('ov-inv-settings')">Abbrechen</button>
+      <button class="btn btn--primary btn--sm" id="inv-settings-save-btn">Speichern</button>
+    </div>
+  </div>
+</div>
+
 <div id="toasts"></div>
 
 <!-- SCRIPTS -->
@@ -893,6 +932,33 @@
 const { createClient } = window.supabase;
 const sb = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
 const $ = id => document.getElementById(id);
+
+// ── COMPANY / INVOICE SETTINGS ────────────────────────────────────────
+// Defaults live in config.js; per-browser overrides (incl. the uploaded
+// logo) are stored in localStorage. Edited via Rechnungen → Einstellungen.
+const INV_SETTINGS_KEY = 'jm_invoice_settings';
+function loadCompanySettings(){
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem(INV_SETTINGS_KEY) || '{}') || {}; } catch(e){}
+  const pick = (k, def) => (saved[k] !== undefined && saved[k] !== null) ? saved[k] : def;
+  return {
+    logo:          pick('logo',          CONFIG.INVOICE_LOGO || ''),
+    issuerName:    pick('issuerName',    CONFIG.INVOICE_ISSUER.name),
+    issuerAddress: pick('issuerAddress', CONFIG.INVOICE_ISSUER.address),
+    bank:          pick('bank',          CONFIG.INVOICE_ACCOUNT.bank),
+    accName:       pick('accName',       CONFIG.INVOICE_ACCOUNT.name),
+    iban:          pick('iban',          CONFIG.INVOICE_ACCOUNT.iban),
+    bic:           pick('bic',           CONFIG.INVOICE_ACCOUNT.bic),
+    legal:         pick('legal',         CONFIG.INVOICE_LEGAL_NOTE),
+    vatLabel:      pick('vatLabel',      CONFIG.INVOICE_VAT_LABEL),
+    currency:      pick('currency',      CONFIG.INVOICE_CURRENCY),
+  };
+}
+function saveCompanySettings(obj){
+  localStorage.setItem(INV_SETTINGS_KEY, JSON.stringify(obj));
+  companySettings = loadCompanySettings();
+}
+let companySettings = loadCompanySettings();
 
 const PANELS = {
   analytics:{ title:'Analytics',     sub:'martinjason.com — Website Traffic' },
@@ -1769,6 +1835,7 @@ async function openInvoiceEdit(id){
   }
 
   $('inv-edit-title').textContent = `Rechnung bearbeiten — ${inv.invoice_number||''}`;
+  const _meta = parseInvMeta(inv);
   $('inv-edit-body').innerHTML = `
     <div class="g2">
       <div class="fg s2">
@@ -1805,9 +1872,13 @@ async function openInvoiceEdit(id){
         <label class="fl">Bezahlt am</label>
         <input class="fi" id="ie-paid-at" type="date" value="${inv.paid_at||''}" />
       </div>
+      <div class="fg">
+        <label class="fl">Billing period</label>
+        <input class="fi" id="ie-period" value="${esc(_meta.billing_period)}" placeholder="z.B. May 2026" />
+      </div>
       <div class="fg s2">
-        <label class="fl">Notizen</label>
-        <textarea class="fi" id="ie-notes" rows="2">${esc(inv.notes||'')}</textarea>
+        <label class="fl">Billed to (Rechnungsempfänger)</label>
+        <textarea class="fi" id="ie-billto" rows="4" placeholder="Firma\nStraße\nPLZ Ort\nLand\nUSt-IdNr.: …">${esc(_meta.bill_to)}</textarea>
       </div>
       <div class="fg s2">
         <label class="fl">PDF anhängen</label>
@@ -1879,9 +1950,12 @@ async function saveInvoiceEdit(id){
     status,
     subtotal:total, tax_rate:0, tax_amount:0, total,
     paid_at: paidAt,
-    notes:   $('ie-notes')?.value.trim() || null,
+    notes:   invMetaToNotes({ billing_period:$('ie-period')?.value, bill_to:$('ie-billto')?.value }),
   };
   if(pdfUrl) payload.pdf_url = pdfUrl;
+  // Keep the per-client billing address in sync with manual edits.
+  const billToVal = $('ie-billto')?.value || '';
+  if(clientId && billToVal){ try{ localStorage.setItem(billToKey(clientId), billToVal); }catch(e){} }
 
   const { error } = await sb.from('invoices').update(payload).eq('id', id);
   btn.disabled=false; btn.textContent='Speichern';
@@ -2077,9 +2151,26 @@ async function viewInvoice(id){
 
 // ── INVOICE BUILDER (3 steps) ─────────────────────────────────────────
 let invStep=1, invClientId=null, invSelectedTEs=[], invLineItems=[], invClients=[];
+let invBillTo=null, invBillingPeriod=null, invDue=null;
+
+// Remember the full "Billed to" address per client so re-billing the same
+// client pre-fills the address typed last time (clients table has no address).
+function billToKey(id){ return 'jm_billto_'+id; }
+function defaultBillTo(client){
+  const lines=[];
+  if(client.company) lines.push(client.company);
+  if(client.name && client.name!==client.company) lines.push(client.name);
+  if(client.email) lines.push(client.email);
+  return lines.join('\n');
+}
+function defaultBillingPeriod(){
+  try { return new Date().toLocaleDateString('en-US',{month:'long',year:'numeric'}); }
+  catch(e){ return ''; }
+}
 
 $('btn-new-invoice').addEventListener('click', async ()=>{
   invStep=1; invClientId=null; invSelectedTEs=[]; invLineItems=[];
+  invBillTo=null; invBillingPeriod=null; invDue=null;
   // Load clients for step 1
   const { data }=await sb.from('clients').select('id,name,company,email').eq('is_active_client',true).order('name');
   invClients=data||[];
@@ -2109,49 +2200,61 @@ async function renderInvStep(){
     $('inv-client-sel').value = invClientId||'';
     $('inv-client-sel').addEventListener('change', async e=>{
       invClientId=e.target.value;
+      invBillTo=null;  // re-prefill billing address for the newly chosen client
       await loadInvTimeEntries();
     });
     if(invClientId) await loadInvTimeEntries();
   }
 
   if(invStep===2){
-    // Line items editor
-    const subtotal=invLineItems.reduce((s,i)=>s+(i.qty*i.price),0);
+    // Billing details + line items (Description + Amount, no quantity)
+    const client=invClients.find(c=>c.id===invClientId)||{};
+    if(invBillTo===null){
+      let saved=''; try{ saved=localStorage.getItem(billToKey(invClientId))||''; }catch(e){}
+      invBillTo = saved || defaultBillTo(client);
+    }
+    if(invBillingPeriod===null) invBillingPeriod = defaultBillingPeriod();
+    if(invDue===null) invDue = daysFromNow(CONFIG.DEFAULT_PAYMENT_DAYS);
+    const subtotal=invLineItems.reduce((s,i)=>s+(Number(i.amount)||0),0);
     body.innerHTML=`
-      <div style="margin-bottom:1rem">
-        <div style="display:grid;grid-template-columns:1fr 72px 80px 80px 28px;gap:.5rem;padding:.375rem 0" class="li-row">
-          <span class="li-hd">Beschreibung</span><span class="li-hd" style="text-align:right">Menge</span>
-          <span class="li-hd" style="text-align:right">Preis €</span><span class="li-hd" style="text-align:right">Gesamt</span><span></span>
+      <div class="g2" style="margin-bottom:1.25rem">
+        <div class="fg s2"><label class="fl">Billed to (Rechnungsempfänger)</label>
+          <textarea class="fi" id="inv-billto" rows="5" placeholder="Firma\nStraße\nPLZ Ort\nLand\nUSt-IdNr.: …">${esc(invBillTo)}</textarea>
+          <span style="font-size:.75rem;color:var(--ink-s)">Erste Zeile = fett. Wird pro Kunde gemerkt.</span>
+        </div>
+        <div class="fg"><label class="fl">Billing period</label><input class="fi" id="inv-period" value="${esc(invBillingPeriod)}" placeholder="z.B. May 2026" /></div>
+        <div class="fg"><label class="fl">Fälligkeit (intern, nicht auf Rechnung)</label><input class="fi" id="inv-due" type="date" value="${esc(invDue)}" /></div>
+      </div>
+      <label class="fl">Positionen</label>
+      <div style="margin-bottom:.5rem">
+        <div style="display:grid;grid-template-columns:1fr 140px 28px;gap:.5rem;padding:.375rem 0" class="li-row">
+          <span class="li-hd">Description</span><span class="li-hd" style="text-align:right">Amount (${esc((companySettings.currency||'EUR'))})</span><span></span>
         </div>
         <div id="li-rows">${invLineItems.map((li,i)=>liRowHTML(li,i)).join('')}</div>
         <button class="btn btn--ghost btn--sm" style="margin-top:.75rem" onclick="addLiRow()">+ Position hinzufügen</button>
       </div>
-      <div class="divider"></div>
-      <div class="g2" style="margin-top:1rem">
-        <div class="fg"><label class="fl">Fälligkeitsdatum</label><input class="fi" id="inv-due" type="date" value="${daysFromNow(CONFIG.DEFAULT_PAYMENT_DAYS)}" /></div>
-        <div class="fg s2"><label class="fl">Rechnungshinweis</label><textarea class="fi" id="inv-notes" rows="2" placeholder="Zahlbar innerhalb von 14 Tagen ohne Abzug."></textarea></div>
-      </div>
       <div class="inv-summary">
-        <div class="inv-sum-row total"><span>Gesamt</span><span>${fmtEur(subtotal)}</span></div>
+        <div class="inv-sum-row total"><span>Total amount</span><span id="li-subtotal">${fmtInvAmount(subtotal)}</span></div>
       </div>`;
     attachLiListeners();
+    $('inv-billto').addEventListener('input', e=>{ invBillTo=e.target.value; });
+    $('inv-period').addEventListener('input', e=>{ invBillingPeriod=e.target.value; });
+    $('inv-due').addEventListener('input', e=>{ invDue=e.target.value; });
   }
 
   if(invStep===3){
-    // Preview
+    // Preview — exactly what will be saved / printed
     const invNum=await nextInvoiceNumber();
-    const subtotal=invLineItems.reduce((s,i)=>s+(i.qty*i.price),0);
+    const subtotal=invLineItems.reduce((s,i)=>s+(Number(i.amount)||0),0);
     const total=subtotal;
     const client=invClients.find(c=>c.id===invClientId)||{};
-    const dueDate=$('inv-due')?.value||'';
-    const notes=$('inv-notes')?.value||'';
-    const fakeInv={ invoice_number:invNum, invoice_date:today(), due_date:dueDate,
+    const notes=invMetaToNotes({ billing_period:invBillingPeriod, bill_to:invBillTo });
+    const fakeInv={ invoice_number:invNum, invoice_date:today(), due_date:invDue||'',
       subtotal, tax_rate:0, tax_amount:0, total, notes,
-      clients:client, invoice_items:invLineItems.map(li=>({ description:li.desc, quantity:li.qty, unit_price:li.price, total:li.qty*li.price })) };
-    body.innerHTML=`<div class="inv-preview">${buildInvoiceHTML(fakeInv,true)}</div>`;
+      clients:client, invoice_items:invLineItems.map((li,i)=>({ description:li.desc, quantity:1, unit_price:Number(li.amount)||0, total:Number(li.amount)||0, sort_order:i })) };
+    body.innerHTML=buildInvoiceHTML(fakeInv);
     $('inv-next-btn').textContent='Als Entwurf speichern';
-    body.dataset.invNum=invNum; body.dataset.due=dueDate;
-    body.dataset.subtotal=subtotal; body.dataset.total=total; body.dataset.notes=notes;
+    body.dataset.invNum=invNum; body.dataset.subtotal=subtotal; body.dataset.total=total;
   }
 }
 
@@ -2176,31 +2279,23 @@ async function loadInvTimeEntries(){
 
 function liRowHTML(li,i){
   return `<div class="li-row" data-li="${i}">
-    <input class="fi li-desc" style="padding:.375rem .5rem;font-size:.8125rem" value="${esc(li.desc)}" placeholder="Leistung beschreiben" />
-    <input class="fi li-qty"  style="padding:.375rem .5rem;font-size:.8125rem;text-align:right" type="number" min="0" step="0.25" value="${li.qty}" />
-    <input class="fi li-price" style="padding:.375rem .5rem;font-size:.8125rem;text-align:right" type="number" min="0" step="0.01" value="${li.price}" />
-    <div class="li-total">${fmtEur(li.qty*li.price)}</div>
+    <textarea class="fi li-desc" rows="2" style="padding:.375rem .5rem;font-size:.8125rem;resize:vertical" placeholder="Leistung beschreiben (mehrzeilig möglich)">${esc(li.desc||'')}</textarea>
+    <input class="fi li-amount" style="padding:.375rem .5rem;font-size:.8125rem;text-align:right" type="number" min="0" step="0.01" value="${li.amount!=null?li.amount:''}" placeholder="0.00" />
     <button class="btn--icon btn--ghost li-del" style="color:var(--ink-s)">✕</button>
   </div>`;
 }
 
 function attachLiListeners(){
-  document.querySelectorAll('.li-desc').forEach((inp,i)=>inp.addEventListener('input',()=>{ invLineItems[i].desc=inp.value; refreshLiTotals(); }));
-  document.querySelectorAll('.li-qty').forEach((inp,i)=>inp.addEventListener('input',()=>{ invLineItems[i].qty=parseFloat(inp.value)||0; refreshLiTotals(); }));
-  document.querySelectorAll('.li-price').forEach((inp,i)=>inp.addEventListener('input',()=>{ invLineItems[i].price=parseFloat(inp.value)||0; refreshLiTotals(); }));
+  document.querySelectorAll('.li-desc').forEach((inp,i)=>inp.addEventListener('input',()=>{ invLineItems[i].desc=inp.value; }));
+  document.querySelectorAll('.li-amount').forEach((inp,i)=>inp.addEventListener('input',()=>{ invLineItems[i].amount=parseFloat(inp.value)||0; refreshLiTotals(); }));
   document.querySelectorAll('.li-del').forEach((btn,i)=>btn.addEventListener('click',()=>{ invLineItems.splice(i,1); renderInvStep(); }));
 }
 
-function addLiRow(){ invLineItems.push({desc:'',qty:1,price:0}); renderInvStep(); }
+function addLiRow(){ invLineItems.push({desc:'',amount:0}); renderInvStep(); }
 
 function refreshLiTotals(){
-  document.querySelectorAll('.li-row').forEach((row,i)=>{
-    const li=invLineItems[i]; if(!li) return;
-    row.querySelector('.li-total').textContent=fmtEur(li.qty*li.price);
-  });
-  const sub=invLineItems.reduce((s,i)=>s+(i.qty*i.price),0);
-  const rows=document.querySelectorAll('.inv-sum-row span:last-child');
-  if(rows[0]) rows[0].textContent=fmtEur(sub);
+  const sub=invLineItems.reduce((s,i)=>s+(Number(i.amount)||0),0);
+  const el=$('li-subtotal'); if(el) el.textContent=fmtInvAmount(sub);
 }
 
 $('inv-next-btn').addEventListener('click', async ()=>{
@@ -2217,9 +2312,9 @@ $('inv-next-btn').addEventListener('click', async ()=>{
         if(!grouped[proj]) grouped[proj]={desc:proj,mins:0,rate};
         grouped[proj].mins+=mins;
       });
-      invLineItems=Object.values(grouped).map(g=>({ desc:g.desc, qty:parseFloat((g.mins/60).toFixed(2)), price:g.rate }));
+      invLineItems=Object.values(grouped).map(g=>({ desc:g.desc, amount:parseFloat(((g.mins/60)*g.rate).toFixed(2)) }));
     }
-    if(!invLineItems.length) invLineItems=[{desc:'Leistung',qty:1,price:0}];
+    if(!invLineItems.length) invLineItems=[{desc:'',amount:0}];
     invStep=2; renderInvStep();
   } else if(invStep===2){
     invStep=3; renderInvStep();
@@ -2236,16 +2331,20 @@ async function saveInvoice(){
   const invNum=body.dataset.invNum;
   const subtotal=parseFloat(body.dataset.subtotal)||0;
   const total=parseFloat(body.dataset.total)||0;
+  // Billed-to address + billing period are snapshotted into notes (JSON).
+  const notes=invMetaToNotes({ billing_period:invBillingPeriod, bill_to:invBillTo });
   const { data:inv, error }=await sb.from('invoices').insert({
     client_id:invClientId, invoice_number:invNum,
-    invoice_date:today(), due_date:body.dataset.due||null,
+    invoice_date:today(), due_date:invDue||null,
     status:'draft', subtotal, tax_rate:0, tax_amount:0, total,
-    notes:body.dataset.notes||null,
+    notes,
   }).select().single();
   if(error){ toast('Fehler: '+error.message,'err'); return; }
-  // Save line items
-  const liPayload=invLineItems.map((li,i)=>({ invoice_id:inv.id, description:li.desc, quantity:li.qty, unit_price:li.price, total:li.qty*li.price, sort_order:i }));
+  // Save line items (amount only; quantity fixed at 1, no "Menge")
+  const liPayload=invLineItems.map((li,i)=>({ invoice_id:inv.id, description:li.desc, quantity:1, unit_price:Number(li.amount)||0, total:Number(li.amount)||0, sort_order:i }));
   await sb.from('invoice_items').insert(liPayload);
+  // Remember the billing address for this client for next time.
+  if(invClientId && invBillTo){ try{ localStorage.setItem(billToKey(invClientId), invBillTo); }catch(e){} }
   // Mark time entries as invoiced
   if(invSelectedTEs.length) await sb.from('time_entries').update({is_invoiced:true}).in('id',invSelectedTEs);
   closeModal('ov-invoice');
@@ -2294,42 +2393,122 @@ function openInvoicePreviewModal(inv){
   document.getElementById('inv-send-gmail-btn').onclick=()=>sendViaGmail(inv);
 }
 
+// ── INVOICE RENDERING HELPERS ─────────────────────────────────────────
+// Amount formatting matching the PDF: "2850,00 EUR" (comma decimals,
+// no thousands grouping, currency code suffix).
+function fmtInvAmount(v){
+  const n = Number(v)||0;
+  const cur = (companySettings.currency||'EUR').trim() || 'EUR';
+  return n.toFixed(2).replace('.', ',') + ' ' + cur;
+}
+// Per-invoice extras (Billed-to snapshot + billing period) are stored as a
+// JSON blob inside the existing `notes` column — no DB migration needed.
+// Legacy / scanned invoices keep plain-text notes and degrade gracefully.
+function parseInvMeta(inv){
+  const raw = inv && typeof inv.notes==='string' ? inv.notes.trim() : '';
+  if(raw.startsWith('{')){
+    try{ const o=JSON.parse(raw); return { billing_period:o.billing_period||'', bill_to:o.bill_to||'' }; }catch(e){}
+  }
+  return { billing_period:'', bill_to:'' };
+}
+function invMetaToNotes(meta){
+  return JSON.stringify({ billing_period:(meta.billing_period||'').trim(), bill_to:(meta.bill_to||'').trim() });
+}
+// Render a multi-line address block; first non-empty line is bold (name).
+function invAddrBlock(text, fallbackLines){
+  let lines = String(text||'').split('\n').map(l=>l.trim()).filter(Boolean);
+  if(!lines.length) lines = (fallbackLines||[]).filter(Boolean);
+  if(!lines.length) return '';
+  return lines.map((l,i)=> i===0 ? `<div class="invd-name">${esc(l)}</div>` : `<div>${esc(l)}</div>`).join('');
+}
+function invMultiline(text){ return esc(text).replace(/\n/g,'<br>'); }
+
 function buildInvoiceHTML(inv, forModal=false){
-  const items=(inv.invoice_items||[]).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
-  const rows=items.map(i=>`<tr><td>${esc(i.description||'')}</td><td style="text-align:right">${typeof i.quantity==='number'?i.quantity:i.qty}</td><td style="text-align:right">${fmtEur(i.unit_price||i.price)}</td><td style="text-align:right;font-weight:600">${fmtEur(i.total||(i.qty*i.price))}</td></tr>`).join('');
-  return `<div class="inv-preview" ${forModal?'style="padding:2rem"':''}>
-    <div class="inv-preview-hd">
-      <div class="inv-from">
-        <div style="font-size:1.125rem;font-weight:700;margin-bottom:.25rem">${esc(CONFIG.INVOICE_FROM.name)}</div>
-        ${CONFIG.INVOICE_FROM.address?`<div>${esc(CONFIG.INVOICE_FROM.address)}</div>`:''}
-        <div>${esc(CONFIG.INVOICE_FROM.email)}</div>
-        <div>${esc(CONFIG.INVOICE_FROM.website)}</div>
-        ${CONFIG.INVOICE_FROM.tax_id?`<div>St.-Nr.: ${esc(CONFIG.INVOICE_FROM.tax_id)}</div>`:''}
-      </div>
+  const s = companySettings;
+  const meta = parseInvMeta(inv);
+  const items = (inv.invoice_items||[]).slice().sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+  const itemAmount = i => (i.total!=null ? Number(i.total)
+                          : i.amount!=null ? Number(i.amount)
+                          : i.unit_price!=null ? Number(i.unit_price)
+                          : (Number(i.qty)||0)*(Number(i.price)||0));
+  const rows = items.map((i,idx)=>`<tr>
+      <td class="c-pos">${idx+1}</td>
+      <td class="c-desc">${invMultiline(i.description||'')}</td>
+      <td class="c-amt">${fmtInvAmount(itemAmount(i))}</td>
+    </tr>`).join('');
+
+  const subtotal = inv.subtotal!=null ? Number(inv.subtotal) : items.reduce((a,i)=>a+itemAmount(i),0);
+  const total    = inv.total!=null ? Number(inv.total) : subtotal;
+  const vatAmount = (Number(total)-Number(subtotal)) || 0;
+  const num = inv.invoice_number||'';
+
+  const billedTo = invAddrBlock(meta.bill_to, [
+    inv.clients?.company||inv.clients?.name,
+    (inv.clients?.company && inv.clients?.name && inv.clients?.name!==inv.clients?.company) ? inv.clients?.name : '',
+    inv.clients?.email
+  ]);
+  // issuerName is the bold first line; prepend it to the address block.
+  const payToFull = `${s.issuerName?`<div class="invd-name">${esc(s.issuerName)}</div>`:''}${invMultiline(s.issuerAddress||'')}`;
+
+  return `<div class="inv-doc">
+    <div class="invd-top">
       <div>
-        <div class="inv-num">Rechnung #${esc(inv.invoice_number||'')}</div>
-        <div class="inv-meta">Datum: ${fmtDate(inv.invoice_date)}</div>
-        ${inv.due_date?`<div class="inv-meta">Fällig: ${fmtDate(inv.due_date)}</div>`:''}
+        <h1 class="invd-title">INVOICE</h1>
+        <div class="invd-sub">#${esc(num)}</div>
+      </div>
+      ${s.logo?`<img class="invd-logo" src="${s.logo}" alt="Logo" />`:''}
+    </div>
+
+    <table class="invd-meta">
+      <tr><td class="invd-meta-k">Date</td><td>${fmtDate(inv.invoice_date)}</td></tr>
+      <tr><td class="invd-meta-k">Number</td><td>#${esc(num)}</td></tr>
+    </table>
+
+    <div class="invd-parties">
+      <div class="invd-party">
+        <div class="invd-h">Billed to</div>
+        ${billedTo||'<div class="invd-name">—</div>'}
+      </div>
+      <div class="invd-party">
+        <div class="invd-h">Pay to</div>
+        ${payToFull}
       </div>
     </div>
-    <div class="inv-to">
-      <div style="font-size:.6875rem;font-weight:600;color:var(--ink-s);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.375rem">Rechnungsempfänger</div>
-      <div style="font-weight:600">${esc(inv.clients?.name||inv.clients?.company||'')}</div>
-      ${inv.clients?.company&&inv.clients?.name!==inv.clients?.company?`<div>${esc(inv.clients.company)}</div>`:''}
-      ${inv.clients?.email?`<div>${esc(inv.clients.email)}</div>`:''}
+
+    ${meta.billing_period?`<div class="invd-period">Billing period: ${esc(meta.billing_period)}</div>`:''}
+
+    <table class="invd-items">
+      <thead><tr><th class="c-pos">Position</th><th class="c-desc">Description</th><th class="c-amt">Amount</th></tr></thead>
+      <tbody>${rows||''}</tbody>
+    </table>
+
+    <div class="invd-totals">
+      <div class="invd-tot-row b"><span>Subtotal (net):</span><span>${fmtInvAmount(subtotal)}</span></div>
+      <div class="invd-tot-row"><span>${esc(s.vatLabel||'VAT')}:</span><span>${fmtInvAmount(vatAmount)}</span></div>
+      <div class="invd-tot-row b"><span>Total amount:</span><span>${fmtInvAmount(total)}</span></div>
     </div>
-    <table class="inv-table"><thead><tr><th>Beschreibung</th><th style="text-align:right">Menge</th><th style="text-align:right">Preis</th><th style="text-align:right">Gesamt</th></tr></thead><tbody>${rows}</tbody></table>
-    <div class="inv-totals">
-      <div class="inv-tot-row final"><span>Gesamtbetrag</span><span>${fmtEur(inv.total)}</span></div>
+
+    <div class="invd-account">
+      <div class="invd-h">Account</div>
+      ${s.bank?`<div class="invd-acc-bank">Bank name and address:<br>${invMultiline(s.bank)}</div>`:''}
+      ${s.accName?`<div class="invd-acc-line"><span class="invd-acc-k">Name:</span><span>${esc(s.accName)}</span></div>`:''}
+      ${s.iban?`<div class="invd-acc-line"><span class="invd-acc-k">IBAN:</span><span>${esc(s.iban)}</span></div>`:''}
+      ${s.bic?`<div class="invd-acc-line"><span class="invd-acc-k">Swift/BIC:</span><span>${esc(s.bic)}</span></div>`:''}
     </div>
-    ${inv.notes?`<div class="inv-footer">${esc(inv.notes)}</div>`:''}
+
+    ${s.legal?`<div class="invd-legal">${invMultiline(s.legal)}</div>`:''}
   </div>`;
 }
 
 async function nextInvoiceNumber(){
-  const year=new Date().getFullYear();
-  const { count }=await sb.from('invoices').select('*',{count:'exact',head:true}).like('invoice_number',`${year}-%`);
-  return `${year}-${String((count||0)+1).padStart(3,'0')}`;
+  // Match the PDF style: INV-DD-MM-YYYY (e.g. INV-31-05-2026), shown as "#INV-…".
+  const d=new Date();
+  const base=`INV-${pad(d.getDate())}-${pad(d.getMonth()+1)}-${d.getFullYear()}`;
+  const { data }=await sb.from('invoices').select('invoice_number').like('invoice_number',`${base}%`);
+  const existing=new Set((data||[]).map(r=>r.invoice_number));
+  if(!existing.has(base)) return base;
+  let n=2; while(existing.has(`${base}-${n}`)) n++;
+  return `${base}-${n}`;
 }
 
 function printInvoice(){
@@ -2337,6 +2516,122 @@ function printInvoice(){
   window.print();
   $('print-area').style.display='none';
 }
+
+// ── INVOICE SETTINGS (logo + company profile) ─────────────────────────
+let pendingLogo = null;  // staged logo (data URL) while the modal is open
+
+$('btn-inv-settings').addEventListener('click', openInvSettings);
+
+function openInvSettings(){
+  const s = loadCompanySettings();
+  pendingLogo = s.logo || '';
+  $('inv-settings-body').innerHTML = `
+    <div class="fg s2" style="margin-bottom:1rem">
+      <label class="fl">Logo</label>
+      <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+        <div id="set-logo-prev" style="width:140px;height:80px;border:1px dashed var(--border-s);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;background:#fff;overflow:hidden"></div>
+        <div style="display:flex;flex-direction:column;gap:.4rem">
+          <label class="btn btn--ghost btn--sm" style="cursor:pointer">
+            <input type="file" id="set-logo-input" accept="image/*" hidden /> Logo hochladen / austauschen
+          </label>
+          <button type="button" class="btn btn--ghost btn--sm" id="set-logo-remove" style="color:var(--red)">Logo entfernen</button>
+          <span style="font-size:.72rem;color:var(--ink-s)">PNG / JPG / SVG · erscheint oben rechts auf der Rechnung</span>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="g2" style="margin-top:1rem">
+      <div class="fg s2"><label class="fl">Pay to — Firmenname</label><input class="fi" id="set-issuer-name" value="${esc(s.issuerName)}" /></div>
+      <div class="fg s2"><label class="fl">Pay to — Adresse (mehrzeilig)</label><textarea class="fi" id="set-issuer-addr" rows="3">${esc(s.issuerAddress)}</textarea></div>
+    </div>
+    <div class="divider"></div>
+    <span class="sec-ttl" style="margin:1rem 0 .5rem;display:block">Account (Bankverbindung)</span>
+    <div class="g2">
+      <div class="fg s2"><label class="fl">Bank name and address</label><textarea class="fi" id="set-bank" rows="2">${esc(s.bank)}</textarea></div>
+      <div class="fg"><label class="fl">Name</label><input class="fi" id="set-acc-name" value="${esc(s.accName)}" /></div>
+      <div class="fg"><label class="fl">IBAN</label><input class="fi" id="set-iban" value="${esc(s.iban)}" /></div>
+      <div class="fg"><label class="fl">Swift / BIC</label><input class="fi" id="set-bic" value="${esc(s.bic)}" /></div>
+      <div class="fg"><label class="fl">Währung</label><input class="fi" id="set-currency" value="${esc(s.currency)}" /></div>
+      <div class="fg"><label class="fl">VAT-Zeile (Label)</label><input class="fi" id="set-vatlabel" value="${esc(s.vatLabel)}" /></div>
+    </div>
+    <div class="divider"></div>
+    <div class="g2" style="margin-top:1rem">
+      <div class="fg s2"><label class="fl">Rechtshinweis (Fußzeile)</label><textarea class="fi" id="set-legal" rows="3">${esc(s.legal)}</textarea></div>
+    </div>`;
+  renderLogoPreview();
+  $('set-logo-input').addEventListener('change', async e=>{
+    const f=e.target.files[0]; if(!f) return;
+    try { pendingLogo = await readLogoFile(f); renderLogoPreview(); toast('Logo geladen — zum Übernehmen speichern.','ok'); }
+    catch(err){ toast(err.message||'Logo konnte nicht geladen werden.','err'); }
+  });
+  $('set-logo-remove').addEventListener('click', ()=>{ pendingLogo=''; renderLogoPreview(); });
+  openModal('ov-inv-settings');
+}
+
+function renderLogoPreview(){
+  const box=$('set-logo-prev'); if(!box) return;
+  box.innerHTML = pendingLogo
+    ? `<img src="${pendingLogo}" style="max-width:100%;max-height:100%;object-fit:contain" />`
+    : `<span style="font-size:.72rem;color:var(--ink-s)">Kein Logo</span>`;
+}
+
+// Read an image file, downscale raster images to max 480px wide, return a
+// data URL. SVGs are embedded as-is (vector). Keeps localStorage small.
+function readLogoFile(file){
+  return new Promise((resolve,reject)=>{
+    if(!file.type || !file.type.startsWith('image/')){ reject(new Error('Bitte eine Bilddatei wählen.')); return; }
+    const reader=new FileReader();
+    reader.onload=()=>{
+      if(file.type==='image/svg+xml'){ resolve(reader.result); return; }
+      const img=new Image();
+      img.onload=()=>{
+        const maxW=480; let w=img.naturalWidth||img.width, h=img.naturalHeight||img.height;
+        if(!w||!h){ reject(new Error('Bild konnte nicht gelesen werden.')); return; }
+        if(w>maxW){ h=Math.round(h*maxW/w); w=maxW; }
+        const c=document.createElement('canvas'); c.width=w; c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(c.toDataURL('image/png'));
+      };
+      img.onerror=()=>reject(new Error('Bild konnte nicht gelesen werden.'));
+      img.src=reader.result;
+    };
+    reader.onerror=()=>reject(new Error('Datei konnte nicht gelesen werden.'));
+    reader.readAsDataURL(file);
+  });
+}
+
+$('inv-settings-save-btn').addEventListener('click', ()=>{
+  const obj = {
+    logo:          pendingLogo||'',
+    issuerName:    $('set-issuer-name')?.value || '',
+    issuerAddress: $('set-issuer-addr')?.value || '',
+    bank:          $('set-bank')?.value || '',
+    accName:       $('set-acc-name')?.value || '',
+    iban:          $('set-iban')?.value || '',
+    bic:           $('set-bic')?.value || '',
+    currency:      ($('set-currency')?.value || 'EUR').trim() || 'EUR',
+    vatLabel:      $('set-vatlabel')?.value || '',
+    legal:         $('set-legal')?.value || '',
+  };
+  try { saveCompanySettings(obj); }
+  catch(e){ toast('Speichern fehlgeschlagen — Logo evtl. zu groß. Bitte kleineres Bild wählen.','err'); return; }
+  toast('Rechnungseinstellungen gespeichert.','ok');
+  closeModal('ov-inv-settings');
+  // Refresh an open preview with the new branding.
+  if(currentPreviewInv){
+    const h=buildInvoiceHTML(currentPreviewInv,true);
+    const b=$('invprev-body'); if(b) b.innerHTML=`<div style="padding:0">${h}</div>`;
+    if($('print-area')) $('print-area').innerHTML=h;
+  }
+});
+
+$('inv-settings-reset-btn').addEventListener('click', ()=>{
+  if(!confirm('Alle Rechnungseinstellungen (inkl. Logo) auf die Standardwerte zurücksetzen?')) return;
+  localStorage.removeItem(INV_SETTINGS_KEY);
+  companySettings = loadCompanySettings();
+  toast('Auf Standardwerte zurückgesetzt.','ok');
+  openInvSettings();
+});
 
 // ── ANALYTICS (GA4 Data API) ──────────────────────────────────────────
 let gaToken  = null;
