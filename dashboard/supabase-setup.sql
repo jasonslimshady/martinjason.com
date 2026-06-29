@@ -140,7 +140,6 @@ CREATE TABLE IF NOT EXISTS invoice_reminders (
   note             TEXT,
   status           TEXT        NOT NULL DEFAULT 'pending'
                    CHECK (status IN ('pending', 'done')),
-  calendar_event_id TEXT,
   created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

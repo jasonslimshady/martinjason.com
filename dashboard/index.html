@@ -849,12 +849,6 @@
           <div class="fg"><label class="fl">Erinnerungsdatum *</label><input class="fi" id="rem-date" type="date" required /></div>
           <div class="fg"><label class="fl">Uhrzeit</label><input class="fi" id="rem-time" type="time" value="09:00" /></div>
           <div class="fg s2"><label class="fl">Notiz</label><textarea class="fi" id="rem-note" rows="2" placeholder="z.B. Monatsrechnung für April, Projekt XY abrechnen…"></textarea></div>
-          <div class="fg s2">
-            <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.875rem">
-              <input type="checkbox" id="rem-calendar" checked style="width:16px;height:16px;accent-color:var(--accent)" />
-              In Google Kalender eintragen
-            </label>
-          </div>
         </div>
       </div>
       <div class="modal-ft">
@@ -3189,7 +3183,6 @@ $('klv-custom-btn').addEventListener('click', () => {
 
 // ── INVOICE REMINDERS ────────────────────────────────────────────────
 let editReminderId = null;
-let calendarToken = null;
 
 $('btn-inv-reminders').addEventListener('click', openRemindersListModal);
 $('btn-new-reminder').addEventListener('click', () => openReminderModal());
@@ -3223,11 +3216,9 @@ async function openReminderModal(reminder = null){
     $('rem-date').value = d.toISOString().split('T')[0];
     $('rem-time').value = d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit',hour12:false});
     $('rem-note').value = reminder.note || '';
-    $('rem-calendar').checked = false;
   } else {
     $('rem-date').value = daysFromNow(7);
     $('rem-time').value = '09:00';
-    $('rem-calendar').checked = true;
   }
   openModal('ov-reminder');
 }
@@ -3241,25 +3232,11 @@ async function saveReminder(e){
   if(!dateStr){ toast('Bitte ein Datum wählen.','err'); return; }
   const remindAt = new Date(`${dateStr}T${timeStr}`).toISOString();
   const note = $('rem-note').value.trim() || null;
-  const addToCalendar = $('rem-calendar').checked && !editReminderId;
 
   const btn = $('rem-save-btn');
   btn.disabled = true; btn.textContent = 'Speichern…';
 
-  let calendarEventId = null;
-  if(addToCalendar){
-    try {
-      const clientName = $('rem-client').options[$('rem-client').selectedIndex]?.text || '';
-      calendarEventId = await createCalendarReminder(clientName, remindAt, note);
-    } catch(err){
-      btn.disabled = false; btn.textContent = 'Speichern';
-      toast('Kalender-Fehler: ' + err.message, 'err');
-      return;
-    }
-  }
-
   const payload = { client_id:clientId, remind_at:remindAt, note, status:'pending' };
-  if(calendarEventId) payload.calendar_event_id = calendarEventId;
 
   let error;
   if(editReminderId){
@@ -3270,7 +3247,7 @@ async function saveReminder(e){
   btn.disabled = false; btn.textContent = 'Speichern';
   if(error){ toast('Fehler: '+error.message,'err'); return; }
   closeModal('ov-reminder');
-  toast(editReminderId ? 'Erinnerung aktualisiert.' : (calendarEventId ? 'Erinnerung gespeichert & Kalendereintrag erstellt.' : 'Erinnerung gespeichert.'), 'ok');
+  toast(editReminderId ? 'Erinnerung aktualisiert.' : 'Erinnerung gespeichert.', 'ok');
   loadInvReminders();
 }
 
@@ -3349,7 +3326,7 @@ async function renderRemindersAllList(){
       </div>
       <div style="flex:1;min-width:0">
         <div style="font-size:.875rem;font-weight:600">${esc(clientLabel)}</div>
-        <div style="font-size:.75rem;color:var(--ink-s)">${r.note ? esc(r.note) : 'Rechnung erstellen'}${r.calendar_event_id ? ' · <span style="color:var(--accent)">Kalender</span>' : ''}</div>
+        <div style="font-size:.75rem;color:var(--ink-s)">${r.note ? esc(r.note) : 'Rechnung erstellen'}</div>
       </div>
       <div style="text-align:right;flex-shrink:0">
         <div style="font-size:.8125rem;font-weight:500;${overdue&&!isDone?'color:var(--red)':''}">${fmtDate(r.remind_at)}</div>
@@ -3375,56 +3352,6 @@ async function renderRemindersAllList(){
     await sb.from('invoice_reminders').delete().eq('id', btn.dataset.id);
     toast('Gelöscht.'); renderRemindersAllList(); loadInvReminders();
   }));
-}
-
-// ── GOOGLE CALENDAR ─────────────────────────────────────────────────
-function getCalendarToken(){
-  return new Promise((resolve, reject) => {
-    if(!window.google){ reject(new Error('Google Identity Services nicht geladen')); return; }
-    const client = google.accounts.oauth2.initTokenClient({
-      client_id: CONFIG.GMAIL_CLIENT_ID,
-      scope: 'https://www.googleapis.com/auth/calendar.events',
-      callback: (res) => { if(res.error) reject(new Error(res.error)); else resolve(res.access_token); }
-    });
-    client.requestAccessToken();
-  });
-}
-
-async function createCalendarReminder(clientName, remindAtISO, note){
-  if(!calendarToken){
-    calendarToken = await getCalendarToken();
-  }
-  const start = new Date(remindAtISO);
-  const end = new Date(start.getTime() + 30*60*1000);
-  const summary = `Rechnung erstellen: ${clientName}`;
-  const description = note
-    ? `${note}\n\nErstellt über dashboard.martinjason.com`
-    : 'Erinnerung: Rechnung für diesen Kunden erstellen.\n\nErstellt über dashboard.martinjason.com';
-
-  const res = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
-    method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + calendarToken, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      summary,
-      description,
-      start: { dateTime: start.toISOString() },
-      end:   { dateTime: end.toISOString() },
-      reminders: {
-        useDefault: false,
-        overrides: [
-          { method: 'popup', minutes: 30 },
-          { method: 'popup', minutes: 0 },
-        ]
-      }
-    })
-  });
-  if(!res.ok){
-    const err = await res.json().catch(()=>({}));
-    if(res.status === 401){ calendarToken = null; }
-    throw new Error(err.error?.message || res.statusText);
-  }
-  const event = await res.json();
-  return event.id;
 }
 
 // ── GMAIL SEND ────────────────────────────────────────────────────────
