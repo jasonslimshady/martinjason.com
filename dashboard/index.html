@@ -719,9 +719,9 @@
         </div>
         <p id="mt-dur-hint" style="margin:.5rem 0 0;font-size:.8125rem;color:var(--ink-s)"></p>
         <div id="mt-logs-section" hidden style="margin-top:1rem">
-          <div class="divider"></div>
-          <div style="font-size:.75rem;font-weight:600;color:var(--ink-s);text-transform:uppercase;letter-spacing:.04em;margin-bottom:.5rem">Zeitprotokoll</div>
-          <div id="mt-logs-list"></div>
+          <div class="divider" style="margin-bottom:.75rem"></div>
+          <div style="font-size:.75rem;font-weight:600;color:var(--ink-s);text-transform:uppercase;letter-spacing:.04em;margin-bottom:.625rem">Zeitprotokoll</div>
+          <div id="mt-logs-list" style="max-height:220px;overflow-y:auto"></div>
         </div>
       </div>
       <div class="modal-ft">
@@ -1322,20 +1322,28 @@ $('btn-stop').addEventListener('click', async ()=>{
       if(existing){
         const logs = Array.isArray(existing.time_logs) ? [...existing.time_logs, logEntry] : [logEntry];
         const totalMins = (existing.duration_minutes||0) + sessionMins;
-        await sb.from('time_entries').update({
-          duration_minutes: totalMins,
-          end_time: sessionEnd,
-          time_logs: logs,
-        }).eq('id', timerResumeEntryId);
-        toast(`${fmtDur(sessionMins)} hinzugefügt — gesamt ${fmtDur(totalMins)}.`,'ok');
+        const updatePayload = { duration_minutes: totalMins, end_time: sessionEnd };
+        let { error } = await sb.from('time_entries').update({ ...updatePayload, time_logs: logs }).eq('id', timerResumeEntryId);
+        if(error){
+          ({ error } = await sb.from('time_entries').update(updatePayload).eq('id', timerResumeEntryId));
+        }
+        if(error){ toast('Fehler beim Speichern: '+error.message,'err'); }
+        else { toast(`${fmtDur(sessionMins)} hinzugefügt — gesamt ${fmtDur(totalMins)}.`,'ok'); }
       }
     } else {
-      await sb.from('time_entries').insert({
+      let { error } = await sb.from('time_entries').insert({
         project_id:pid, client_id:proj.client_id, duration_minutes:sessionMins,
         date:today(), start_time:sessionStart, end_time:sessionEnd,
         time_logs:[logEntry],
       });
-      toast(`${fmtDur(sessionMins)} gespeichert.`,'ok');
+      if(error){
+        ({ error } = await sb.from('time_entries').insert({
+          project_id:pid, client_id:proj.client_id, duration_minutes:sessionMins,
+          date:today(), start_time:sessionStart, end_time:sessionEnd,
+        }));
+      }
+      if(error){ toast('Fehler beim Speichern: '+error.message,'err'); }
+      else { toast(`${fmtDur(sessionMins)} gespeichert.`,'ok'); }
     }
   }
   $('timer-clk').textContent='00:00:00'; $('timer-meta').textContent='Kein Projekt ausgewählt';
