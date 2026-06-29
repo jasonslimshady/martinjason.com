@@ -41,8 +41,7 @@ const CONFIG = {
     tax_id:  '',
   },
 
-  // German MwSt — change to 0 if you're a Kleinunternehmer (§19 UStG)
-  DEFAULT_TAX_RATE: 19,
+  DEFAULT_TAX_RATE: 0,
 
   // Default payment term in days
   DEFAULT_PAYMENT_DAYS: 14,

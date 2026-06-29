@@ -127,6 +127,34 @@ BEGIN
   END IF;
 END $$;
 
+-- Migration helper: add pdf_url column to invoices if missing
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'invoices' AND column_name = 'pdf_url'
+  ) THEN
+    ALTER TABLE invoices ADD COLUMN pdf_url TEXT;
+  END IF;
+END $$;
+
+-- Storage bucket for invoice PDFs (run once)
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('invoice-pdfs', 'invoice-pdfs', false)
+ON CONFLICT (id) DO NOTHING;
+
+CREATE POLICY "Authenticated upload invoice PDFs"
+  ON storage.objects FOR INSERT TO authenticated
+  WITH CHECK (bucket_id = 'invoice-pdfs');
+
+CREATE POLICY "Authenticated read invoice PDFs"
+  ON storage.objects FOR SELECT TO authenticated
+  USING (bucket_id = 'invoice-pdfs');
+
+CREATE POLICY "Authenticated delete invoice PDFs"
+  ON storage.objects FOR DELETE TO authenticated
+  USING (bucket_id = 'invoice-pdfs');
+
 
 -- ============================================================
 --  TABLE: invoice_reminders
@@ -152,8 +180,7 @@ CREATE POLICY "Authenticated full access" ON invoice_reminders
 -- ============================================================
 --  TABLE: invoices
 --  One invoice per client billing cycle. Line items live in
---  invoice_items. tax_rate defaults to 19% (German MwSt) but
---  can be changed per invoice (e.g. 0% for EU B2B / Kleinunternehmer).
+--  invoice_items. No tax / MwSt (Kleinunternehmer §19 UStG).
 -- ============================================================
 CREATE TABLE IF NOT EXISTS invoices (
   id             UUID           DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -164,10 +191,11 @@ CREATE TABLE IF NOT EXISTS invoices (
   status         TEXT           NOT NULL DEFAULT 'draft'
                  CHECK (status IN ('draft', 'sent', 'paid', 'overdue', 'cancelled')),
   subtotal       DECIMAL(10,2)  NOT NULL DEFAULT 0,
-  tax_rate       DECIMAL(5,2)   NOT NULL DEFAULT 19.00,
+  tax_rate       DECIMAL(5,2)   NOT NULL DEFAULT 0,
   tax_amount     DECIMAL(10,2)  NOT NULL DEFAULT 0,
   total          DECIMAL(10,2)  NOT NULL DEFAULT 0,
   notes          TEXT,
+  pdf_url        TEXT,
   sent_at        TIMESTAMPTZ,
   paid_at        TIMESTAMPTZ,
   created_at     TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
