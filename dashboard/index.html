@@ -710,6 +710,11 @@
           </div>
         </div>
         <p id="mt-dur-hint" style="margin:.5rem 0 0;font-size:.8125rem;color:var(--ink-s)"></p>
+        <div id="mt-logs-section" hidden style="margin-top:1rem">
+          <div class="divider"></div>
+          <div style="font-size:.75rem;font-weight:600;color:var(--ink-s);text-transform:uppercase;letter-spacing:.04em;margin-bottom:.5rem">Zeitprotokoll</div>
+          <div id="mt-logs-list"></div>
+        </div>
       </div>
       <div class="modal-ft">
         <button type="button" class="btn btn--danger btn--sm" id="mt-delete-btn" hidden>Löschen</button>
@@ -1233,31 +1238,57 @@ async function saveProject(e){
 }
 
 // ── TIMER ────────────────────────────────────────────────────────────
-let timerTick=null, timerStart=null;
+let timerTick=null, timerStart=null, timerResumeEntryId=null, timerPrevMinutes=0;
 
 $('btn-start').addEventListener('click',()=>{
   if(!$('timer-proj').value){ toast('Bitte erst ein Projekt wählen.','err'); return; }
   timerStart=Date.now();
   timerTick=setInterval(()=>{
-    const s=Math.floor((Date.now()-timerStart)/1000);
+    const s=Math.floor((Date.now()-timerStart)/1000) + timerPrevMinutes*60;
     $('timer-clk').textContent=`${pad(~~(s/3600))}:${pad(~~(s%3600/60))}:${pad(s%60)}`;
   },1000);
   $('btn-start').hidden=true; $('btn-stop').hidden=false;
-  const sel=$('timer-proj'); $('timer-meta').textContent=sel.options[sel.selectedIndex]?.text||'';
-  toast('Timer gestartet.');
+  const sel=$('timer-proj');
+  const label = sel.options[sel.selectedIndex]?.text||'';
+  $('timer-meta').textContent = timerResumeEntryId ? `${label} (fortgesetzt)` : label;
+  toast(timerResumeEntryId ? 'Timer fortgesetzt.' : 'Timer gestartet.');
 });
 
 $('btn-stop').addEventListener('click', async ()=>{
   clearInterval(timerTick); timerTick=null;
-  const mins=Math.round((Date.now()-timerStart)/60000);
+  const sessionMins=Math.round((Date.now()-timerStart)/60000);
+  const sessionStart=new Date(timerStart).toISOString();
+  const sessionEnd=new Date().toISOString();
   const pid=$('timer-proj').value;
   const proj=projectsCache.find(p=>p.id===pid);
-  if(mins>0&&proj){
-    await sb.from('time_entries').insert({ project_id:pid, client_id:proj.client_id, duration_minutes:mins, date:today() });
-    toast(`${fmtDur(mins)} gespeichert.`,'ok');
+
+  if(sessionMins>0&&proj){
+    const logEntry = { start:sessionStart, stop:sessionEnd, minutes:sessionMins };
+
+    if(timerResumeEntryId){
+      const { data:existing } = await sb.from('time_entries').select('duration_minutes,time_logs,start_time').eq('id',timerResumeEntryId).single();
+      if(existing){
+        const logs = Array.isArray(existing.time_logs) ? [...existing.time_logs, logEntry] : [logEntry];
+        const totalMins = (existing.duration_minutes||0) + sessionMins;
+        await sb.from('time_entries').update({
+          duration_minutes: totalMins,
+          end_time: sessionEnd,
+          time_logs: logs,
+        }).eq('id', timerResumeEntryId);
+        toast(`${fmtDur(sessionMins)} hinzugefügt — gesamt ${fmtDur(totalMins)}.`,'ok');
+      }
+    } else {
+      await sb.from('time_entries').insert({
+        project_id:pid, client_id:proj.client_id, duration_minutes:sessionMins,
+        date:today(), start_time:sessionStart, end_time:sessionEnd,
+        time_logs:[logEntry],
+      });
+      toast(`${fmtDur(sessionMins)} gespeichert.`,'ok');
+    }
   }
   $('timer-clk').textContent='00:00:00'; $('timer-meta').textContent='Kein Projekt ausgewählt';
-  $('btn-start').hidden=false; $('btn-stop').hidden=true; timerStart=null;
+  $('btn-start').hidden=false; $('btn-stop').hidden=true;
+  timerStart=null; timerResumeEntryId=null; timerPrevMinutes=0;
   loadTimeEntries(); loadStats();
 });
 
@@ -1277,20 +1308,30 @@ function openTimeModal(entry = null) {
     o.value = p.id; o.textContent = `${p.name} — ${p.clients?.name||''}`;
     projSel.appendChild(o);
   });
+  const hasLogs = entry && Array.isArray(entry.time_logs) && entry.time_logs.length > 0;
+  const vonBisRow = $('mt-von').closest('.fg');
+  if(vonBisRow) vonBisRow.style.display = hasLogs ? 'none' : '';
   if (entry) {
     projSel.value          = entry.project_id || '';
     $('mt-desc').value     = entry.description || '';
     $('mt-date').value     = entry.date || today();
     $('mt-invoiced').value = entry.is_invoiced ? 'true' : 'false';
-    // Pre-fill Von/Bis from stored timestamps if available
-    $('mt-von').value = entry.start_time ? fmtTimeOnly(entry.start_time) : '';
-    $('mt-bis').value = entry.end_time   ? fmtTimeOnly(entry.end_time)   : '';
-    // If no timestamps, fall back to manual duration
-    if (!entry.start_time) {
+    if(hasLogs){
+      $('mt-von').value = '';
+      $('mt-bis').value = '';
       $('mt-h').value = Math.floor((entry.duration_minutes||0) / 60);
       $('mt-m').value = (entry.duration_minutes||0) % 60;
+      setDurLock(true);
+    } else {
+      $('mt-von').value = entry.start_time ? fmtTimeOnly(entry.start_time) : '';
+      $('mt-bis').value = entry.end_time   ? fmtTimeOnly(entry.end_time)   : '';
+      if (!entry.start_time) {
+        $('mt-h').value = Math.floor((entry.duration_minutes||0) / 60);
+        $('mt-m').value = (entry.duration_minutes||0) % 60;
+      }
     }
   } else {
+    if(vonBisRow) vonBisRow.style.display = '';
     $('mt-date').value     = today();
     $('mt-von').value      = '';
     $('mt-bis').value      = '';
@@ -1298,8 +1339,34 @@ function openTimeModal(entry = null) {
     $('mt-m').value        = 0;
     $('mt-invoiced').value = 'false';
   }
-  // Sync auto-calc state after pre-fill
-  calcDurFromVonBis();
+  if(!hasLogs) calcDurFromVonBis();
+  // Render time_logs history
+  const logsSection = $('mt-logs-section');
+  const logsList = $('mt-logs-list');
+  if(entry && Array.isArray(entry.time_logs) && entry.time_logs.length > 0){
+    logsSection.hidden = false;
+    logsList.innerHTML = entry.time_logs.map((log, i) => {
+      const start = log.start ? new Date(log.start) : null;
+      const stop = log.stop ? new Date(log.stop) : null;
+      const startStr = start ? start.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + start.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}) : '—';
+      const stopStr = stop ? stop.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}) : '—';
+      const dateChanged = start && stop && start.toDateString() !== stop.toDateString();
+      const stopDisplay = dateChanged ? stop.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'}) + ' ' + stopStr : stopStr;
+      return `<div style="display:flex;align-items:center;gap:.75rem;padding:.5rem .75rem;border-radius:var(--r-sm);background:var(--surface-2);margin-bottom:.375rem">
+        <div style="width:20px;height:20px;border-radius:50%;background:var(--green-t);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="9" height="9" fill="var(--green)" viewBox="0 0 16 16"><path d="M5 3.5v9l7-4.5z"/></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.8125rem;font-weight:500">Session ${i+1}</div>
+          <div style="font-size:.75rem;color:var(--ink-s)">${startStr} → ${stopDisplay}</div>
+        </div>
+        <div style="font-size:.8125rem;font-weight:600;font-variant-numeric:tabular-nums;flex-shrink:0">${fmtDur(log.minutes||0)}</div>
+      </div>`;
+    }).join('') + `<div style="display:flex;justify-content:flex-end;margin-top:.375rem;font-size:.75rem;color:var(--ink-s);font-weight:600">Gesamt: ${fmtDur(entry.time_logs.reduce((s,l)=>s+(l.minutes||0),0))}</div>`;
+  } else {
+    logsSection.hidden = true;
+    logsList.innerHTML = '';
+  }
   openModal('ov-time');
 }
 
@@ -1365,7 +1432,7 @@ async function saveManualTime(e){
 }
 
 async function loadTimeEntries(){
-  const { data }=await sb.from('time_entries').select('*,projects(name)').order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30);
+  const { data }=await sb.from('time_entries').select('*,time_logs,projects(name)').order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30);
   const list=data||[];
   const todayStr=today(), weekAgo=new Date(Date.now()-7*864e5).toISOString().split('T')[0];
   $('t-today').textContent=fmtDur(list.filter(e=>e.date===todayStr).reduce((s,e)=>s+e.duration_minutes,0));
@@ -1381,7 +1448,7 @@ async function loadTimeEntries(){
     <td class="muted">${fmtDate(e.date)}</td><td class="muted mono">${zeitStr}</td>
     <td class="mono">${fmtDur(e.duration_minutes)}</td>
     <td>${e.is_invoiced?'<span class="tag tag--green">Fakturiert</span>':'<span class="tag tag--muted">Offen</span>'}</td>
-    <td style="padding:.5rem .625rem"><button class="btn btn--icon btn--ghost te-restart-btn" data-proj="${e.project_id}" title="Timer für dieses Projekt starten" style="width:28px;height:28px;color:var(--green)"><svg width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M5 3.5v9l7-4.5z"/></svg></button></td>
+    <td style="padding:.5rem .625rem"><button class="btn btn--icon btn--ghost te-restart-btn" data-proj="${e.project_id}" data-entry="${e.id}" data-mins="${e.duration_minutes}" title="Timer für diesen Eintrag fortsetzen" style="width:28px;height:28px;color:var(--green)"><svg width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M5 3.5v9l7-4.5z"/></svg></button></td>
   </tr>`;}).join('');
   const entryMap = Object.fromEntries(list.map(e => [e.id, e]));
   tbody.querySelectorAll('tr[data-id]').forEach(row =>
@@ -1394,10 +1461,14 @@ async function loadTimeEntries(){
     btn.addEventListener('click', e => {
       e.stopPropagation();
       const pid = btn.dataset.proj;
+      const eid = btn.dataset.entry;
+      const prevMins = parseInt(btn.dataset.mins)||0;
       if(!pid) return;
       if(timerTick){ toast('Timer läuft bereits. Bitte zuerst stoppen.','err'); return; }
       const sel = $('timer-proj');
       if([...sel.options].some(o=>o.value===pid)){
+        timerResumeEntryId = eid;
+        timerPrevMinutes = prevMins;
         sel.value = pid;
         $('btn-start').click();
         $('panel-time').scrollTo({top:0,behavior:'smooth'});
