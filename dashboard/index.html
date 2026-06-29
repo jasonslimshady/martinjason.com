@@ -288,7 +288,7 @@
     .invd-top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;margin-bottom:26px}
     .invd-title{font-size:34px;font-weight:800;letter-spacing:-.01em;margin:0 0 4px;line-height:1}
     .invd-sub{font-size:14px;color:#333}
-    .invd-logo{max-height:80px;max-width:240px;width:auto;object-fit:contain;display:block}
+    .invd-logo{max-height:40px;max-width:120px;width:auto;object-fit:contain;display:block}
     .invd-meta{border-collapse:collapse;margin-bottom:26px}
     .invd-meta td{padding:1px 0;font-size:13px;vertical-align:top}
     .invd-meta-k{padding-right:42px;width:92px}
@@ -315,12 +315,14 @@
     .invd-legal{font-size:13px;line-height:1.6;text-align:justify;border-top:1px solid #b9b9b9;padding-top:18px}
 
     @media print{
-      html,body{height:auto!important;overflow:visible!important}
-      body *{visibility:hidden!important}
-      #print-area,#print-area *{visibility:visible!important}
-      #print-area{position:absolute;top:0;left:0;width:100%;background:#fff}
+      html,body{height:auto!important;overflow:visible!important;background:#fff!important}
+      /* Hide the whole dashboard, print only the invoice in normal flow so
+         the @page margins apply on every page (no absolute positioning,
+         which previously pulled content to the physical page edge). */
+      body > *{display:none!important}
+      #print-area{display:block!important;position:static!important;width:auto!important;background:#fff}
       .inv-doc{padding:0;max-width:100%;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-      @page{size:A4;margin:18mm 15mm}
+      @page{size:A4;margin:18mm 16mm}
     }
 
     /* KLAVIYO */
