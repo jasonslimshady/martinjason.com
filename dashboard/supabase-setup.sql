@@ -111,8 +111,21 @@ CREATE TABLE IF NOT EXISTS time_entries (
   duration_minutes INTEGER     NOT NULL DEFAULT 0,
   date             DATE        NOT NULL DEFAULT CURRENT_DATE,
   is_invoiced      BOOLEAN     NOT NULL DEFAULT false,
+  time_logs        JSONB       NOT NULL DEFAULT '[]',
   created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Migration helper: add time_logs column if table already exists
+-- (safe to run multiple times)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'time_entries' AND column_name = 'time_logs'
+  ) THEN
+    ALTER TABLE time_entries ADD COLUMN time_logs JSONB NOT NULL DEFAULT '[]';
+  END IF;
+END $$;
 
 
 -- ============================================================
