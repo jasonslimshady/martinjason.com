@@ -666,6 +666,8 @@
           <div class="fg"><label class="fl">Telefon</label><input class="fi" id="mc-phone" placeholder="+49 …" /></div>
           <div class="fg s2"><label class="fl">Unternehmen</label><input class="fi" id="mc-company" placeholder="Musterfirma GmbH" /></div>
           <div class="fg s2"><label class="fl">Website</label><input class="fi" id="mc-web" type="url" placeholder="https://…" /></div>
+          <div class="fg s2"><label class="fl">Adresse (für Rechnung)</label><textarea class="fi" id="mc-address" rows="3" placeholder="Straße Nr.&#10;PLZ Ort&#10;Land"></textarea></div>
+          <div class="fg s2"><label class="fl">USt-IdNr. (optional, für Rechnung)</label><input class="fi" id="mc-vatid" placeholder="z.B. DE299831460" /></div>
           <div class="fg"><label class="fl">Pipeline-Phase</label>
             <select class="fi" id="mc-stage">
               <option value="new_lead">Neuer Lead</option><option value="contacted">Kontaktiert</option>
@@ -1109,11 +1111,21 @@ async function saveClient(e){
   const payload={ name:$('mc-name').value.trim(), email:$('mc-email').value.trim()||null,
     company:$('mc-company').value.trim()||null, phone:$('mc-phone').value.trim()||null,
     website:$('mc-web').value.trim()||null, pipeline_stage:stage,
+    address:$('mc-address').value.trim()||null, vat_id:$('mc-vatid').value.trim()||null,
     next_followup_date:$('mc-followup').value||null, notes:$('mc-notes').value.trim()||null,
     is_active_client:stage==='won' };
-  const { error } = editClientId
+  let { error } = editClientId
     ? await sb.from('clients').update(payload).eq('id',editClientId)
     : await sb.from('clients').insert(payload);
+  // Graceful fallback if the address/vat_id columns aren't migrated yet.
+  if(error && /address|vat_id|column|schema cache/i.test(error.message||'')){
+    const { address, vat_id, ...base } = payload;
+    const retry = editClientId
+      ? await sb.from('clients').update(base).eq('id',editClientId)
+      : await sb.from('clients').insert(base);
+    error = retry.error;
+    if(!error) toast('Adresse/USt-IdNr. nicht gespeichert — bitte das aktualisierte supabase-setup.sql in Supabase ausführen.','err');
+  }
   btn.textContent='Speichern'; btn.disabled=false;
   if(error){ toast('Fehler: '+error.message,'err'); return; }
   closeModal('ov-client'); toast(editClientId?'Kontakt aktualisiert.':'Lead hinzugefügt.','ok');
@@ -1139,6 +1151,8 @@ async function openDrawer(id){
     ['E-Mail', c.email ? `<a href="mailto:${esc(c.email)}" style="color:var(--accent)">${esc(c.email)}</a>` : '—'],
     ['Telefon', c.phone||'—'],
     ['Website', c.website ? `<a href="${esc(c.website)}" target="_blank" style="color:var(--accent)">${esc(c.website)}</a>` : '—'],
+    ['Adresse', c.address ? esc(c.address).replace(/\n/g,'<br>') : '—'],
+    ['USt-IdNr.', c.vat_id ? esc(c.vat_id) : '—'],
     ['Follow-up', c.next_followup_date ? fmtDate(c.next_followup_date) : '—'],
     ['Erstellt', fmtDate(c.created_at)],
     ['Notizen', c.notes||'—'],
@@ -1150,6 +1164,7 @@ async function openDrawer(id){
     $('mc-name').value=c.name||''; $('mc-email').value=c.email||'';
     $('mc-phone').value=c.phone||''; $('mc-company').value=c.company||'';
     $('mc-web').value=c.website||''; $('mc-stage').value=c.pipeline_stage||'new_lead';
+    $('mc-address').value=c.address||''; $('mc-vatid').value=c.vat_id||'';
     $('mc-followup').value=c.next_followup_date||''; $('mc-notes').value=c.notes||'';
     openModal('ov-client');
   };
@@ -2153,14 +2168,18 @@ async function viewInvoice(id){
 let invStep=1, invClientId=null, invSelectedTEs=[], invLineItems=[], invClients=[];
 let invBillTo=null, invBillingPeriod=null, invDue=null;
 
-// Remember the full "Billed to" address per client so re-billing the same
-// client pre-fills the address typed last time (clients table has no address).
+// Build the "Billed to" block from the client record (company, name,
+// postal address, optional VAT id) — matches the PDF layout. A hand-typed
+// override is still remembered per client in localStorage as a fallback.
 function billToKey(id){ return 'jm_billto_'+id; }
 function defaultBillTo(client){
+  client = client || {};
   const lines=[];
-  if(client.company) lines.push(client.company);
-  if(client.name && client.name!==client.company) lines.push(client.name);
-  if(client.email) lines.push(client.email);
+  const head = client.company || client.name;
+  if(head) lines.push(head);
+  if(client.company && client.name && client.name!==client.company) lines.push(client.name);
+  String(client.address||'').split('\n').map(l=>l.trim()).filter(Boolean).forEach(l=>lines.push(l));
+  if(client.vat_id && String(client.vat_id).trim()) lines.push('USt-IdNr.: '+String(client.vat_id).trim());
   return lines.join('\n');
 }
 function defaultBillingPeriod(){
@@ -2172,7 +2191,7 @@ $('btn-new-invoice').addEventListener('click', async ()=>{
   invStep=1; invClientId=null; invSelectedTEs=[]; invLineItems=[];
   invBillTo=null; invBillingPeriod=null; invDue=null;
   // Load clients for step 1
-  const { data }=await sb.from('clients').select('id,name,company,email').eq('is_active_client',true).order('name');
+  const { data }=await sb.from('clients').select('id,name,company,email,address,vat_id').eq('is_active_client',true).order('name');
   invClients=data||[];
   renderInvStep(); openModal('ov-invoice');
 });
@@ -2210,8 +2229,12 @@ async function renderInvStep(){
     // Billing details + line items (Description + Amount, no quantity)
     const client=invClients.find(c=>c.id===invClientId)||{};
     if(invBillTo===null){
+      const structured = defaultBillTo(client);
+      const hasAddress = !!(client.address && String(client.address).trim());
+      // Client record (with address) is the source of truth; otherwise fall
+      // back to a previously hand-typed address remembered for this client.
       let saved=''; try{ saved=localStorage.getItem(billToKey(invClientId))||''; }catch(e){}
-      invBillTo = saved || defaultBillTo(client);
+      invBillTo = hasAddress ? structured : (saved || structured);
     }
     if(invBillingPeriod===null) invBillingPeriod = defaultBillingPeriod();
     if(invDue===null) invDue = daysFromNow(CONFIG.DEFAULT_PAYMENT_DAYS);
@@ -2442,11 +2465,8 @@ function buildInvoiceHTML(inv, forModal=false){
   const vatAmount = (Number(total)-Number(subtotal)) || 0;
   const num = inv.invoice_number||'';
 
-  const billedTo = invAddrBlock(meta.bill_to, [
-    inv.clients?.company||inv.clients?.name,
-    (inv.clients?.company && inv.clients?.name && inv.clients?.name!==inv.clients?.company) ? inv.clients?.name : '',
-    inv.clients?.email
-  ]);
+  // Prefer the per-invoice snapshot; otherwise build from the client record.
+  const billedTo = invAddrBlock(meta.bill_to || defaultBillTo(inv.clients||{}), []);
   // issuerName is the bold first line; prepend it to the address block.
   const payToFull = `${s.issuerName?`<div class="invd-name">${esc(s.issuerName)}</div>`:''}${invMultiline(s.issuerAddress||'')}`;
 
