@@ -1308,14 +1308,15 @@ $('btn-start').addEventListener('click',()=>{
 
 $('btn-stop').addEventListener('click', async ()=>{
   clearInterval(timerTick); timerTick=null;
-  const sessionMins=Math.round((Date.now()-timerStart)/60000);
+  const sessionSecs=Math.round((Date.now()-timerStart)/1000);
+  const sessionMins=Math.max(sessionSecs>0?1:0, Math.round(sessionSecs/60));
   const sessionStart=new Date(timerStart).toISOString();
   const sessionEnd=new Date().toISOString();
   const pid=$('timer-proj').value;
   const proj=projectsCache.find(p=>p.id===pid);
 
-  if(sessionMins>0&&proj){
-    const logEntry = { start:sessionStart, stop:sessionEnd, minutes:sessionMins };
+  if(sessionSecs>0&&proj){
+    const logEntry = { start:sessionStart, stop:sessionEnd, minutes:sessionMins, seconds:sessionSecs };
 
     if(timerResumeEntryId){
       const { data:existing } = await sb.from('time_entries').select('*').eq('id',timerResumeEntryId).single();
