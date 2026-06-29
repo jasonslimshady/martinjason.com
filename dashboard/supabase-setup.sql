@@ -129,6 +129,28 @@ END $$;
 
 
 -- ============================================================
+--  TABLE: invoice_reminders
+--  Reminders for upcoming invoice creation. Optionally linked
+--  to a Google Calendar event for notifications.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS invoice_reminders (
+  id               UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
+  client_id        UUID        NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+  remind_at        TIMESTAMPTZ NOT NULL,
+  note             TEXT,
+  status           TEXT        NOT NULL DEFAULT 'pending'
+                   CHECK (status IN ('pending', 'done')),
+  calendar_event_id TEXT,
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE invoice_reminders ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Authenticated full access" ON invoice_reminders
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+
+-- ============================================================
 --  TABLE: invoices
 --  One invoice per client billing cycle. Line items live in
 --  invoice_items. tax_rate defaults to 19% (German MwSt) but
