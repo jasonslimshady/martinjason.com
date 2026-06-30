@@ -339,6 +339,20 @@
     .mono{font-family:"SF Mono","Fira Code",monospace;font-size:.8125rem}
     .muted{color:var(--ink-m)} .soft{color:var(--ink-s)} .fw6{font-weight:600} .fw7{font-weight:700}
     .divider{height:1px;background:var(--border);margin:.875rem 0}
+
+    /* PROJECT TIME OVERVIEW */
+    .pto-btn{padding:.375rem .875rem;border-radius:var(--r-pill);font-size:.8125rem;font-weight:500;background:var(--surface);color:var(--ink-m);border:1px solid var(--border-s);cursor:pointer;transition:all var(--fast)}
+    .pto-btn.active,.pto-btn:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+    .pto-row{padding:.875rem 1.125rem;border-bottom:1px solid var(--border)}
+    .pto-row:last-child{border-bottom:none}
+    .pto-row-top{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.375rem}
+    .pto-proj-name{font-size:.875rem;font-weight:600}
+    .pto-proj-client{font-size:.75rem;color:var(--ink-s);margin-top:.125rem}
+    .pto-row-right{display:flex;align-items:center;gap:.625rem;flex-shrink:0}
+    .pto-dur{font-size:.9375rem;font-weight:700;font-variant-numeric:tabular-nums}
+    .pto-earn{font-size:.8125rem;color:var(--ink-s)}
+    .pto-bar-bg{height:4px;background:var(--surface-2);border-radius:2px;overflow:hidden}
+    .pto-bar-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .35s var(--ease)}
   </style>
 </head>
 <body>
@@ -465,6 +479,17 @@
         <div class="card"><div class="card-hd"><span class="card-ttl">Heute</span></div><div class="t-stat" id="t-today">0h 0min</div><div class="t-sub">erfasst heute</div></div>
         <div class="card"><div class="card-hd"><span class="card-ttl">Diese Woche</span></div><div class="t-stat" id="t-week">0h 0min</div><div class="t-sub">erfasst diese Woche</div></div>
       </div>
+      <!-- PROJECT TIME OVERVIEW -->
+      <div class="sec-hd" style="margin-top:1.25rem">
+        <span class="sec-ttl">Projektübersicht</span>
+        <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+          <button class="pto-btn active" data-pto="week">Diese Woche</button>
+          <button class="pto-btn" data-pto="month">Diesen Monat</button>
+          <button class="pto-btn" data-pto="date">Datum</button>
+          <input type="date" id="pto-date" class="fi" style="display:none;width:140px;font-size:.8125rem;padding:.375rem .625rem" />
+        </div>
+      </div>
+      <div id="pto-container" style="margin-bottom:1.25rem"></div>
       <div class="sec-hd">
         <span class="sec-ttl">Letzte Einträge</span>
         <div style="display:flex;gap:.5rem">
@@ -997,7 +1022,7 @@ function showApp(user){
   const ini = (user.email||'JM').slice(0,2).toUpperCase();
   $('sb-av').textContent=$('sb-av').textContent=ini;
   $('sb-email').textContent = user.email||'';
-  loadStats(); loadCRM(); loadTimeEntries(); loadInvoices(); loadProjects(); loadInvReminders();
+  loadStats(); loadCRM(); loadTimeEntries(); loadProjectOverview(); loadInvoices(); loadProjects(); loadInvReminders();
 }
 
 $('login-form').addEventListener('submit', async e => {
@@ -1317,7 +1342,7 @@ async function deleteProject(id, name){
   const { error } = await sb.from('projects').delete().eq('id', id);
   if(error){ toast('Fehler: '+error.message,'err'); return; }
   toast('Projekt gelöscht.','ok');
-  loadProjects(); loadTimeEntries(); loadStats();
+  loadProjects(); loadTimeEntries(); loadProjectOverview(); loadStats();
   openProjectManagement();
 }
 
@@ -1433,7 +1458,7 @@ $('btn-stop').addEventListener('click', async ()=>{
   $('timer-clk').textContent='00:00:00'; $('timer-meta').textContent='Kein Projekt ausgewählt';
   $('btn-start').hidden=false; $('btn-stop').hidden=true;
   timerStart=null; timerResumeEntryId=null; timerPrevMinutes=0;
-  loadTimeEntries(); loadStats();
+  loadTimeEntries(); loadProjectOverview(); loadStats();
 });
 
 let editTimeEntryId = null;
@@ -1519,7 +1544,7 @@ $('mt-delete-btn').addEventListener('click', async () => {
   const { error } = await sb.from('time_entries').delete().eq('id', editTimeEntryId);
   if (error) { toast('Fehler: ' + error.message, 'err'); return; }
   closeModal('ov-time'); toast('Eintrag gelöscht.');
-  loadTimeEntries(); loadStats();
+  loadTimeEntries(); loadProjectOverview(); loadStats();
 });
 
 $('mt-von').addEventListener('input', calcDurFromVonBis);
@@ -1572,7 +1597,7 @@ async function saveManualTime(e){
   if (error) { toast('Fehler: '+error.message,'err'); return; }
   closeModal('ov-time');
   toast(editTimeEntryId ? 'Eintrag aktualisiert.' : 'Eintrag gespeichert.', 'ok');
-  loadTimeEntries(); loadStats();
+  loadTimeEntries(); loadProjectOverview(); loadStats();
 }
 
 async function loadTimeEntries(){
@@ -1622,6 +1647,75 @@ async function loadTimeEntries(){
     })
   );
 }
+
+// ── PROJECT TIME OVERVIEW ──────────────────────────────────────────────
+let ptoFilter = 'week';
+
+function ptoRange() {
+  const todayStr = today();
+  if (ptoFilter === 'week') {
+    const d = new Date();
+    const day = d.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    d.setDate(d.getDate() + diff);
+    return [d.toISOString().split('T')[0], todayStr];
+  }
+  if (ptoFilter === 'month') {
+    const d = new Date();
+    return [`${d.getFullYear()}-${pad(d.getMonth()+1)}-01`, todayStr];
+  }
+  const v = $('pto-date').value || todayStr;
+  return [v, v];
+}
+
+async function loadProjectOverview() {
+  const [from, to] = ptoRange();
+  const { data } = await sb.from('time_entries')
+    .select('duration_minutes,project_id,projects(name,rate,rate_type,clients(name))')
+    .gte('date', from).lte('date', to);
+  const entries = data || [];
+  const map = {};
+  entries.forEach(e => {
+    const pid = e.project_id; if (!pid) return;
+    if (!map[pid]) map[pid] = { name: e.projects?.name||'—', client: e.projects?.clients?.name||'', rate: e.projects?.rate||0, rateType: e.projects?.rate_type||'hourly', mins: 0 };
+    map[pid].mins += e.duration_minutes || 0;
+  });
+  const projs = Object.values(map).sort((a,b) => b.mins - a.mins);
+  const c = $('pto-container');
+  if (!projs.length) {
+    c.innerHTML = `<div class="card"><div class="empty-st" style="padding:1.5rem 1rem"><p class="empty-ttl" style="margin:0">Keine Einträge im gewählten Zeitraum</p></div></div>`;
+    return;
+  }
+  const maxM = projs[0].mins;
+  c.innerHTML = `<div class="card">${projs.map(p => {
+    const pct = maxM > 0 ? Math.round(p.mins / maxM * 100) : 0;
+    const earn = p.rateType === 'hourly' && p.rate ? `<span class="pto-earn">${fmtEur(p.mins / 60 * p.rate)}</span>` : '';
+    return `<div class="pto-row">
+      <div class="pto-row-top">
+        <div><div class="pto-proj-name">${esc(p.name)}</div>${p.client?`<div class="pto-proj-client">${esc(p.client)}</div>`:''}</div>
+        <div class="pto-row-right"><span class="pto-dur">${fmtDur(p.mins)}</span>${earn}</div>
+      </div>
+      <div class="pto-bar-bg"><div class="pto-bar-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+document.querySelectorAll('.pto-btn').forEach(btn =>
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.pto-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    ptoFilter = btn.dataset.pto;
+    const dateInput = $('pto-date');
+    if (ptoFilter === 'date') {
+      dateInput.style.display = '';
+      if (!dateInput.value) dateInput.value = today();
+    } else {
+      dateInput.style.display = 'none';
+    }
+    loadProjectOverview();
+  })
+);
+$('pto-date').addEventListener('change', () => loadProjectOverview());
 
 // ── INVOICES ──────────────────────────────────────────────────────────
 const STATUS_TAG  = { draft:'tag--muted', sent:'tag--blue', paid:'tag--green', overdue:'tag--red', cancelled:'tag--muted' };
