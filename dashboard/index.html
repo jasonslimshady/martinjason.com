@@ -1028,6 +1028,11 @@ function showApp(user){
   $('sb-av').textContent=$('sb-av').textContent=ini;
   $('sb-email').textContent = user.email||'';
   loadStats(); loadCRM(); loadTimeEntries(); loadProjectOverview(); loadInvoices(); loadProjects(); loadInvReminders();
+  // Restore last active panel (persists across reloads)
+  const savedPanel = localStorage.getItem('active_panel');
+  if (savedPanel && PANELS[savedPanel] && savedPanel !== 'analytics') switchPanel(savedPanel);
+  // Try to restore Google Analytics session without requiring re-login
+  gaAutoInit();
 }
 
 $('login-form').addEventListener('submit', async e => {
@@ -1051,24 +1056,28 @@ $('btn-signout').addEventListener('click', async () => {
 
 // ── NAVIGATION ──────────────────────────────────────────────────────
 let klvLoaded = false;
+
+function switchPanel(id) {
+  if (!PANELS[id]) return;
+  if (id !== 'analytics' && gaLiveTimer) gaStopLive();
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.nav-item[data-panel="${id}"]`)?.classList.add('active');
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  $('panel-'+id).classList.add('active');
+  $('tb-title').textContent = PANELS[id].title;
+  $('tb-sub').textContent   = PANELS[id].sub;
+  localStorage.setItem('active_panel', id);
+  if (id === 'klaviyo' && !klvLoaded) {
+    klvLoaded = true;
+    const { start, end } = klvISORange(klvDays);
+    $('klv-from').value = start;
+    $('klv-to').value   = end;
+    loadKlaviyo(start, end);
+  }
+}
+
 document.querySelectorAll('.nav-item[data-panel]').forEach(btn =>
-  btn.addEventListener('click', () => {
-    const id = btn.dataset.panel;
-    if (id !== 'analytics' && gaLiveTimer) gaStopLive();
-    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    $('panel-'+id).classList.add('active');
-    $('tb-title').textContent = PANELS[id].title;
-    $('tb-sub').textContent   = PANELS[id].sub;
-    if (id === 'klaviyo' && !klvLoaded) {
-      klvLoaded = true;
-      const { start, end } = klvISORange(klvDays);
-      $('klv-from').value = start;
-      $('klv-to').value   = end;
-      loadKlaviyo(start, end);
-    }
-  })
+  btn.addEventListener('click', () => switchPanel(btn.dataset.panel))
 );
 
 // ── STATS ───────────────────────────────────────────────────────────
@@ -3164,15 +3173,23 @@ function getGaToken() {
   });
 }
 
-// Auto-restore token on load; try silent re-auth if expired
-(async function gaAutoInit() {
-  if (gaLoadToken()) { renderAnalytics(); return; }
+// Restore GA session: use cached token if still valid, otherwise silent re-auth via GIS.
+// Called from showApp() and from onGoogleLibraryLoad (whichever fires last).
+async function gaAutoInit() {
+  if (gaLoadToken()) { renderAnalytics(); return; }      // cached token still valid
+  if (!window.google) return;                             // GIS not ready yet; onGoogleLibraryLoad will retry
   try {
     const token = await getGaTokenSilent();
     gaSaveToken(token);
     renderAnalytics();
   } catch(_) { /* silent fail — user sees the connect button */ }
-})();
+}
+
+// Google fires this callback once the GIS library has fully loaded.
+window.onGoogleLibraryLoad = function() {
+  // If the dashboard is already open and no token was restored, try silent re-auth now.
+  if (!$('screen-app').hidden && !gaToken) gaAutoInit();
+};
 
 async function gaReport(body) {
   const pid = CONFIG.GA4_PROPERTY_ID;
