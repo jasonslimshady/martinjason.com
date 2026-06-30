@@ -706,6 +706,7 @@
               <option value="won">Gewonnen</option><option value="lost">Verloren</option>
             </select>
           </div>
+          <div class="fg" id="mc-won-at-row" style="display:none"><label class="fl">Gewonnen am</label><input class="fi" id="mc-won-at" type="date" /></div>
           <div class="fg"><label class="fl">Follow-up Datum</label><input class="fi" id="mc-followup" type="date" /></div>
           <div class="fg s2"><label class="fl">Notizen</label><textarea class="fi" id="mc-notes" rows="3" placeholder="Erstgespräch, Anforderungen …"></textarea></div>
         </div>
@@ -1133,29 +1134,33 @@ function renderFollowups(clients){
   document.querySelectorAll('.followup-row').forEach(r=>r.addEventListener('click',()=>openDrawer(r.dataset.id)));
 }
 
-$('btn-new-client').addEventListener('click',()=>{ editClientId=null; $('mc-title').textContent='Neuer Lead'; $('mc-form').reset(); openModal('ov-client'); });
+$('btn-new-client').addEventListener('click',()=>{ editClientId=null; $('mc-title').textContent='Neuer Lead'; $('mc-form').reset(); $('mc-won-at-row').style.display='none'; openModal('ov-client'); });
+$('mc-stage').addEventListener('change',()=>{ $('mc-won-at-row').style.display=$('mc-stage').value==='won'?'':'none'; });
 
 async function saveClient(e){
   e.preventDefault();
   const btn=$('mc-save'); btn.textContent='…'; btn.disabled=true;
   const stage=$('mc-stage').value;
+  // Auto-set won_at to today when stage is first set to 'won' and no date given
+  const wonAtVal = $('mc-won-at').value || (stage === 'won' ? today() : null);
   const payload={ name:$('mc-name').value.trim(), email:$('mc-email').value.trim()||null,
     company:$('mc-company').value.trim()||null, phone:$('mc-phone').value.trim()||null,
     website:$('mc-web').value.trim()||null, pipeline_stage:stage,
     address:$('mc-address').value.trim()||null, vat_id:$('mc-vatid').value.trim()||null,
+    won_at: stage === 'won' ? wonAtVal : null,
     next_followup_date:$('mc-followup').value||null, notes:$('mc-notes').value.trim()||null,
     is_active_client:stage==='won' };
   let { error } = editClientId
     ? await sb.from('clients').update(payload).eq('id',editClientId)
     : await sb.from('clients').insert(payload);
-  // Graceful fallback if the address/vat_id columns aren't migrated yet.
-  if(error && /address|vat_id|column|schema cache/i.test(error.message||'')){
-    const { address, vat_id, ...base } = payload;
+  // Graceful fallback if new columns aren't migrated yet.
+  if(error && /address|vat_id|won_at|column|schema cache/i.test(error.message||'')){
+    const { address, vat_id, won_at, ...base } = payload;
     const retry = editClientId
       ? await sb.from('clients').update(base).eq('id',editClientId)
       : await sb.from('clients').insert(base);
     error = retry.error;
-    if(!error) toast('Adresse/USt-IdNr. nicht gespeichert — bitte das aktualisierte supabase-setup.sql in Supabase ausführen.','err');
+    if(!error) toast('Einige Felder nicht gespeichert — bitte das aktualisierte supabase-setup.sql in Supabase ausführen.','err');
   }
   btn.textContent='Speichern'; btn.disabled=false;
   if(error){ toast('Fehler: '+error.message,'err'); return; }
@@ -1184,6 +1189,7 @@ async function openDrawer(id){
     ['Website', c.website ? `<a href="${esc(c.website)}" target="_blank" style="color:var(--accent)">${esc(c.website)}</a>` : '—'],
     ['Adresse', c.address ? esc(c.address).replace(/\n/g,'<br>') : '—'],
     ['USt-IdNr.', c.vat_id ? esc(c.vat_id) : '—'],
+    ['Gewonnen am', c.won_at ? fmtDate(c.won_at) : '—'],
     ['Follow-up', c.next_followup_date ? fmtDate(c.next_followup_date) : '—'],
     ['Erstellt', fmtDate(c.created_at)],
     ['Notizen', c.notes||'—'],
@@ -1196,6 +1202,7 @@ async function openDrawer(id){
     $('mc-phone').value=c.phone||''; $('mc-company').value=c.company||'';
     $('mc-web').value=c.website||''; $('mc-stage').value=c.pipeline_stage||'new_lead';
     $('mc-address').value=c.address||''; $('mc-vatid').value=c.vat_id||'';
+    $('mc-won-at').value=c.won_at||''; $('mc-won-at-row').style.display=c.pipeline_stage==='won'?'':'none';
     $('mc-followup').value=c.next_followup_date||''; $('mc-notes').value=c.notes||'';
     openModal('ov-client');
   };
@@ -1675,7 +1682,7 @@ function ptoRange() {
 async function loadProjectOverview() {
   const [from, to] = ptoRange();
   const { data } = await sb.from('time_entries')
-    .select('duration_minutes,project_id,projects(name,rate,rate_type,budget_hours,created_at,clients(name))')
+    .select('duration_minutes,project_id,projects(name,rate,rate_type,budget_hours,clients(name,won_at))')
     .gte('date', from).lte('date', to);
   const entries = data || [];
   const map = {};
@@ -1685,7 +1692,7 @@ async function loadProjectOverview() {
       name: e.projects?.name||'—', client: e.projects?.clients?.name||'',
       rate: e.projects?.rate||0, rateType: e.projects?.rate_type||'hourly',
       budgetHours: e.projects?.budget_hours||null,
-      createdAt: e.projects?.created_at||null,
+      wonAt: e.projects?.clients?.won_at||null,
       mins: 0
     };
     map[pid].mins += e.duration_minutes || 0;
@@ -1700,22 +1707,38 @@ async function loadProjectOverview() {
   const now = new Date();
   const curYear = now.getFullYear(), curMonth = now.getMonth();
   const daysInMonth = new Date(curYear, curMonth + 1, 0).getDate();
+  const weekStartDate = ptoFilter === 'week' ? new Date(from) : null;
 
   function periodBudgetMins(p) {
     if (!p.budgetHours) return null;
+    const wonDate = p.wonAt ? new Date(p.wonAt) : null;
+
     if (ptoFilter === 'month') {
-      // Prorate budget wenn Projekt erst diesen Monat gestartet ist
-      if (p.createdAt) {
-        const d = new Date(p.createdAt);
-        if (d.getFullYear() === curYear && d.getMonth() === curMonth) {
-          // Tage nach dem Startdatum (Tag selbst zählt nicht mit)
-          const remainingDays = Math.max(daysInMonth - d.getDate(), 1);
-          return Math.round(p.budgetHours * (remainingDays / daysInMonth) * 60);
+      if (wonDate && wonDate.getFullYear() === curYear && wonDate.getMonth() === curMonth) {
+        // Kunde diesen Monat gewonnen → anteiliges Budget (Tage nach Gewinn-Tag)
+        const remainingDays = Math.max(daysInMonth - wonDate.getDate(), 1);
+        return Math.round(p.budgetHours * (remainingDays / daysInMonth) * 60);
+      }
+      return Math.round(p.budgetHours * 60); // ganzer Monat
+    }
+
+    if (ptoFilter === 'week') {
+      const fullWeekMins = Math.round(p.budgetHours / 4.33 * 60);
+      if (wonDate && weekStartDate) {
+        const weekEnd = new Date(weekStartDate);
+        weekEnd.setDate(weekStartDate.getDate() + 6); // Sonntag
+        const wonMidnight = new Date(wonDate); wonMidnight.setHours(0,0,0,0);
+        const wStartMidnight = new Date(weekStartDate); wStartMidnight.setHours(0,0,0,0);
+        weekEnd.setHours(0,0,0,0);
+        if (wonMidnight >= wStartMidnight && wonMidnight <= weekEnd) {
+          // Kunde diese Woche gewonnen → anteiliges Wochenbudget (Tage nach Gewinn-Tag bis Sonntag)
+          const daysRemaining = Math.max(Math.round((weekEnd - wonMidnight) / 86400000), 1);
+          return Math.round(fullWeekMins * daysRemaining / 7);
         }
       }
-      return Math.round(p.budgetHours * 60);
+      return fullWeekMins;
     }
-    if (ptoFilter === 'week') return Math.round(p.budgetHours / 4.33 * 60);
+
     return Math.round(p.budgetHours / 20 * 60); // Tagesansicht
   }
 

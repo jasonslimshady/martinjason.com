@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS clients (
                       'negotiation', 'won', 'lost'
                     )),
   is_active_client  BOOLEAN     NOT NULL DEFAULT false,
+  won_at            DATE,                   -- date the client was won (used for budget proration)
   notes             TEXT,
   next_followup_date DATE,
   tags              TEXT[]      DEFAULT '{}',
@@ -144,6 +145,17 @@ BEGIN
     WHERE table_name = 'time_entries' AND column_name = 'time_logs'
   ) THEN
     ALTER TABLE time_entries ADD COLUMN time_logs JSONB NOT NULL DEFAULT '[]';
+  END IF;
+END $$;
+
+-- Migration helper: add won_at column to clients if missing
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'clients' AND column_name = 'won_at'
+  ) THEN
+    ALTER TABLE clients ADD COLUMN won_at DATE;
   END IF;
 END $$;
 
