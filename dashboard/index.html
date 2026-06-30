@@ -1675,7 +1675,7 @@ function ptoRange() {
 async function loadProjectOverview() {
   const [from, to] = ptoRange();
   const { data } = await sb.from('time_entries')
-    .select('duration_minutes,project_id,projects(name,rate,rate_type,budget_hours,clients(name))')
+    .select('duration_minutes,project_id,projects(name,rate,rate_type,budget_hours,created_at,clients(name))')
     .gte('date', from).lte('date', to);
   const entries = data || [];
   const map = {};
@@ -1684,7 +1684,9 @@ async function loadProjectOverview() {
     if (!map[pid]) map[pid] = {
       name: e.projects?.name||'—', client: e.projects?.clients?.name||'',
       rate: e.projects?.rate||0, rateType: e.projects?.rate_type||'hourly',
-      budgetHours: e.projects?.budget_hours||null, mins: 0
+      budgetHours: e.projects?.budget_hours||null,
+      createdAt: e.projects?.created_at||null,
+      mins: 0
     };
     map[pid].mins += e.duration_minutes || 0;
   });
@@ -1695,14 +1697,34 @@ async function loadProjectOverview() {
     return;
   }
 
-  // Budget-Faktor je nach Zeitraum: Woche = 1/4,33 des Monatsbudgets, Tag = 1/20
-  const budgetFactor = ptoFilter === 'week' ? 1/4.33 : ptoFilter === 'month' ? 1 : 1/20;
-  const maxM = projs[0].mins; // Fallback für Projekte ohne Budget
+  const now = new Date();
+  const curYear = now.getFullYear(), curMonth = now.getMonth();
+  const daysInMonth = new Date(curYear, curMonth + 1, 0).getDate();
+
+  function periodBudgetMins(p) {
+    if (!p.budgetHours) return null;
+    if (ptoFilter === 'month') {
+      // Prorate budget wenn Projekt erst diesen Monat gestartet ist
+      if (p.createdAt) {
+        const d = new Date(p.createdAt);
+        if (d.getFullYear() === curYear && d.getMonth() === curMonth) {
+          // Tage nach dem Startdatum (Tag selbst zählt nicht mit)
+          const remainingDays = Math.max(daysInMonth - d.getDate(), 1);
+          return Math.round(p.budgetHours * (remainingDays / daysInMonth) * 60);
+        }
+      }
+      return Math.round(p.budgetHours * 60);
+    }
+    if (ptoFilter === 'week') return Math.round(p.budgetHours / 4.33 * 60);
+    return Math.round(p.budgetHours / 20 * 60); // Tagesansicht
+  }
+
+  const maxM = projs[0].mins;
 
   c.innerHTML = `<div class="card">${projs.map(p => {
+    const budgetMins = periodBudgetMins(p);
     let pct, barLbl = '', over = false;
-    if (p.budgetHours) {
-      const budgetMins = Math.round(p.budgetHours * budgetFactor * 60);
+    if (budgetMins) {
       pct = Math.round(p.mins / budgetMins * 100);
       over = pct > 100;
       barLbl = `<span class="pto-bar-lbl">${pct} % · Ziel ${fmtDur(budgetMins)}</span>`;
