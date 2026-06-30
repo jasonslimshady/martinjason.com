@@ -351,8 +351,12 @@
     .pto-row-right{display:flex;align-items:center;gap:.625rem;flex-shrink:0}
     .pto-dur{font-size:.9375rem;font-weight:700;font-variant-numeric:tabular-nums}
     .pto-earn{font-size:.8125rem;color:var(--ink-s)}
-    .pto-bar-bg{height:4px;background:var(--surface-2);border-radius:2px;overflow:hidden}
-    .pto-bar-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .35s var(--ease)}
+    .pto-bar-wrap{display:flex;align-items:center;gap:.625rem}
+    .pto-bar-bg{flex:1;height:4px;background:var(--surface-2);border-radius:2px;overflow:hidden}
+    .pto-bar-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .35s var(--ease),background var(--fast)}
+    .pto-bar-fill.over{background:var(--red)}
+    .pto-bar-lbl{font-size:.6875rem;color:var(--ink-s);white-space:nowrap;flex-shrink:0}
+    .pto-over{color:var(--red)!important}
   </style>
 </head>
 <body>
@@ -1671,13 +1675,17 @@ function ptoRange() {
 async function loadProjectOverview() {
   const [from, to] = ptoRange();
   const { data } = await sb.from('time_entries')
-    .select('duration_minutes,project_id,projects(name,rate,rate_type,clients(name))')
+    .select('duration_minutes,project_id,projects(name,rate,rate_type,budget_hours,clients(name))')
     .gte('date', from).lte('date', to);
   const entries = data || [];
   const map = {};
   entries.forEach(e => {
     const pid = e.project_id; if (!pid) return;
-    if (!map[pid]) map[pid] = { name: e.projects?.name||'—', client: e.projects?.clients?.name||'', rate: e.projects?.rate||0, rateType: e.projects?.rate_type||'hourly', mins: 0 };
+    if (!map[pid]) map[pid] = {
+      name: e.projects?.name||'—', client: e.projects?.clients?.name||'',
+      rate: e.projects?.rate||0, rateType: e.projects?.rate_type||'hourly',
+      budgetHours: e.projects?.budget_hours||null, mins: 0
+    };
     map[pid].mins += e.duration_minutes || 0;
   });
   const projs = Object.values(map).sort((a,b) => b.mins - a.mins);
@@ -1686,16 +1694,32 @@ async function loadProjectOverview() {
     c.innerHTML = `<div class="card"><div class="empty-st" style="padding:1.5rem 1rem"><p class="empty-ttl" style="margin:0">Keine Einträge im gewählten Zeitraum</p></div></div>`;
     return;
   }
-  const maxM = projs[0].mins;
+
+  // Budget-Faktor je nach Zeitraum: Woche = 1/4,33 des Monatsbudgets, Tag = 1/20
+  const budgetFactor = ptoFilter === 'week' ? 1/4.33 : ptoFilter === 'month' ? 1 : 1/20;
+  const maxM = projs[0].mins; // Fallback für Projekte ohne Budget
+
   c.innerHTML = `<div class="card">${projs.map(p => {
-    const pct = maxM > 0 ? Math.round(p.mins / maxM * 100) : 0;
+    let pct, barLbl = '', over = false;
+    if (p.budgetHours) {
+      const budgetMins = Math.round(p.budgetHours * budgetFactor * 60);
+      pct = Math.round(p.mins / budgetMins * 100);
+      over = pct > 100;
+      barLbl = `<span class="pto-bar-lbl">${pct} % · Ziel ${fmtDur(budgetMins)}</span>`;
+      pct = Math.min(pct, 100);
+    } else {
+      pct = maxM > 0 ? Math.round(p.mins / maxM * 100) : 0;
+    }
     const earn = p.rateType === 'hourly' && p.rate ? `<span class="pto-earn">${fmtEur(p.mins / 60 * p.rate)}</span>` : '';
     return `<div class="pto-row">
       <div class="pto-row-top">
         <div><div class="pto-proj-name">${esc(p.name)}</div>${p.client?`<div class="pto-proj-client">${esc(p.client)}</div>`:''}</div>
-        <div class="pto-row-right"><span class="pto-dur">${fmtDur(p.mins)}</span>${earn}</div>
+        <div class="pto-row-right"><span class="pto-dur${over?' pto-over':''}">${fmtDur(p.mins)}</span>${earn}</div>
       </div>
-      <div class="pto-bar-bg"><div class="pto-bar-fill" style="width:${pct}%"></div></div>
+      <div class="pto-bar-wrap">
+        <div class="pto-bar-bg"><div class="pto-bar-fill${over?' over':''}" style="width:${pct}%"></div></div>
+        ${barLbl}
+      </div>
     </div>`;
   }).join('')}</div>`;
 }
