@@ -490,7 +490,13 @@
           <button class="pto-btn active" data-pto="week">Diese Woche</button>
           <button class="pto-btn" data-pto="month">Diesen Monat</button>
           <button class="pto-btn" data-pto="date">Datum</button>
+          <button class="pto-btn" data-pto="range">Von – Bis</button>
           <input type="date" id="pto-date" class="fi" style="display:none;width:140px;font-size:.8125rem;padding:.375rem .625rem" />
+          <span id="pto-range-wrap" style="display:none;align-items:center;gap:.375rem">
+            <input type="date" id="pto-date-from" class="fi" style="width:140px;font-size:.8125rem;padding:.375rem .625rem" />
+            <span style="color:var(--ink-s);font-size:.8125rem">–</span>
+            <input type="date" id="pto-date-to" class="fi" style="width:140px;font-size:.8125rem;padding:.375rem .625rem" />
+          </span>
         </div>
       </div>
       <div id="pto-container" style="margin-bottom:1.25rem"></div>
@@ -1678,6 +1684,10 @@ async function loadTimeEntries(){
 // ── PROJECT TIME OVERVIEW ──────────────────────────────────────────────
 let ptoFilter = 'week';
 
+// Local Y-M-D string, built from local getters only (unlike toISOString(),
+// this can't shift the date backwards near midnight in UTC+ timezones).
+function localISO(d) { return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+
 function ptoRange() {
   const todayStr = today();
   if (ptoFilter === 'week') {
@@ -1685,11 +1695,16 @@ function ptoRange() {
     const day = d.getDay();
     const diff = day === 0 ? -6 : 1 - day;
     d.setDate(d.getDate() + diff);
-    return [d.toISOString().split('T')[0], todayStr];
+    return [localISO(d), todayStr];
   }
   if (ptoFilter === 'month') {
     const d = new Date();
     return [`${d.getFullYear()}-${pad(d.getMonth()+1)}-01`, todayStr];
+  }
+  if (ptoFilter === 'range') {
+    const from = $('pto-date-from').value || todayStr;
+    const to   = $('pto-date-to').value   || todayStr;
+    return from <= to ? [from, to] : [to, from];
   }
   const v = $('pto-date').value || todayStr;
   return [v, v];
@@ -1724,15 +1739,26 @@ async function loadProjectOverview() {
   const curYear = now.getFullYear(), curMonth = now.getMonth();
   const daysInMonth = new Date(curYear, curMonth + 1, 0).getDate();
   const weekStartDate = ptoFilter === 'week' ? new Date(from) : null;
+  const rangeStartDate = ptoFilter === 'range' ? new Date(from) : null;
+  const rangeEndDate   = ptoFilter === 'range' ? new Date(to)   : null;
+  if (rangeStartDate) rangeStartDate.setHours(0,0,0,0);
+  if (rangeEndDate)   rangeEndDate.setHours(0,0,0,0);
+
+  // Inclusive day count between two midnights (e.g. Monday→Sunday = 7, not 6).
+  function daysBetweenInclusive(startMidnight, endMidnight) {
+    return Math.round((endMidnight - startMidnight) / 86400000) + 1;
+  }
 
   function periodBudgetMins(p) {
     if (!p.budgetHours) return null;
     const wonDate = p.wonAt ? new Date(p.wonAt) : null;
+    if (wonDate) wonDate.setHours(0,0,0,0); // normalize to midnight for day-count math
+    const wonMidnight = wonDate;
 
     if (ptoFilter === 'month') {
-      if (wonDate && wonDate.getFullYear() === curYear && wonDate.getMonth() === curMonth) {
-        // Kunde diesen Monat gewonnen → anteiliges Budget (Tage nach Gewinn-Tag)
-        const remainingDays = Math.max(daysInMonth - wonDate.getDate(), 1);
+      if (wonMidnight && wonDate.getFullYear() === curYear && wonDate.getMonth() === curMonth) {
+        // Kunde diesen Monat gewonnen → anteiliges Budget, inkl. des Gewinn-Tags selbst.
+        const remainingDays = Math.max(daysInMonth - wonMidnight.getDate() + 1, 1);
         return Math.round(p.budgetHours * (remainingDays / daysInMonth) * 60);
       }
       return Math.round(p.budgetHours * 60); // ganzer Monat
@@ -1740,19 +1766,27 @@ async function loadProjectOverview() {
 
     if (ptoFilter === 'week') {
       const fullWeekMins = Math.round(p.budgetHours / 4.33 * 60);
-      if (wonDate && weekStartDate) {
+      if (wonMidnight && weekStartDate) {
         const weekEnd = new Date(weekStartDate);
         weekEnd.setDate(weekStartDate.getDate() + 6); // Sonntag
-        const wonMidnight = new Date(wonDate); wonMidnight.setHours(0,0,0,0);
         const wStartMidnight = new Date(weekStartDate); wStartMidnight.setHours(0,0,0,0);
         weekEnd.setHours(0,0,0,0);
         if (wonMidnight >= wStartMidnight && wonMidnight <= weekEnd) {
-          // Kunde diese Woche gewonnen → anteiliges Wochenbudget (Tage nach Gewinn-Tag bis Sonntag)
-          const daysRemaining = Math.max(Math.round((weekEnd - wonMidnight) / 86400000), 1);
+          // Kunde diese Woche gewonnen → anteiliges Wochenbudget, inkl. des Gewinn-Tags selbst.
+          const daysRemaining = Math.max(daysBetweenInclusive(wonMidnight, weekEnd), 1);
           return Math.round(fullWeekMins * daysRemaining / 7);
         }
       }
       return fullWeekMins;
+    }
+
+    if (ptoFilter === 'range') {
+      let effectiveStart = rangeStartDate;
+      if (wonMidnight && wonMidnight > effectiveStart) effectiveStart = wonMidnight;
+      if (effectiveStart > rangeEndDate) return null; // Kunde erst nach dem Zeitraum gewonnen
+      const daysInRange = daysBetweenInclusive(effectiveStart, rangeEndDate);
+      const avgDaysPerMonth = 365.25 / 12; // ⌀ Kalendertage pro Monat
+      return Math.round(p.budgetHours * 60 / avgDaysPerMonth * daysInRange);
     }
 
     return Math.round(p.budgetHours / 20 * 60); // Tagesansicht
@@ -1791,16 +1825,20 @@ document.querySelectorAll('.pto-btn').forEach(btn =>
     btn.classList.add('active');
     ptoFilter = btn.dataset.pto;
     const dateInput = $('pto-date');
-    if (ptoFilter === 'date') {
-      dateInput.style.display = '';
-      if (!dateInput.value) dateInput.value = today();
-    } else {
-      dateInput.style.display = 'none';
+    const rangeWrap = $('pto-range-wrap');
+    dateInput.style.display = ptoFilter === 'date' ? '' : 'none';
+    if (ptoFilter === 'date' && !dateInput.value) dateInput.value = today();
+    rangeWrap.style.display = ptoFilter === 'range' ? 'inline-flex' : 'none';
+    if (ptoFilter === 'range') {
+      if (!$('pto-date-from').value) $('pto-date-from').value = today();
+      if (!$('pto-date-to').value)   $('pto-date-to').value   = today();
     }
     loadProjectOverview();
   })
 );
 $('pto-date').addEventListener('change', () => loadProjectOverview());
+$('pto-date-from').addEventListener('change', () => loadProjectOverview());
+$('pto-date-to').addEventListener('change', () => loadProjectOverview());
 
 // ── INVOICES ──────────────────────────────────────────────────────────
 const STATUS_TAG  = { draft:'tag--muted', sent:'tag--blue', paid:'tag--green', overdue:'tag--red', cancelled:'tag--muted' };
