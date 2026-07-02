@@ -1825,6 +1825,30 @@ async function loadProjectOverview() {
   }
   const entries = data || [];
   const map = {};
+
+  // Seed every active project up front, so it's always visible here even
+  // with 0 minutes logged in the selected period — not just projects that
+  // happen to have entries within the range.
+  let { data: activeProjects, error: apErr } = await sb.from('projects')
+    .select('id,name,rate,rate_type,budget_hours,color,clients(name,won_at)')
+    .eq('status', 'active');
+  if (apErr) {
+    ({ data: activeProjects, error: apErr } = await sb.from('projects')
+      .select('id,name,rate,rate_type,budget_hours,clients(name,won_at)')
+      .eq('status', 'active'));
+  }
+  (activeProjects || []).forEach(p => {
+    map[p.id] = {
+      id: p.id,
+      name: p.name || '—', client: p.clients?.name || '',
+      rate: p.rate || 0, rateType: p.rate_type || 'hourly',
+      budgetHours: p.budget_hours || null,
+      wonAt: p.clients?.won_at || null,
+      color: p.color || null,
+      mins: 0
+    };
+  });
+
   entries.forEach(e => {
     const pid = e.project_id; if (!pid) return;
     if (!map[pid]) map[pid] = {
