@@ -92,7 +92,7 @@
     /* SIDEBAR */
     .sb{width:var(--sb);height:100vh;background:var(--glass-s);backdrop-filter:blur(var(--blur)) saturate(180%);-webkit-backdrop-filter:blur(var(--blur)) saturate(180%);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:1.125rem .75rem;flex-shrink:0;overflow-y:auto}
     .sb-brand{display:flex;align-items:center;gap:.625rem;padding:.25rem .5rem 1.125rem;border-bottom:1px solid var(--border);margin-bottom:.75rem}
-    .sb-mark{width:30px;height:30px;border-radius:7px;background:var(--ink);display:flex;align-items:center;justify-content:center;color:var(--bg);font-size:.7rem;font-weight:700;flex-shrink:0}
+    .sb-mark{width:30px;height:30px;flex-shrink:0;object-fit:contain;display:block}
     .sb-name{font-size:.875rem;font-weight:600;letter-spacing:-.01em}
     .sb-sec{font-size:.6875rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-s);padding:.5rem .5rem .25rem;margin-top:.375rem}
     .nav-item{display:flex;align-items:center;gap:.625rem;padding:.5rem .75rem;border-radius:var(--r-sm);font-size:.875rem;font-weight:500;color:var(--ink-m);cursor:pointer;transition:all var(--fast);width:100%;text-align:left;margin-bottom:2px}
@@ -417,7 +417,7 @@
 <!-- APP -->
 <div id="screen-app" hidden>
   <aside class="sb">
-    <div class="sb-brand"><div class="sb-mark">JM</div><span class="sb-name">BI Dashboard</span></div>
+    <div class="sb-brand"><img class="sb-mark" src="pacific-origins-icon.png" alt="Pacific Origins LLC" /><span class="sb-name">BI Dashboard</span></div>
     <div class="sb-sec">Übersicht</div>
     <button class="nav-item active" data-panel="analytics">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1" y="9" width="3" height="6" rx="1"/><rect x="6.5" y="5" width="3" height="10" rx="1"/><rect x="12" y="1.5" width="3" height="13.5" rx="1"/></svg>Analytics
