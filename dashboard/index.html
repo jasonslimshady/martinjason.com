@@ -1704,7 +1704,11 @@ async function saveManualTime(e){
 }
 
 async function loadTimeEntries(){
-  const { data }=await sb.from('time_entries').select('*,projects(name,color)').order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30);
+  let { data, error } = await sb.from('time_entries').select('*,projects(name,color)').order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30);
+  if(error){
+    // "color" may not be migrated on this database yet — never let that hide the list itself.
+    ({ data, error } = await sb.from('time_entries').select('*,projects(name)').order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30));
+  }
   const list=data||[];
   const todayStr=today(), weekAgo=new Date(Date.now()-7*864e5).toISOString().split('T')[0];
   $('t-today').textContent=fmtDur(list.filter(e=>e.date===todayStr).reduce((s,e)=>s+e.duration_minutes,0));
@@ -1782,9 +1786,15 @@ function ptoRange() {
 
 async function loadProjectOverview() {
   const [from, to] = ptoRange();
-  const { data } = await sb.from('time_entries')
+  let { data, error } = await sb.from('time_entries')
     .select('duration_minutes,project_id,projects(name,rate,rate_type,budget_hours,color,clients(name,won_at))')
     .gte('date', from).lte('date', to);
+  if(error){
+    // "color" may not be migrated on this database yet — never let that hide the overview itself.
+    ({ data, error } = await sb.from('time_entries')
+      .select('duration_minutes,project_id,projects(name,rate,rate_type,budget_hours,clients(name,won_at))')
+      .gte('date', from).lte('date', to));
+  }
   const entries = data || [];
   const map = {};
   entries.forEach(e => {
