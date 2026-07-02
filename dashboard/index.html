@@ -37,13 +37,27 @@
     a{color:inherit;text-decoration:none} button{font:inherit;cursor:pointer;border:0;background:transparent}
     input,textarea,select{font:inherit} [hidden]{display:none!important}
 
+    /* BACKGROUND — same drifting-blob treatment as martinjason.com */
+    .bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+    .bg-blobs{position:absolute;inset:-10%;filter:blur(80px) saturate(120%);will-change:transform}
+    .blob{position:absolute;border-radius:50%;opacity:.55;mix-blend-mode:multiply;animation:drift 38s ease-in-out infinite}
+    .blob--a{width:60vmax;height:60vmax;background:radial-gradient(closest-side,#BFD7FF 0%,transparent 70%);top:-15%;left:-10%;animation-duration:42s}
+    .blob--b{width:55vmax;height:55vmax;background:radial-gradient(closest-side,#FFD9C2 0%,transparent 70%);top:30%;right:-15%;animation-duration:56s;animation-direction:reverse}
+    .blob--c{width:50vmax;height:50vmax;background:radial-gradient(closest-side,#E7DCC8 0%,transparent 70%);bottom:-20%;left:20%;animation-duration:64s}
+    @keyframes drift{
+      0%,100%{transform:translate3d(0,0,0) scale(1)}
+      33%{transform:translate3d(4vw,-3vh,0) scale(1.05)}
+      66%{transform:translate3d(-3vw,4vh,0) scale(.97)}
+    }
+    .bg-grain{position:absolute;inset:0;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");opacity:.05;mix-blend-mode:multiply}
+
     /* LOADING */
-    #loading{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .3s}
+    #loading{position:fixed;inset:0;background:transparent;display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .3s}
     .spin{width:28px;height:28px;border:2.5px solid var(--border-s);border-top-color:var(--ink);border-radius:50%;animation:spin .6s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
 
     /* LOGIN */
-    #screen-login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+    #screen-login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:transparent}
     .login-card{background:var(--glass-s);backdrop-filter:blur(var(--blur)) saturate(180%);-webkit-backdrop-filter:blur(var(--blur)) saturate(180%);border:1px solid var(--glass-b);border-radius:var(--r-lg);box-shadow:var(--shadow-s);padding:2.5rem;width:100%;max-width:400px}
     .login-brand{display:flex;align-items:center;gap:.625rem;margin-bottom:2rem}
     .login-mark{width:36px;height:36px;border-radius:var(--r-sm);background:var(--ink);display:flex;align-items:center;justify-content:center;color:var(--bg);font-size:.75rem;font-weight:700}
@@ -78,7 +92,7 @@
     /* SIDEBAR */
     .sb{width:var(--sb);height:100vh;background:var(--glass-s);backdrop-filter:blur(var(--blur)) saturate(180%);-webkit-backdrop-filter:blur(var(--blur)) saturate(180%);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:1.125rem .75rem;flex-shrink:0;overflow-y:auto}
     .sb-brand{display:flex;align-items:center;gap:.625rem;padding:.25rem .5rem 1.125rem;border-bottom:1px solid var(--border);margin-bottom:.75rem}
-    .sb-mark{width:30px;height:30px;border-radius:7px;background:var(--ink);display:flex;align-items:center;justify-content:center;color:var(--bg);font-size:.7rem;font-weight:700;flex-shrink:0}
+    .sb-mark{width:30px;height:30px;flex-shrink:0;object-fit:contain;display:block}
     .sb-name{font-size:.875rem;font-weight:600;letter-spacing:-.01em}
     .sb-sec{font-size:.6875rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-s);padding:.5rem .5rem .25rem;margin-top:.375rem}
     .nav-item{display:flex;align-items:center;gap:.625rem;padding:.5rem .75rem;border-radius:var(--r-sm);font-size:.875rem;font-weight:500;color:var(--ink-m);cursor:pointer;transition:all var(--fast);width:100%;text-align:left;margin-bottom:2px}
@@ -357,9 +371,28 @@
     .pto-bar-fill.over{background:var(--red)}
     .pto-bar-lbl{font-size:.6875rem;color:var(--ink-s);white-space:nowrap;flex-shrink:0}
     .pto-over{color:var(--red)!important}
+    .pto-view-toggle{display:flex;border:1px solid var(--border-s);border-radius:var(--r-sm);overflow:hidden}
+    .pto-view-btn{padding:.3rem .55rem;background:var(--surface);border:none;cursor:pointer;display:flex;align-items:center;color:var(--ink-m)}
+    .pto-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:.875rem}
+    .pto-circle-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:1.125rem 1rem;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.5rem}
+    .pto-circle-wrap{position:relative;width:100px;height:100px;flex-shrink:0}
+    .pto-circle-wrap svg circle{transition:stroke-dashoffset .35s var(--ease),stroke .2s var(--fast)}
+    .pto-circle-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.0625rem;font-weight:700;letter-spacing:-.02em}
+    .pto-circle-name{font-size:.875rem;font-weight:600}
+    .pto-circle-client{font-size:.75rem;color:var(--ink-s);margin-top:-.25rem}
+    .pto-circle-dur{font-size:.9375rem;font-weight:700;font-variant-numeric:tabular-nums}
   </style>
 </head>
 <body>
+
+<div class="bg" aria-hidden="true">
+  <div class="bg-blobs">
+    <span class="blob blob--a"></span>
+    <span class="blob blob--b"></span>
+    <span class="blob blob--c"></span>
+  </div>
+  <div class="bg-grain"></div>
+</div>
 
 <div id="loading"><div class="spin"></div></div>
 
@@ -384,7 +417,7 @@
 <!-- APP -->
 <div id="screen-app" hidden>
   <aside class="sb">
-    <div class="sb-brand"><div class="sb-mark">JM</div><span class="sb-name">BI Dashboard</span></div>
+    <div class="sb-brand"><img class="sb-mark" src="pacific-origins-icon.png" alt="Pacific Origins LLC" /><span class="sb-name">BI Dashboard</span></div>
     <div class="sb-sec">Übersicht</div>
     <button class="nav-item active" data-panel="analytics">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1" y="9" width="3" height="6" rx="1"/><rect x="6.5" y="5" width="3" height="10" rx="1"/><rect x="12" y="1.5" width="3" height="13.5" rx="1"/></svg>Analytics
@@ -497,6 +530,10 @@
             <span style="color:var(--ink-s);font-size:.8125rem">–</span>
             <input type="date" id="pto-date-to" class="fi" style="width:140px;font-size:.8125rem;padding:.375rem .625rem" />
           </span>
+          <div class="pto-view-toggle">
+            <button class="pto-view-btn" id="pto-view-bar" title="Balkenansicht"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><rect x="1" y="9" width="14" height="3" rx="1"/><rect x="1" y="4" width="9" height="3" rx="1"/></svg></button>
+            <button class="pto-view-btn" id="pto-view-circle" title="Kreisansicht"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/></svg></button>
+          </div>
         </div>
       </div>
       <div id="pto-container" style="margin-bottom:1.25rem"></div>
@@ -747,6 +784,14 @@
           <div class="fg"><label class="fl">Budget (Stunden)</label><input class="fi" id="mp-budget" type="number" min="0" step="0.5" placeholder="Optional" /></div>
           <div class="fg"><label class="fl">Status</label>
             <select class="fi" id="mp-status"><option value="active">Aktiv</option><option value="paused">Pausiert</option><option value="completed">Abgeschlossen</option></select>
+          </div>
+          <div class="fg">
+            <label class="fl">Highlight-Farbe</label>
+            <div style="display:flex;gap:.5rem;align-items:center">
+              <input type="color" id="mp-color" value="#0A84FF" style="width:42px;height:38px;padding:2px;border:1px solid var(--border-s);border-radius:var(--r-sm);cursor:pointer;background:var(--surface);flex-shrink:0" />
+              <input class="fi" id="mp-color-hex" type="text" placeholder="#0A84FF" maxlength="7" style="flex:1" />
+              <button type="button" class="btn btn--ghost btn--sm" id="mp-color-clear" title="Farbe entfernen" style="flex-shrink:0">✕</button>
+            </div>
           </div>
         </div>
       </div>
@@ -1311,7 +1356,7 @@ async function loadClientProjects(clientId){
   const ST_LBL = { active:'Aktiv', paused:'Pausiert', completed:'Abgeschlossen', cancelled:'Abgebrochen' };
   el.innerHTML = data.map(p=>`<div class="proj-item">
     <div>
-      <div class="proj-name">${esc(p.name)}</div>
+      <div class="proj-name">${safeColor(p.color)?`<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${p.color};margin-right:.375rem"></span>`:''}${esc(p.name)}</div>
       <div class="proj-meta">${p.rate_type==='hourly'?`€${p.rate||0}/h`:`Festpreis €${p.rate||0}`} · ${fmtDur(hoursMap[p.id]||0)} erfasst</div>
     </div>
     <span class="tag ${ST_TAG[p.status]||'tag--muted'}">${ST_LBL[p.status]||p.status}</span>
@@ -1346,6 +1391,17 @@ $('btn-new-proj').addEventListener('click', async () => {
   openModal('ov-proj');
 });
 
+// Keep the swatch and the "#rrggbb" text field in sync.
+$('mp-color').addEventListener('input', () => { $('mp-color-hex').value = $('mp-color').value; });
+$('mp-color-hex').addEventListener('input', () => {
+  const v = $('mp-color-hex').value.trim();
+  if (/^#[0-9A-Fa-f]{6}$/.test(v)) $('mp-color').value = v;
+});
+$('mp-color-clear').addEventListener('click', () => {
+  $('mp-color').value = '#0A84FF';
+  $('mp-color-hex').value = '';
+});
+
 async function openEditProject(id){
   const { data:p } = await sb.from('projects').select('*,clients(name,company)').eq('id',id).single();
   if(!p) return;
@@ -1367,6 +1423,9 @@ async function openEditProject(id){
   $('mp-rate').value = p.rate || '';
   $('mp-budget').value = p.budget_hours || '';
   $('mp-status').value = p.status || 'active';
+  const validColor = safeColor(p.color) || '';
+  $('mp-color').value = validColor || '#0A84FF';
+  $('mp-color-hex').value = validColor;
   openModal('ov-proj');
 }
 
@@ -1391,7 +1450,7 @@ async function openProjectManagement(){
     tbody.innerHTML = `<tr><td colspan="5"><div class="empty-st"><p class="empty-ttl">Noch keine Projekte</p><p class="empty-sub">Erstelle das erste Projekt.</p></div></td></tr>`;
   } else {
     tbody.innerHTML = list.map(p=>`<tr>
-      <td class="fw6">${esc(p.name)}</td>
+      <td class="fw6">${safeColor(p.color)?`<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${p.color};margin-right:.5rem;flex-shrink:0"></span>`:''}${esc(p.name)}</td>
       <td class="muted">${esc(p.clients?.name||'—')}</td>
       <td class="muted">${p.rate_type==='hourly'?`€${p.rate||0}/h`:`Festpreis €${p.rate||0}`}</td>
       <td><span class="tag ${ST_TAG[p.status]||'tag--muted'}">${ST_LBL[p.status]||p.status}</span></td>
@@ -1413,20 +1472,31 @@ async function saveProject(e){
   if(!clientId){
     toast('Bitte einen Kunden auswählen.','err'); return;
   }
+  const colorRaw = $('mp-color-hex').value.trim();
+  const color = /^#[0-9A-Fa-f]{6}$/.test(colorRaw) ? colorRaw.toUpperCase() : null;
   const payload = { name:$('mp-name').value.trim(), description:$('mp-desc').value.trim()||null,
     rate_type:$('mp-rate-type').value, rate:parseFloat($('mp-rate').value)||null,
     budget_hours:parseFloat($('mp-budget').value)||null, status:$('mp-status').value,
-    client_id: clientId };
+    color, client_id: clientId };
   let error;
   if(editProjectId){
     ({ error } = await sb.from('projects').update(payload).eq('id', editProjectId));
   } else {
     ({ error } = await sb.from('projects').insert(payload));
   }
+  // Graceful fallback if the "color" column isn't migrated yet.
+  if(error && /color|column|schema cache/i.test(error.message||'')){
+    const { color, ...base } = payload;
+    const retry = editProjectId
+      ? await sb.from('projects').update(base).eq('id', editProjectId)
+      : await sb.from('projects').insert(base);
+    error = retry.error;
+    if(!error) toast('Farbe nicht gespeichert — bitte das aktualisierte supabase-setup.sql in Supabase ausführen.','err');
+  }
   if(error){ toast('Fehler: '+error.message,'err'); return; }
   closeModal('ov-proj'); toast(editProjectId ? 'Projekt aktualisiert.' : 'Projekt erstellt.','ok');
   editProjectId = null;
-  loadProjects();
+  loadProjects(); loadProjectOverview(); loadTimeEntries();
   if(drawerClientId) loadClientProjects(drawerClientId);
 }
 
@@ -1634,7 +1704,7 @@ async function saveManualTime(e){
 }
 
 async function loadTimeEntries(){
-  const { data }=await sb.from('time_entries').select('*,projects(name)').order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30);
+  const { data }=await sb.from('time_entries').select('*,projects(name,color)').order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30);
   const list=data||[];
   const todayStr=today(), weekAgo=new Date(Date.now()-7*864e5).toISOString().split('T')[0];
   $('t-today').textContent=fmtDur(list.filter(e=>e.date===todayStr).reduce((s,e)=>s+e.duration_minutes,0));
@@ -1646,7 +1716,7 @@ async function loadTimeEntries(){
       ? `${fmtTimeOnly(e.start_time)} – ${fmtTimeOnly(e.end_time)}`
       : '—';
     return `<tr data-id="${e.id}" title="Klicken zum Bearbeiten">
-    <td>${esc(e.description||'—')}</td><td class="muted">${esc(e.projects?.name||'—')}</td>
+    <td>${esc(e.description||'—')}</td><td class="muted">${safeColor(e.projects?.color)?`<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${e.projects.color};margin-right:.375rem"></span>`:''}${esc(e.projects?.name||'—')}</td>
     <td class="muted">${fmtDate(e.date)}</td><td class="muted mono">${zeitStr}</td>
     <td class="mono">${fmtDur(e.duration_minutes)}</td>
     <td>${e.is_invoiced?'<span class="tag tag--green">Fakturiert</span>':'<span class="tag tag--muted">Offen</span>'}</td>
@@ -1713,7 +1783,7 @@ function ptoRange() {
 async function loadProjectOverview() {
   const [from, to] = ptoRange();
   const { data } = await sb.from('time_entries')
-    .select('duration_minutes,project_id,projects(name,rate,rate_type,budget_hours,clients(name,won_at))')
+    .select('duration_minutes,project_id,projects(name,rate,rate_type,budget_hours,color,clients(name,won_at))')
     .gte('date', from).lte('date', to);
   const entries = data || [];
   const map = {};
@@ -1724,12 +1794,14 @@ async function loadProjectOverview() {
       rate: e.projects?.rate||0, rateType: e.projects?.rate_type||'hourly',
       budgetHours: e.projects?.budget_hours||null,
       wonAt: e.projects?.clients?.won_at||null,
+      color: e.projects?.color||null,
       mins: 0
     };
     map[pid].mins += e.duration_minutes || 0;
   });
   const projs = Object.values(map).sort((a,b) => b.mins - a.mins);
   const c = $('pto-container');
+  syncPtoViewButtons();
   if (!projs.length) {
     c.innerHTML = `<div class="card"><div class="empty-st" style="padding:1.5rem 1rem"><p class="empty-ttl" style="margin:0">Keine Einträge im gewählten Zeitraum</p></div></div>`;
     return;
@@ -1794,30 +1866,77 @@ async function loadProjectOverview() {
 
   const maxM = projs[0].mins;
 
-  c.innerHTML = `<div class="card">${projs.map(p => {
+  // Shared stats per project — both the bar and circle views read from this.
+  const rows = projs.map(p => {
     const budgetMins = periodBudgetMins(p);
-    let pct, barLbl = '', over = false;
+    let pct, rawPct, over = false;
     if (budgetMins) {
-      pct = Math.round(p.mins / budgetMins * 100);
-      over = pct > 100;
-      barLbl = `<span class="pto-bar-lbl">${pct} % · Ziel ${fmtDur(budgetMins)}</span>`;
-      pct = Math.min(pct, 100);
+      rawPct = Math.round(p.mins / budgetMins * 100);
+      over = rawPct > 100;
+      pct = Math.min(rawPct, 100);
     } else {
-      pct = maxM > 0 ? Math.round(p.mins / maxM * 100) : 0;
+      rawPct = maxM > 0 ? Math.round(p.mins / maxM * 100) : 0;
+      pct = rawPct;
     }
-    const earn = p.rateType === 'hourly' && p.rate ? `<span class="pto-earn">${fmtEur(p.mins / 60 * p.rate)}</span>` : '';
-    return `<div class="pto-row">
+    const earn = p.rateType === 'hourly' && p.rate ? fmtEur(p.mins / 60 * p.rate) : '';
+    return { ...p, budgetMins, pct, rawPct, over, earn };
+  });
+
+  c.innerHTML = ptoViewType === 'circle' ? renderPtoCircles(rows) : renderPtoBars(rows);
+}
+
+function renderPtoBars(rows) {
+  return `<div class="card">${rows.map(p => `<div class="pto-row">
       <div class="pto-row-top">
         <div><div class="pto-proj-name">${esc(p.name)}</div>${p.client?`<div class="pto-proj-client">${esc(p.client)}</div>`:''}</div>
-        <div class="pto-row-right"><span class="pto-dur${over?' pto-over':''}">${fmtDur(p.mins)}</span>${earn}</div>
+        <div class="pto-row-right"><span class="pto-dur${p.over?' pto-over':''}">${fmtDur(p.mins)}</span>${p.earn?`<span class="pto-earn">${p.earn}</span>`:''}</div>
       </div>
       <div class="pto-bar-wrap">
-        <div class="pto-bar-bg"><div class="pto-bar-fill${over?' over':''}" style="width:${pct}%"></div></div>
-        ${barLbl}
+        <div class="pto-bar-bg"><div class="pto-bar-fill${p.over?' over':''}" style="width:${p.pct}%;${!p.over&&safeColor(p.color)?`background:${p.color}`:''}"></div></div>
+        ${p.budgetMins?`<span class="pto-bar-lbl">${p.rawPct} % · Ziel ${fmtDur(p.budgetMins)}</span>`:''}
       </div>
-    </div>`;
-  }).join('')}</div>`;
+    </div>`).join('')}</div>`;
 }
+
+// Circular gauges (ring, not a filled disc) — like the progress rings in
+// common PM tools. A light track circle plus a colored arc on top of it.
+function ptoRingSVG(pct, over, color) {
+  const r = 42, sw = 9, size = 100, ctr = size / 2;
+  const circumference = 2 * Math.PI * r;
+  const offset = circumference * (1 - Math.max(0, Math.min(pct, 100)) / 100);
+  const stroke = over ? 'var(--red)' : (safeColor(color) || 'var(--accent)');
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="transform:rotate(-90deg)">
+    <circle cx="${ctr}" cy="${ctr}" r="${r}" fill="none" stroke="var(--surface-2)" stroke-width="${sw}"/>
+    <circle cx="${ctr}" cy="${ctr}" r="${r}" fill="none" stroke="${stroke}" stroke-width="${sw}" stroke-linecap="round"
+      stroke-dasharray="${circumference.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}"/>
+  </svg>`;
+}
+
+function renderPtoCircles(rows) {
+  return `<div class="pto-grid">${rows.map(p => `<div class="pto-circle-card">
+      <div class="pto-circle-wrap">
+        ${ptoRingSVG(p.pct, p.over, p.color)}
+        <div class="pto-circle-pct${p.over?' pto-over':''}">${p.rawPct}%</div>
+      </div>
+      <div><div class="pto-circle-name">${esc(p.name)}</div>${p.client?`<div class="pto-circle-client">${esc(p.client)}</div>`:''}</div>
+      <div class="pto-circle-dur${p.over?' pto-over':''}">${fmtDur(p.mins)}</div>
+      ${p.earn?`<div class="pto-earn">${p.earn}</div>`:''}
+      ${p.budgetMins?`<div class="pto-bar-lbl">Ziel ${fmtDur(p.budgetMins)}</div>`:''}
+    </div>`).join('')}</div>`;
+}
+
+let ptoViewType = localStorage.getItem('pto_view_type') || 'bar';
+
+function syncPtoViewButtons() {
+  const isBar = ptoViewType === 'bar';
+  $('pto-view-bar').style.background = isBar ? 'var(--ink)' : 'var(--surface)';
+  $('pto-view-bar').style.color = isBar ? '#fff' : 'var(--ink-m)';
+  $('pto-view-circle').style.background = !isBar ? 'var(--ink)' : 'var(--surface)';
+  $('pto-view-circle').style.color = !isBar ? '#fff' : 'var(--ink-m)';
+}
+
+$('pto-view-bar').addEventListener('click', () => { ptoViewType = 'bar'; localStorage.setItem('pto_view_type','bar'); loadProjectOverview(); });
+$('pto-view-circle').addEventListener('click', () => { ptoViewType = 'circle'; localStorage.setItem('pto_view_type','circle'); loadProjectOverview(); });
 
 document.querySelectorAll('.pto-btn').forEach(btn =>
   btn.addEventListener('click', () => {
@@ -4168,6 +4287,8 @@ function fmtDateTime(d){ if(!d) return '—'; return new Date(d).toLocaleDateStr
 function fmtDur(m){ if(!m) return '0h 0min'; return `${Math.floor(m/60)}h ${m%60}min`; }
 function fmtEur(v){ if(v==null) return '—'; return new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(v); }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+// Only ever trust a strict "#rrggbb" shape before it's interpolated into HTML/CSS.
+function safeColor(c){ return c && /^#[0-9A-Fa-f]{6}$/.test(c) ? c : null; }
 function pad(n){ return String(n).padStart(2,'0'); }
 function today(){ return new Date().toISOString().split('T')[0]; }
 function daysFromNow(n){ const d=new Date(); d.setDate(d.getDate()+n); return d.toISOString().split('T')[0]; }

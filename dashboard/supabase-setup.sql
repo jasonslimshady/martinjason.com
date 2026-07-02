@@ -106,6 +106,7 @@ CREATE TABLE IF NOT EXISTS projects (
                CHECK (rate_type IN ('hourly', 'fixed')),
   rate         DECIMAL(10,2),           -- €/hour or fixed project fee
   budget_hours DECIMAL(10,2),           -- optional hour cap
+  color        TEXT,                    -- optional custom "#rrggbb" highlight color
   created_at   TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
   updated_at   TIMESTAMPTZ    NOT NULL DEFAULT NOW()
 );
@@ -167,6 +168,17 @@ BEGIN
     WHERE table_name = 'invoices' AND column_name = 'pdf_url'
   ) THEN
     ALTER TABLE invoices ADD COLUMN pdf_url TEXT;
+  END IF;
+END $$;
+
+-- Migration helper: add color column to projects if missing
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'projects' AND column_name = 'color'
+  ) THEN
+    ALTER TABLE projects ADD COLUMN color TEXT;
   END IF;
 END $$;
 
