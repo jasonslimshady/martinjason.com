@@ -32,6 +32,11 @@
       --sb:232px;
     }
     *,*::before,*::after{box-sizing:border-box}
+    /* Hide scrollbars everywhere — scrolling itself stays fully functional
+       (mouse wheel, trackpad, keyboard, drag), only the visible track/thumb
+       is removed. */
+    *{scrollbar-width:none;-ms-overflow-style:none}
+    *::-webkit-scrollbar{display:none;width:0;height:0}
     html,body{margin:0;height:100%;overflow:hidden}
     body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:.9375rem;line-height:1.55;-webkit-font-smoothing:antialiased}
     a{color:inherit;text-decoration:none} button{font:inherit;cursor:pointer;border:0;background:transparent}
