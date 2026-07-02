@@ -381,7 +381,8 @@
     .pto-circle-card.selected{border-color:var(--accent)}
     .pto-circle-wrap{position:relative;width:100px;height:100px;flex-shrink:0}
     .pto-circle-wrap svg circle{transition:stroke-dashoffset .35s var(--ease),stroke .2s var(--fast)}
-    .pto-circle-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.0625rem;font-weight:700;letter-spacing:-.02em}
+    .pto-circle-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.0625rem;font-weight:700;letter-spacing:-.02em;text-align:center;padding:0 .375rem}
+    .pto-circle-pct--sm{font-size:.8125rem}
     .pto-circle-name{font-size:.875rem;font-weight:600}
     .pto-circle-client{font-size:.75rem;color:var(--ink-s);margin-top:-.25rem}
     .pto-circle-dur{font-size:.9375rem;font-weight:700;font-variant-numeric:tabular-nums}
@@ -1953,17 +1954,26 @@ function ptoRingSVG(pct, over, color) {
   </svg>`;
 }
 
+// Projects without an hour budget have no % target — show the amount
+// earned so far instead (only meaningful for hourly-rate projects).
+function ptoCircleCenterLabel(p) {
+  if (!p.budgetMins && p.rateType === 'hourly' && p.rate) {
+    return { text: fmtEurShort(p.mins / 60 * p.rate), small: true };
+  }
+  return { text: `${p.rawPct}%`, small: false };
+}
+
 function renderPtoCircles(rows) {
-  return `<div class="pto-grid">${rows.map(p => `<div class="pto-circle-card${p.id===ptoSelectedProjectId?' selected':''}" data-project-id="${p.id}" data-project-name="${esc(p.name)}">
+  return `<div class="pto-grid">${rows.map(p => { const lbl = ptoCircleCenterLabel(p); return `<div class="pto-circle-card${p.id===ptoSelectedProjectId?' selected':''}" data-project-id="${p.id}" data-project-name="${esc(p.name)}">
       <div class="pto-circle-wrap">
         ${ptoRingSVG(p.pct, p.over, p.color)}
-        <div class="pto-circle-pct${p.over?' pto-over':''}">${p.rawPct}%</div>
+        <div class="pto-circle-pct${p.over?' pto-over':''}${lbl.small?' pto-circle-pct--sm':''}">${lbl.text}</div>
       </div>
       <div><div class="pto-circle-name">${esc(p.name)}</div>${p.client?`<div class="pto-circle-client">${esc(p.client)}</div>`:''}</div>
       <div class="pto-circle-dur${p.over?' pto-over':''}">${fmtDur(p.mins)}</div>
-      ${p.earn?`<div class="pto-earn">${p.earn}</div>`:''}
+      ${p.earn&&!lbl.small?`<div class="pto-earn">${p.earn}</div>`:''}
       ${p.budgetMins?`<div class="pto-bar-lbl">Ziel ${fmtDur(p.budgetMins)}</div>`:''}
-    </div>`).join('')}</div>`;
+    </div>`; }).join('')}</div>`;
 }
 
 let ptoViewType = localStorage.getItem('pto_view_type') || 'bar';
@@ -4348,6 +4358,8 @@ function fmtDate(d){ if(!d) return '—'; return new Date(d).toLocaleDateString(
 function fmtDateTime(d){ if(!d) return '—'; return new Date(d).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}); }
 function fmtDur(m){ if(!m) return '0h 0min'; return `${Math.floor(m/60)}h ${m%60}min`; }
 function fmtEur(v){ if(v==null) return '—'; return new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(v); }
+// Rounded, no decimals — used where space is tight (e.g. inside the pto ring).
+function fmtEurShort(v){ if(v==null) return '—'; return new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(v); }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 // Only ever trust a strict "#rrggbb" shape before it's interpolated into HTML/CSS.
 function safeColor(c){ return c && /^#[0-9A-Fa-f]{6}$/.test(c) ? c : null; }
