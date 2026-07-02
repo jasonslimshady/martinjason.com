@@ -361,6 +361,7 @@
     .pto-row:last-child{border-bottom:none}
     .pto-row:hover{background:var(--surface-2)}
     .pto-row.selected{box-shadow:inset 0 0 0 1.5px var(--accent)}
+    .pto-row.dragging{opacity:.4}
     .pto-row-top{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.375rem}
     .pto-proj-name{font-size:.875rem;font-weight:600}
     .pto-proj-client{font-size:.75rem;color:var(--ink-s);margin-top:.125rem}
@@ -379,6 +380,7 @@
     .pto-circle-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:1.125rem 1rem;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.5rem;cursor:pointer;transition:all var(--fast)}
     .pto-circle-card:hover{border-color:var(--border-s)}
     .pto-circle-card.selected{border-color:var(--accent)}
+    .pto-circle-card.dragging{opacity:.4}
     .pto-circle-wrap{position:relative;width:100px;height:100px;flex-shrink:0}
     .pto-circle-wrap svg circle{transition:stroke-dashoffset .35s var(--ease),stroke .2s var(--fast)}
     .pto-circle-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.0625rem;font-weight:700;letter-spacing:-.02em;text-align:center;padding:0 .375rem}
@@ -1862,7 +1864,7 @@ async function loadProjectOverview() {
     };
     map[pid].mins += e.duration_minutes || 0;
   });
-  const projs = Object.values(map).sort((a,b) => b.mins - a.mins);
+  const projs = sortPtoProjects(Object.values(map));
   const c = $('pto-container');
   syncPtoViewButtons();
   if (!projs.length) {
@@ -1947,7 +1949,59 @@ async function loadProjectOverview() {
 
   c.innerHTML = ptoViewType === 'circle' ? renderPtoCircles(rows) : renderPtoBars(rows);
   c.querySelectorAll('[data-project-id]').forEach(el => {
-    el.addEventListener('click', () => selectPtoProject(el.dataset.projectId, el.dataset.projectName));
+    el.addEventListener('click', () => { if(!ptoJustDragged) selectPtoProject(el.dataset.projectId, el.dataset.projectName); });
+  });
+  attachPtoDragHandlers(c);
+}
+
+// ── DRAG & DROP REORDERING ──────────────────────────────────────────────
+// A manually dragged order is remembered per-browser and always wins over
+// the default "most time logged first" sort; new/untouched projects keep
+// falling back to that default sort, appended after the ordered ones.
+let ptoProjectOrder = [];
+try { ptoProjectOrder = JSON.parse(localStorage.getItem('pto_project_order')) || []; } catch(e) { ptoProjectOrder = []; }
+let ptoJustDragged = false; // suppresses the click-to-select that follows a drag release
+
+function sortPtoProjects(list) {
+  const orderIdx = new Map(ptoProjectOrder.map((id, i) => [id, i]));
+  return list.slice().sort((a, b) => {
+    const ai = orderIdx.has(a.id) ? orderIdx.get(a.id) : Infinity;
+    const bi = orderIdx.has(b.id) ? orderIdx.get(b.id) : Infinity;
+    if (ai !== bi) return ai - bi;
+    return b.mins - a.mins;
+  });
+}
+
+function persistPtoOrder(container) {
+  ptoProjectOrder = [...container.querySelectorAll('[data-project-id]')].map(el => el.dataset.projectId);
+  try { localStorage.setItem('pto_project_order', JSON.stringify(ptoProjectOrder)); } catch(e) {}
+}
+
+function attachPtoDragHandlers(c) {
+  const items = c.querySelectorAll('[data-project-id]');
+  items.forEach(el => {
+    el.draggable = true;
+    el.addEventListener('dragstart', e => {
+      el.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      try { e.dataTransfer.setData('text/plain', el.dataset.projectId); } catch(err) {}
+    });
+    el.addEventListener('dragend', () => {
+      el.classList.remove('dragging');
+      persistPtoOrder(c);
+      ptoJustDragged = true;
+      setTimeout(() => { ptoJustDragged = false; }, 0);
+    });
+    el.addEventListener('dragover', e => {
+      e.preventDefault();
+      const dragEl = c.querySelector('.dragging');
+      if (!dragEl || dragEl === el) return;
+      const rect = el.getBoundingClientRect();
+      const before = ptoViewType === 'circle'
+        ? (e.clientX - rect.left) < rect.width / 2
+        : (e.clientY - rect.top) < rect.height / 2;
+      el.parentElement.insertBefore(dragEl, before ? el : el.nextSibling);
+    });
   });
 }
 
@@ -1971,7 +2025,7 @@ function ptoRingSVG(pct, over, color) {
   const circumference = 2 * Math.PI * r;
   const offset = circumference * (1 - Math.max(0, Math.min(pct, 100)) / 100);
   const stroke = over ? 'var(--red)' : (safeColor(color) || 'var(--accent)');
-  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="transform:rotate(-90deg)">
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="transform:rotate(-90deg)" draggable="false">
     <circle cx="${ctr}" cy="${ctr}" r="${r}" fill="none" stroke="var(--surface-2)" stroke-width="${sw}"/>
     <circle cx="${ctr}" cy="${ctr}" r="${r}" fill="none" stroke="${stroke}" stroke-width="${sw}" stroke-linecap="round"
       stroke-dasharray="${circumference.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}"/>
