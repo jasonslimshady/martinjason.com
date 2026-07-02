@@ -357,8 +357,10 @@
     /* PROJECT TIME OVERVIEW */
     .pto-btn{padding:.375rem .875rem;border-radius:var(--r-pill);font-size:.8125rem;font-weight:500;background:var(--surface);color:var(--ink-m);border:1px solid var(--border-s);cursor:pointer;transition:all var(--fast)}
     .pto-btn.active,.pto-btn:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
-    .pto-row{padding:.875rem 1.125rem;border-bottom:1px solid var(--border)}
+    .pto-row{padding:.875rem 1.125rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background var(--fast)}
     .pto-row:last-child{border-bottom:none}
+    .pto-row:hover{background:var(--surface-2)}
+    .pto-row.selected{background:var(--accent-t)}
     .pto-row-top{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.375rem}
     .pto-proj-name{font-size:.875rem;font-weight:600}
     .pto-proj-client{font-size:.75rem;color:var(--ink-s);margin-top:.125rem}
@@ -374,7 +376,9 @@
     .pto-view-toggle{display:flex;border:1px solid var(--border-s);border-radius:var(--r-sm);overflow:hidden}
     .pto-view-btn{padding:.3rem .55rem;background:var(--surface);border:none;cursor:pointer;display:flex;align-items:center;color:var(--ink-m)}
     .pto-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:.875rem}
-    .pto-circle-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:1.125rem 1rem;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.5rem}
+    .pto-circle-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:1.125rem 1rem;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.5rem;cursor:pointer;transition:all var(--fast)}
+    .pto-circle-card:hover{border-color:var(--border-s)}
+    .pto-circle-card.selected{background:var(--accent-t);border-color:var(--accent)}
     .pto-circle-wrap{position:relative;width:100px;height:100px;flex-shrink:0}
     .pto-circle-wrap svg circle{transition:stroke-dashoffset .35s var(--ease),stroke .2s var(--fast)}
     .pto-circle-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.0625rem;font-weight:700;letter-spacing:-.02em}
@@ -513,8 +517,8 @@
         </div>
       </div>
       <div class="time-2col">
-        <div class="card"><div class="card-hd"><span class="card-ttl">Heute</span></div><div class="t-stat" id="t-today">0h 0min</div><div class="t-sub">erfasst heute</div></div>
-        <div class="card"><div class="card-hd"><span class="card-ttl">Diese Woche</span></div><div class="t-stat" id="t-week">0h 0min</div><div class="t-sub">erfasst diese Woche</div></div>
+        <div class="card"><div class="card-hd" style="justify-content:center"><span class="card-ttl">Heute</span></div><div class="t-stat" id="t-today">0h 0min</div><div class="t-sub">erfasst heute</div></div>
+        <div class="card"><div class="card-hd" style="justify-content:center"><span class="card-ttl">Diese Woche</span></div><div class="t-stat" id="t-week">0h 0min</div><div class="t-sub">erfasst diese Woche</div></div>
       </div>
       <!-- PROJECT TIME OVERVIEW -->
       <div class="sec-hd" style="margin-top:1.25rem">
@@ -538,8 +542,9 @@
       </div>
       <div id="pto-container" style="margin-bottom:1.25rem"></div>
       <div class="sec-hd">
-        <span class="sec-ttl">Letzte Einträge</span>
+        <span class="sec-ttl" id="time-sec-ttl">Letzte Einträge</span>
         <div style="display:flex;gap:.5rem">
+          <button class="btn btn--ghost btn--sm" id="btn-pto-clear-filter" title="Projekt-Filter entfernen" hidden>Alle</button>
           <button class="btn btn--ghost btn--sm" id="btn-manage-proj">Projekte verwalten</button>
           <button class="btn btn--ghost btn--sm" id="btn-new-proj">+ Neues Projekt</button>
           <button class="btn btn--ghost btn--sm" id="btn-manual">+ Manuell</button>
@@ -1433,6 +1438,7 @@ async function deleteProject(id, name){
   if(!confirm(`Projekt "${name}" wirklich löschen? Alle zugehörigen Zeiteinträge werden ebenfalls gelöscht.`)) return;
   const { error } = await sb.from('projects').delete().eq('id', id);
   if(error){ toast('Fehler: '+error.message,'err'); return; }
+  if(ptoSelectedProjectId === id){ ptoSelectedProjectId = null; ptoSelectedProjectName = null; }
   toast('Projekt gelöscht.','ok');
   loadProjects(); loadTimeEntries(); loadProjectOverview(); loadStats();
   openProjectManagement();
@@ -1709,12 +1715,33 @@ async function loadTimeEntries(){
     // "color" may not be migrated on this database yet — never let that hide the list itself.
     ({ data, error } = await sb.from('time_entries').select('*,projects(name)').order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30));
   }
-  const list=data||[];
+  const statsList = data||[];
   const todayStr=today(), weekAgo=new Date(Date.now()-7*864e5).toISOString().split('T')[0];
-  $('t-today').textContent=fmtDur(list.filter(e=>e.date===todayStr).reduce((s,e)=>s+e.duration_minutes,0));
-  $('t-week').textContent=fmtDur(list.filter(e=>e.date>=weekAgo).reduce((s,e)=>s+e.duration_minutes,0));
+  $('t-today').textContent=fmtDur(statsList.filter(e=>e.date===todayStr).reduce((s,e)=>s+e.duration_minutes,0));
+  $('t-week').textContent=fmtDur(statsList.filter(e=>e.date>=weekAgo).reduce((s,e)=>s+e.duration_minutes,0));
+
+  // "Letzte Einträge" itself narrows down to the project selected in the
+  // overview above, while the Heute/Diese Woche totals stay global.
+  let list = statsList;
+  if(ptoSelectedProjectId){
+    let filtered = await sb.from('time_entries').select('*,projects(name,color)').eq('project_id', ptoSelectedProjectId).order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30);
+    if(filtered.error){
+      filtered = await sb.from('time_entries').select('*,projects(name)').eq('project_id', ptoSelectedProjectId).order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30);
+    }
+    list = filtered.data || [];
+  }
+
+  const ttlEl = $('time-sec-ttl');
+  if(ttlEl) ttlEl.textContent = ptoSelectedProjectId ? `Letzte Einträge — ${ptoSelectedProjectName||''}` : 'Letzte Einträge';
+  const clearBtn = $('btn-pto-clear-filter');
+  if(clearBtn) clearBtn.hidden = !ptoSelectedProjectId;
+
   const tbody=$('time-body');
-  if(!list.length){ tbody.innerHTML=`<tr><td colspan="7"><div class="empty-st"><p class="empty-ttl">Noch keine Zeiteinträge</p><p class="empty-sub">Starte den Timer oder erfasse manuell.</p></div></td></tr>`; return; }
+  if(!list.length){
+    const emptyTtl = ptoSelectedProjectId ? 'Keine Einträge für dieses Projekt' : 'Noch keine Zeiteinträge';
+    const emptySub = ptoSelectedProjectId ? 'Klicke „Alle“, um wieder alle Einträge zu sehen.' : 'Starte den Timer oder erfasse manuell.';
+    tbody.innerHTML=`<tr><td colspan="7"><div class="empty-st"><p class="empty-ttl">${emptyTtl}</p><p class="empty-sub">${emptySub}</p></div></td></tr>`; return;
+  }
   tbody.innerHTML=list.map(e=>{
     const zeitStr = (e.start_time && e.end_time)
       ? `${fmtTimeOnly(e.start_time)} – ${fmtTimeOnly(e.end_time)}`
@@ -1800,6 +1827,7 @@ async function loadProjectOverview() {
   entries.forEach(e => {
     const pid = e.project_id; if (!pid) return;
     if (!map[pid]) map[pid] = {
+      id: pid,
       name: e.projects?.name||'—', client: e.projects?.clients?.name||'',
       rate: e.projects?.rate||0, rateType: e.projects?.rate_type||'hourly',
       budgetHours: e.projects?.budget_hours||null,
@@ -1893,10 +1921,13 @@ async function loadProjectOverview() {
   });
 
   c.innerHTML = ptoViewType === 'circle' ? renderPtoCircles(rows) : renderPtoBars(rows);
+  c.querySelectorAll('[data-project-id]').forEach(el => {
+    el.addEventListener('click', () => selectPtoProject(el.dataset.projectId, el.dataset.projectName));
+  });
 }
 
 function renderPtoBars(rows) {
-  return `<div class="card">${rows.map(p => `<div class="pto-row">
+  return `<div class="card">${rows.map(p => `<div class="pto-row${p.id===ptoSelectedProjectId?' selected':''}" data-project-id="${p.id}" data-project-name="${esc(p.name)}">
       <div class="pto-row-top">
         <div><div class="pto-proj-name">${esc(p.name)}</div>${p.client?`<div class="pto-proj-client">${esc(p.client)}</div>`:''}</div>
         <div class="pto-row-right"><span class="pto-dur${p.over?' pto-over':''}">${fmtDur(p.mins)}</span>${p.earn?`<span class="pto-earn">${p.earn}</span>`:''}</div>
@@ -1923,7 +1954,7 @@ function ptoRingSVG(pct, over, color) {
 }
 
 function renderPtoCircles(rows) {
-  return `<div class="pto-grid">${rows.map(p => `<div class="pto-circle-card">
+  return `<div class="pto-grid">${rows.map(p => `<div class="pto-circle-card${p.id===ptoSelectedProjectId?' selected':''}" data-project-id="${p.id}" data-project-name="${esc(p.name)}">
       <div class="pto-circle-wrap">
         ${ptoRingSVG(p.pct, p.over, p.color)}
         <div class="pto-circle-pct${p.over?' pto-over':''}">${p.rawPct}%</div>
@@ -1947,6 +1978,27 @@ function syncPtoViewButtons() {
 
 $('pto-view-bar').addEventListener('click', () => { ptoViewType = 'bar'; localStorage.setItem('pto_view_type','bar'); loadProjectOverview(); });
 $('pto-view-circle').addEventListener('click', () => { ptoViewType = 'circle'; localStorage.setItem('pto_view_type','circle'); loadProjectOverview(); });
+
+// Clicking a project in the overview highlights it and scopes "Letzte
+// Einträge" down to just that project's entries; "Alle" clears it again.
+let ptoSelectedProjectId = null;
+let ptoSelectedProjectName = null;
+
+function selectPtoProject(id, name) {
+  ptoSelectedProjectId = id;
+  ptoSelectedProjectName = name;
+  loadProjectOverview();
+  loadTimeEntries();
+}
+
+function clearPtoProjectFilter() {
+  ptoSelectedProjectId = null;
+  ptoSelectedProjectName = null;
+  loadProjectOverview();
+  loadTimeEntries();
+}
+
+$('btn-pto-clear-filter').addEventListener('click', clearPtoProjectFilter);
 
 document.querySelectorAll('.pto-btn').forEach(btn =>
   btn.addEventListener('click', () => {
