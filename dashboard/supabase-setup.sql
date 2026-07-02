@@ -317,6 +317,24 @@ CREATE POLICY "Authenticated full access" ON invoice_items
 
 
 -- ============================================================
+--  TABLE: app_tokens
+--  Server-side secrets (e.g. the Google Analytics OAuth refresh
+--  token used by /api/ga-token). RLS is enabled with NO policies
+--  on purpose: neither anon nor authenticated clients can read
+--  this table — only the service role key used by the Vercel
+--  API functions has access.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS app_tokens (
+  id         TEXT        PRIMARY KEY,
+  token      TEXT        NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE app_tokens ENABLE ROW LEVEL SECURITY;
+-- no CREATE POLICY here — service-role access only
+
+
+-- ============================================================
 --  SAMPLE DATA (optional — delete this block if you want a
 --  clean start, or run it to test the dashboard right away)
 -- ============================================================

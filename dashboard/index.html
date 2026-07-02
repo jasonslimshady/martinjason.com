@@ -3398,12 +3398,14 @@ let gaEnd    = 'today';
 
 const GA_TOKEN_KEY = 'ga4_token';
 const GA_EXPIRY_KEY = 'ga4_token_expiry';
+const GA_TOKEN_API = '/api/ga-token';
 
-function gaSaveToken(token) {
+function gaSaveToken(token, expiresInSec) {
   gaToken = token;
   localStorage.setItem(GA_TOKEN_KEY, token);
-  // Google access tokens expire after 1h; store with 55min safety margin
-  localStorage.setItem(GA_EXPIRY_KEY, Date.now() + 55 * 60 * 1000);
+  // Google access tokens expire after ~1h; renew 5min before expiry
+  const ttlMs = Math.max((expiresInSec || 3600) - 300, 60) * 1000;
+  localStorage.setItem(GA_EXPIRY_KEY, Date.now() + ttlMs);
 }
 
 function gaLoadToken() {
@@ -3430,6 +3432,45 @@ function getGaTokenSilent() {
     });
     client.requestAccessToken({ prompt: '' });
   });
+}
+
+// Backend token mint (/api/ga-token): uses the refresh token stored during
+// the one-time connect, so no Google popup is ever needed again.
+// GET → fresh access token · POST {code} → store refresh token after connect.
+async function gaServerToken(code) {
+  const { data:{ session } } = await sb.auth.getSession();
+  if (!session) throw new Error('Nicht angemeldet');
+  const res = await fetch(GA_TOKEN_API, {
+    method: code ? 'POST' : 'GET',
+    headers: {
+      'Authorization': 'Bearer ' + session.access_token,
+      ...(code ? { 'Content-Type': 'application/json' } : {}),
+    },
+    body: code ? JSON.stringify({ code }) : undefined,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.error || res.statusText);
+    err.status = res.status;
+    err.code = data.code;
+    throw err;
+  }
+  return data; // { access_token, expires_in, stored? }
+}
+
+// Get a fresh access token without any user interaction:
+// 1) backend refresh-token mint, 2) GIS silent iframe as fallback.
+async function gaFreshToken() {
+  try {
+    const data = await gaServerToken();
+    gaSaveToken(data.access_token, data.expires_in);
+    return gaToken;
+  } catch(e) {
+    if (e.code === 'reauth_required') gaClearToken();
+  }
+  const token = await getGaTokenSilent();
+  gaSaveToken(token);
+  return gaToken;
 }
 
 // Range preset buttons
@@ -3480,15 +3521,24 @@ function gaStopLive() {
   $('ga-live-btn').classList.remove('active');
 }
 
-async function gaRealtimeReport(body) {
-  const pid = CONFIG.GA4_PROPERTY_ID;
-  const res = await fetch(`https://analyticsdata.googleapis.com/v1beta/properties/${pid}:runRealtimeReport`, {
+// Shared GA4 Data API call. Renews the token silently and retries once
+// when it expires mid-session, so long sessions never hit a login popup.
+async function gaApiFetch(url, body) {
+  const call = () => fetch(url, {
     method: 'POST',
     headers: { 'Authorization': 'Bearer ' + gaToken, 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
+  let res = await call();
+  if (res.status === 401) {
+    try { await gaFreshToken(); res = await call(); } catch(_) {}
+  }
   if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.error?.message || res.statusText); }
   return res.json();
+}
+
+function gaRealtimeReport(body) {
+  return gaApiFetch(`https://analyticsdata.googleapis.com/v1beta/properties/${CONFIG.GA4_PROPERTY_ID}:runRealtimeReport`, body);
 }
 
 async function renderLive() {
@@ -3653,17 +3703,53 @@ async function renderLive() {
   }
 }
 
-// Auth button
-$('ga-auth-btn').addEventListener('click', async () => {
+// Auth button — one-time connect via the OAuth *code* flow. The backend
+// (/api/ga-token) exchanges the code for a refresh token and stores it,
+// so this popup is only ever needed once — afterwards every device gets
+// its tokens silently from the backend, forever.
+$('ga-auth-btn').addEventListener('click', gaConnect);
+
+async function gaConnect() {
   try {
-    const token = await getGaToken();
-    gaSaveToken(token);
+    const data = await new Promise((resolve, reject) => {
+      if (!window.google) { reject(new Error('Google Identity Services nicht geladen')); return; }
+      const client = google.accounts.oauth2.initCodeClient({
+        client_id: CONFIG.GMAIL_CLIENT_ID,
+        scope: 'https://www.googleapis.com/auth/analytics.readonly',
+        ux_mode: 'popup',
+        callback: async (res) => {
+          if (res.error) { reject(new Error(res.error)); return; }
+          try { resolve(await gaServerToken(res.code)); } catch(e) { reject(e); }
+        },
+        error_callback: (err) => reject(new Error(err?.message || err?.type || 'Popup geschlossen')),
+      });
+      client.requestCode();
+    });
+    gaSaveToken(data.access_token, data.expires_in);
+    if (data.stored === false) {
+      toast('Verbunden — Google hat keinen Refresh-Token geliefert. Falls die Anmeldung nicht dauerhaft hält: myaccount.google.com/permissions → Zugriff der App entfernen, dann hier neu verbinden.', 'err');
+    }
     renderAnalytics();
   } catch(e) {
+    // Backend not deployed / env vars missing → fall back to the old
+    // 1-hour token flow so Analytics still works.
+    if (e.code === 'server_not_configured' || e.status === 404 || e instanceof TypeError) {
+      try {
+        const token = await getGaToken();
+        gaSaveToken(token);
+        renderAnalytics();
+        toast('Verbunden (temporär) — für dauerhafte Anmeldung GOOGLE_CLIENT_SECRET & SUPABASE_SERVICE_ROLE_KEY in Vercel setzen.', 'err');
+      } catch(e2) {
+        toast('Google-Anmeldung fehlgeschlagen: ' + e2.message, 'err');
+      }
+      return;
+    }
     toast('Google-Anmeldung fehlgeschlagen: ' + e.message, 'err');
   }
-});
+}
 
+// Legacy fallback: implicit flow (1h token, no refresh) — only used when
+// the /api/ga-token backend is not configured.
 function getGaToken() {
   return new Promise((resolve, reject) => {
     if (!window.google) { reject(new Error('Google Identity Services nicht geladen')); return; }
@@ -3676,16 +3762,30 @@ function getGaToken() {
   });
 }
 
-// Restore GA session: use cached token if still valid, otherwise silent re-auth via GIS.
+// Restore GA session without user interaction:
+// 1) cached token, 2) backend refresh-token mint, 3) GIS silent iframe.
 // Called from showApp() and from onGoogleLibraryLoad (whichever fires last).
+let gaAutoInitRunning = false;
 async function gaAutoInit() {
-  if (gaLoadToken()) { renderAnalytics(); return; }      // cached token still valid
-  if (!window.google) return;                             // GIS not ready yet; onGoogleLibraryLoad will retry
+  if (gaAutoInitRunning || gaToken) return;
+  gaAutoInitRunning = true;
   try {
-    const token = await getGaTokenSilent();
-    gaSaveToken(token);
-    renderAnalytics();
-  } catch(_) { /* silent fail — user sees the connect button */ }
+    if (gaLoadToken()) { renderAnalytics(); return; }    // cached token still valid
+    try {
+      const data = await gaServerToken();                // backend mint — works on every device, no popup
+      gaSaveToken(data.access_token, data.expires_in);
+      renderAnalytics();
+      return;
+    } catch(_) { /* backend not configured or not connected yet */ }
+    if (!window.google) return;                          // GIS not ready yet; onGoogleLibraryLoad will retry
+    try {
+      const token = await getGaTokenSilent();
+      gaSaveToken(token);
+      renderAnalytics();
+    } catch(_) { /* silent fail — user sees the connect button */ }
+  } finally {
+    gaAutoInitRunning = false;
+  }
 }
 
 // Google fires this callback once the GIS library has fully loaded.
@@ -3694,18 +3794,8 @@ window.onGoogleLibraryLoad = function() {
   if (!$('screen-app').hidden && !gaToken) gaAutoInit();
 };
 
-async function gaReport(body) {
-  const pid = CONFIG.GA4_PROPERTY_ID;
-  const res = await fetch(`https://analyticsdata.googleapis.com/v1beta/properties/${pid}:runReport`, {
-    method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + gaToken, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error?.message || res.statusText);
-  }
-  return res.json();
+function gaReport(body) {
+  return gaApiFetch(`https://analyticsdata.googleapis.com/v1beta/properties/${CONFIG.GA4_PROPERTY_ID}:runReport`, body);
 }
 
 function gaMetric(report, name) {
