@@ -1805,6 +1805,25 @@ let ptoFilter = 'week';
 // this can't shift the date backwards near midnight in UTC+ timezones).
 function localISO(d) { return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
 
+// Parse a 'YYYY-MM-DD' string as LOCAL midnight (new Date('YYYY-MM-DD')
+// would parse as UTC and shift the day in UTC+ timezones).
+function parseLocalDate(s) { const [y,m,d] = String(s).split('-').map(Number); return new Date(y, m-1, d); }
+
+// Number of Mon–Fri working days between two dates, inclusive. This is the
+// backbone of every budget target: the hour budget is only ever spread over
+// working days, never weekends.
+function countWeekdaysInclusive(start, end) {
+  const a = new Date(start); a.setHours(0,0,0,0);
+  const b = new Date(end);   b.setHours(0,0,0,0);
+  if (b < a) return 0;
+  let count = 0, guard = 0;
+  for (const d = new Date(a); d <= b && guard < 4000; d.setDate(d.getDate()+1), guard++) {
+    const wd = d.getDay();
+    if (wd >= 1 && wd <= 5) count++;
+  }
+  return count;
+}
+
 // The current recurring budget cycle (start/end midnight, both inclusive)
 // that contains `ref`, for a project whose budget renews on day `startDay`
 // of every month. startDay=1 (or unset) reduces exactly to the calendar
@@ -1857,6 +1876,33 @@ function ptoRange() {
 async function loadProjectOverview() {
   const now = new Date();
   const [from, to] = ptoRange();
+
+  // Period geometry (local midnights), shared by both the worked-minute
+  // clipping below and the budget-target math further down.
+  const weekStartDate = ptoFilter === 'week'  ? parseLocalDate(from) : null;   // Monday
+  const weekEndDate   = weekStartDate ? (() => { const d = new Date(weekStartDate); d.setDate(d.getDate()+6); return d; })() : null; // Sunday
+  const rangeStartDate = ptoFilter === 'range' ? parseLocalDate(from) : null;
+  const rangeEndDate   = ptoFilter === 'range' ? parseLocalDate(to)   : null;
+  const singleDate     = ptoFilter === 'date'  ? parseLocalDate(from) : null;
+
+  // Earliest date whose entries still count toward this view's progress:
+  // for week/month we clip to the project's current budget cycle (and the
+  // client's won date); range/date are already bounded by the query.
+  function workedClipStartISO(p) {
+    const won = p.wonAt ? parseLocalDate(p.wonAt) : null;
+    let start = null;
+    if (ptoFilter === 'week') {
+      const cycle = ptoBudgetCycle(p.budgetStartDay, now);
+      start = new Date(Math.max(weekStartDate.getTime(), cycle.start.getTime()));
+    } else if (ptoFilter === 'month') {
+      start = ptoBudgetCycle(p.budgetStartDay, now).start;
+    } else {
+      return null;
+    }
+    if (won && won.getTime() > start.getTime()) start = won;
+    return localISO(start);
+  }
+
   let { data, error } = await sb.from('time_entries')
     .select('duration_minutes,date,project_id,projects(name,rate,rate_type,budget_hours,budget_start_day,color,clients(name,won_at))')
     .gte('date', from).lte('date', to);
@@ -1895,17 +1941,17 @@ async function loadProjectOverview() {
 
   entries.forEach(e => {
     const pid = e.project_id; if (!pid) return;
-    // "Diesen Monat" was fetched a bit wider than the calendar month so
-    // every possible cycle start day is covered — narrow each project back
-    // down to its own recurring cycle before summing minutes into it. This
-    // check happens *before* creating a map entry, so an inactive project
-    // whose only entries fall outside its current cycle doesn't show up
-    // here at all (matching its old behavior of simply not appearing).
-    if (ptoFilter === 'month') {
-      const startDay = map[pid] ? map[pid].budgetStartDay : (e.projects?.budget_start_day || null);
-      const cycle = ptoBudgetCycle(startDay, now);
-      if (e.date < localISO(cycle.start)) return;
-    }
+    // Reuse an existing (seeded) row so we don't create rows for inactive
+    // projects whose entries all fall outside the current cycle window.
+    const rowForClip = map[pid] || {
+      budgetStartDay: e.projects?.budget_start_day || null,
+      wonAt: e.projects?.clients?.won_at || null
+    };
+    // Week/Month were fetched a bit wider than their true window (to cover
+    // every possible cycle start day) — narrow each project back down to its
+    // own recurring cycle (and won date) before counting the minutes.
+    const clip = workedClipStartISO(rowForClip);
+    if (clip && e.date < clip) return;
     if (!map[pid]) map[pid] = {
       id: pid,
       name: e.projects?.name||'—', client: e.projects?.clients?.name||'',
@@ -1926,62 +1972,49 @@ async function loadProjectOverview() {
     return;
   }
 
-  const weekStartDate = ptoFilter === 'week' ? new Date(from) : null;
-  const rangeStartDate = ptoFilter === 'range' ? new Date(from) : null;
-  const rangeEndDate   = ptoFilter === 'range' ? new Date(to)   : null;
-  if (rangeStartDate) rangeStartDate.setHours(0,0,0,0);
-  if (rangeEndDate)   rangeEndDate.setHours(0,0,0,0);
-
-  // Inclusive day count between two midnights (e.g. Monday→Sunday = 7, not 6).
-  function daysBetweenInclusive(startMidnight, endMidnight) {
-    return Math.round((endMidnight - startMidnight) / 86400000) + 1;
-  }
-
+  // Budget target (in minutes) for the current view.
+  //
+  // Model: the monthly budget is treated as a *20-working-day* budget, so
+  // the rate is  budget_hours / 20  hours per Mon–Fri day  (a full 5-day
+  // week = budget/4). Targets are always relative to today's date, the
+  // Mon–Fri work week, and the project's own budget cycle start day:
+  //   • Woche/Tag/Zeitraum → daily rate × working days in the window,
+  //     clipped to the current cycle start and the client's won date.
+  //   • Monat → the full monthly budget for the current cycle, reduced pro
+  //     rata (by working-day share) only if the client was won mid-cycle.
   function periodBudgetMins(p) {
     if (!p.budgetHours) return null;
-    const wonDate = p.wonAt ? new Date(p.wonAt) : null;
-    if (wonDate) wonDate.setHours(0,0,0,0); // normalize to midnight for day-count math
-    const wonMidnight = wonDate;
+    const dailyMins = p.budgetHours / 20 * 60; // 20 Arbeitstage = volles Monatsbudget
+    const won = p.wonAt ? parseLocalDate(p.wonAt) : null;
 
     if (ptoFilter === 'month') {
-      // Recurring cycle starting on the project's own budget_start_day
-      // (defaults to the calendar month when unset).
       const cycle = ptoBudgetCycle(p.budgetStartDay, now);
-      const cycleDays = daysBetweenInclusive(cycle.start, cycle.end);
-      if (wonMidnight && wonMidnight >= cycle.start && wonMidnight <= cycle.end) {
-        // Kunde in diesem Zyklus gewonnen → anteiliges Budget, inkl. des Gewinn-Tags selbst.
-        const remainingDays = Math.max(daysBetweenInclusive(wonMidnight, cycle.end), 1);
-        return Math.round(p.budgetHours * (remainingDays / cycleDays) * 60);
-      }
-      return Math.round(p.budgetHours * 60); // ganzer Zyklus
+      const totalWd = countWeekdaysInclusive(cycle.start, cycle.end);
+      if (totalWd <= 0) return null;
+      let budgetStart = cycle.start;
+      if (won && won.getTime() > budgetStart.getTime()) budgetStart = won;
+      if (budgetStart.getTime() > cycle.end.getTime()) return null; // Kunde erst nach dem Zyklus gewonnen
+      const activeWd = countWeekdaysInclusive(budgetStart, cycle.end);
+      // Full monthly budget, scaled by the share of the cycle's working
+      // days on/after the won date (whole cycle → full budget).
+      return Math.round(p.budgetHours * 60 * (activeWd / totalWd));
     }
 
+    // Woche / Zeitraum / Tag — pure daily rate × working days in the window.
+    let winStart, winEnd;
     if (ptoFilter === 'week') {
-      const fullWeekMins = Math.round(p.budgetHours / 4.33 * 60);
-      if (wonMidnight && weekStartDate) {
-        const weekEnd = new Date(weekStartDate);
-        weekEnd.setDate(weekStartDate.getDate() + 6); // Sonntag
-        const wStartMidnight = new Date(weekStartDate); wStartMidnight.setHours(0,0,0,0);
-        weekEnd.setHours(0,0,0,0);
-        if (wonMidnight >= wStartMidnight && wonMidnight <= weekEnd) {
-          // Kunde diese Woche gewonnen → anteiliges Wochenbudget, inkl. des Gewinn-Tags selbst.
-          const daysRemaining = Math.max(daysBetweenInclusive(wonMidnight, weekEnd), 1);
-          return Math.round(fullWeekMins * daysRemaining / 7);
-        }
-      }
-      return fullWeekMins;
+      const cycle = ptoBudgetCycle(p.budgetStartDay, now);
+      winStart = new Date(Math.max(weekStartDate.getTime(), cycle.start.getTime()));
+      winEnd   = new Date(Math.min(weekEndDate.getTime(),   cycle.end.getTime()));
+    } else if (ptoFilter === 'range') {
+      winStart = new Date(rangeStartDate); winEnd = new Date(rangeEndDate);
+    } else {
+      winStart = new Date(singleDate); winEnd = new Date(singleDate);
     }
-
-    if (ptoFilter === 'range') {
-      let effectiveStart = rangeStartDate;
-      if (wonMidnight && wonMidnight > effectiveStart) effectiveStart = wonMidnight;
-      if (effectiveStart > rangeEndDate) return null; // Kunde erst nach dem Zeitraum gewonnen
-      const daysInRange = daysBetweenInclusive(effectiveStart, rangeEndDate);
-      const avgDaysPerMonth = 365.25 / 12; // ⌀ Kalendertage pro Monat
-      return Math.round(p.budgetHours * 60 / avgDaysPerMonth * daysInRange);
-    }
-
-    return Math.round(p.budgetHours / 20 * 60); // Tagesansicht
+    if (won && won.getTime() > winStart.getTime()) winStart = won;
+    const wd = countWeekdaysInclusive(winStart, winEnd);
+    if (wd <= 0) return null;
+    return Math.round(wd * dailyMins);
   }
 
   const maxM = projs[0].mins;
