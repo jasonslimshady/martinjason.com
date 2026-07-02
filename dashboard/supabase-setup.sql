@@ -106,6 +106,8 @@ CREATE TABLE IF NOT EXISTS projects (
                CHECK (rate_type IN ('hourly', 'fixed')),
   rate         DECIMAL(10,2),           -- €/hour or fixed project fee
   budget_hours DECIMAL(10,2),           -- optional hour cap
+  budget_start_day SMALLINT             -- day-of-month (1-31) the recurring budget cycle starts on; NULL = calendar month
+               CHECK (budget_start_day IS NULL OR (budget_start_day BETWEEN 1 AND 31)),
   color        TEXT,                    -- optional custom "#rrggbb" highlight color
   created_at   TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
   updated_at   TIMESTAMPTZ    NOT NULL DEFAULT NOW()
@@ -179,6 +181,18 @@ BEGIN
     WHERE table_name = 'projects' AND column_name = 'color'
   ) THEN
     ALTER TABLE projects ADD COLUMN color TEXT;
+  END IF;
+END $$;
+
+-- Migration helper: add budget_start_day column to projects if missing
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'projects' AND column_name = 'budget_start_day'
+  ) THEN
+    ALTER TABLE projects ADD COLUMN budget_start_day SMALLINT
+      CHECK (budget_start_day IS NULL OR (budget_start_day BETWEEN 1 AND 31));
   END IF;
 END $$;
 

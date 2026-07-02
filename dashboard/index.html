@@ -32,6 +32,11 @@
       --sb:232px;
     }
     *,*::before,*::after{box-sizing:border-box}
+    /* Hide scrollbars everywhere — scrolling itself stays fully functional
+       (mouse wheel, trackpad, keyboard, drag), only the visible track/thumb
+       is removed. */
+    *{scrollbar-width:none;-ms-overflow-style:none}
+    *::-webkit-scrollbar{display:none;width:0;height:0}
     html,body{margin:0;height:100%;overflow:hidden}
     body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:.9375rem;line-height:1.55;-webkit-font-smoothing:antialiased}
     a{color:inherit;text-decoration:none} button{font:inherit;cursor:pointer;border:0;background:transparent}
@@ -790,6 +795,11 @@
           </div>
           <div class="fg"><label class="fl">Satz (€)</label><input class="fi" id="mp-rate" type="number" min="0" step="0.01" placeholder="95.00" /></div>
           <div class="fg"><label class="fl">Budget (Stunden)</label><input class="fi" id="mp-budget" type="number" min="0" step="0.5" placeholder="Optional" /></div>
+          <div class="fg">
+            <label class="fl">Budget gilt ab Tag</label>
+            <input class="fi" id="mp-budget-start-day" type="number" min="1" max="31" step="1" placeholder="Standard: 1. des Monats" />
+            <span style="font-size:.75rem;color:var(--ink-s)">Tag im Monat, ab dem sich das Stundenbudget fortlaufend erneuert.</span>
+          </div>
           <div class="fg"><label class="fl">Status</label>
             <select class="fi" id="mp-status"><option value="active">Aktiv</option><option value="paused">Pausiert</option><option value="completed">Abgeschlossen</option></select>
           </div>
@@ -1430,6 +1440,7 @@ async function openEditProject(id){
   $('mp-rate-type').value = p.rate_type || 'hourly';
   $('mp-rate').value = p.rate || '';
   $('mp-budget').value = p.budget_hours || '';
+  $('mp-budget-start-day').value = p.budget_start_day || '';
   $('mp-status').value = p.status || 'active';
   const validColor = safeColor(p.color) || '';
   $('mp-color').value = validColor || '#0A84FF';
@@ -1483,9 +1494,11 @@ async function saveProject(e){
   }
   const colorRaw = $('mp-color-hex').value.trim();
   const color = /^#[0-9A-Fa-f]{6}$/.test(colorRaw) ? colorRaw.toUpperCase() : null;
+  const startDayRaw = parseInt($('mp-budget-start-day').value);
+  const budgetStartDay = startDayRaw >= 1 && startDayRaw <= 31 ? startDayRaw : null;
   const payload = { name:$('mp-name').value.trim(), description:$('mp-desc').value.trim()||null,
     rate_type:$('mp-rate-type').value, rate:parseFloat($('mp-rate').value)||null,
-    budget_hours:parseFloat($('mp-budget').value)||null, status:$('mp-status').value,
+    budget_hours:parseFloat($('mp-budget').value)||null, budget_start_day: budgetStartDay, status:$('mp-status').value,
     color, client_id: clientId };
   let error;
   if(editProjectId){
@@ -1493,14 +1506,14 @@ async function saveProject(e){
   } else {
     ({ error } = await sb.from('projects').insert(payload));
   }
-  // Graceful fallback if the "color" column isn't migrated yet.
-  if(error && /color|column|schema cache/i.test(error.message||'')){
-    const { color, ...base } = payload;
+  // Graceful fallback if "color" and/or "budget_start_day" aren't migrated yet.
+  if(error && /color|budget_start_day|column|schema cache/i.test(error.message||'')){
+    const { color, budget_start_day, ...base } = payload;
     const retry = editProjectId
       ? await sb.from('projects').update(base).eq('id', editProjectId)
       : await sb.from('projects').insert(base);
     error = retry.error;
-    if(!error) toast('Farbe nicht gespeichert — bitte das aktualisierte supabase-setup.sql in Supabase ausführen.','err');
+    if(!error) toast('Farbe/Budget-Starttag nicht gespeichert — bitte das aktualisierte supabase-setup.sql in Supabase ausführen.','err');
   }
   if(error){ toast('Fehler: '+error.message,'err'); return; }
   closeModal('ov-proj'); toast(editProjectId ? 'Projekt aktualisiert.' : 'Projekt erstellt.','ok');
@@ -1792,6 +1805,28 @@ let ptoFilter = 'week';
 // this can't shift the date backwards near midnight in UTC+ timezones).
 function localISO(d) { return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
 
+// The current recurring budget cycle (start/end midnight, both inclusive)
+// that contains `ref`, for a project whose budget renews on day `startDay`
+// of every month. startDay=1 (or unset) reduces exactly to the calendar
+// month, matching the previous (fixed) behavior. Days beyond a given
+// month's length (e.g. 31 in February) clamp to that month's last day.
+function ptoBudgetCycle(startDay, ref) {
+  const day = Math.min(Math.max(parseInt(startDay) || 1, 1), 31);
+  const t = new Date(ref); t.setHours(0,0,0,0);
+  const clampDay = (y, m) => Math.min(day, new Date(y, m + 1, 0).getDate());
+  const y = t.getFullYear(), m = t.getMonth();
+  // If we haven't reached this month's start day yet, the current cycle
+  // began last month instead (JS Date normalizes month <0 into the prior year).
+  const startM = t.getDate() < clampDay(y, m) ? m - 1 : m;
+  const start = new Date(y, startM, clampDay(y, startM));
+  start.setHours(0,0,0,0);
+  const nextStart = new Date(y, startM + 1, clampDay(y, startM + 1));
+  const end = new Date(nextStart);
+  end.setDate(end.getDate() - 1);
+  end.setHours(0,0,0,0);
+  return { start, end };
+}
+
 function ptoRange() {
   const todayStr = today();
   if (ptoFilter === 'week') {
@@ -1802,8 +1837,13 @@ function ptoRange() {
     return [localISO(d), todayStr];
   }
   if (ptoFilter === 'month') {
+    // Widened to the 1st of the *previous* month: a project's recurring
+    // budget cycle can start on any day 1-31, so its current cycle may
+    // already have begun before this calendar month did. The overview
+    // itself still narrows each project down to its own cycle window.
     const d = new Date();
-    return [`${d.getFullYear()}-${pad(d.getMonth()+1)}-01`, todayStr];
+    const prevMonth = new Date(d.getFullYear(), d.getMonth() - 1, 1);
+    return [`${prevMonth.getFullYear()}-${pad(prevMonth.getMonth()+1)}-01`, todayStr];
   }
   if (ptoFilter === 'range') {
     const from = $('pto-date-from').value || todayStr;
@@ -1815,14 +1855,15 @@ function ptoRange() {
 }
 
 async function loadProjectOverview() {
+  const now = new Date();
   const [from, to] = ptoRange();
   let { data, error } = await sb.from('time_entries')
-    .select('duration_minutes,project_id,projects(name,rate,rate_type,budget_hours,color,clients(name,won_at))')
+    .select('duration_minutes,date,project_id,projects(name,rate,rate_type,budget_hours,budget_start_day,color,clients(name,won_at))')
     .gte('date', from).lte('date', to);
   if(error){
-    // "color" may not be migrated on this database yet — never let that hide the overview itself.
+    // "color"/"budget_start_day" may not be migrated on this database yet — never let that hide the overview itself.
     ({ data, error } = await sb.from('time_entries')
-      .select('duration_minutes,project_id,projects(name,rate,rate_type,budget_hours,clients(name,won_at))')
+      .select('duration_minutes,date,project_id,projects(name,rate,rate_type,budget_hours,clients(name,won_at))')
       .gte('date', from).lte('date', to));
   }
   const entries = data || [];
@@ -1832,7 +1873,7 @@ async function loadProjectOverview() {
   // with 0 minutes logged in the selected period — not just projects that
   // happen to have entries within the range.
   let { data: activeProjects, error: apErr } = await sb.from('projects')
-    .select('id,name,rate,rate_type,budget_hours,color,clients(name,won_at)')
+    .select('id,name,rate,rate_type,budget_hours,budget_start_day,color,clients(name,won_at)')
     .eq('status', 'active');
   if (apErr) {
     ({ data: activeProjects, error: apErr } = await sb.from('projects')
@@ -1845,6 +1886,7 @@ async function loadProjectOverview() {
       name: p.name || '—', client: p.clients?.name || '',
       rate: p.rate || 0, rateType: p.rate_type || 'hourly',
       budgetHours: p.budget_hours || null,
+      budgetStartDay: p.budget_start_day || null,
       wonAt: p.clients?.won_at || null,
       color: p.color || null,
       mins: 0
@@ -1853,11 +1895,23 @@ async function loadProjectOverview() {
 
   entries.forEach(e => {
     const pid = e.project_id; if (!pid) return;
+    // "Diesen Monat" was fetched a bit wider than the calendar month so
+    // every possible cycle start day is covered — narrow each project back
+    // down to its own recurring cycle before summing minutes into it. This
+    // check happens *before* creating a map entry, so an inactive project
+    // whose only entries fall outside its current cycle doesn't show up
+    // here at all (matching its old behavior of simply not appearing).
+    if (ptoFilter === 'month') {
+      const startDay = map[pid] ? map[pid].budgetStartDay : (e.projects?.budget_start_day || null);
+      const cycle = ptoBudgetCycle(startDay, now);
+      if (e.date < localISO(cycle.start)) return;
+    }
     if (!map[pid]) map[pid] = {
       id: pid,
       name: e.projects?.name||'—', client: e.projects?.clients?.name||'',
       rate: e.projects?.rate||0, rateType: e.projects?.rate_type||'hourly',
       budgetHours: e.projects?.budget_hours||null,
+      budgetStartDay: e.projects?.budget_start_day||null,
       wonAt: e.projects?.clients?.won_at||null,
       color: e.projects?.color||null,
       mins: 0
@@ -1872,9 +1926,6 @@ async function loadProjectOverview() {
     return;
   }
 
-  const now = new Date();
-  const curYear = now.getFullYear(), curMonth = now.getMonth();
-  const daysInMonth = new Date(curYear, curMonth + 1, 0).getDate();
   const weekStartDate = ptoFilter === 'week' ? new Date(from) : null;
   const rangeStartDate = ptoFilter === 'range' ? new Date(from) : null;
   const rangeEndDate   = ptoFilter === 'range' ? new Date(to)   : null;
@@ -1893,12 +1944,16 @@ async function loadProjectOverview() {
     const wonMidnight = wonDate;
 
     if (ptoFilter === 'month') {
-      if (wonMidnight && wonDate.getFullYear() === curYear && wonDate.getMonth() === curMonth) {
-        // Kunde diesen Monat gewonnen → anteiliges Budget, inkl. des Gewinn-Tags selbst.
-        const remainingDays = Math.max(daysInMonth - wonMidnight.getDate() + 1, 1);
-        return Math.round(p.budgetHours * (remainingDays / daysInMonth) * 60);
+      // Recurring cycle starting on the project's own budget_start_day
+      // (defaults to the calendar month when unset).
+      const cycle = ptoBudgetCycle(p.budgetStartDay, now);
+      const cycleDays = daysBetweenInclusive(cycle.start, cycle.end);
+      if (wonMidnight && wonMidnight >= cycle.start && wonMidnight <= cycle.end) {
+        // Kunde in diesem Zyklus gewonnen → anteiliges Budget, inkl. des Gewinn-Tags selbst.
+        const remainingDays = Math.max(daysBetweenInclusive(wonMidnight, cycle.end), 1);
+        return Math.round(p.budgetHours * (remainingDays / cycleDays) * 60);
       }
-      return Math.round(p.budgetHours * 60); // ganzer Monat
+      return Math.round(p.budgetHours * 60); // ganzer Zyklus
     }
 
     if (ptoFilter === 'week') {
