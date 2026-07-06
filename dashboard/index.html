@@ -117,9 +117,6 @@
 
     /* MAIN */
     .main{flex:1;min-width:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column}
-    .topbar{height:56px;background:var(--glass-s);backdrop-filter:blur(var(--blur));-webkit-backdrop-filter:blur(var(--blur));border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;flex-shrink:0;position:sticky;top:0;z-index:10}
-    .tb-title{font-size:1rem;font-weight:600;letter-spacing:-.02em;flex:1}
-    .tb-sub{font-size:.8125rem;color:var(--ink-s)}
     .panel{flex:1;padding:1.5rem;display:none}
     .panel.active{display:block}
 
@@ -473,9 +470,6 @@
   </aside>
 
   <main class="main">
-    <div class="topbar">
-      <div style="flex:1"><div class="tb-title" id="tb-title">Analytics</div><div class="tb-sub" id="tb-sub">martinjason.com — Website Traffic</div></div>
-    </div>
 
     <!-- ANALYTICS PANEL -->
     <section class="panel active" id="panel-analytics">
@@ -1170,8 +1164,6 @@ function switchPanel(id) {
   document.querySelector(`.nav-item[data-panel="${id}"]`)?.classList.add('active');
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   $('panel-'+id).classList.add('active');
-  $('tb-title').textContent = PANELS[id].title;
-  $('tb-sub').textContent   = PANELS[id].sub;
   localStorage.setItem('active_panel', id);
   if (id === 'klaviyo' && !klvLoaded) {
     klvLoaded = true;
