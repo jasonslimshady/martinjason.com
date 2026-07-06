@@ -853,6 +853,17 @@
           <div style="font-size:.75rem;font-weight:600;color:var(--ink-s);text-transform:uppercase;letter-spacing:.04em;margin-bottom:.625rem">Zeitprotokoll</div>
           <div id="mt-logs-list" style="max-height:220px;overflow-y:auto"></div>
         </div>
+        <div id="mt-addlog-wrap" hidden style="margin-top:1rem">
+          <div class="divider" style="margin-bottom:.75rem"></div>
+          <button type="button" class="btn btn--ghost btn--sm" id="btn-addlog-toggle">+ Weiteren Eintrag hinzufügen</button>
+          <div id="mt-addlog-form" hidden style="display:flex;gap:.5rem;align-items:flex-end;margin-top:.625rem;flex-wrap:wrap">
+            <div class="fg" style="flex:2;min-width:160px;margin:0"><label class="fl">Beschreibung</label><input class="fi" id="mt-addlog-desc" placeholder="Was hast du gemacht?" /></div>
+            <div class="fg" style="width:80px;margin:0"><label class="fl">Std</label><input class="fi" id="mt-addlog-h" type="number" min="0" max="99" value="0" /></div>
+            <div class="fg" style="width:80px;margin:0"><label class="fl">Min</label><input class="fi" id="mt-addlog-m" type="number" min="0" max="59" value="0" /></div>
+            <button type="button" class="btn btn--primary btn--sm" id="btn-addlog-save">Hinzufügen</button>
+            <button type="button" class="btn btn--ghost btn--sm" id="btn-addlog-cancel">Abbrechen</button>
+          </div>
+        </div>
       </div>
       <div class="modal-ft">
         <button type="button" class="btn btn--danger btn--sm" id="mt-delete-btn" hidden>Löschen</button>
@@ -1648,22 +1659,77 @@ function openTimeModal(entry = null) {
       const stopStr = stop ? stop.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}) : '—';
       const dateChanged = start && stop && start.toDateString() !== stop.toDateString();
       const stopDisplay = dateChanged ? stop.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'}) + ' ' + stopStr : stopStr;
+      const label = log.manual ? (log.desc ? esc(log.desc) : 'Manueller Eintrag') : `Session ${i+1}`;
+      const subline = log.manual ? 'Manuell hinzugefügt' : `${startStr} → ${stopDisplay}`;
       return `<div style="display:flex;align-items:center;gap:.75rem;padding:.5rem .75rem;border-radius:var(--r-sm);background:var(--surface-2);margin-bottom:.375rem">
         <div style="width:20px;height:20px;border-radius:50%;background:var(--green-t);display:flex;align-items:center;justify-content:center;flex-shrink:0">
           <svg width="9" height="9" fill="var(--green)" viewBox="0 0 16 16"><path d="M5 3.5v9l7-4.5z"/></svg>
         </div>
         <div style="flex:1;min-width:0">
-          <div style="font-size:.8125rem;font-weight:500">Session ${i+1}</div>
-          <div style="font-size:.75rem;color:var(--ink-s)">${startStr} → ${stopDisplay}</div>
+          <div style="font-size:.8125rem;font-weight:500">${label}</div>
+          <div style="font-size:.75rem;color:var(--ink-s)">${subline}</div>
         </div>
         <div style="font-size:.8125rem;font-weight:600;font-variant-numeric:tabular-nums;flex-shrink:0">${fmtDur(log.minutes||0)}</div>
+        <button type="button" class="btn btn--icon btn--ghost log-del-btn" data-idx="${i}" title="Eintrag entfernen" style="width:22px;height:22px;flex-shrink:0;color:var(--ink-s)"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><path d="M2 2l12 12M14 2L2 14"/></svg></button>
       </div>`;
     }).join('') + `<div style="display:flex;justify-content:flex-end;margin-top:.375rem;font-size:.75rem;color:var(--ink-s);font-weight:600">Gesamt: ${fmtDur(entry.time_logs.reduce((s,l)=>s+(l.minutes||0),0))}</div>`;
+    logsList.querySelectorAll('.log-del-btn').forEach(btn =>
+      btn.addEventListener('click', () => deleteTimeLog(parseInt(btn.dataset.idx)))
+    );
   } else {
     logsSection.hidden = true;
     logsList.innerHTML = '';
   }
+  // Manually adding another log entry only makes sense once the entry
+  // itself already exists (it needs an id to attach the log to).
+  $('mt-addlog-wrap').hidden = !entry;
+  $('mt-addlog-form').hidden = true;
+  $('mt-addlog-desc').value = '';
+  $('mt-addlog-h').value = 0;
+  $('mt-addlog-m').value = 0;
   openModal('ov-time');
+}
+
+$('btn-addlog-toggle').addEventListener('click', () => {
+  $('mt-addlog-form').hidden = !$('mt-addlog-form').hidden;
+});
+$('btn-addlog-cancel').addEventListener('click', () => {
+  $('mt-addlog-form').hidden = true;
+});
+
+async function reopenTimeModalFresh(){
+  const { data: fresh } = await sb.from('time_entries').select('*').eq('id', editTimeEntryId).single();
+  if(fresh) openTimeModal(fresh);
+  loadTimeEntries(); loadProjectOverview(); loadStats();
+}
+
+$('btn-addlog-save').addEventListener('click', async () => {
+  const h = parseInt($('mt-addlog-h').value||0), m = parseInt($('mt-addlog-m').value||0);
+  const mins = h*60 + m;
+  if(!mins){ toast('Bitte eine Dauer angeben.','err'); return; }
+  const desc = $('mt-addlog-desc').value.trim();
+  const { data: existing, error: fetchErr } = await sb.from('time_entries').select('*').eq('id', editTimeEntryId).single();
+  if(fetchErr || !existing){ toast('Fehler: Eintrag nicht gefunden.','err'); return; }
+  const logEntry = { minutes: mins, manual: true, desc: desc || null };
+  const logs = Array.isArray(existing.time_logs) ? [...existing.time_logs, logEntry] : [logEntry];
+  const totalMins = (existing.duration_minutes||0) + mins;
+  const { error } = await sb.from('time_entries').update({ duration_minutes: totalMins, time_logs: logs }).eq('id', editTimeEntryId);
+  if(error){ toast('Fehler: '+error.message,'err'); return; }
+  toast('Eintrag hinzugefügt — Gesamtdauer aktualisiert.','ok');
+  await reopenTimeModalFresh();
+});
+
+async function deleteTimeLog(idx){
+  if(!confirm('Diesen Untereintrag wirklich entfernen?')) return;
+  const { data: existing, error: fetchErr } = await sb.from('time_entries').select('*').eq('id', editTimeEntryId).single();
+  if(fetchErr || !existing){ toast('Fehler: Eintrag nicht gefunden.','err'); return; }
+  const logs = Array.isArray(existing.time_logs) ? [...existing.time_logs] : [];
+  const removed = logs.splice(idx, 1)[0];
+  const totalMins = Math.max((existing.duration_minutes||0) - (removed?.minutes||0), 0);
+  const { error } = await sb.from('time_entries').update({ duration_minutes: totalMins, time_logs: logs }).eq('id', editTimeEntryId);
+  if(error){ toast('Fehler: '+error.message,'err'); return; }
+  toast('Untereintrag entfernt.','ok');
+  await reopenTimeModalFresh();
 }
 
 $('mt-delete-btn').addEventListener('click', async () => {
