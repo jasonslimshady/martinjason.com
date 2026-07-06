@@ -558,7 +558,7 @@
           <button class="btn btn--ghost btn--sm" id="btn-manual">+ Manuell</button>
         </div>
       </div>
-      <div class="card"><table class="dtable"><thead><tr><th>Beschreibung</th><th>Projekt</th><th>Datum</th><th>Uhrzeit</th><th>Dauer</th><th>Status</th><th style="width:36px"></th></tr></thead><tbody id="time-body"></tbody></table></div>
+      <div class="card"><table class="dtable"><thead><tr><th>Beschreibung</th><th>Projekt</th><th>Datum</th><th>Dauer</th><th>Betrag</th><th>Status</th><th style="width:36px"></th></tr></thead><tbody id="time-body"></tbody></table></div>
     </section>
 
     <!-- INVOICES PANEL -->
@@ -1726,10 +1726,10 @@ async function saveManualTime(e){
 }
 
 async function loadTimeEntries(){
-  let { data, error } = await sb.from('time_entries').select('*,projects(name,color)').order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30);
+  let { data, error } = await sb.from('time_entries').select('*,projects(name,color,rate,rate_type)').order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30);
   if(error){
     // "color" may not be migrated on this database yet — never let that hide the list itself.
-    ({ data, error } = await sb.from('time_entries').select('*,projects(name)').order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30));
+    ({ data, error } = await sb.from('time_entries').select('*,projects(name,rate,rate_type)').order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30));
   }
   const statsList = data||[];
   const todayStr=today(), weekAgo=new Date(Date.now()-7*864e5).toISOString().split('T')[0];
@@ -1740,9 +1740,9 @@ async function loadTimeEntries(){
   // overview above, while the Heute/Diese Woche totals stay global.
   let list = statsList;
   if(ptoSelectedProjectId){
-    let filtered = await sb.from('time_entries').select('*,projects(name,color)').eq('project_id', ptoSelectedProjectId).order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30);
+    let filtered = await sb.from('time_entries').select('*,projects(name,color,rate,rate_type)').eq('project_id', ptoSelectedProjectId).order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30);
     if(filtered.error){
-      filtered = await sb.from('time_entries').select('*,projects(name)').eq('project_id', ptoSelectedProjectId).order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30);
+      filtered = await sb.from('time_entries').select('*,projects(name,rate,rate_type)').eq('project_id', ptoSelectedProjectId).order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30);
     }
     list = filtered.data || [];
   }
@@ -1759,13 +1759,14 @@ async function loadTimeEntries(){
     tbody.innerHTML=`<tr><td colspan="7"><div class="empty-st"><p class="empty-ttl">${emptyTtl}</p><p class="empty-sub">${emptySub}</p></div></td></tr>`; return;
   }
   tbody.innerHTML=list.map(e=>{
-    const zeitStr = (e.start_time && e.end_time)
-      ? `${fmtTimeOnly(e.start_time)} – ${fmtTimeOnly(e.end_time)}`
+    const betrag = e.projects?.rate_type === 'hourly' && e.projects?.rate
+      ? fmtEur(e.duration_minutes / 60 * e.projects.rate)
       : '—';
     return `<tr data-id="${e.id}" title="Klicken zum Bearbeiten">
     <td>${esc(e.description||'—')}</td><td class="muted">${safeColor(e.projects?.color)?`<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${e.projects.color};margin-right:.375rem"></span>`:''}${esc(e.projects?.name||'—')}</td>
-    <td class="muted">${fmtDate(e.date)}</td><td class="muted mono">${zeitStr}</td>
+    <td class="muted">${fmtDate(e.date)}</td>
     <td class="mono">${fmtDur(e.duration_minutes)}</td>
+    <td class="mono">${betrag}</td>
     <td>${e.is_invoiced?'<span class="tag tag--green">Fakturiert</span>':'<span class="tag tag--muted">Offen</span>'}</td>
     <td style="padding:.5rem .625rem"><button class="btn btn--icon btn--ghost te-restart-btn" data-proj="${e.project_id}" data-entry="${e.id}" data-mins="${e.duration_minutes}" title="Timer für diesen Eintrag fortsetzen" style="width:28px;height:28px;color:var(--green)"><svg width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M5 3.5v9l7-4.5z"/></svg></button></td>
   </tr>`;}).join('');
