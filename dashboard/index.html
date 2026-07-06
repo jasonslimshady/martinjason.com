@@ -232,7 +232,6 @@
     /* TIMER */
     .timer-hero{background:var(--ink);border-radius:var(--r-lg);padding:1.75rem 2rem;color:#fff;margin-bottom:1.25rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap}
     .timer-clk{font-size:3.25rem;font-weight:700;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:1;flex:1;min-width:200px}
-    .timer-meta{font-size:.8125rem;opacity:.55;margin-top:.375rem}
     .timer-sel{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;padding:.5rem .75rem;border-radius:var(--r-sm);font:inherit;font-size:.875rem;outline:none;cursor:pointer}
     .timer-sel option{color:var(--ink);background:var(--surface)}
     .btn--start{background:var(--green);color:#fff;padding:.625rem 1.25rem;border-radius:var(--r-sm);font-weight:600}
@@ -516,7 +515,6 @@
       <div class="timer-hero">
         <div style="flex:1">
           <div class="timer-clk" id="timer-clk">00:00:00</div>
-          <div class="timer-meta" id="timer-meta">Kein Projekt ausgewählt</div>
         </div>
         <div style="display:flex;gap:.625rem;align-items:center;flex-wrap:wrap">
           <select class="timer-sel" id="timer-proj"><option value="">Projekt wählen…</option></select>
@@ -1547,9 +1545,6 @@ $('btn-start').addEventListener('click',()=>{
     $('timer-clk').textContent=`${pad(~~(s/3600))}:${pad(~~(s%3600/60))}:${pad(s%60)}`;
   },1000);
   $('btn-start').hidden=true; $('btn-stop').hidden=false;
-  const sel=$('timer-proj');
-  const label = sel.options[sel.selectedIndex]?.text||'';
-  $('timer-meta').textContent = timerResumeEntryId ? `${label} (fortgesetzt)` : label;
   toast(timerResumeEntryId ? 'Timer fortgesetzt.' : 'Timer gestartet.');
 });
 
@@ -1594,7 +1589,7 @@ $('btn-stop').addEventListener('click', async ()=>{
       else { toast(`${fmtDur(sessionMins)} gespeichert.`,'ok'); }
     }
   }
-  $('timer-clk').textContent='00:00:00'; $('timer-meta').textContent='Kein Projekt ausgewählt';
+  $('timer-clk').textContent='00:00:00';
   $('btn-start').hidden=false; $('btn-stop').hidden=true;
   timerStart=null; timerResumeEntryId=null; timerPrevMinutes=0;
   loadTimeEntries(); loadProjectOverview(); loadStats();
