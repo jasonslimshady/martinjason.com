@@ -136,6 +136,7 @@ CREATE TABLE IF NOT EXISTS time_entries (
   date             DATE        NOT NULL DEFAULT CURRENT_DATE,
   is_invoiced      BOOLEAN     NOT NULL DEFAULT false,
   time_logs        JSONB       NOT NULL DEFAULT '[]',
+  rate_override    NUMERIC,
   created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -148,6 +149,18 @@ BEGIN
     WHERE table_name = 'time_entries' AND column_name = 'time_logs'
   ) THEN
     ALTER TABLE time_entries ADD COLUMN time_logs JSONB NOT NULL DEFAULT '[]';
+  END IF;
+END $$;
+
+-- Migration helper: add rate_override column (per-entry hourly rate that
+-- overrides the project's default rate) if table already exists
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'time_entries' AND column_name = 'rate_override'
+  ) THEN
+    ALTER TABLE time_entries ADD COLUMN rate_override NUMERIC;
   END IF;
 END $$;
 
