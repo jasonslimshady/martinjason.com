@@ -1659,7 +1659,9 @@ function openTimeModal(entry = null) {
       const stopStr = stop ? stop.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}) : '—';
       const dateChanged = start && stop && start.toDateString() !== stop.toDateString();
       const stopDisplay = dateChanged ? stop.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'}) + ' ' + stopStr : stopStr;
-      const label = log.manual ? (log.desc ? esc(log.desc) : 'Manueller Eintrag') : `Session ${i+1}`;
+      // A custom name (set via the rename button) always wins; otherwise
+      // fall back to the description (manual entries) or "Session N".
+      const label = log.name ? esc(log.name) : (log.manual ? (log.desc ? esc(log.desc) : 'Manueller Eintrag') : `Session ${i+1}`);
       const subline = log.manual ? 'Manuell hinzugefügt' : `${startStr} → ${stopDisplay}`;
       return `<div style="display:flex;align-items:center;gap:.75rem;padding:.5rem .75rem;border-radius:var(--r-sm);background:var(--surface-2);margin-bottom:.375rem">
         <div style="width:20px;height:20px;border-radius:50%;background:var(--green-t);display:flex;align-items:center;justify-content:center;flex-shrink:0">
@@ -1670,9 +1672,13 @@ function openTimeModal(entry = null) {
           <div style="font-size:.75rem;color:var(--ink-s)">${subline}</div>
         </div>
         <div style="font-size:.8125rem;font-weight:600;font-variant-numeric:tabular-nums;flex-shrink:0">${fmtDur(log.minutes||0)}</div>
+        <button type="button" class="btn btn--icon btn--ghost log-rename-btn" data-idx="${i}" title="Umbenennen" style="width:22px;height:22px;flex-shrink:0;color:var(--ink-s)"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 16 16"><path d="M11 2l3 3-8 8-3.5 1L3.5 11z"/></svg></button>
         <button type="button" class="btn btn--icon btn--ghost log-del-btn" data-idx="${i}" title="Eintrag entfernen" style="width:22px;height:22px;flex-shrink:0;color:var(--ink-s)"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><path d="M2 2l12 12M14 2L2 14"/></svg></button>
       </div>`;
     }).join('') + `<div style="display:flex;justify-content:flex-end;margin-top:.375rem;font-size:.75rem;color:var(--ink-s);font-weight:600">Gesamt: ${fmtDur(entry.time_logs.reduce((s,l)=>s+(l.minutes||0),0))}</div>`;
+    logsList.querySelectorAll('.log-rename-btn').forEach(btn =>
+      btn.addEventListener('click', () => renameTimeLog(parseInt(btn.dataset.idx)))
+    );
     logsList.querySelectorAll('.log-del-btn').forEach(btn =>
       btn.addEventListener('click', () => deleteTimeLog(parseInt(btn.dataset.idx)))
     );
@@ -1718,6 +1724,21 @@ $('btn-addlog-save').addEventListener('click', async () => {
   toast('Eintrag hinzugefügt — Gesamtdauer aktualisiert.','ok');
   await reopenTimeModalFresh();
 });
+
+async function renameTimeLog(idx){
+  const { data: existing, error: fetchErr } = await sb.from('time_entries').select('*').eq('id', editTimeEntryId).single();
+  if(fetchErr || !existing){ toast('Fehler: Eintrag nicht gefunden.','err'); return; }
+  const logs = Array.isArray(existing.time_logs) ? [...existing.time_logs] : [];
+  const log = logs[idx]; if(!log) return;
+  const current = log.name || (log.manual ? (log.desc || '') : `Session ${idx+1}`);
+  const input = prompt('Name für diesen Eintrag:', current);
+  if(input === null) return; // abgebrochen
+  logs[idx] = { ...log, name: input.trim() || null };
+  const { error } = await sb.from('time_entries').update({ time_logs: logs }).eq('id', editTimeEntryId);
+  if(error){ toast('Fehler: '+error.message,'err'); return; }
+  toast('Name aktualisiert.','ok');
+  await reopenTimeModalFresh();
+}
 
 async function deleteTimeLog(idx){
   if(!confirm('Diesen Untereintrag wirklich entfernen?')) return;
