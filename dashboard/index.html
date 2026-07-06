@@ -534,6 +534,8 @@
         <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
           <button class="pto-btn active" data-pto="week">Diese Woche</button>
           <button class="pto-btn" data-pto="month">Diesen Monat</button>
+          <button class="pto-btn" data-pto="customer">Kundenzeitraum</button>
+          <button class="pto-btn" data-pto="total">Gesamt</button>
           <button class="pto-btn" data-pto="date">Datum</button>
           <button class="pto-btn" data-pto="range">Von – Bis</button>
           <input type="date" id="pto-date" class="fi" style="display:none;width:140px;font-size:.8125rem;padding:.375rem .625rem" />
@@ -1865,6 +1867,13 @@ function ptoRange() {
     const prevMonth = new Date(d.getFullYear(), d.getMonth() - 1, 1);
     return [`${prevMonth.getFullYear()}-${pad(prevMonth.getMonth()+1)}-01`, todayStr];
   }
+  if (ptoFilter === 'total' || ptoFilter === 'customer') {
+    // Full history: "Gesamt" wants every entry a project has ever logged;
+    // "Kundenzeitraum" cycles are anchored to each client's own won date,
+    // so the true window differs per project — fetch everything and
+    // narrow each project down to its current 30-day cycle client-side.
+    return ['1970-01-01', todayStr];
+  }
   if (ptoFilter === 'range') {
     const from = $('pto-date-from').value || todayStr;
     const to   = $('pto-date-to').value   || todayStr;
@@ -1886,9 +1895,20 @@ async function loadProjectOverview() {
   const rangeEndDate   = ptoFilter === 'range' ? parseLocalDate(to)   : null;
   const singleDate     = ptoFilter === 'date'  ? parseLocalDate(from) : null;
 
+  // The recurring 30ish-day cycle "Kundenzeitraum" targets: anchored to the
+  // day-of-month the client was won, rolling forward a month at a time
+  // (23.06. → 23.06.–22.07., then 23.07.–22.08., …) — reuses the existing
+  // day-of-month cycle math, just keyed by the won date instead of a
+  // project's own budget_start_day.
+  function customerCycle(wonAtStr) {
+    if (!wonAtStr) return null;
+    return ptoBudgetCycle(parseLocalDate(wonAtStr).getDate(), now);
+  }
+
   // Earliest date whose entries still count toward this view's progress:
-  // for week/month we clip to the project's current budget cycle (and the
-  // client's won date); range/date are already bounded by the query.
+  // for week/month/customer we clip to the relevant recurring cycle (and
+  // the client's won date); range/date/total are already bounded by the
+  // query (total simply fetches everything, unclipped).
   function workedClipStartISO(p) {
     const won = p.wonAt ? parseLocalDate(p.wonAt) : null;
     let start = null;
@@ -1897,6 +1917,10 @@ async function loadProjectOverview() {
       start = new Date(Math.max(weekStartDate.getTime(), cycle.start.getTime()));
     } else if (ptoFilter === 'month') {
       start = ptoBudgetCycle(p.budgetStartDay, now).start;
+    } else if (ptoFilter === 'customer') {
+      const cycle = customerCycle(p.wonAt);
+      if (!cycle) return null;
+      start = cycle.start;
     } else {
       return null;
     }
@@ -1928,6 +1952,9 @@ async function loadProjectOverview() {
       .eq('status', 'active'));
   }
   (activeProjects || []).forEach(p => {
+    // "Kundenzeitraum" only makes sense once a client has an actual won
+    // date to anchor the 30-day cycle to.
+    if (ptoFilter === 'customer' && !p.clients?.won_at) return;
     map[p.id] = {
       id: p.id,
       name: p.name || '—', client: p.clients?.name || '',
@@ -1948,9 +1975,11 @@ async function loadProjectOverview() {
       budgetStartDay: e.projects?.budget_start_day || null,
       wonAt: e.projects?.clients?.won_at || null
     };
-    // Week/Month were fetched a bit wider than their true window (to cover
-    // every possible cycle start day) — narrow each project back down to its
-    // own recurring cycle (and won date) before counting the minutes.
+    if (ptoFilter === 'customer' && !rowForClip.wonAt) return; // no cycle to anchor to
+    // Week/Month/Kundenzeitraum were fetched a bit wider than their true
+    // window (to cover every possible cycle start day) — narrow each
+    // project back down to its own recurring cycle (and won date) before
+    // counting the minutes.
     const clip = workedClipStartISO(rowForClip);
     if (clip && e.date < clip) return;
     if (!map[pid]) map[pid] = {
@@ -1983,13 +2012,18 @@ async function loadProjectOverview() {
   //     clipped to the current cycle start and the client's won date.
   //   • Monat → the full monthly budget for the current cycle, reduced pro
   //     rata (by working-day share) only if the client was won mid-cycle.
+  //   • Kundenzeitraum → same as Monat, but the cycle is anchored to the
+  //     client's own won date instead of the project's budget_start_day.
+  //   • Gesamt → no fixed target period, so no % / Ziel is shown at all.
   function periodBudgetMins(p) {
     if (!p.budgetHours) return null;
+    if (ptoFilter === 'total') return null;
     const dailyMins = p.budgetHours / 20 * 60; // 20 Arbeitstage = volles Monatsbudget
     const won = p.wonAt ? parseLocalDate(p.wonAt) : null;
 
-    if (ptoFilter === 'month') {
-      const cycle = ptoBudgetCycle(p.budgetStartDay, now);
+    if (ptoFilter === 'month' || ptoFilter === 'customer') {
+      const cycle = ptoFilter === 'customer' ? customerCycle(p.wonAt) : ptoBudgetCycle(p.budgetStartDay, now);
+      if (!cycle) return null;
       const totalWd = countWeekdaysInclusive(cycle.start, cycle.end);
       if (totalWd <= 0) return null;
       let budgetStart = cycle.start;
