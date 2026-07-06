@@ -840,6 +840,7 @@
           </div>
           <div class="fg"><label class="fl" id="mt-h-lbl">Stunden</label><input class="fi" id="mt-h" type="number" min="0" max="99" value="1" /></div>
           <div class="fg"><label class="fl">Minuten</label><input class="fi" id="mt-m" type="number" min="0" max="59" value="0" /></div>
+          <div class="fg"><label class="fl">Stundensatz (€)</label><input class="fi" id="mt-rate" type="number" min="0" step="0.01" placeholder="Projekt-Standard" /></div>
           <div class="fg s2"><label class="fl">Status</label>
             <select class="fi" id="mt-invoiced">
               <option value="false">Offen</option>
@@ -1623,6 +1624,7 @@ function openTimeModal(entry = null) {
     $('mt-desc').value     = entry.description || '';
     $('mt-date').value     = entry.date || today();
     $('mt-invoiced').value = entry.is_invoiced ? 'true' : 'false';
+    $('mt-rate').value = entry.rate_override != null ? entry.rate_override : '';
     if(hasLogs){
       $('mt-von').value = '';
       $('mt-bis').value = '';
@@ -1644,6 +1646,7 @@ function openTimeModal(entry = null) {
     $('mt-h').value        = 1;
     $('mt-m').value        = 0;
     $('mt-invoiced').value = 'false';
+    $('mt-rate').value     = '';
   }
   setDurLock(false);
   if(!hasLogs) calcDurFromVonBis();
@@ -1792,6 +1795,7 @@ async function saveManualTime(e){
   }
 
   const proj = projectsCache.find(p => p.id === pid);
+  const rateVal = $('mt-rate').value.trim();
   const payload = {
     project_id:       pid,
     client_id:        proj?.client_id || null,
@@ -1801,12 +1805,21 @@ async function saveManualTime(e){
     is_invoiced:      $('mt-invoiced').value === 'true',
     start_time:       startISO,
     end_time:         endISO,
+    rate_override:    rateVal ? parseFloat(rateVal) : null,
   };
   let error;
   if (editTimeEntryId) {
     ({ error } = await sb.from('time_entries').update(payload).eq('id', editTimeEntryId));
   } else {
     ({ error } = await sb.from('time_entries').insert(payload));
+  }
+  // Graceful fallback if "rate_override" isn't migrated yet.
+  if (error && /rate_override|column|schema cache/i.test(error.message||'')) {
+    const { rate_override, ...base } = payload;
+    ({ error } = editTimeEntryId
+      ? await sb.from('time_entries').update(base).eq('id', editTimeEntryId)
+      : await sb.from('time_entries').insert(base));
+    if (!error) toast('Individueller Stundensatz nicht gespeichert — bitte das aktualisierte supabase-setup.sql in Supabase ausführen.','err');
   }
   if (error) { toast('Fehler: '+error.message,'err'); return; }
   closeModal('ov-time');
@@ -1848,9 +1861,11 @@ async function loadTimeEntries(){
     tbody.innerHTML=`<tr><td colspan="7"><div class="empty-st"><p class="empty-ttl">${emptyTtl}</p><p class="empty-sub">${emptySub}</p></div></td></tr>`; return;
   }
   tbody.innerHTML=list.map(e=>{
-    const betrag = e.projects?.rate_type === 'hourly' && e.projects?.rate
-      ? fmtEur(e.duration_minutes / 60 * e.projects.rate)
-      : '—';
+    // An entry's own rate_override always wins over the project's default
+    // hourly rate — lets different work in the same project be billed
+    // at a different rate.
+    const effRate = e.rate_override != null ? e.rate_override : (e.projects?.rate_type === 'hourly' ? e.projects?.rate : null);
+    const betrag = effRate ? fmtEur(e.duration_minutes / 60 * effRate) : '—';
     return `<tr data-id="${e.id}" title="Klicken zum Bearbeiten">
     <td>${esc(e.description||'—')}</td><td class="muted">${safeColor(e.projects?.color)?`<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${e.projects.color};margin-right:.375rem"></span>`:''}${esc(e.projects?.name||'—')}</td>
     <td class="muted">${fmtDate(e.date)}</td>
@@ -2292,6 +2307,12 @@ function selectPtoProject(id, name) {
   ptoSelectedProjectName = name;
   loadProjectOverview();
   loadTimeEntries();
+  // Pre-select the same project for a new manual entry, but only if the
+  // timer isn't already running against a different one.
+  const timerSel = $('timer-proj');
+  if (!timerTick && [...timerSel.options].some(o => o.value === id)) {
+    timerSel.value = id;
+  }
 }
 
 function clearPtoProjectFilter() {
@@ -3082,11 +3103,15 @@ async function loadInvTimeEntries(){
   const list=data||[];
   if(!list.length){ el.innerHTML=`<div style="color:var(--ink-m);font-size:.875rem;padding:.75rem 0">Keine offenen Stunden für diesen Kunden.</div>`; return; }
   el.innerHTML=`<div style="font-size:.8125rem;font-weight:600;color:var(--ink-s);margin-bottom:.625rem">OFFENE ZEITEINTRÄGE</div>`+
-    list.map(e=>`<div class="te-row${invSelectedTEs.includes(e.id)?' checked':''}" data-id="${e.id}" data-mins="${e.duration_minutes}" data-proj="${esc(e.projects?.name||'')}" data-rate="${e.projects?.rate||0}">
+    list.map(e=>{
+      // An entry's own rate_override always wins over the project's rate.
+      const effRate = e.rate_override != null ? e.rate_override : (e.projects?.rate || 0);
+      return `<div class="te-row${invSelectedTEs.includes(e.id)?' checked':''}" data-id="${e.id}" data-mins="${e.duration_minutes}" data-proj="${esc(e.projects?.name||'')}" data-rate="${effRate}">
       <div class="te-check">✓</div>
       <div style="flex:1"><div style="font-size:.875rem">${esc(e.description||e.projects?.name||'Arbeit')}</div><div style="font-size:.75rem;color:var(--ink-s)">${fmtDate(e.date)} · ${fmtDur(e.duration_minutes)}</div></div>
-      <div style="font-size:.875rem;font-weight:600">${fmtEur((e.duration_minutes/60)*(e.projects?.rate||0))}</div>
-    </div>`).join('');
+      <div style="font-size:.875rem;font-weight:600">${fmtEur((e.duration_minutes/60)*effRate)}</div>
+    </div>`;
+    }).join('');
   document.querySelectorAll('.te-row').forEach(row=>row.addEventListener('click',()=>{
     const id=row.dataset.id;
     if(invSelectedTEs.includes(id)) invSelectedTEs=invSelectedTEs.filter(x=>x!==id);
@@ -3127,10 +3152,12 @@ $('inv-next-btn').addEventListener('click', async ()=>{
         const proj=r.dataset.proj||'Arbeit';
         const mins=parseInt(r.dataset.mins)||0;
         const rate=parseFloat(r.dataset.rate)||0;
-        if(!grouped[proj]) grouped[proj]={desc:proj,mins:0,rate};
-        grouped[proj].mins+=mins;
+        // Summed as amount (not mins × a single group rate), so entries with
+        // a per-entry rate_override are billed correctly within the group.
+        if(!grouped[proj]) grouped[proj]={desc:proj,amount:0};
+        grouped[proj].amount+=(mins/60)*rate;
       });
-      invLineItems=Object.values(grouped).map(g=>({ desc:g.desc, amount:parseFloat(((g.mins/60)*g.rate).toFixed(2)) }));
+      invLineItems=Object.values(grouped).map(g=>({ desc:g.desc, amount:parseFloat(g.amount.toFixed(2)) }));
     }
     if(!invLineItems.length) invLineItems=[{desc:'',amount:0}];
     invStep=2; renderInvStep();
