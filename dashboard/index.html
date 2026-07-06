@@ -1995,10 +1995,12 @@ async function loadProjectOverview() {
       let budgetStart = cycle.start;
       if (won && won.getTime() > budgetStart.getTime()) budgetStart = won;
       if (budgetStart.getTime() > cycle.end.getTime()) return null; // Kunde erst nach dem Zyklus gewonnen
-      const activeWd = countWeekdaysInclusive(budgetStart, cycle.end);
+      // At least 1 so a won date that falls on a weekend at the tail end
+      // of the cycle doesn't zero out the target entirely.
+      const activeWd = Math.max(countWeekdaysInclusive(budgetStart, cycle.end), 1);
       // Full monthly budget, scaled by the share of the cycle's working
       // days on/after the won date (whole cycle → full budget).
-      return Math.round(p.budgetHours * 60 * (activeWd / totalWd));
+      return Math.max(Math.round(p.budgetHours * 60 * (activeWd / totalWd)), 1);
     }
 
     // Woche / Zeitraum / Tag — pure daily rate × working days in the window.
@@ -2013,9 +2015,12 @@ async function loadProjectOverview() {
       winStart = new Date(singleDate); winEnd = new Date(singleDate);
     }
     if (won && won.getTime() > winStart.getTime()) winStart = won;
-    const wd = countWeekdaysInclusive(winStart, winEnd);
-    if (wd <= 0) return null;
-    return Math.round(wd * dailyMins);
+    if (winStart.getTime() > winEnd.getTime()) return null; // Kunde erst nach dem Zeitraum gewonnen
+    // At least 1 working day so a window that happens to fall entirely on
+    // a weekend (e.g. "Tag" view on a Saturday) still shows a real target
+    // instead of silently hiding it.
+    const wd = Math.max(countWeekdaysInclusive(winStart, winEnd), 1);
+    return Math.max(Math.round(wd * dailyMins), 1);
   }
 
   const maxM = projs[0].mins;
