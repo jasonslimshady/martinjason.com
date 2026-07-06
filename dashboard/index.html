@@ -534,6 +534,8 @@
         <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
           <button class="pto-btn active" data-pto="week">Diese Woche</button>
           <button class="pto-btn" data-pto="month">Diesen Monat</button>
+          <button class="pto-btn" data-pto="customer">Kundenzeitraum</button>
+          <button class="pto-btn" data-pto="total">Gesamt</button>
           <button class="pto-btn" data-pto="date">Datum</button>
           <button class="pto-btn" data-pto="range">Von – Bis</button>
           <input type="date" id="pto-date" class="fi" style="display:none;width:140px;font-size:.8125rem;padding:.375rem .625rem" />
@@ -850,6 +852,17 @@
           <div class="divider" style="margin-bottom:.75rem"></div>
           <div style="font-size:.75rem;font-weight:600;color:var(--ink-s);text-transform:uppercase;letter-spacing:.04em;margin-bottom:.625rem">Zeitprotokoll</div>
           <div id="mt-logs-list" style="max-height:220px;overflow-y:auto"></div>
+        </div>
+        <div id="mt-addlog-wrap" hidden style="margin-top:1rem">
+          <div class="divider" style="margin-bottom:.75rem"></div>
+          <button type="button" class="btn btn--ghost btn--sm" id="btn-addlog-toggle">+ Weiteren Eintrag hinzufügen</button>
+          <div id="mt-addlog-form" hidden style="display:flex;gap:.5rem;align-items:flex-end;margin-top:.625rem;flex-wrap:wrap">
+            <div class="fg" style="flex:2;min-width:160px;margin:0"><label class="fl">Beschreibung</label><input class="fi" id="mt-addlog-desc" placeholder="Was hast du gemacht?" /></div>
+            <div class="fg" style="width:80px;margin:0"><label class="fl">Std</label><input class="fi" id="mt-addlog-h" type="number" min="0" max="99" value="0" /></div>
+            <div class="fg" style="width:80px;margin:0"><label class="fl">Min</label><input class="fi" id="mt-addlog-m" type="number" min="0" max="59" value="0" /></div>
+            <button type="button" class="btn btn--primary btn--sm" id="btn-addlog-save">Hinzufügen</button>
+            <button type="button" class="btn btn--ghost btn--sm" id="btn-addlog-cancel">Abbrechen</button>
+          </div>
         </div>
       </div>
       <div class="modal-ft">
@@ -1646,22 +1659,77 @@ function openTimeModal(entry = null) {
       const stopStr = stop ? stop.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}) : '—';
       const dateChanged = start && stop && start.toDateString() !== stop.toDateString();
       const stopDisplay = dateChanged ? stop.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'}) + ' ' + stopStr : stopStr;
+      const label = log.manual ? (log.desc ? esc(log.desc) : 'Manueller Eintrag') : `Session ${i+1}`;
+      const subline = log.manual ? 'Manuell hinzugefügt' : `${startStr} → ${stopDisplay}`;
       return `<div style="display:flex;align-items:center;gap:.75rem;padding:.5rem .75rem;border-radius:var(--r-sm);background:var(--surface-2);margin-bottom:.375rem">
         <div style="width:20px;height:20px;border-radius:50%;background:var(--green-t);display:flex;align-items:center;justify-content:center;flex-shrink:0">
           <svg width="9" height="9" fill="var(--green)" viewBox="0 0 16 16"><path d="M5 3.5v9l7-4.5z"/></svg>
         </div>
         <div style="flex:1;min-width:0">
-          <div style="font-size:.8125rem;font-weight:500">Session ${i+1}</div>
-          <div style="font-size:.75rem;color:var(--ink-s)">${startStr} → ${stopDisplay}</div>
+          <div style="font-size:.8125rem;font-weight:500">${label}</div>
+          <div style="font-size:.75rem;color:var(--ink-s)">${subline}</div>
         </div>
         <div style="font-size:.8125rem;font-weight:600;font-variant-numeric:tabular-nums;flex-shrink:0">${fmtDur(log.minutes||0)}</div>
+        <button type="button" class="btn btn--icon btn--ghost log-del-btn" data-idx="${i}" title="Eintrag entfernen" style="width:22px;height:22px;flex-shrink:0;color:var(--ink-s)"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><path d="M2 2l12 12M14 2L2 14"/></svg></button>
       </div>`;
     }).join('') + `<div style="display:flex;justify-content:flex-end;margin-top:.375rem;font-size:.75rem;color:var(--ink-s);font-weight:600">Gesamt: ${fmtDur(entry.time_logs.reduce((s,l)=>s+(l.minutes||0),0))}</div>`;
+    logsList.querySelectorAll('.log-del-btn').forEach(btn =>
+      btn.addEventListener('click', () => deleteTimeLog(parseInt(btn.dataset.idx)))
+    );
   } else {
     logsSection.hidden = true;
     logsList.innerHTML = '';
   }
+  // Manually adding another log entry only makes sense once the entry
+  // itself already exists (it needs an id to attach the log to).
+  $('mt-addlog-wrap').hidden = !entry;
+  $('mt-addlog-form').hidden = true;
+  $('mt-addlog-desc').value = '';
+  $('mt-addlog-h').value = 0;
+  $('mt-addlog-m').value = 0;
   openModal('ov-time');
+}
+
+$('btn-addlog-toggle').addEventListener('click', () => {
+  $('mt-addlog-form').hidden = !$('mt-addlog-form').hidden;
+});
+$('btn-addlog-cancel').addEventListener('click', () => {
+  $('mt-addlog-form').hidden = true;
+});
+
+async function reopenTimeModalFresh(){
+  const { data: fresh } = await sb.from('time_entries').select('*').eq('id', editTimeEntryId).single();
+  if(fresh) openTimeModal(fresh);
+  loadTimeEntries(); loadProjectOverview(); loadStats();
+}
+
+$('btn-addlog-save').addEventListener('click', async () => {
+  const h = parseInt($('mt-addlog-h').value||0), m = parseInt($('mt-addlog-m').value||0);
+  const mins = h*60 + m;
+  if(!mins){ toast('Bitte eine Dauer angeben.','err'); return; }
+  const desc = $('mt-addlog-desc').value.trim();
+  const { data: existing, error: fetchErr } = await sb.from('time_entries').select('*').eq('id', editTimeEntryId).single();
+  if(fetchErr || !existing){ toast('Fehler: Eintrag nicht gefunden.','err'); return; }
+  const logEntry = { minutes: mins, manual: true, desc: desc || null };
+  const logs = Array.isArray(existing.time_logs) ? [...existing.time_logs, logEntry] : [logEntry];
+  const totalMins = (existing.duration_minutes||0) + mins;
+  const { error } = await sb.from('time_entries').update({ duration_minutes: totalMins, time_logs: logs }).eq('id', editTimeEntryId);
+  if(error){ toast('Fehler: '+error.message,'err'); return; }
+  toast('Eintrag hinzugefügt — Gesamtdauer aktualisiert.','ok');
+  await reopenTimeModalFresh();
+});
+
+async function deleteTimeLog(idx){
+  if(!confirm('Diesen Untereintrag wirklich entfernen?')) return;
+  const { data: existing, error: fetchErr } = await sb.from('time_entries').select('*').eq('id', editTimeEntryId).single();
+  if(fetchErr || !existing){ toast('Fehler: Eintrag nicht gefunden.','err'); return; }
+  const logs = Array.isArray(existing.time_logs) ? [...existing.time_logs] : [];
+  const removed = logs.splice(idx, 1)[0];
+  const totalMins = Math.max((existing.duration_minutes||0) - (removed?.minutes||0), 0);
+  const { error } = await sb.from('time_entries').update({ duration_minutes: totalMins, time_logs: logs }).eq('id', editTimeEntryId);
+  if(error){ toast('Fehler: '+error.message,'err'); return; }
+  toast('Untereintrag entfernt.','ok');
+  await reopenTimeModalFresh();
 }
 
 $('mt-delete-btn').addEventListener('click', async () => {
@@ -1865,6 +1933,13 @@ function ptoRange() {
     const prevMonth = new Date(d.getFullYear(), d.getMonth() - 1, 1);
     return [`${prevMonth.getFullYear()}-${pad(prevMonth.getMonth()+1)}-01`, todayStr];
   }
+  if (ptoFilter === 'total' || ptoFilter === 'customer') {
+    // Full history: "Gesamt" wants every entry a project has ever logged;
+    // "Kundenzeitraum" cycles are anchored to each client's own won date,
+    // so the true window differs per project — fetch everything and
+    // narrow each project down to its current 30-day cycle client-side.
+    return ['1970-01-01', todayStr];
+  }
   if (ptoFilter === 'range') {
     const from = $('pto-date-from').value || todayStr;
     const to   = $('pto-date-to').value   || todayStr;
@@ -1886,9 +1961,20 @@ async function loadProjectOverview() {
   const rangeEndDate   = ptoFilter === 'range' ? parseLocalDate(to)   : null;
   const singleDate     = ptoFilter === 'date'  ? parseLocalDate(from) : null;
 
+  // The recurring 30ish-day cycle "Kundenzeitraum" targets: anchored to the
+  // day-of-month the client was won, rolling forward a month at a time
+  // (23.06. → 23.06.–22.07., then 23.07.–22.08., …) — reuses the existing
+  // day-of-month cycle math, just keyed by the won date instead of a
+  // project's own budget_start_day.
+  function customerCycle(wonAtStr) {
+    if (!wonAtStr) return null;
+    return ptoBudgetCycle(parseLocalDate(wonAtStr).getDate(), now);
+  }
+
   // Earliest date whose entries still count toward this view's progress:
-  // for week/month we clip to the project's current budget cycle (and the
-  // client's won date); range/date are already bounded by the query.
+  // for week/month/customer we clip to the relevant recurring cycle (and
+  // the client's won date); range/date/total are already bounded by the
+  // query (total simply fetches everything, unclipped).
   function workedClipStartISO(p) {
     const won = p.wonAt ? parseLocalDate(p.wonAt) : null;
     let start = null;
@@ -1897,6 +1983,10 @@ async function loadProjectOverview() {
       start = new Date(Math.max(weekStartDate.getTime(), cycle.start.getTime()));
     } else if (ptoFilter === 'month') {
       start = ptoBudgetCycle(p.budgetStartDay, now).start;
+    } else if (ptoFilter === 'customer') {
+      const cycle = customerCycle(p.wonAt);
+      if (!cycle) return null;
+      start = cycle.start;
     } else {
       return null;
     }
@@ -1928,6 +2018,9 @@ async function loadProjectOverview() {
       .eq('status', 'active'));
   }
   (activeProjects || []).forEach(p => {
+    // "Kundenzeitraum" only makes sense once a client has an actual won
+    // date to anchor the 30-day cycle to.
+    if (ptoFilter === 'customer' && !p.clients?.won_at) return;
     map[p.id] = {
       id: p.id,
       name: p.name || '—', client: p.clients?.name || '',
@@ -1948,9 +2041,11 @@ async function loadProjectOverview() {
       budgetStartDay: e.projects?.budget_start_day || null,
       wonAt: e.projects?.clients?.won_at || null
     };
-    // Week/Month were fetched a bit wider than their true window (to cover
-    // every possible cycle start day) — narrow each project back down to its
-    // own recurring cycle (and won date) before counting the minutes.
+    if (ptoFilter === 'customer' && !rowForClip.wonAt) return; // no cycle to anchor to
+    // Week/Month/Kundenzeitraum were fetched a bit wider than their true
+    // window (to cover every possible cycle start day) — narrow each
+    // project back down to its own recurring cycle (and won date) before
+    // counting the minutes.
     const clip = workedClipStartISO(rowForClip);
     if (clip && e.date < clip) return;
     if (!map[pid]) map[pid] = {
@@ -1983,13 +2078,18 @@ async function loadProjectOverview() {
   //     clipped to the current cycle start and the client's won date.
   //   • Monat → the full monthly budget for the current cycle, reduced pro
   //     rata (by working-day share) only if the client was won mid-cycle.
+  //   • Kundenzeitraum → same as Monat, but the cycle is anchored to the
+  //     client's own won date instead of the project's budget_start_day.
+  //   • Gesamt → no fixed target period, so no % / Ziel is shown at all.
   function periodBudgetMins(p) {
     if (!p.budgetHours) return null;
+    if (ptoFilter === 'total') return null;
     const dailyMins = p.budgetHours / 20 * 60; // 20 Arbeitstage = volles Monatsbudget
     const won = p.wonAt ? parseLocalDate(p.wonAt) : null;
 
-    if (ptoFilter === 'month') {
-      const cycle = ptoBudgetCycle(p.budgetStartDay, now);
+    if (ptoFilter === 'month' || ptoFilter === 'customer') {
+      const cycle = ptoFilter === 'customer' ? customerCycle(p.wonAt) : ptoBudgetCycle(p.budgetStartDay, now);
+      if (!cycle) return null;
       const totalWd = countWeekdaysInclusive(cycle.start, cycle.end);
       if (totalWd <= 0) return null;
       let budgetStart = cycle.start;
