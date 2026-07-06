@@ -230,9 +230,22 @@
     .proj-meta{font-size:.75rem;color:var(--ink-s);margin-top:.125rem}
 
     /* TIMER */
-    .timer-hero{background:var(--ink);border-radius:var(--r-lg);padding:1.75rem 2rem;color:#fff;margin-bottom:1.25rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap}
+    .timer-hero{position:relative;overflow:hidden;background:var(--glass-s);backdrop-filter:blur(var(--blur)) saturate(180%);-webkit-backdrop-filter:blur(var(--blur)) saturate(180%);border:1px solid var(--glass-b);box-shadow:var(--shadow-s);border-radius:var(--r-lg);padding:1.75rem 2rem;color:var(--ink);margin-bottom:1.25rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap}
+    .timer-hero>*{position:relative;z-index:1}
+    /* Same drifting-blob treatment as the page background, but faster and
+       with a bigger travel range so it reads as lively within a small box. */
+    .timer-blobs{position:absolute;inset:-30%;filter:blur(45px) saturate(140%);pointer-events:none;z-index:0}
+    .timer-blob{position:absolute;border-radius:50%;opacity:.6;mix-blend-mode:multiply;animation:timer-drift 11s ease-in-out infinite}
+    .timer-blob--a{width:55%;height:160%;background:radial-gradient(closest-side,#BFD7FF 0%,transparent 70%);top:-30%;left:-8%;animation-duration:9s}
+    .timer-blob--b{width:50%;height:150%;background:radial-gradient(closest-side,#FFD9C2 0%,transparent 70%);top:5%;right:-12%;animation-duration:12s;animation-direction:reverse}
+    .timer-blob--c{width:48%;height:140%;background:radial-gradient(closest-side,#E7DCC8 0%,transparent 70%);bottom:-35%;left:32%;animation-duration:14s}
+    @keyframes timer-drift{
+      0%,100%{transform:translate3d(0,0,0) scale(1)}
+      33%{transform:translate3d(18%,-16%,0) scale(1.18)}
+      66%{transform:translate3d(-14%,14%,0) scale(.88)}
+    }
     .timer-clk{font-size:3.25rem;font-weight:700;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:1;flex:1;min-width:200px}
-    .timer-sel{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;padding:.5rem .75rem;border-radius:var(--r-sm);font:inherit;font-size:.875rem;outline:none;cursor:pointer}
+    .timer-sel{background:var(--surface);border:1px solid var(--border-s);color:var(--ink);padding:.5rem .75rem;border-radius:var(--r-sm);font:inherit;font-size:.875rem;outline:none;cursor:pointer}
     .timer-sel option{color:var(--ink);background:var(--surface)}
     .btn--start{background:var(--green);color:#fff;padding:.625rem 1.25rem;border-radius:var(--r-sm);font-weight:600}
     .btn--stop{background:var(--red);color:#fff;padding:.625rem 1.25rem;border-radius:var(--r-sm);font-weight:600}
@@ -513,6 +526,11 @@
     <!-- TIME PANEL -->
     <section class="panel" id="panel-time">
       <div class="timer-hero">
+        <div class="timer-blobs">
+          <span class="timer-blob timer-blob--a"></span>
+          <span class="timer-blob timer-blob--b"></span>
+          <span class="timer-blob timer-blob--c"></span>
+        </div>
         <div style="flex:1">
           <div class="timer-clk" id="timer-clk">00:00:00</div>
         </div>
