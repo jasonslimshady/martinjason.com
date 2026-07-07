@@ -4,9 +4,9 @@
 
    Minimal, framework-free JS:
      1. Reveal-on-scroll (Intersection Observer)
-     2. Hero parallax — blobs drift slightly with scroll
-     3. Smooth focus on nav anchors
-     4. Footer year
+     3. Footer year
+     4. Blog-featured slideshow
+     5. Klaviyo newsletter signup
    ===================================================================== */
 
 
@@ -38,31 +38,10 @@
 
 
 /* ---------------------------------------------------------------------
-   2. Hero parallax — translate the bg blobs slightly on scroll.
-   Throttled via requestAnimationFrame for smoothness.
+   2. (removed) Background blobs are now fully static — no scroll
+   parallax. A static blurred layer is painted once and cached by the
+   compositor instead of being re-blurred on every scroll frame.
    --------------------------------------------------------------------- */
-(function setupParallax() {
-  const blobs = document.querySelector('.bg-blobs');
-  if (!blobs) return;
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-  let ticking = false;
-
-  function update() {
-    // Read scrollY inside rAF — layout is clean here, no forced reflow.
-    const y = window.scrollY;
-    blobs.style.transform = `translate3d(0, ${y * -0.12}px, 0)`;
-    ticking = false;
-  }
-
-  window.addEventListener('scroll', () => {
-    // Never read layout properties here — only schedule the rAF write pass.
-    if (!ticking) {
-      requestAnimationFrame(update);
-      ticking = true;
-    }
-  }, { passive: true });
-})();
 
 
 /* ---------------------------------------------------------------------
