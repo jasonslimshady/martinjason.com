@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/avif" sizes="128x128" href="/images/favicon.avif">
+  <link rel="icon" type="image/png" sizes="128x128" href="/images/favicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>Hero, Detail, Lifestyle: Die Anatomie einer Produktgalerie — Jason Martin</title>
@@ -72,8 +72,7 @@
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-VGBWRTMZW2');
+    window.gtag = gtag;
   </script>
   <link rel="preload" href="cookie-consent.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="cookie-consent.css"></noscript>
@@ -100,7 +99,7 @@
 
       <header class="article-header article-header--grid">
         <div class="article-header__content">
-          <a class="article-header__back reveal" href="/blog.html">← Zurück zum Blog</a>
+          <a class="article-header__back reveal" href="/blog">← Zurück zum Blog</a>
           <div class="article-header__meta reveal" style="--reveal-delay: 40ms">
             <span class="article-tag">Bildlogik</span>
             <span class="article-header__date">
@@ -124,7 +123,7 @@
           </p>
         </div>
         <div class="article-header__media">
-          <img class="article-header__image" src="/images/Blog/Blog Artikel/hero-detail-lifestyle-die-anatomie-einer-produktgalerie.avif" alt="Hero, Detail, Lifestyle: Die Anatomie einer Produktgalerie" loading="eager" />
+          <img class="article-header__image" src="/images/Blog/Blog Artikel/hero-detail-lifestyle-die-anatomie-einer-produktgalerie.avif" width="1024" height="1024" alt="Hero, Detail, Lifestyle: Die Anatomie einer Produktgalerie" loading="eager" />
         </div>
       </header>
 
@@ -395,8 +394,8 @@
 
   <footer class="footer"></footer>
 
-  <script src="/shared-components.js"></script>
-  <script src="script.js"></script>
+  <script src="/shared-components.js" defer></script>
+  <script src="script.js" defer></script>
   <script>
     (function () {
       const bar = document.getElementById('reading-progress');

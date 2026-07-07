@@ -67,11 +67,11 @@
     '      <span class="blog-card__read">Jetzt lesen →</span>' +
     '    </div>' +
     '    <div class="blog-featured__image-wrap blog-featured__slideshow">' +
-    '      <img class="blog-featured__image is-active" src="/images/Blog/Case Study/claritylabscasestudy-1.avif" alt="Clarity Labs Case Study" loading="eager" />' +
-    '      <img class="blog-featured__image" src="/images/Blog/Case Study/claritylabscasestudy-2.avif" alt="Clarity Labs Case Study" loading="lazy" />' +
-    '      <img class="blog-featured__image" src="/images/Blog/Case Study/claritylabscasestudy-3.avif" alt="Clarity Labs Case Study" loading="lazy" />' +
-    '      <img class="blog-featured__image" src="/images/Blog/Case Study/claritylabscasestudy-4.avif" alt="Clarity Labs Case Study" loading="lazy" />' +
-    '      <img class="blog-featured__image" src="/images/Blog/Case Study/claritylabscasestudy-5.avif" alt="Clarity Labs Case Study" loading="lazy" />' +
+    '      <img class="blog-featured__image is-active" src="/images/Blog/Case Study/claritylabscasestudy-1.avif" alt="Clarity Labs Case Study" width="1562" height="1250" loading="lazy" decoding="async" />' +
+    '      <img class="blog-featured__image" src="/images/Blog/Case Study/claritylabscasestudy-2.avif" alt="Clarity Labs Case Study" width="1562" height="1250" loading="lazy" decoding="async" />' +
+    '      <img class="blog-featured__image" src="/images/Blog/Case Study/claritylabscasestudy-3.avif" alt="Clarity Labs Case Study" width="1562" height="1250" loading="lazy" decoding="async" />' +
+    '      <img class="blog-featured__image" src="/images/Blog/Case Study/claritylabscasestudy-4.avif" alt="Clarity Labs Case Study" width="1562" height="1250" loading="lazy" decoding="async" />' +
+    '      <img class="blog-featured__image" src="/images/Blog/Case Study/claritylabscasestudy-5.avif" alt="Clarity Labs Case Study" width="1562" height="1250" loading="lazy" decoding="async" />' +
     '    </div>' +
     '  </a>' +
     '</div>';
@@ -79,7 +79,7 @@
   var ARTICLE_CTA_HTML =
     '<div class="article-cta reveal">' +
     '  <div class="article-cta__image-wrap">' +
-    '    <img src="/images/Blog/fuerdichumgesetzt.avif" alt="" />' +
+    '    <img src="/images/Blog/fuerdichumgesetzt.avif" alt="" width="1159" height="652" loading="lazy" decoding="async" />' +
     '  </div>' +
     '  <a class="btn btn--primary glass-btn nav__cta" href="#contact" data-booking>Projekt besprechen</a>' +
     '</div>';
@@ -109,7 +109,7 @@
     '      <div class="author-card__links">' +
     '        <a class="author-card__link" href="/" itemprop="url">→ Mehr über mich</a>' +
     '        <a class="author-card__link" href="/#contact">→ Projekt anfragen</a>' +
-    '        <a class="author-card__link" href="/blog.html">→ Alle Artikel</a>' +
+    '        <a class="author-card__link" href="/blog">→ Alle Artikel</a>' +
     '      </div>' +
     '    </div>' +
     '  </div>' +

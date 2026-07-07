@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
 
   <!-- Favicon -->
-  <link rel="icon" type="image/avif" sizes="128x128" href="/images/favicon.avif">
+  <link rel="icon" type="image/png" sizes="128x128" href="/images/favicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- SEO: Title & Description -->
@@ -66,8 +66,7 @@
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-VGBWRTMZW2');
+    window.gtag = gtag;
   </script>
   <link rel="preload" href="cookie-consent.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="cookie-consent.css"></noscript>
@@ -96,7 +95,7 @@
       <!-- ── Article Header ───────────────────────────────── -->
       <header class="article-header article-header--grid article-header--slideshow">
         <div class="article-header__content">
-          <a class="article-header__back reveal" href="/blog.html">← Zurück zum Blog</a>
+          <a class="article-header__back reveal" href="/blog">← Zurück zum Blog</a>
           <div class="article-header__meta reveal" style="--reveal-delay: 40ms">
             <span class="article-tag">Case Study</span>
             <span class="article-header__date">
@@ -115,11 +114,11 @@
         </div>
         <div class="article-header__media">
           <div class="blog-featured__image-wrap blog-featured__slideshow">
-            <img class="blog-featured__image is-active" src="/images/Blog/Case Study/claritylabscasestudy-1.avif" alt="Clarity Labs Case Study" loading="eager" />
-            <img class="blog-featured__image" src="/images/Blog/Case Study/claritylabscasestudy-2.avif" alt="Clarity Labs Case Study" loading="lazy" />
-            <img class="blog-featured__image" src="/images/Blog/Case Study/claritylabscasestudy-3.avif" alt="Clarity Labs Case Study" loading="lazy" />
-            <img class="blog-featured__image" src="/images/Blog/Case Study/claritylabscasestudy-4.avif" alt="Clarity Labs Case Study" loading="lazy" />
-            <img class="blog-featured__image" src="/images/Blog/Case Study/claritylabscasestudy-5.avif" alt="Clarity Labs Case Study" loading="lazy" />
+            <img class="blog-featured__image is-active" src="/images/Blog/Case Study/claritylabscasestudy-1.avif" width="1562" height="1250" alt="Clarity Labs Case Study" loading="eager" />
+            <img class="blog-featured__image" src="/images/Blog/Case Study/claritylabscasestudy-2.avif" width="1562" height="1250" alt="Clarity Labs Case Study" loading="lazy" />
+            <img class="blog-featured__image" src="/images/Blog/Case Study/claritylabscasestudy-3.avif" width="1562" height="1250" alt="Clarity Labs Case Study" loading="lazy" />
+            <img class="blog-featured__image" src="/images/Blog/Case Study/claritylabscasestudy-4.avif" width="1562" height="1250" alt="Clarity Labs Case Study" loading="lazy" />
+            <img class="blog-featured__image" src="/images/Blog/Case Study/claritylabscasestudy-5.avif" width="1562" height="1250" alt="Clarity Labs Case Study" loading="lazy" />
           </div>
         </div>
       </header>
@@ -233,8 +232,8 @@
 
   <footer class="footer"></footer>
 
-  <script src="/shared-components.js"></script>
-  <script src="script.js"></script>
+  <script src="/shared-components.js" defer></script>
+  <script src="script.js" defer></script>
   <script>
     // Reading progress bar
     (function () {

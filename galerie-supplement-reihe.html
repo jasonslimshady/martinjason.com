@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
 
   <!-- Favicon -->
-  <link rel="icon" type="image/avif" sizes="128x128" href="/images/favicon.avif">
+  <link rel="icon" type="image/png" sizes="128x128" href="/images/favicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Supplement Reihe — Jason Martin</title>
   <meta name="description" content="PDP-Galerien und Feature-Tiles für eine deutsche Wellness-Marke. Fünf Supplement-Produkte, vollständig für Landing Pages optimiert." />
@@ -16,8 +16,7 @@
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-VGBWRTMZW2');
+    window.gtag = gtag;
   </script>
   <link rel="preload" href="cookie-consent.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="cookie-consent.css"></noscript>
@@ -104,8 +103,8 @@
 
   <footer class="footer"></footer>
 
-  <script src="/shared-components.js"></script>
-  <script src="script.js"></script>
+  <script src="/shared-components.js" defer></script>
+  <script src="script.js" defer></script>
   <script src="cookie-consent.js" defer></script>
 </body>
 </html>

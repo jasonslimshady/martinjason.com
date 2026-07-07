@@ -113,7 +113,7 @@
         '</div>' +
       '</div>' +
       '<p class="cp-body">Wir verwenden Cookies für Webanalyse (Google Analytics 4) und Session-Aufzeichnungen (Microsoft Clarity), um unsere Website kontinuierlich zu verbessern. Deine Einwilligung kannst du jederzeit widerrufen.</p>' +
-      '<a href="/datenschutz.html" class="cp-link">Datenschutzerklärung lesen →</a>' +
+      '<a href="/datenschutz" class="cp-link">Datenschutzerklärung lesen →</a>' +
       '<div class="cp-actions">' +
         '<button class="cp-btn cp-btn--secondary" data-action="reject">Ablehnen</button>' +
         '<button class="cp-btn cp-btn--primary" data-action="accept">Alle akzeptieren</button>' +
