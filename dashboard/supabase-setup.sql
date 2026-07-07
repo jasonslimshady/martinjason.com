@@ -226,21 +226,21 @@ DROP POLICY IF EXISTS "Owner delete invoice PDFs" ON storage.objects;
 
 CREATE POLICY "Owner upload invoice PDFs"
   ON storage.objects FOR INSERT TO authenticated
-  WITH CHECK (bucket_id = 'invoice-pdfs' AND (auth.jwt() ->> 'email') = 'jasonmartinph@gmail.com');
+  WITH CHECK (bucket_id = 'invoice-pdfs' AND lower(auth.jwt() ->> 'email') = 'jasonmartinde@gmail.com');
 
 CREATE POLICY "Owner read invoice PDFs"
   ON storage.objects FOR SELECT TO authenticated
-  USING (bucket_id = 'invoice-pdfs' AND (auth.jwt() ->> 'email') = 'jasonmartinph@gmail.com');
+  USING (bucket_id = 'invoice-pdfs' AND lower(auth.jwt() ->> 'email') = 'jasonmartinde@gmail.com');
 
 -- upsert:true re-uploads need UPDATE as well as INSERT
 CREATE POLICY "Owner update invoice PDFs"
   ON storage.objects FOR UPDATE TO authenticated
-  USING (bucket_id = 'invoice-pdfs' AND (auth.jwt() ->> 'email') = 'jasonmartinph@gmail.com')
-  WITH CHECK (bucket_id = 'invoice-pdfs' AND (auth.jwt() ->> 'email') = 'jasonmartinph@gmail.com');
+  USING (bucket_id = 'invoice-pdfs' AND lower(auth.jwt() ->> 'email') = 'jasonmartinde@gmail.com')
+  WITH CHECK (bucket_id = 'invoice-pdfs' AND lower(auth.jwt() ->> 'email') = 'jasonmartinde@gmail.com');
 
 CREATE POLICY "Owner delete invoice PDFs"
   ON storage.objects FOR DELETE TO authenticated
-  USING (bucket_id = 'invoice-pdfs' AND (auth.jwt() ->> 'email') = 'jasonmartinph@gmail.com');
+  USING (bucket_id = 'invoice-pdfs' AND lower(auth.jwt() ->> 'email') = 'jasonmartinde@gmail.com');
 
 
 -- ============================================================
@@ -313,7 +313,7 @@ CREATE TABLE IF NOT EXISTS invoice_items (
 -- ============================================================
 --  ROW LEVEL SECURITY — OWNER LOCKDOWN
 --  All tables are locked down to exactly ONE account
---  (jasonmartinph@gmail.com). Every other authenticated user —
+--  (jasonmartinde@gmail.com). Every other authenticated user —
 --  and of course every anonymous request — gets nothing.
 --
 --  This block is idempotent: it drops the older, wider
@@ -343,8 +343,8 @@ BEGIN
     EXECUTE format('DROP POLICY IF EXISTS "Owner only" ON %I', t);
     EXECUTE format(
       'CREATE POLICY "Owner only" ON %I FOR ALL TO authenticated '
-      || 'USING ((auth.jwt() ->> ''email'') = ''jasonmartinph@gmail.com'') '
-      || 'WITH CHECK ((auth.jwt() ->> ''email'') = ''jasonmartinph@gmail.com'')', t);
+      || 'USING (lower(auth.jwt() ->> ''email'') = ''jasonmartinde@gmail.com'') '
+      || 'WITH CHECK (lower(auth.jwt() ->> ''email'') = ''jasonmartinde@gmail.com'')', t);
   END LOOP;
 END $$;
 
