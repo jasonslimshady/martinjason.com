@@ -25,6 +25,7 @@
 const SUPABASE_URL     = process.env.SUPABASE_URL || 'https://blibykmyvkdtdvgzuwyr.supabase.co';
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '672383429326-fve9t1ak2haf7ll2he2r54rkvohtqugt.apps.googleusercontent.com';
 const TOKEN_ID         = 'ga4'; // row id in the app_tokens table
+const ALLOWED_EMAIL    = process.env.DASHBOARD_ALLOWED_EMAIL || 'jasonmartinph@gmail.com';
 
 export default async function handler(req, res) {
   const origin = req.headers.origin || '';
@@ -53,13 +54,17 @@ export default async function handler(req, res) {
     });
   }
 
-  // Only a logged-in dashboard user may mint tokens
+  // Only the logged-in dashboard OWNER may mint tokens
   const jwt = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
   if (!jwt) return res.status(401).json({ error: 'Missing Authorization header' });
   const userRes = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
     headers: { apikey: serviceKey, Authorization: `Bearer ${jwt}` },
   });
   if (!userRes.ok) return res.status(401).json({ error: 'Ungültige Sitzung' });
+  const authUser = await userRes.json().catch(() => ({}));
+  if (ALLOWED_EMAIL && (authUser.email || '').toLowerCase() !== ALLOWED_EMAIL.toLowerCase()) {
+    return res.status(403).json({ error: 'Kein Zugriff' });
+  }
 
   const sbHeaders = {
     apikey: serviceKey,

@@ -214,17 +214,33 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('invoice-pdfs', 'invoice-pdfs', false)
 ON CONFLICT (id) DO NOTHING;
 
-CREATE POLICY "Authenticated upload invoice PDFs"
+-- Storage policies: ONLY the owner account may touch invoice PDFs.
+-- Idempotent — safe to re-run; replaces the older "Authenticated …" policies.
+DROP POLICY IF EXISTS "Authenticated upload invoice PDFs" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated read invoice PDFs"   ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated delete invoice PDFs" ON storage.objects;
+DROP POLICY IF EXISTS "Owner upload invoice PDFs" ON storage.objects;
+DROP POLICY IF EXISTS "Owner read invoice PDFs"   ON storage.objects;
+DROP POLICY IF EXISTS "Owner update invoice PDFs" ON storage.objects;
+DROP POLICY IF EXISTS "Owner delete invoice PDFs" ON storage.objects;
+
+CREATE POLICY "Owner upload invoice PDFs"
   ON storage.objects FOR INSERT TO authenticated
-  WITH CHECK (bucket_id = 'invoice-pdfs');
+  WITH CHECK (bucket_id = 'invoice-pdfs' AND (auth.jwt() ->> 'email') = 'jasonmartinph@gmail.com');
 
-CREATE POLICY "Authenticated read invoice PDFs"
+CREATE POLICY "Owner read invoice PDFs"
   ON storage.objects FOR SELECT TO authenticated
-  USING (bucket_id = 'invoice-pdfs');
+  USING (bucket_id = 'invoice-pdfs' AND (auth.jwt() ->> 'email') = 'jasonmartinph@gmail.com');
 
-CREATE POLICY "Authenticated delete invoice PDFs"
+-- upsert:true re-uploads need UPDATE as well as INSERT
+CREATE POLICY "Owner update invoice PDFs"
+  ON storage.objects FOR UPDATE TO authenticated
+  USING (bucket_id = 'invoice-pdfs' AND (auth.jwt() ->> 'email') = 'jasonmartinph@gmail.com')
+  WITH CHECK (bucket_id = 'invoice-pdfs' AND (auth.jwt() ->> 'email') = 'jasonmartinph@gmail.com');
+
+CREATE POLICY "Owner delete invoice PDFs"
   ON storage.objects FOR DELETE TO authenticated
-  USING (bucket_id = 'invoice-pdfs');
+  USING (bucket_id = 'invoice-pdfs' AND (auth.jwt() ->> 'email') = 'jasonmartinph@gmail.com');
 
 
 -- ============================================================
@@ -243,9 +259,7 @@ CREATE TABLE IF NOT EXISTS invoice_reminders (
 );
 
 ALTER TABLE invoice_reminders ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Authenticated full access" ON invoice_reminders
-  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+-- policy: see the "OWNER LOCKDOWN" block below (covers this table too)
 
 
 -- ============================================================
@@ -297,10 +311,19 @@ CREATE TABLE IF NOT EXISTS invoice_items (
 
 
 -- ============================================================
---  ROW LEVEL SECURITY
---  All tables are locked down. Only authenticated users
---  (i.e. you, logged in through Supabase Auth) can read
---  or write anything. Anonymous requests get nothing.
+--  ROW LEVEL SECURITY — OWNER LOCKDOWN
+--  All tables are locked down to exactly ONE account
+--  (jasonmartinph@gmail.com). Every other authenticated user —
+--  and of course every anonymous request — gets nothing.
+--
+--  This block is idempotent: it drops the older, wider
+--  "Authenticated full access" policies and (re)creates the
+--  owner-only ones, so it is safe to re-run on an existing DB.
+--
+--  IMPORTANT — do this once in the Supabase UI as well:
+--  Authentication → Sign In / Providers → disable
+--  "Allow new users to sign up", so nobody else can even
+--  create an account.
 -- ============================================================
 ALTER TABLE clients        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE contacts_log   ENABLE ROW LEVEL SECURITY;
@@ -309,24 +332,21 @@ ALTER TABLE time_entries   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE invoices       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE invoice_items  ENABLE ROW LEVEL SECURITY;
 
--- Policy: authenticated user has full access to all tables
-CREATE POLICY "Authenticated full access" ON clients
-  FOR ALL TO authenticated USING (true) WITH CHECK (true);
-
-CREATE POLICY "Authenticated full access" ON contacts_log
-  FOR ALL TO authenticated USING (true) WITH CHECK (true);
-
-CREATE POLICY "Authenticated full access" ON projects
-  FOR ALL TO authenticated USING (true) WITH CHECK (true);
-
-CREATE POLICY "Authenticated full access" ON time_entries
-  FOR ALL TO authenticated USING (true) WITH CHECK (true);
-
-CREATE POLICY "Authenticated full access" ON invoices
-  FOR ALL TO authenticated USING (true) WITH CHECK (true);
-
-CREATE POLICY "Authenticated full access" ON invoice_items
-  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+DO $$
+DECLARE t text;
+BEGIN
+  FOREACH t IN ARRAY ARRAY[
+    'clients', 'contacts_log', 'projects',
+    'time_entries', 'invoices', 'invoice_items', 'invoice_reminders'
+  ] LOOP
+    EXECUTE format('DROP POLICY IF EXISTS "Authenticated full access" ON %I', t);
+    EXECUTE format('DROP POLICY IF EXISTS "Owner only" ON %I', t);
+    EXECUTE format(
+      'CREATE POLICY "Owner only" ON %I FOR ALL TO authenticated '
+      || 'USING ((auth.jwt() ->> ''email'') = ''jasonmartinph@gmail.com'') '
+      || 'WITH CHECK ((auth.jwt() ->> ''email'') = ''jasonmartinph@gmail.com'')', t);
+  END LOOP;
+END $$;
 
 
 -- ============================================================

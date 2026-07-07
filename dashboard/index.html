@@ -62,8 +62,8 @@
     @keyframes spin{to{transform:rotate(360deg)}}
 
     /* LOGIN */
-    #screen-login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:transparent}
-    .login-card{background:var(--glass-s);backdrop-filter:blur(var(--blur)) saturate(180%);-webkit-backdrop-filter:blur(var(--blur)) saturate(180%);border:1px solid var(--glass-b);border-radius:var(--r-lg);box-shadow:var(--shadow-s);padding:2.5rem;width:100%;max-width:400px}
+    #screen-login{height:100vh;overflow-y:auto;display:flex;align-items:center;justify-content:center;background:transparent;padding:1.5rem}
+    .login-card{background:var(--glass-s);backdrop-filter:blur(var(--blur)) saturate(180%);-webkit-backdrop-filter:blur(var(--blur)) saturate(180%);border:1px solid var(--glass-b);border-radius:var(--r-lg);box-shadow:var(--shadow-s);padding:2.5rem;width:100%;max-width:400px;margin:auto}
     .login-brand{display:flex;align-items:center;gap:.625rem;margin-bottom:2rem}
     .login-mark{width:36px;height:36px;border-radius:var(--r-sm);background:var(--ink);display:flex;align-items:center;justify-content:center;color:var(--bg);font-size:.75rem;font-weight:700}
     .login-title{font-size:1.4rem;font-weight:700;letter-spacing:-.03em;margin:0 0 .375rem}
@@ -396,6 +396,37 @@
     .pto-circle-name{font-size:.875rem;font-weight:600}
     .pto-circle-client{font-size:.75rem;color:var(--ink-s);margin-top:-.25rem}
     .pto-circle-dur{font-size:.9375rem;font-weight:700;font-variant-numeric:tabular-nums}
+
+    /* SCROLLBARS — horizontal scroll areas keep a thin, visible scrollbar so
+       overflowing content (Kanban, breite Tabellen) is actually discoverable.
+       (Everything else keeps the hidden-scrollbar look from above.) */
+    .kanban,.scroll-x{scrollbar-width:thin}
+    .kanban::-webkit-scrollbar,.scroll-x::-webkit-scrollbar{display:block;height:8px;width:8px}
+    .kanban::-webkit-scrollbar-thumb,.scroll-x::-webkit-scrollbar-thumb{background:rgba(10,10,10,.16);border-radius:99px}
+    .kanban::-webkit-scrollbar-track,.scroll-x::-webkit-scrollbar-track{background:transparent}
+
+    /* RESPONSIVE — below 900px the sidebar becomes a sticky horizontal bar
+       and multi-column grids collapse, so the dashboard is usable on
+       tablets & phones instead of being squeezed. */
+    @media (max-width:900px){
+      html,body{overflow:auto}
+      #screen-app{flex-direction:column;height:auto;min-height:100vh}
+      .main{height:auto;overflow:visible}
+      .sb{width:100%;height:auto;flex-direction:row;align-items:center;gap:.25rem;overflow-x:auto;padding:.5rem .75rem;border-right:0;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:40}
+      .sb-brand{border-bottom:0;margin-bottom:0;padding:.25rem .5rem .25rem 0;flex-shrink:0}
+      .sb-sec{display:none}
+      .sb-spacer{display:none}
+      .nav-item{width:auto;white-space:nowrap;margin-bottom:0;flex-shrink:0}
+      .panel{padding:1rem}
+      .ga-metric-grid{grid-template-columns:repeat(2,1fr)}
+      .ga-2col,.time-2col{grid-template-columns:1fr}
+      .g2{grid-template-columns:1fr}
+      .s2{grid-column:auto}
+      .drawer{width:100vw}
+      .timer-hero{padding:1.25rem}
+      .timer-clk{font-size:2.5rem;min-width:0}
+      .invd-parties{flex-direction:column;gap:20px}
+    }
   </style>
 </head>
 <body>
@@ -440,7 +471,7 @@
     <div class="sb-sec">Business</div>
     <button class="nav-item" data-panel="crm">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6" cy="5" r="2.5"/><path d="M1 13.5c0-2.76 2.24-5 5-5"/><circle cx="12" cy="10" r="2.5"/><path d="M12 7.5v2.5l1.5 1.5"/></svg>CRM
-      <span class="nav-badge" id="badge-crm">0</span>
+      <span class="nav-badge" id="badge-crm" hidden>0</span>
     </button>
     <button class="nav-item" data-panel="time">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5V8l2.5 2.5"/></svg>Zeiterfassung
@@ -454,6 +485,9 @@
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="3.5" width="13" height="9" rx="1.5"/><path d="M1.5 5.5l6.5 4 6.5-4"/></svg>Klaviyo
     </button>
     <div class="sb-spacer"></div>
+    <button class="nav-item" id="btn-logout" title="Abmelden">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2H3.5A1.5 1.5 0 0 0 2 3.5v9A1.5 1.5 0 0 0 3.5 14H6"/><path d="M10.5 11.5 14 8l-3.5-3.5M14 8H6"/></svg>Abmelden
+    </button>
   </aside>
 
   <main class="main">
@@ -565,6 +599,7 @@
       <div class="sec-hd">
         <span class="sec-ttl">Rechnungen</span>
         <div style="display:flex;gap:.5rem;align-items:center">
+          <button class="btn btn--ghost btn--sm" id="btn-reminders" title="Rechnungserinnerungen anzeigen & anlegen">⏰ Erinnerungen</button>
           <button class="btn btn--ghost btn--sm" id="btn-inv-settings" title="Logo & Firmendaten für Rechnungen"><span style="font-size:1.2em;line-height:1">⚙️</span> Einstellungen</button>
           <button class="btn btn--ghost btn--sm" id="btn-all-invoices">Alle Rechnungen</button>
           <button class="btn btn--ghost btn--sm" id="btn-upload-invoice">Rechnung hinzufügen</button>
@@ -611,7 +646,7 @@
         </div>
         <div id="inv-reminders-list"></div>
       </div>
-      <div class="card"><table class="dtable"><thead><tr><th>Nr.</th><th>Kunde</th><th>Datum</th><th>Fällig</th><th>Betrag</th><th>Status</th><th style="width:36px"></th></tr></thead><tbody id="inv-body"></tbody></table></div>
+      <div class="card"><table class="dtable"><thead><tr><th>Nr.</th><th>Kunde</th><th>Datum</th><th>Fällig</th><th>Betrag</th><th>Status</th><th style="width:28px"></th><th style="width:36px"></th></tr></thead><tbody id="inv-body"></tbody></table></div>
     </section>
 
     <!-- KLAVIYO PANEL -->
@@ -680,7 +715,7 @@
           <span class="card-ttl">Kampagnen</span>
           <span style="font-size:.75rem;color:var(--ink-s)" id="klv-campaigns-count"></span>
         </div>
-        <div style="overflow-x:auto">
+        <div class="scroll-x" style="overflow-x:auto">
           <table class="dtable" style="min-width:700px">
             <thead><tr><th>Kampagne</th><th>Gesendet</th><th>Empfänger</th><th>Öffnungen</th><th>Öffnungsrate</th><th>Klicks</th><th>Klickrate</th><th>Abmeld.</th></tr></thead>
             <tbody id="klv-campaigns-body"></tbody>
@@ -1043,16 +1078,34 @@
 <div id="toasts"></div>
 
 <!-- SCRIPTS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+<!-- pdf.js / JSZip / html2pdf werden erst bei Bedarf nachgeladen (siehe loadScript) — spart ~1 MB pro Seitenaufruf. -->
 <script src="config.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
 'use strict';
 const { createClient } = window.supabase;
 const sb = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
 const $ = id => document.getElementById(id);
+
+// ── LAZY LIBRARIES ───────────────────────────────────────────────────
+// pdf.js / JSZip / html2pdf are only needed for uploads & exports — they
+// are loaded on demand instead of on every page view (~1 MB saved).
+const LIB_PDFJS    = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+const LIB_JSZIP    = 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js';
+const LIB_HTML2PDF = 'https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js';
+const _loadedScripts = {};
+function loadScript(src){
+  if(!_loadedScripts[src]){
+    _loadedScripts[src] = new Promise((resolve, reject)=>{
+      const el = document.createElement('script');
+      el.src = src;
+      el.onload = resolve;
+      el.onerror = ()=>{ delete _loadedScripts[src]; reject(new Error('Bibliothek konnte nicht geladen werden: '+src)); };
+      document.head.appendChild(el);
+    });
+  }
+  return _loadedScripts[src];
+}
 
 // ── COMPANY / INVOICE SETTINGS ────────────────────────────────────────
 // Defaults live in config.js; per-browser overrides (incl. the uploaded
@@ -1081,13 +1134,8 @@ function saveCompanySettings(obj){
 }
 let companySettings = loadCompanySettings();
 
-const PANELS = {
-  analytics:{ title:'Analytics',     sub:'martinjason.com — Website Traffic' },
-  crm:      { title:'CRM',           sub:'Leads & aktive Kunden' },
-  time:     { title:'Zeiterfassung', sub:'Projekte & Stunden' },
-  invoices: { title:'Rechnungen',    sub:'Entwürfe, versendet, bezahlt' },
-  klaviyo:  { title:'Klaviyo',       sub:'Email Marketing — Abonnenten & Kampagnen' },
-};
+// Valid panel ids (titles/subs were dead code since the header bar was removed)
+const PANELS = { analytics:true, crm:true, time:true, invoices:true, klaviyo:true };
 const STAGE_CFG = [
   { id:'new_lead',    label:'Neuer Lead',  color:'#8A8A92', tag:'tag--muted' },
   { id:'contacted',   label:'Kontaktiert', color:'#0A84FF', tag:'tag--blue' },
@@ -1109,15 +1157,42 @@ async function boot() {
 }
 
 function showLogin(){ $('screen-login').hidden=false; $('screen-app').hidden=true; }
-function showApp(user){
+async function showApp(user){
+  // Defense in depth: the dashboard belongs to exactly one account.
+  // (Real enforcement lives in the RLS policies + the /api email checks.)
+  if (CONFIG.ALLOWED_EMAIL && (user?.email||'').toLowerCase() !== CONFIG.ALLOWED_EMAIL.toLowerCase()) {
+    sb.auth.signOut().catch(()=>{});
+    showLogin();
+    const err=$('login-err');
+    if(err){ err.textContent='Dieses Konto hat keinen Zugriff auf das Dashboard.'; err.style.display='block'; }
+    return;
+  }
   $('screen-login').hidden=true; $('screen-app').hidden=false;
-  loadStats(); loadCRM(); loadTimeEntries(); loadProjectOverview(); loadInvoices(); loadProjects(); loadInvReminders();
+  loadStats(); loadCRM(); loadTimeEntries(); loadProjectOverview(); loadInvoices(); loadInvReminders();
+  await loadProjects();
+  restoreTimer(); // pick up a timer that survived a reload / tab close
   // Restore last active panel (persists across reloads)
   const savedPanel = localStorage.getItem('active_panel');
   if (savedPanel && PANELS[savedPanel] && savedPanel !== 'analytics') switchPanel(savedPanel);
   // Try to restore Google Analytics session without requiring re-login
   gaAutoInit();
 }
+
+$('btn-logout').addEventListener('click', async () => {
+  if (timerTick && !confirm('Der Timer läuft noch. Trotzdem abmelden?')) return;
+  await sb.auth.signOut().catch(()=>{});
+  location.reload();
+});
+
+// An expired/revoked session no longer shows a silently empty dashboard —
+// it drops back to the login screen with a message.
+sb.auth.onAuthStateChange((event, session) => {
+  if (!session && event !== 'INITIAL_SESSION' && !$('screen-app').hidden) {
+    showLogin();
+    const err=$('login-err');
+    if(err){ err.textContent='Sitzung abgelaufen — bitte neu anmelden.'; err.style.display='block'; }
+  }
+});
 
 $('login-form').addEventListener('submit', async e => {
   e.preventDefault();
@@ -1171,7 +1246,8 @@ async function loadStats() {
     $('s-leads').textContent   = c2??0;
     $('s-hours').textContent   = fmtDur((te||[]).reduce((s,e)=>s+(e.duration_minutes||0),0));
     $('s-invs').textContent    = c3??0;
-    if(c3>0){ $('badge-inv').textContent=c3; $('badge-inv').hidden=false; }
+    $('badge-inv').textContent = c3??0;
+    $('badge-inv').hidden      = !(c3>0);
   } catch(e){ console.warn(e); }
 }
 
@@ -1179,10 +1255,13 @@ async function loadStats() {
 let editClientId = null;
 
 async function loadCRM() {
-  const { data } = await sb.from('clients').select('*').order('created_at',{ascending:false});
+  const { data, error } = await sb.from('clients').select('*').order('created_at',{ascending:false});
+  if(error) toast('Fehler beim Laden der Kunden: '+error.message,'err');
   const list = data||[];
   renderKanban(list); renderFollowups(list);
-  $('badge-crm').textContent = list.filter(c=>!c.is_active_client&&!['won','lost'].includes(c.pipeline_stage)).length;
+  const leadCount = list.filter(c=>!c.is_active_client&&!['won','lost'].includes(c.pipeline_stage)).length;
+  $('badge-crm').textContent = leadCount;
+  $('badge-crm').hidden = leadCount === 0;
 }
 
 function renderKanban(clients) {
@@ -1198,22 +1277,31 @@ function renderKanban(clients) {
 }
 
 function kCard(c){
-  const due=c.next_followup_date&&new Date(c.next_followup_date)<new Date();
+  // Date-string compare in dashboard timezone: only *past* days count as
+  // overdue (red); a follow-up due today shows orange instead.
+  const t=today();
+  const overdue=!!c.next_followup_date&&c.next_followup_date<t;
+  const dueToday=c.next_followup_date===t;
   return `<div class="kcard" data-id="${c.id}">
     <div class="kc-name">${esc(c.name)}</div>
     ${c.company?`<div class="kc-co">${esc(c.company)}</div>`:''}
     <div class="kc-ft">
-      <span class="kc-date" style="${due?'color:var(--red)':''}">${due?'⚠ ':''}${fmtDate(c.next_followup_date||c.created_at)}</span>
+      <span class="kc-date" style="${overdue?'color:var(--red)':dueToday?'color:var(--orange)':''}">${overdue?'⚠ ':''}${fmtDate(c.next_followup_date||c.created_at)}</span>
       ${c.email?'<span class="tag tag--blue" style="font-size:.6rem">✉</span>':''}
     </div></div>`;
 }
 
 function renderFollowups(clients){
-  const today=new Date(); today.setHours(23,59,59,999);
-  const due=clients.filter(c=>c.next_followup_date&&new Date(c.next_followup_date)<=today);
-  const el=$('followup-list'); if(!due.length) return;
+  const t=today();
+  const due=clients.filter(c=>c.next_followup_date&&c.next_followup_date<=t);
+  const el=$('followup-list');
+  if(!due.length){
+    // Reset to the empty state — previously stale rows stayed visible.
+    el.innerHTML=`<div class="empty-st"><div class="empty-ico"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5V8l2.5 2.5"/></svg></div><p class="empty-ttl">Keine Follow-ups fällig</p></div>`;
+    return;
+  }
   el.innerHTML=due.map(c=>{
-    const ov=new Date(c.next_followup_date)<new Date();
+    const ov=c.next_followup_date<t;
     return `<div class="followup-row" data-id="${c.id}" style="display:flex;align-items:center;justify-content:space-between;padding:.8125rem 1.125rem;border-bottom:1px solid var(--border);cursor:pointer">
       <div><div style="font-size:.875rem;font-weight:500">${esc(c.name)}</div><div class="soft" style="font-size:.75rem">${esc(c.company||'')}</div></div>
       <span class="tag ${ov?'tag--red':'tag--orange'}">${fmtDate(c.next_followup_date)}</span></div>`;
@@ -1270,16 +1358,17 @@ async function openDrawer(id){
   const st = STAGE_MAP[c.pipeline_stage]||{label:c.pipeline_stage,tag:'tag--muted'};
   $('dr-stage-tag').innerHTML = `<span class="tag ${st.tag}">${st.label}</span>${c.is_active_client?'<span class="tag tag--green" style="margin-left:.375rem">Aktiver Kunde</span>':''}`;
   // Info tab
+  const webUrl = safeUrl(c.website); // only http(s) becomes a clickable link
   $('dr-info-rows').innerHTML = [
     ['E-Mail', c.email ? `<a href="mailto:${esc(c.email)}" style="color:var(--accent)">${esc(c.email)}</a>` : '—'],
-    ['Telefon', c.phone||'—'],
-    ['Website', c.website ? `<a href="${esc(c.website)}" target="_blank" style="color:var(--accent)">${esc(c.website)}</a>` : '—'],
+    ['Telefon', c.phone ? esc(c.phone) : '—'],
+    ['Website', c.website ? (webUrl ? `<a href="${esc(webUrl)}" target="_blank" style="color:var(--accent)">${esc(c.website)}</a>` : esc(c.website)) : '—'],
     ['Adresse', c.address ? esc(c.address).replace(/\n/g,'<br>') : '—'],
     ['USt-IdNr.', c.vat_id ? esc(c.vat_id) : '—'],
     ['Gewonnen am', c.won_at ? fmtDate(c.won_at) : '—'],
     ['Follow-up', c.next_followup_date ? fmtDate(c.next_followup_date) : '—'],
     ['Erstellt', fmtDate(c.created_at)],
-    ['Notizen', c.notes||'—'],
+    ['Notizen', c.notes ? esc(c.notes).replace(/\n/g,'<br>') : '—'],
   ].map(([l,v])=>`<div class="info-row"><span class="info-lbl">${l}</span><span class="info-val">${v}</span></div>`).join('');
 
   // Wire edit/delete
@@ -1389,8 +1478,11 @@ async function loadProjects(){
   const { data } = await sb.from('projects').select('id,name,client_id,rate,rate_type,clients(name)').eq('status','active');
   projectsCache = data||[];
   ['timer-proj','mt-proj'].forEach(selId=>{
-    const sel=$(selId); sel.innerHTML='<option value="">Projekt wählen…</option>';
+    const sel=$(selId);
+    const prev=sel.value; // never wipe an active selection (e.g. running timer)
+    sel.innerHTML='<option value="">Projekt wählen…</option>';
     projectsCache.forEach(p=>{ const o=document.createElement('option'); o.value=p.id; o.textContent=`${p.name} — ${p.clients?.name||''}`; sel.appendChild(o); });
+    if(prev && [...sel.options].some(o=>o.value===prev)) sel.value=prev;
   });
 }
 
@@ -1525,16 +1617,48 @@ async function saveProject(e){
 }
 
 // ── TIMER ────────────────────────────────────────────────────────────
-let timerTick=null, timerStart=null, timerResumeEntryId=null, timerPrevMinutes=0;
+let timerTick=null, timerStart=null, timerResumeEntryId=null, timerPrevMinutes=0, timerProjId=null;
+const TIMER_KEY='jm_timer_state';
+
+function timerTickFn(){
+  const s=Math.floor((Date.now()-timerStart)/1000) + timerPrevMinutes*60;
+  $('timer-clk').textContent=`${pad(~~(s/3600))}:${pad(~~(s%3600/60))}:${pad(s%60)}`;
+}
+function startTicking(){
+  timerTickFn();
+  timerTick=setInterval(timerTickFn,1000);
+  $('btn-start').hidden=true; $('btn-stop').hidden=false;
+}
+
+// A running timer survives reloads/tab closes: its state is persisted and
+// picked up again by restoreTimer() in showApp().
+function persistTimer(){
+  try { localStorage.setItem(TIMER_KEY, JSON.stringify({ start:timerStart, projId:timerProjId, resumeId:timerResumeEntryId, prevMins:timerPrevMinutes })); } catch(e){}
+}
+function restoreTimer(){
+  let st=null;
+  try { st=JSON.parse(localStorage.getItem(TIMER_KEY)); } catch(e){}
+  if(!st || !st.start || !st.projId) return;
+  timerStart=st.start; timerProjId=st.projId;
+  timerResumeEntryId=st.resumeId||null; timerPrevMinutes=st.prevMins||0;
+  const sel=$('timer-proj');
+  if([...sel.options].some(o=>o.value===st.projId)) sel.value=st.projId;
+  startTicking();
+  toast('Laufender Timer wiederhergestellt.');
+}
+// Warn before closing/reloading the tab while the timer is still running.
+window.addEventListener('beforeunload', e=>{
+  if(timerTick){ e.preventDefault(); e.returnValue=''; }
+});
 
 $('btn-start').addEventListener('click',()=>{
   if(!$('timer-proj').value){ toast('Bitte erst ein Projekt wählen.','err'); return; }
   timerStart=Date.now();
-  timerTick=setInterval(()=>{
-    const s=Math.floor((Date.now()-timerStart)/1000) + timerPrevMinutes*60;
-    $('timer-clk').textContent=`${pad(~~(s/3600))}:${pad(~~(s%3600/60))}:${pad(s%60)}`;
-  },1000);
-  $('btn-start').hidden=true; $('btn-stop').hidden=false;
+  // Snapshot the project now — changing the dropdown mid-run can no longer
+  // redirect where the tracked time is saved.
+  timerProjId=$('timer-proj').value;
+  persistTimer();
+  startTicking();
   toast(timerResumeEntryId ? 'Timer fortgesetzt.' : 'Timer gestartet.');
 });
 
@@ -1544,10 +1668,10 @@ $('btn-stop').addEventListener('click', async ()=>{
   const sessionMins=Math.max(sessionSecs>0?1:0, Math.round(sessionSecs/60));
   const sessionStart=new Date(timerStart).toISOString();
   const sessionEnd=new Date().toISOString();
-  const pid=$('timer-proj').value;
+  const pid=timerProjId||$('timer-proj').value;
   const proj=projectsCache.find(p=>p.id===pid);
 
-  if(sessionSecs>0&&proj){
+  if(sessionSecs>0){
     const logEntry = { start:sessionStart, stop:sessionEnd, minutes:sessionMins, seconds:sessionSecs };
 
     if(timerResumeEntryId){
@@ -1562,8 +1686,10 @@ $('btn-stop').addEventListener('click', async ()=>{
         }
         if(error){ toast('Fehler beim Speichern: '+error.message,'err'); }
         else { toast(`${fmtDur(sessionMins)} hinzugefügt — gesamt ${fmtDur(totalMins)}.`,'ok'); }
+      } else {
+        toast('Zeit konnte nicht gespeichert werden — ursprünglicher Eintrag nicht gefunden.','err');
       }
-    } else {
+    } else if(proj){
       let { error } = await sb.from('time_entries').insert({
         project_id:pid, client_id:proj.client_id, duration_minutes:sessionMins,
         date:today(), start_time:sessionStart, end_time:sessionEnd,
@@ -1577,15 +1703,20 @@ $('btn-stop').addEventListener('click', async ()=>{
       }
       if(error){ toast('Fehler beim Speichern: '+error.message,'err'); }
       else { toast(`${fmtDur(sessionMins)} gespeichert.`,'ok'); }
+    } else {
+      // Previously this case dropped the tracked time silently.
+      toast('Zeit konnte nicht gespeichert werden — Projekt nicht gefunden.','err');
     }
   }
+  try { localStorage.removeItem(TIMER_KEY); } catch(e){}
   $('timer-clk').textContent='00:00:00';
   $('btn-start').hidden=false; $('btn-stop').hidden=true;
-  timerStart=null; timerResumeEntryId=null; timerPrevMinutes=0;
+  timerStart=null; timerResumeEntryId=null; timerPrevMinutes=0; timerProjId=null;
   loadTimeEntries(); loadProjectOverview(); loadStats();
 });
 
 let editTimeEntryId = null;
+let editTimeEntryHasLogs = false;
 
 $('btn-manual').addEventListener('click', () => openTimeModal());
 
@@ -1634,7 +1765,15 @@ function openTimeModal(entry = null) {
     $('mt-rate').value     = '';
   }
   setDurLock(false);
-  if(!hasLogs) calcDurFromVonBis();
+  editTimeEntryHasLogs = !!hasLogs;
+  if(hasLogs){
+    // The total derives from the Zeitprotokoll below — edit the sub-entries
+    // instead of the (read-only) sum, so both never drift apart.
+    $('mt-h').disabled = true; $('mt-m').disabled = true;
+    $('mt-h-lbl').textContent = 'Stunden (aus Protokoll)';
+  } else {
+    calcDurFromVonBis();
+  }
   // Render time_logs history
   const logsSection = $('mt-logs-section');
   const logsList = $('mt-logs-list');
@@ -1643,10 +1782,10 @@ function openTimeModal(entry = null) {
     logsList.innerHTML = entry.time_logs.map((log, i) => {
       const start = log.start ? new Date(log.start) : null;
       const stop = log.stop ? new Date(log.stop) : null;
-      const startStr = start ? start.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + start.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}) : '—';
-      const stopStr = stop ? stop.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}) : '—';
-      const dateChanged = start && stop && start.toDateString() !== stop.toDateString();
-      const stopDisplay = dateChanged ? stop.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'}) + ' ' + stopStr : stopStr;
+      const startStr = start ? start.toLocaleDateString('de-DE',{timeZone:TZ,day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + start.toLocaleTimeString('de-DE',{timeZone:TZ,hour:'2-digit',minute:'2-digit'}) : '—';
+      const stopStr = stop ? stop.toLocaleTimeString('de-DE',{timeZone:TZ,hour:'2-digit',minute:'2-digit'}) : '—';
+      const dateChanged = start && stop && tzDateStr(start) !== tzDateStr(stop);
+      const stopDisplay = dateChanged ? stop.toLocaleDateString('de-DE',{timeZone:TZ,day:'2-digit',month:'2-digit'}) + ' ' + stopStr : stopStr;
       // A custom name (set via the rename button) always wins; otherwise
       // fall back to the description (manual entries) or "Session N".
       const label = log.name ? esc(log.name) : (log.manual ? (log.desc ? esc(log.desc) : 'Manueller Eintrag') : `Session ${i+1}`);
@@ -1760,7 +1899,7 @@ async function saveManualTime(e){
   const bis     = $('mt-bis').value;
   if (!pid) { toast('Bitte ein Projekt wählen.','err'); return; }
 
-  let mins, startISO = null, endISO = null;
+  let mins, startISO = null, endISO = null, haveTimes = false;
   if(von && bis){
     const [vh,vm] = von.split(':').map(Number);
     const [bh,bm] = bis.split(':').map(Number);
@@ -1769,14 +1908,16 @@ async function saveManualTime(e){
     if(overnight) total += 24*60;
     if(!total){ toast('Von und Bis sind identisch.','err'); return; }
     mins = total;
-    startISO = new Date(`${dateStr}T${von}`).toISOString();
+    haveTimes = true;
+    // Times are entered in dashboard time (Bali/Singapur, UTC+8, no DST).
+    startISO = new Date(`${dateStr}T${von}:00+08:00`).toISOString();
     const endDate = overnight
-      ? new Date(new Date(dateStr).getTime()+86400000).toISOString().split('T')[0]
+      ? new Date(new Date(`${dateStr}T00:00:00Z`).getTime()+86400000).toISOString().split('T')[0]
       : dateStr;
-    endISO = new Date(`${endDate}T${bis}`).toISOString();
+    endISO = new Date(`${endDate}T${bis}:00+08:00`).toISOString();
   } else {
     mins = parseInt($('mt-h').value||0)*60 + parseInt($('mt-m').value||0);
-    if(!mins){ toast('Bitte Dauer oder Von–Bis eingeben.','err'); return; }
+    if(!mins && !editTimeEntryHasLogs){ toast('Bitte Dauer oder Von–Bis eingeben.','err'); return; }
   }
 
   const proj = projectsCache.find(p => p.id === pid);
@@ -1788,10 +1929,14 @@ async function saveManualTime(e){
     duration_minutes: mins,
     date:             dateStr,
     is_invoiced:      $('mt-invoiced').value === 'true',
-    start_time:       startISO,
-    end_time:         endISO,
     rate_override:    rateVal ? parseFloat(rateVal) : null,
   };
+  // Only write times when actually provided — editing an entry without
+  // touching Von–Bis no longer nulls out its recorded start/end.
+  if (!editTimeEntryId || haveTimes) { payload.start_time = startISO; payload.end_time = endISO; }
+  // Entries with a Zeitprotokoll derive duration & times from their logs;
+  // leave those fields untouched here.
+  if (editTimeEntryHasLogs) { delete payload.duration_minutes; delete payload.start_time; delete payload.end_time; }
   let error;
   if (editTimeEntryId) {
     ({ error } = await sb.from('time_entries').update(payload).eq('id', editTimeEntryId));
@@ -1818,14 +1963,19 @@ async function loadTimeEntries(){
     // "color" may not be migrated on this database yet — never let that hide the list itself.
     ({ data, error } = await sb.from('time_entries').select('*,projects(name,rate,rate_type)').order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30));
   }
-  const statsList = data||[];
-  const todayStr=today(), weekAgo=new Date(Date.now()-7*864e5).toISOString().split('T')[0];
-  $('t-today').textContent=fmtDur(statsList.filter(e=>e.date===todayStr).reduce((s,e)=>s+e.duration_minutes,0));
-  $('t-week').textContent=fmtDur(statsList.filter(e=>e.date>=weekAgo).reduce((s,e)=>s+e.duration_minutes,0));
+  // Heute/Diese Woche come from a dedicated (unlimited) query over the
+  // current calendar week (Mo–So, dashboard timezone) — previously they
+  // were summed from just the last 30 rows and used a rolling 7-day window.
+  const todayStr=today();
+  const [weekStart, weekEnd] = tzWeekRange();
+  const { data: statEntries } = await sb.from('time_entries')
+    .select('duration_minutes,date').gte('date', weekStart).lte('date', weekEnd);
+  $('t-today').textContent=fmtDur((statEntries||[]).filter(e=>e.date===todayStr).reduce((s,e)=>s+(e.duration_minutes||0),0));
+  $('t-week').textContent=fmtDur((statEntries||[]).reduce((s,e)=>s+(e.duration_minutes||0),0));
 
   // "Letzte Einträge" itself narrows down to the project selected in the
   // overview above, while the Heute/Diese Woche totals stay global.
-  let list = statsList;
+  let list = data||[];
   if(ptoSelectedProjectId){
     let filtered = await sb.from('time_entries').select('*,projects(name,color,rate,rate_type)').eq('project_id', ptoSelectedProjectId).order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30);
     if(filtered.error){
@@ -1939,11 +2089,9 @@ function ptoBudgetCycle(startDay, ref) {
 function ptoRange() {
   const todayStr = today();
   if (ptoFilter === 'week') {
-    const d = new Date();
-    const day = d.getDay();
-    const diff = day === 0 ? -6 : 1 - day;
-    d.setDate(d.getDate() + diff);
-    return [localISO(d), todayStr];
+    // Monday of the current week in the dashboard timezone — consistent
+    // with today(), so the window can't invert around midnight.
+    return [tzWeekRange()[0], todayStr];
   }
   if (ptoFilter === 'month') {
     // Widened to the 1st of the *previous* month: a project's recurring
@@ -2341,8 +2489,17 @@ function clientCompanyLabel(c){ return c?.company || c?.name || '—'; }
 let allInvoicesCache = [];
 
 async function loadInvoices(){
-  const { data }=await sb.from('invoices').select('*,paid_at,clients(name,company,id)').order('created_at',{ascending:false});
+  const { data, error }=await sb.from('invoices').select('*,paid_at,clients(name,company,id)').order('created_at',{ascending:false});
+  if(error) toast('Fehler beim Laden der Rechnungen: '+error.message,'err');
   const list=data||[];
+  // Auto-flag: versendete Rechnungen mit überschrittener Fälligkeit werden
+  // automatisch "Überfällig" (vorher musste man das manuell umstellen).
+  const t=today();
+  const nowOverdue=list.filter(i=>i.status==='sent'&&i.due_date&&i.due_date<t);
+  if(nowOverdue.length){
+    nowOverdue.forEach(i=>{ i.status='overdue'; });
+    sb.from('invoices').update({status:'overdue'}).in('id',nowOverdue.map(i=>i.id)).then(()=>loadStats());
+  }
   allInvoicesCache = list;
   $('i-draft').textContent=list.filter(i=>i.status==='draft').length;
   $('i-sent').textContent=list.filter(i=>i.status==='sent').length;
@@ -2352,7 +2509,7 @@ async function loadInvoices(){
   overdueEl.textContent = overdueCount;
   overdueEl.style.color = overdueCount>0 ? 'var(--red)' : 'var(--green)';
   const tbody=$('inv-body');
-  if(!list.length){ tbody.innerHTML=`<tr><td colspan="6"><div class="empty-st"><p class="empty-ttl">Noch keine Rechnungen</p><p class="empty-sub">Erstelle deine erste Rechnung.</p></div></td></tr>`; return; }
+  if(!list.length){ tbody.innerHTML=`<tr><td colspan="8"><div class="empty-st"><p class="empty-ttl">Noch keine Rechnungen</p><p class="empty-sub">Erstelle deine erste Rechnung.</p></div></td></tr>`; return; }
   tbody.innerHTML=list.map(inv=>`<tr data-id="${inv.id}">
     <td class="mono">${esc(inv.invoice_number)}</td><td class="fw6">${esc(clientCompanyLabel(inv.clients))}</td>
     <td class="muted">${fmtDate(inv.invoice_date)}</td><td class="muted">${inv.due_date?fmtDate(inv.due_date):'—'}</td>
@@ -2370,21 +2527,30 @@ async function loadInvoices(){
 
 // ── REVENUE CHART ──────────────────────────────────────────────────────
 function initRevenueFilters(){
+  // Rebuilding the <select>s used to reset the user's choice before the
+  // chart read it — both filters were effectively dead. Preserve the
+  // current selection across every re-render.
+  const yearSel = $('rev-year');
+  const prevYear = yearSel.value;
   const years = [...new Set(allInvoicesCache
     .filter(i=>i.invoice_date)
     .map(i=>new Date(i.invoice_date).getFullYear())
-  )].sort((a,b)=>b-a);
+  )];
   const curYear = new Date().getFullYear();
-  const sel = $('rev-year');
-  sel.innerHTML = years.map(y=>`<option value="${y}"${y===curYear?'selected':''}>${y}</option>`).join('');
-  if(!years.includes(curYear)) sel.innerHTML = `<option value="${curYear}" selected>${curYear}</option>` + sel.innerHTML;
+  if(!years.includes(curYear)) years.push(curYear);
+  years.sort((a,b)=>b-a);
+  yearSel.innerHTML = years.map(y=>`<option value="${y}"${y===curYear?' selected':''}>${y}</option>`).join('');
+  if(prevYear && years.includes(parseInt(prevYear))) yearSel.value = prevYear;
   // Client filter
+  const clientSel = $('rev-client');
+  const prevClient = clientSel.value;
   const clients = [...new Map(allInvoicesCache
     .filter(i=>i.clients?.id)
     .map(i=>[i.clients.id, i.clients.name])
   ).entries()].sort((a,b)=>a[1].localeCompare(b[1]));
-  $('rev-client').innerHTML = `<option value="">Alle Kunden</option>` +
+  clientSel.innerHTML = `<option value="">Alle Kunden</option>` +
     clients.map(([id,name])=>`<option value="${id}">${esc(name)}</option>`).join('');
+  if(prevClient && clients.some(([id])=>String(id)===prevClient)) clientSel.value = prevClient;
 }
 
 let revChartType = localStorage.getItem('inv_chart_type') || 'bar';
@@ -2520,7 +2686,7 @@ function renderAllInvoicesTable(){
   $('allinv-total-lbl').textContent = `Bezahlt gesamt: ${fmtEur(total)}`;
   const tbody = $('allinv-body');
   if(!list.length){
-    tbody.innerHTML=`<tr><td colspan="6"><div class="empty-st"><p class="empty-ttl">Keine Rechnungen gefunden</p></div></td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="7"><div class="empty-st"><p class="empty-ttl">Keine Rechnungen gefunden</p></div></td></tr>`;
     return;
   }
   tbody.innerHTML = list.map(inv=>`<tr data-id="${inv.id}" style="cursor:pointer">
@@ -2546,7 +2712,9 @@ function renderAllInvoicesTable(){
 // rendered from the same layout used for the on-screen/print preview.
 async function generateInvoicePdfBlob(invId){
   const { data:full } = await sb.from('invoices').select('*,clients(*),invoice_items(*)').eq('id',invId).single();
-  if(!full || typeof html2pdf==='undefined') return null;
+  if(!full) return null;
+  if(typeof html2pdf==='undefined') await loadScript(LIB_HTML2PDF).catch(()=>{});
+  if(typeof html2pdf==='undefined') return null;
   const container = document.createElement('div');
   container.style.cssText = 'position:fixed;left:-9999px;top:0;width:820px;background:#fff';
   container.innerHTML = buildInvoiceHTML(full, true);
@@ -2565,6 +2733,7 @@ async function generateInvoicePdfBlob(invId){
 async function exportFilteredInvoices(){
   const list = getFilteredAllInvoices();
   if(!list.length){ toast('Keine Rechnungen für den Export gefunden.','err'); return; }
+  if(typeof JSZip==='undefined') await loadScript(LIB_JSZIP).catch(()=>{});
   if(typeof JSZip==='undefined'){ toast('ZIP-Bibliothek konnte nicht geladen werden.','err'); return; }
   const btn = $('allinv-export-btn');
   const origLabel = btn.textContent;
@@ -2672,7 +2841,9 @@ async function openInvoiceEdit(id){
       </div>
       <div class="fg" id="ie-paid-at-row" style="display:${inv.status==='paid'?'':'none'}">
         <label class="fl">Bezahlt am</label>
-        <input class="fi" id="ie-paid-at" type="date" value="${inv.paid_at||''}" />
+        <!-- Date inputs reject full timestamps — slice to YYYY-MM-DD, sonst
+             wird paid_at beim Speichern stillschweigend gelöscht. -->
+        <input class="fi" id="ie-paid-at" type="date" value="${inv.paid_at ? esc(String(inv.paid_at).slice(0,10)) : ''}" />
       </div>
       <div class="fg">
         <label class="fl">Billing period</label>
@@ -2680,7 +2851,11 @@ async function openInvoiceEdit(id){
       </div>
       <div class="fg s2">
         <label class="fl">Billed to (Rechnungsempfänger)</label>
-        <textarea class="fi" id="ie-billto" rows="4" placeholder="Firma\nStraße\nPLZ Ort\nLand\nUSt-IdNr.: …">${esc(_meta.bill_to)}</textarea>
+        <textarea class="fi" id="ie-billto" rows="4" placeholder="Firma&#10;Straße&#10;PLZ Ort&#10;Land&#10;USt-IdNr.: …">${esc(_meta.bill_to)}</textarea>
+      </div>
+      <div class="fg s2">
+        <label class="fl">Notizen (intern)</label>
+        <textarea class="fi" id="ie-notes" rows="2" placeholder="Interne Anmerkungen zur Rechnung">${esc(_meta.text)}</textarea>
       </div>
       <div class="fg s2">
         <label class="fl">PDF anhängen</label>
@@ -2741,7 +2916,14 @@ async function saveInvoiceEdit(id){
   let pdfUrl = null;
   const pdfInput = $('ie-pdf');
   if(pdfInput?.files?.length){
-    pdfUrl = await uploadInvoicePdf(id, pdfInput.files[0]);
+    try {
+      pdfUrl = await uploadInvoicePdf(id, pdfInput.files[0]);
+    } catch(e){
+      // Previously an upload failure left the button stuck on "Speichern…".
+      btn.disabled=false; btn.textContent='Speichern';
+      toast('PDF-Upload fehlgeschlagen: '+(e.message||'Unbekannter Fehler'),'err');
+      return;
+    }
   }
 
   const payload = {
@@ -2752,7 +2934,7 @@ async function saveInvoiceEdit(id){
     status,
     subtotal:total, tax_rate:0, tax_amount:0, total,
     paid_at: paidAt,
-    notes:   invMetaToNotes({ billing_period:$('ie-period')?.value, bill_to:$('ie-billto')?.value }),
+    notes:   invMetaToNotes({ billing_period:$('ie-period')?.value, bill_to:$('ie-billto')?.value, text:$('ie-notes')?.value }),
   };
   if(pdfUrl) payload.pdf_url = pdfUrl;
   // Keep the per-client billing address in sync with manual edits.
@@ -2812,6 +2994,7 @@ async function processScanFile(file){
   $('scan-result').hidden = false;
   $('scan-result').innerHTML = `<div class="ga-auth-wrap" style="min-height:160px"><div class="spin"></div><p style="color:var(--ink-m);margin:0">Rechnung wird analysiert…</p></div>`;
   try {
+    if(typeof pdfjsLib==='undefined') await loadScript(LIB_PDFJS);
     if(typeof pdfjsLib==='undefined') throw new Error('PDF.js nicht geladen');
     pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     const buf  = await file.arrayBuffer();
@@ -2968,6 +3151,7 @@ async function viewInvoice(id){
 // ── INVOICE BUILDER (3 steps) ─────────────────────────────────────────
 let invStep=1, invClientId=null, invSelectedTEs=[], invLineItems=[], invClients=[];
 let invBillTo=null, invBillingPeriod=null, invDue=null;
+let invLiKey=null; // key of the TE selection the current line items were generated from
 
 // Build the "Billed to" block from the client record (company, name,
 // postal address, optional VAT id) — matches the PDF layout. A hand-typed
@@ -2989,7 +3173,7 @@ function defaultBillingPeriod(){
 }
 
 $('btn-new-invoice').addEventListener('click', async ()=>{
-  invStep=1; invClientId=null; invSelectedTEs=[]; invLineItems=[];
+  invStep=1; invClientId=null; invSelectedTEs=[]; invLineItems=[]; invLiKey=null;
   invBillTo=null; invBillingPeriod=null; invDue=null;
   // Load clients for step 1
   const { data }=await sb.from('clients').select('id,name,company,email,address,vat_id').eq('is_active_client',true).order('name');
@@ -3021,6 +3205,10 @@ async function renderInvStep(){
     $('inv-client-sel').addEventListener('change', async e=>{
       invClientId=e.target.value;
       invBillTo=null;  // re-prefill billing address for the newly chosen client
+      // A new client means a fresh slate: the previous client's checked time
+      // entries must never end up flagged "fakturiert" by this invoice.
+      invSelectedTEs=[];
+      if(invLiKey){ invLineItems=[]; invLiKey=null; }
       await loadInvTimeEntries();
     });
     if(invClientId) await loadInvTimeEntries();
@@ -3043,7 +3231,7 @@ async function renderInvStep(){
     body.innerHTML=`
       <div class="g2" style="margin-bottom:1.25rem">
         <div class="fg s2"><label class="fl">Billed to (Rechnungsempfänger)</label>
-          <textarea class="fi" id="inv-billto" rows="5" placeholder="Firma\nStraße\nPLZ Ort\nLand\nUSt-IdNr.: …">${esc(invBillTo)}</textarea>
+          <textarea class="fi" id="inv-billto" rows="5" placeholder="Firma&#10;Straße&#10;PLZ Ort&#10;Land&#10;USt-IdNr.: …">${esc(invBillTo)}</textarea>
           <span style="font-size:.75rem;color:var(--ink-s)">Erste Zeile = fett. Wird pro Kunde gemerkt.</span>
         </div>
         <div class="fg"><label class="fl">Billing period</label><input class="fi" id="inv-period" value="${esc(invBillingPeriod)}" placeholder="z.B. May 2026" /></div>
@@ -3129,8 +3317,11 @@ function refreshLiTotals(){
 $('inv-next-btn').addEventListener('click', async ()=>{
   if(invStep===1){
     if(!invClientId){ toast('Bitte Kunden auswählen.','err'); return; }
-    // Build line items from selected TEs
-    if(invSelectedTEs.length>0){
+    // Build line items from selected TEs — but only when the selection
+    // actually changed, so edits made in step 2 survive a
+    // Zurück → Weiter round-trip.
+    const teKey=JSON.stringify([...invSelectedTEs].sort());
+    if(invSelectedTEs.length>0 && teKey!==invLiKey){
       const rows=document.querySelectorAll('.te-row.checked');
       const grouped={};
       rows.forEach(r=>{
@@ -3143,6 +3334,7 @@ $('inv-next-btn').addEventListener('click', async ()=>{
         grouped[proj].amount+=(mins/60)*rate;
       });
       invLineItems=Object.values(grouped).map(g=>({ desc:g.desc, amount:parseFloat(g.amount.toFixed(2)) }));
+      invLiKey=teKey;
     }
     if(!invLineItems.length) invLineItems=[{desc:'',amount:0}];
     invStep=2; renderInvStep();
@@ -3199,7 +3391,7 @@ async function openInvoicePreviewModal(inv){
         <button class="btn btn--accent btn--sm" id="inv-send-gmail-btn">✉ Per Gmail senden</button>
       </div></div>`;
     document.body.appendChild(ov);
-    ov.addEventListener('click',e=>{ if(e.target===ov) ov.classList.remove('open'); });
+    ov.addEventListener('click',e=>{ if(e.target===ov) closeModal(id); });
   }
   ov.querySelector('.modal-ttl').textContent = `Rechnung ${inv.invoice_number||''}`;
   currentPreviewInv=inv;
@@ -3219,6 +3411,7 @@ async function openInvoicePreviewModal(inv){
     // A PDF was manually attached — show that exact file instead of the
     // system-generated layout, since it's the source of truth here.
     if(printBtn) printBtn.hidden = true;
+    $('print-area').innerHTML = ''; // never keep a previous invoice's layout around
     document.getElementById('invprev-body').innerHTML = `<div class="ga-auth-wrap" style="min-height:240px"><div class="spin"></div><p style="color:var(--ink-m);margin:0">PDF wird geladen…</p></div>`;
     openModal(id);
     const url = await getInvoicePdfUrl(inv.pdf_url);
@@ -3265,7 +3458,7 @@ async function refreshInvoiceClientData(){
   if(cErr || !client){ if(btn) btn.disabled=false; toast('Kunde nicht gefunden.','err'); return; }
   const meta = parseInvMeta(inv);
   const newBillTo = defaultBillTo(client);
-  const notes = invMetaToNotes({ billing_period: meta.billing_period, bill_to: newBillTo });
+  const notes = invMetaToNotes({ billing_period: meta.billing_period, bill_to: newBillTo, text: meta.text });
   const { error } = await sb.from('invoices').update({ notes }).eq('id', inv.id);
   if(btn) btn.disabled=false;
   if(error){ toast('Fehler: '+error.message,'err'); return; }
@@ -3300,18 +3493,19 @@ function fmtInvAmount(v){
   const cur = (companySettings.currency||'EUR').trim() || 'EUR';
   return n.toFixed(2).replace('.', ',') + ' ' + cur;
 }
-// Per-invoice extras (Billed-to snapshot + billing period) are stored as a
-// JSON blob inside the existing `notes` column — no DB migration needed.
-// Legacy / scanned invoices keep plain-text notes and degrade gracefully.
+// Per-invoice extras (Billed-to snapshot + billing period + free-text notes)
+// are stored as a JSON blob inside the existing `notes` column — no DB
+// migration needed. Plain-text notes of legacy/scanned invoices surface as
+// `text`, so editing an invoice no longer destroys them.
 function parseInvMeta(inv){
   const raw = inv && typeof inv.notes==='string' ? inv.notes.trim() : '';
   if(raw.startsWith('{')){
-    try{ const o=JSON.parse(raw); return { billing_period:o.billing_period||'', bill_to:o.bill_to||'' }; }catch(e){}
+    try{ const o=JSON.parse(raw); return { billing_period:o.billing_period||'', bill_to:o.bill_to||'', text:o.text||'' }; }catch(e){}
   }
-  return { billing_period:'', bill_to:'' };
+  return { billing_period:'', bill_to:'', text:raw };
 }
 function invMetaToNotes(meta){
-  return JSON.stringify({ billing_period:(meta.billing_period||'').trim(), bill_to:(meta.bill_to||'').trim() });
+  return JSON.stringify({ billing_period:(meta.billing_period||'').trim(), bill_to:(meta.bill_to||'').trim(), text:(meta.text||'').trim() });
 }
 // Render a multi-line address block; first non-empty line is bold (name).
 function invAddrBlock(text, fallbackLines){
@@ -3324,6 +3518,8 @@ function invMultiline(text){ return esc(text).replace(/\n/g,'<br>'); }
 
 function buildInvoiceHTML(inv, forModal=false){
   const s = companySettings;
+  // Only real data-URL images may be injected into the img src.
+  const safeLogo = /^data:image\//.test(s.logo||'') ? s.logo : '';
   const meta = parseInvMeta(inv);
   const items = (inv.invoice_items||[]).slice().sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
   const itemAmount = i => (i.total!=null ? Number(i.total)
@@ -3352,7 +3548,7 @@ function buildInvoiceHTML(inv, forModal=false){
         <h1 class="invd-title">INVOICE</h1>
         <div class="invd-sub">#${esc(num)}</div>
       </div>
-      ${s.logo?`<img class="invd-logo" src="${s.logo}" alt="Logo" />`:''}
+      ${safeLogo?`<img class="invd-logo" src="${safeLogo}" alt="Logo" />`:''}
     </div>
 
     <table class="invd-meta">
@@ -3467,8 +3663,9 @@ function openInvSettings(){
 
 function renderLogoPreview(){
   const box=$('set-logo-prev'); if(!box) return;
-  box.innerHTML = pendingLogo
-    ? `<img src="${pendingLogo}" style="max-width:100%;max-height:100%;object-fit:contain" />`
+  const src = /^data:image\//.test(pendingLogo||'') ? pendingLogo : '';
+  box.innerHTML = src
+    ? `<img src="${src}" style="max-width:100%;max-height:100%;object-fit:contain" />`
     : `<span style="font-size:.72rem;color:var(--ink-s)">Kein Logo</span>`;
 }
 
@@ -3535,29 +3732,30 @@ let gaToken  = null;
 let gaStart  = '7daysAgo';
 let gaEnd    = 'today';
 
-const GA_TOKEN_KEY = 'ga4_token';
-const GA_EXPIRY_KEY = 'ga4_token_expiry';
 const GA_TOKEN_API = '/api/ga-token';
+
+// The access token lives in memory only (NOT localStorage) — after a reload
+// it is re-minted silently via /api/ga-token, so nothing sensitive persists
+// where a future XSS could read it. Tokens persisted by older versions are
+// cleaned up once here.
+localStorage.removeItem('ga4_token');
+localStorage.removeItem('ga4_token_expiry');
+let gaTokenExpiry = 0;
 
 function gaSaveToken(token, expiresInSec) {
   gaToken = token;
-  localStorage.setItem(GA_TOKEN_KEY, token);
   // Google access tokens expire after ~1h; renew 5min before expiry
   const ttlMs = Math.max((expiresInSec || 3600) - 300, 60) * 1000;
-  localStorage.setItem(GA_EXPIRY_KEY, Date.now() + ttlMs);
+  gaTokenExpiry = Date.now() + ttlMs;
 }
 
 function gaLoadToken() {
-  const token  = localStorage.getItem(GA_TOKEN_KEY);
-  const expiry = parseInt(localStorage.getItem(GA_EXPIRY_KEY) || '0');
-  if (token && Date.now() < expiry) { gaToken = token; return true; }
-  return false;
+  return !!(gaToken && Date.now() < gaTokenExpiry);
 }
 
 function gaClearToken() {
   gaToken = null;
-  localStorage.removeItem(GA_TOKEN_KEY);
-  localStorage.removeItem(GA_EXPIRY_KEY);
+  gaTokenExpiry = 0;
 }
 
 function getGaTokenSilent() {
@@ -3645,13 +3843,14 @@ $('ga-live-btn').addEventListener('click', () => {
     gaStart = last.dataset.start; gaEnd = last.dataset.end;
     if (gaToken) renderAnalytics();
   } else {
+    // Never flip the button into its pulsing "active" state without a token.
+    if (!gaToken) { toast('Bitte zuerst Google Analytics verbinden.', 'err'); return; }
     document.querySelectorAll('.ga-range-btn').forEach(b => {
       if (b.classList.contains('active')) b.setAttribute('data-was-active','1');
       b.classList.remove('active');
     });
     $('ga-live-btn').classList.add('active');
-    if (gaToken) { renderLive(); gaLiveTimer = setInterval(renderLive, 30000); }
-    else toast('Bitte zuerst Google Analytics verbinden.', 'err');
+    renderLive(); gaLiveTimer = setInterval(renderLive, 30000);
   }
 });
 
@@ -3715,7 +3914,7 @@ async function renderLive() {
       }),
     ]);
 
-    const now = new Date().toLocaleTimeString('de-DE', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const now = new Date().toLocaleTimeString('de-DE', {timeZone:TZ,hour:'2-digit',minute:'2-digit',second:'2-digit'});
     const activeUsers = parseInt(active?.rows?.[0]?.metricValues?.[0]?.value || '0');
 
     // Pages rows
@@ -4160,6 +4359,16 @@ function gaRegPage(path, title) {
   return gaPageReg.length - 1;
 }
 
+// Human-readable label for the active date range ("7daysAgo" → "Letzte 7 Tage")
+function gaRangeLabel() {
+  const m = /^(\d+)daysAgo$/.exec(gaStart || '');
+  if (m && gaEnd === 'today') return `Letzte ${m[1]} Tage`;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(gaStart || '') && /^\d{4}-\d{2}-\d{2}$/.test(gaEnd || '')) {
+    return `${fmtDate(gaStart)} – ${fmtDate(gaEnd)}`;
+  }
+  return `${gaStart} – ${gaEnd}`;
+}
+
 // ── GA ALL PAGES VIEW ────────────────────────────────────────────────
 async function gaShowAllPages() {
   $('ga-content').innerHTML = `<div class="ga-auth-wrap"><div class="spin"></div><p style="color:var(--ink-m);margin:0">Seiten werden geladen…</p></div>`;
@@ -4198,7 +4407,7 @@ async function gaShowAllPages() {
       <div class="card">
         <div class="card-hd">
           <span class="card-ttl">Alle Seiten</span>
-          <span style="font-size:.75rem;color:var(--ink-s)">${(report?.rows||[]).length} Seiten · ${gaStart} – ${gaEnd}</span>
+          <span style="font-size:.75rem;color:var(--ink-s)">${(report?.rows||[]).length} Seiten · ${gaRangeLabel()}</span>
         </div>
         <table class="dtable">
           <thead><tr><th>Pfad</th><th>Titel</th><th>Aufrufe</th><th>Nutzer</th><th>Ø Zeit</th><th>Absprung</th></tr></thead>
@@ -4371,13 +4580,10 @@ async function gaShowPageDetail(path, title) {
 let klvDays = 30;
 
 function klvISORange(days) {
-  const end = new Date();
-  const start = new Date();
-  start.setDate(start.getDate() - days);
-  return {
-    start: start.toISOString().split('T')[0],
-    end: end.toISOString().split('T')[0],
-  };
+  const end = today(); // dashboard timezone
+  const [y,m,d] = end.split('-').map(Number);
+  const start = new Date(Date.UTC(y, m-1, d-days)).toISOString().split('T')[0];
+  return { start, end };
 }
 
 function klvSetLoading() {
@@ -4393,7 +4599,11 @@ function klvSetLoading() {
 async function loadKlaviyo(start, end) {
   klvSetLoading();
   try {
-    const res = await fetch(`/api/klaviyo?resource=overview&start=${start}&end=${end}`);
+    // The endpoint requires the owner's session JWT — it is no longer public.
+    const { data:{ session } } = await sb.auth.getSession();
+    const res = await fetch(`/api/klaviyo?resource=overview&start=${start}&end=${end}`, {
+      headers: { 'Authorization': 'Bearer ' + (session?.access_token || '') },
+    });
     if (!res.ok) {
       const { error } = await res.json().catch(() => ({}));
       throw new Error(error || res.statusText);
@@ -4406,8 +4616,11 @@ async function loadKlaviyo(start, end) {
     $('klv-total').textContent = (profileTotal ?? listSum).toLocaleString('de-DE');
 
     // ── New sign-ups (sum of metric aggregate values) ──
+    // Klaviyo returns measurements as an object keyed by measurement name
+    // ({ count: [...] }) — reading it as an array crashed the whole panel.
     const sigDates = signups?.data?.attributes?.dates || [];
-    const sigVals  = signups?.data?.attributes?.data?.[0]?.measurements || [];
+    const sigMeas  = signups?.data?.attributes?.data?.[0]?.measurements;
+    const sigVals  = Array.isArray(sigMeas) ? sigMeas : (sigMeas?.count || []);
     const totalSignups = sigVals.reduce((s, v) => s + (v || 0), 0);
     $('klv-signups').textContent = totalSignups.toLocaleString('de-DE');
     $('klv-signups-total').textContent = sigDates.length ? `${sigDates.length} Tage` : '';
@@ -4470,7 +4683,7 @@ function klvRenderLists(lists) {
     .map(l => `<tr>
       <td class="fw6">${esc(l.attributes?.name || '—')}</td>
       <td>${(l.attributes?.profile_count || 0).toLocaleString('de-DE')}</td>
-      <td class="muted">${l.attributes?.created ? new Date(l.attributes.created).toLocaleDateString('de-DE') : '—'}</td>
+      <td class="muted">${fmtDate(l.attributes?.created)}</td>
     </tr>`).join('');
 }
 
@@ -4493,7 +4706,7 @@ function klvRenderCampaigns(campaigns) {
     const clickCol = (a.click_rate || 0) >= 0.03 ? 'var(--green)' : 'inherit';
     return `<tr>
       <td class="fw6" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(a.campaign_name || '—')}</td>
-      <td class="muted">${a.send_time ? new Date(a.send_time).toLocaleDateString('de-DE') : '—'}</td>
+      <td class="muted">${fmtDate(a.send_time)}</td>
       <td>${(a.recipients || 0).toLocaleString('de-DE')}</td>
       <td>${(a.unique_opens || 0).toLocaleString('de-DE')}</td>
       <td style="font-weight:600;color:${openCol}">${openPct}</td>
@@ -4530,6 +4743,10 @@ let editReminderId = null;
 
 $('btn-inv-reminders').addEventListener('click', openRemindersListModal);
 $('btn-new-reminder').addEventListener('click', () => openReminderModal());
+// Always-visible entry point in the Rechnungen toolbar — previously the only
+// buttons lived inside a card that is hidden when no reminders are pending,
+// making the whole feature unreachable.
+$('btn-reminders').addEventListener('click', openRemindersListModal);
 $('rem-list-new-btn').addEventListener('click', () => { closeModal('ov-reminders-list'); openReminderModal(); });
 $('rem-filter').addEventListener('change', renderRemindersAllList);
 
@@ -4556,9 +4773,11 @@ async function openReminderModal(reminder = null){
   });
   if(reminder){
     sel.value = reminder.client_id || '';
+    // Date AND time both in the dashboard timezone (previously the date was
+    // UTC while the time was local — off by a day around midnight).
     const d = new Date(reminder.remind_at);
-    $('rem-date').value = d.toISOString().split('T')[0];
-    $('rem-time').value = d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit',hour12:false});
+    $('rem-date').value = tzDateStr(d);
+    $('rem-time').value = d.toLocaleTimeString('de-DE',{timeZone:TZ,hour:'2-digit',minute:'2-digit',hour12:false});
     $('rem-note').value = reminder.note || '';
   } else {
     $('rem-date').value = daysFromNow(7);
@@ -4574,7 +4793,8 @@ async function saveReminder(e){
   const timeStr = $('rem-time').value || '09:00';
   if(!clientId){ toast('Bitte einen Kunden wählen.','err'); return; }
   if(!dateStr){ toast('Bitte ein Datum wählen.','err'); return; }
-  const remindAt = new Date(`${dateStr}T${timeStr}`).toISOString();
+  // Entered in dashboard time (Bali/Singapur, UTC+8 — no DST).
+  const remindAt = new Date(`${dateStr}T${timeStr}:00+08:00`).toISOString();
   const note = $('rem-note').value.trim() || null;
 
   const btn = $('rem-save-btn');
@@ -4620,7 +4840,7 @@ async function loadInvReminders(){
       </div>
       <div style="text-align:right;flex-shrink:0">
         <div style="font-size:.8125rem;font-weight:500;${overdue?'color:var(--red)':''}">${fmtDate(r.remind_at)}</div>
-        <div style="font-size:.6875rem;color:var(--ink-s)">${d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})} Uhr</div>
+        <div style="font-size:.6875rem;color:var(--ink-s)">${d.toLocaleTimeString('de-DE',{timeZone:TZ,hour:'2-digit',minute:'2-digit'})} Uhr</div>
       </div>
       <div style="display:flex;gap:.25rem;flex-shrink:0">
         <button class="btn btn--icon btn--ghost rem-done-btn" data-id="${r.id}" title="Erledigt" style="width:28px;height:28px;color:var(--green)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 16 16"><path d="M3 8.5l3.5 3.5 6.5-7"/></svg></button>
@@ -4674,7 +4894,7 @@ async function renderRemindersAllList(){
       </div>
       <div style="text-align:right;flex-shrink:0">
         <div style="font-size:.8125rem;font-weight:500;${overdue&&!isDone?'color:var(--red)':''}">${fmtDate(r.remind_at)}</div>
-        <div style="font-size:.6875rem;color:var(--ink-s)">${d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})} Uhr</div>
+        <div style="font-size:.6875rem;color:var(--ink-s)">${d.toLocaleTimeString('de-DE',{timeZone:TZ,hour:'2-digit',minute:'2-digit'})} Uhr</div>
       </div>
       <div style="display:flex;gap:.25rem;flex-shrink:0">
         ${!isDone ? `<button class="btn btn--icon btn--ghost reml-done-btn" data-id="${r.id}" title="Erledigt" style="width:28px;height:28px;color:var(--green)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 16 16"><path d="M3 8.5l3.5 3.5 6.5-7"/></svg></button>` : ''}
@@ -4711,14 +4931,32 @@ async function sendViaGmail(inv){
   if(!gmailToken){
     try { gmailToken=await getGmailToken(); } catch(e){ toast('Gmail-Anmeldung fehlgeschlagen.','err'); return; }
   }
+  const btn=$('inv-send-gmail-btn');
+  if(btn){ btn.disabled=true; btn.textContent='✉ Wird gesendet…'; }
   try {
+    // The mail says the invoice is attached — so actually attach it: a
+    // manually attached PDF wins, otherwise render one from the layout.
+    let pdfBlob=null;
+    if(inv.pdf_url){
+      const url=await getInvoicePdfUrl(inv.pdf_url);
+      if(url){ const r=await fetch(url); if(r.ok) pdfBlob=await r.blob(); }
+    }
+    if(!pdfBlob && inv.id) pdfBlob=await generateInvoicePdfBlob(inv.id);
+    if(!pdfBlob) throw new Error('Rechnungs-PDF konnte nicht erstellt werden.');
+    const pdfName=`Rechnung-${String(inv.invoice_number||inv.id||'').replace(/[^\w.\-]+/g,'-')||'Rechnung'}.pdf`;
+
     const subject=`Rechnung ${inv.invoice_number||''} von ${CONFIG.INVOICE_FROM.name}`;
-    const body=`Hallo,\n\nim Anhang findest du Rechnung ${inv.invoice_number} über ${fmtEur(inv.total)}.\n\nBitte überweise den Betrag bis zum ${fmtDate(inv.due_date)} auf mein Konto.\n\nMit freundlichen Grüßen,\n${CONFIG.INVOICE_FROM.name}`;
-    await gmailSend(clientEmail, subject, body);
-    await sb.from('invoices').update({status:'sent',sent_at:new Date().toISOString()}).eq('id',inv.id);
+    const dueLine=inv.due_date?`\n\nBitte überweise den Betrag bis zum ${fmtDate(inv.due_date)} auf mein Konto.`:'';
+    const body=`Hallo,\n\nim Anhang findest du Rechnung ${inv.invoice_number} über ${fmtEur(inv.total)}.${dueLine}\n\nMit freundlichen Grüßen,\n${CONFIG.INVOICE_FROM.name}`;
+    await gmailSend(clientEmail, subject, body, pdfBlob, pdfName);
+    // Never downgrade paid/cancelled/overdue — only drafts move to "sent".
+    const patch={ sent_at:new Date().toISOString() };
+    if(!inv.status||inv.status==='draft') patch.status='sent';
+    await sb.from('invoices').update(patch).eq('id',inv.id);
     toast(`Rechnung an ${clientEmail} gesendet.`,'ok');
-    loadInvoices();
+    loadInvoices(); loadStats();
   } catch(e){ toast('Fehler beim Senden: '+e.message,'err'); }
+  finally { if(btn){ btn.disabled=false; btn.textContent='✉ Per Gmail senden'; } }
 }
 
 function getGmailToken(){
@@ -4733,24 +4971,81 @@ function getGmailToken(){
   });
 }
 
-async function gmailSend(to, subject, bodyText){
-  const msg=[`To: ${to}`,`Subject: =?UTF-8?B?${btoa(unescape(encodeURIComponent(subject)))}?=`,'MIME-Version: 1.0','Content-Type: text/plain; charset=UTF-8','',bodyText].join('\r\n');
-  const encoded=btoa(unescape(encodeURIComponent(msg))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-  const res=await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send',{
+async function blobToBase64(blob){
+  const bytes=new Uint8Array(await blob.arrayBuffer());
+  let bin=''; const CHUNK=0x8000;
+  for(let i=0;i<bytes.length;i+=CHUNK) bin+=String.fromCharCode.apply(null, bytes.subarray(i,i+CHUNK));
+  return btoa(bin);
+}
+
+async function gmailSend(to, subject, bodyText, pdfBlob, pdfName){
+  const b64utf8=s=>btoa(unescape(encodeURIComponent(s)));
+  let msg;
+  if(pdfBlob){
+    const bnd='jm-'+Date.now().toString(36);
+    const pdf64=(await blobToBase64(pdfBlob)).replace(/(.{76})/g,'$1\r\n');
+    msg=[
+      `To: ${to}`,
+      `Subject: =?UTF-8?B?${b64utf8(subject)}?=`,
+      'MIME-Version: 1.0',
+      `Content-Type: multipart/mixed; boundary="${bnd}"`,
+      '',
+      `--${bnd}`,
+      'Content-Type: text/plain; charset=UTF-8',
+      '',
+      bodyText,
+      '',
+      `--${bnd}`,
+      `Content-Type: application/pdf; name="${pdfName}"`,
+      'Content-Transfer-Encoding: base64',
+      `Content-Disposition: attachment; filename="${pdfName}"`,
+      '',
+      pdf64,
+      `--${bnd}--`,
+    ].join('\r\n');
+  } else {
+    msg=[`To: ${to}`,`Subject: =?UTF-8?B?${b64utf8(subject)}?=`,'MIME-Version: 1.0','Content-Type: text/plain; charset=UTF-8','',bodyText].join('\r\n');
+  }
+  const encoded=b64utf8(msg).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  const doSend=()=>fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send',{
     method:'POST',headers:{'Authorization':'Bearer '+gmailToken,'Content-Type':'application/json'},
     body:JSON.stringify({raw:encoded})
   });
+  let res=await doSend();
+  if(res.status===401){
+    // Cached token expired (~1h) — re-auth once and retry.
+    gmailToken=await getGmailToken();
+    res=await doSend();
+  }
   if(!res.ok) throw new Error(await res.text());
 }
 
 // ── MODAL SYSTEM ─────────────────────────────────────────────────────
 function openModal(id) { $(id)?.classList.add('open'); }
-function closeModal(id){ $(id)?.classList.remove('open'); }
-document.querySelectorAll('.overlay').forEach(ov=>ov.addEventListener('click',e=>{ if(e.target===ov) ov.classList.remove('open'); }));
+function closeModal(id){
+  $(id)?.classList.remove('open');
+  // Clear the print area with the preview — otherwise a later Ctrl+P would
+  // print the stale invoice (print CSS shows only #print-area).
+  if(id==='ov-invpreview'){ const pa=$('print-area'); if(pa) pa.innerHTML=''; }
+}
+document.querySelectorAll('.overlay').forEach(ov=>ov.addEventListener('click',e=>{ if(e.target===ov) closeModal(ov.id); }));
+// Esc closes the topmost open modal, or the client drawer.
+document.addEventListener('keydown', e=>{
+  if(e.key!=='Escape') return;
+  const open=[...document.querySelectorAll('.overlay.open')];
+  if(open.length){ closeModal(open[open.length-1].id); return; }
+  if($('drawer-ov')?.classList.contains('open')) closeDrawer();
+});
 
 // ── HELPERS ──────────────────────────────────────────────────────────
-function fmtDate(d){ if(!d) return '—'; return new Date(d).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}); }
-function fmtDateTime(d){ if(!d) return '—'; return new Date(d).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}); }
+// All "today"-style logic and date displays run in the dashboard's home
+// timezone (Bali/Singapur, UTC+8, no DST) — independent of the browser.
+// Previously today() used UTC, which produced yesterday's date in the
+// hours after local midnight.
+const TZ = 'Asia/Singapore';
+function tzDateStr(d){ return new Intl.DateTimeFormat('en-CA',{timeZone:TZ}).format(d); } // YYYY-MM-DD
+function fmtDate(d){ if(!d) return '—'; return new Date(d).toLocaleDateString('de-DE',{timeZone:TZ,day:'2-digit',month:'2-digit',year:'numeric'}); }
+function fmtDateTime(d){ if(!d) return '—'; return new Date(d).toLocaleDateString('de-DE',{timeZone:TZ,day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}); }
 function fmtDur(m){ if(!m) return '0h 0min'; return `${Math.floor(m/60)}h ${m%60}min`; }
 function fmtEur(v){ if(v==null) return '—'; return new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(v); }
 // Rounded, no decimals — used where space is tight (e.g. inside the pto ring).
@@ -4759,9 +5054,21 @@ function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')
 // Only ever trust a strict "#rrggbb" shape before it's interpolated into HTML/CSS.
 function safeColor(c){ return c && /^#[0-9A-Fa-f]{6}$/.test(c) ? c : null; }
 function pad(n){ return String(n).padStart(2,'0'); }
-function today(){ return new Date().toISOString().split('T')[0]; }
-function daysFromNow(n){ const d=new Date(); d.setDate(d.getDate()+n); return d.toISOString().split('T')[0]; }
-function fmtTimeOnly(ts){ if(!ts) return ''; return new Date(ts).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit',hour12:false}); }
+function today(){ return tzDateStr(new Date()); }
+function daysFromNow(n){ const [y,m,d]=today().split('-').map(Number); return new Date(Date.UTC(y,m-1,d+n)).toISOString().split('T')[0]; }
+// Monday–Sunday of the current week in the dashboard timezone.
+function tzWeekRange(){
+  const [y,m,d]=today().split('-').map(Number);
+  const dt=new Date(Date.UTC(y,m-1,d));
+  const wd=dt.getUTCDay();
+  dt.setUTCDate(dt.getUTCDate()+(wd===0?-6:1-wd));
+  const start=dt.toISOString().split('T')[0];
+  dt.setUTCDate(dt.getUTCDate()+6);
+  return [start, dt.toISOString().split('T')[0]];
+}
+function fmtTimeOnly(ts){ if(!ts) return ''; return new Date(ts).toLocaleTimeString('de-DE',{timeZone:TZ,hour:'2-digit',minute:'2-digit',hour12:false}); }
+// Only http(s) URLs may become clickable links (blocks javascript: etc.).
+function safeUrl(u){ u=String(u||'').trim(); return /^https?:\/\//i.test(u) ? u : null; }
 
 // Von–Bis helpers
 function setDurLock(locked){
