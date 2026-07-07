@@ -14,6 +14,14 @@ const CONFIG = {
   SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsaWJ5a215dmtkdGR2Z3p1d3lyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NDI4ODYsImV4cCI6MjA5MzQxODg4Nn0.9CeJ9wNUcA7_3CXWXZ2rEZZMkbEYmBSQVvvv5ycNINA',
 
   // ----------------------------------------------------------
+  //  Owner lockdown — the dashboard belongs to exactly ONE
+  //  account. The same email is enforced server-side (RLS
+  //  policies in supabase-setup.sql + the /api endpoints); this
+  //  client-side check is just the friendly first line.
+  // ----------------------------------------------------------
+  ALLOWED_EMAIL: 'jasonmartinph@gmail.com',
+
+  // ----------------------------------------------------------
   //  Google Analytics 4
   //  Replace the placeholder below with your Measurement ID
   //  (format: G-XXXXXXXXXX) once you create the GA4 property.
