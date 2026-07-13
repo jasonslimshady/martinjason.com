@@ -9,7 +9,7 @@ const SUPABASE_URL      = process.env.SUPABASE_URL || 'https://blibykmyvkdtdvgzu
 // The anon key is public by design (it is shipped in config.js) — here it is
 // only used to validate the caller's session JWT against Supabase Auth.
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsaWJ5a215dmtkdGR2Z3p1d3lyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NDI4ODYsImV4cCI6MjA5MzQxODg4Nn0.9CeJ9wNUcA7_3CXWXZ2rEZZMkbEYmBSQVvvv5ycNINA';
-const ALLOWED_EMAIL     = process.env.DASHBOARD_ALLOWED_EMAIL || 'jasonmartinph@gmail.com';
+const ALLOWED_EMAIL     = process.env.DASHBOARD_ALLOWED_EMAIL || 'jasonmartinde@gmail.com';
 
 export default async function handler(req, res) {
   const origin = req.headers.origin || '';
