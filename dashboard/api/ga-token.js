@@ -25,7 +25,7 @@
 const SUPABASE_URL     = process.env.SUPABASE_URL || 'https://blibykmyvkdtdvgzuwyr.supabase.co';
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '672383429326-fve9t1ak2haf7ll2he2r54rkvohtqugt.apps.googleusercontent.com';
 const TOKEN_ID         = 'ga4'; // row id in the app_tokens table
-const ALLOWED_EMAIL    = process.env.DASHBOARD_ALLOWED_EMAIL || 'jasonmartinph@gmail.com';
+const ALLOWED_EMAIL    = process.env.DASHBOARD_ALLOWED_EMAIL || 'jasonmartinde@gmail.com';
 
 export default async function handler(req, res) {
   const origin = req.headers.origin || '';

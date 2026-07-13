@@ -19,7 +19,7 @@ const CONFIG = {
   //  policies in supabase-setup.sql + the /api endpoints); this
   //  client-side check is just the friendly first line.
   // ----------------------------------------------------------
-  ALLOWED_EMAIL: 'jasonmartinph@gmail.com',
+  ALLOWED_EMAIL: 'jasonmartinde@gmail.com',
 
   // ----------------------------------------------------------
   //  Google Analytics 4
