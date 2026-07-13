@@ -457,6 +457,44 @@
       <div class="fg"><label class="fl">Passwort</label><input class="fi" type="password" id="f-pw" autocomplete="current-password" required placeholder="••••••••" /></div>
       <button class="btn btn--primary btn--full" type="submit" id="login-btn" style="margin-top:.5rem">Anmelden</button>
     </form>
+    <button type="button" id="forgot-link" style="background:none;border:none;padding:0;margin-top:1rem;font-size:.8125rem;color:var(--accent);cursor:pointer">Passwort vergessen?</button>
+  </div>
+</div>
+
+<!-- FORGOT PASSWORD -->
+<div id="screen-forgot" hidden>
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="login-mark">JM</div>
+      <span style="font-size:.9375rem;font-weight:600;letter-spacing:-.01em">martinjason.com</span>
+    </div>
+    <h1 class="login-title">Passwort zurücksetzen</h1>
+    <p class="login-sub">Gib deine E-Mail ein — wir senden dir einen Link zum Zurücksetzen.</p>
+    <div class="login-err" id="forgot-err"></div>
+    <div class="login-err" id="forgot-ok" style="background:var(--green-t);color:#1a8c3a"></div>
+    <form id="forgot-form">
+      <div class="fg"><label class="fl">E-Mail</label><input class="fi" type="email" id="fg-email" autocomplete="email" required placeholder="jason@martinjason.com" /></div>
+      <button class="btn btn--primary btn--full" type="submit" id="forgot-btn" style="margin-top:.5rem">Link senden</button>
+    </form>
+    <button type="button" id="back-to-login-link" style="background:none;border:none;padding:0;margin-top:1rem;font-size:.8125rem;color:var(--accent);cursor:pointer">Zurück zum Login</button>
+  </div>
+</div>
+
+<!-- RESET PASSWORD (reached via the emailed link) -->
+<div id="screen-reset" hidden>
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="login-mark">JM</div>
+      <span style="font-size:.9375rem;font-weight:600;letter-spacing:-.01em">martinjason.com</span>
+    </div>
+    <h1 class="login-title">Neues Passwort festlegen</h1>
+    <p class="login-sub">Wähle ein neues Passwort für dein Konto.</p>
+    <div class="login-err" id="reset-err"></div>
+    <form id="reset-form">
+      <div class="fg"><label class="fl">Neues Passwort</label><input class="fi" type="password" id="rs-pw1" autocomplete="new-password" required minlength="6" placeholder="••••••••" /></div>
+      <div class="fg"><label class="fl">Passwort bestätigen</label><input class="fi" type="password" id="rs-pw2" autocomplete="new-password" required minlength="6" placeholder="••••••••" /></div>
+      <button class="btn btn--primary btn--full" type="submit" id="reset-btn" style="margin-top:.5rem">Passwort speichern</button>
+    </form>
   </div>
 </div>
 
@@ -1156,7 +1194,17 @@ async function boot() {
   session ? showApp(session.user) : showLogin();
 }
 
-function showLogin(){ $('screen-login').hidden=false; $('screen-app').hidden=true; }
+function hideAllScreens(){
+  $('screen-login').hidden=true; $('screen-forgot').hidden=true;
+  $('screen-reset').hidden=true; $('screen-app').hidden=true;
+}
+function showLogin(){ hideAllScreens(); $('screen-login').hidden=false; }
+function showForgotScreen(){
+  hideAllScreens(); $('screen-forgot').hidden=false;
+  $('forgot-err').style.display='none'; $('forgot-ok').style.display='none';
+  $('fg-email').value = $('f-email').value.trim();
+}
+function showResetScreen(){ hideAllScreens(); $('screen-reset').hidden=false; }
 async function showApp(user){
   // Defense in depth: the dashboard belongs to exactly one account.
   // (Real enforcement lives in the RLS policies + the /api email checks.)
@@ -1167,7 +1215,7 @@ async function showApp(user){
     if(err){ err.textContent='Dieses Konto hat keinen Zugriff auf das Dashboard.'; err.style.display='block'; }
     return;
   }
-  $('screen-login').hidden=true; $('screen-app').hidden=false;
+  hideAllScreens(); $('screen-app').hidden=false;
   loadStats(); loadCRM(); loadTimeEntries(); loadProjectOverview(); loadInvoices(); loadInvReminders();
   await loadProjects();
   restoreTimer(); // pick up a timer that survived a reload / tab close
@@ -1187,6 +1235,7 @@ $('btn-logout').addEventListener('click', async () => {
 // An expired/revoked session no longer shows a silently empty dashboard —
 // it drops back to the login screen with a message.
 sb.auth.onAuthStateChange((event, session) => {
+  if (event === 'PASSWORD_RECOVERY') { showResetScreen(); return; }
   if (!session && event !== 'INITIAL_SESSION' && !$('screen-app').hidden) {
     showLogin();
     const err=$('login-err');
@@ -1206,6 +1255,49 @@ $('login-form').addEventListener('submit', async e => {
   } else {
     const { data:{ session } } = await sb.auth.getSession();
     showApp(session.user);
+  }
+});
+
+// ── PASSWORD RESET ─────────────────────────────────────────────────
+$('forgot-link').addEventListener('click', showForgotScreen);
+$('back-to-login-link').addEventListener('click', showLogin);
+
+$('forgot-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn=$('forgot-btn'); btn.textContent='Sende…'; btn.disabled=true;
+  $('forgot-err').style.display='none'; $('forgot-ok').style.display='none';
+  const { error } = await sb.auth.resetPasswordForEmail($('fg-email').value.trim(), {
+    redirectTo: location.origin + location.pathname,
+  });
+  btn.textContent='Link senden'; btn.disabled=false;
+  if (error) {
+    $('forgot-err').textContent = error.message;
+    $('forgot-err').style.display='block';
+  } else {
+    $('forgot-ok').textContent = 'Falls ein Konto mit dieser E-Mail existiert, wurde ein Link zum Zurücksetzen gesendet.';
+    $('forgot-ok').style.display='block';
+  }
+});
+
+$('reset-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  $('reset-err').style.display='none';
+  const pw1=$('rs-pw1').value, pw2=$('rs-pw2').value;
+  if (pw1 !== pw2) {
+    $('reset-err').textContent='Passwörter stimmen nicht überein.';
+    $('reset-err').style.display='block';
+    return;
+  }
+  const btn=$('reset-btn'); btn.textContent='Speichere…'; btn.disabled=true;
+  const { error } = await sb.auth.updateUser({ password: pw1 });
+  btn.textContent='Passwort speichern'; btn.disabled=false;
+  if (error) {
+    $('reset-err').textContent = error.message;
+    $('reset-err').style.display='block';
+  } else {
+    toast('Passwort aktualisiert.', 'ok');
+    const { data:{ session } } = await sb.auth.getSession();
+    session ? showApp(session.user) : showLogin();
   }
 });
 
