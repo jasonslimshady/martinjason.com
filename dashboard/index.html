@@ -929,11 +929,13 @@
           <button type="button" class="btn btn--ghost btn--sm" id="btn-addlog-toggle">+ Weiteren Eintrag hinzufügen</button>
           <div id="mt-addlog-form" hidden style="display:flex;gap:.5rem;align-items:flex-end;margin-top:.625rem;flex-wrap:wrap">
             <div class="fg" style="flex:2;min-width:160px;margin:0"><label class="fl">Beschreibung</label><input class="fi" id="mt-addlog-desc" placeholder="Was hast du gemacht?" /></div>
+            <div class="fg" style="width:150px;margin:0"><label class="fl">Datum</label><input class="fi" id="mt-addlog-date" type="date" /></div>
             <div class="fg" style="width:80px;margin:0"><label class="fl">Std</label><input class="fi" id="mt-addlog-h" type="number" min="0" max="99" value="0" /></div>
             <div class="fg" style="width:80px;margin:0"><label class="fl">Min</label><input class="fi" id="mt-addlog-m" type="number" min="0" max="59" value="0" /></div>
             <button type="button" class="btn btn--primary btn--sm" id="btn-addlog-save">Hinzufügen</button>
             <button type="button" class="btn btn--ghost btn--sm" id="btn-addlog-cancel">Abbrechen</button>
           </div>
+          <p style="margin:.375rem 0 0;font-size:.75rem;color:var(--ink-s)">Weicht das Datum vom Eintrag ab, wird die Zeit auf den passenden Tag dieses Projekts gebucht (neuer Eintrag falls nötig) — sonst landet sie z.B. nicht unter „Heute“.</p>
         </div>
       </div>
       <div class="modal-ft">
@@ -1910,6 +1912,7 @@ function openTimeModal(entry = null) {
   $('mt-addlog-wrap').hidden = !entry;
   $('mt-addlog-form').hidden = true;
   $('mt-addlog-desc').value = '';
+  $('mt-addlog-date').value = today();
   $('mt-addlog-h').value = 0;
   $('mt-addlog-m').value = 0;
   openModal('ov-time');
@@ -1933,14 +1936,37 @@ $('btn-addlog-save').addEventListener('click', async () => {
   const mins = h*60 + m;
   if(!mins){ toast('Bitte eine Dauer angeben.','err'); return; }
   const desc = $('mt-addlog-desc').value.trim();
+  const dateStr = $('mt-addlog-date').value || today();
   const { data: existing, error: fetchErr } = await sb.from('time_entries').select('*').eq('id', editTimeEntryId).single();
   if(fetchErr || !existing){ toast('Fehler: Eintrag nicht gefunden.','err'); return; }
   const logEntry = { minutes: mins, manual: true, desc: desc || null };
-  const logs = Array.isArray(existing.time_logs) ? [...existing.time_logs, logEntry] : [logEntry];
-  const totalMins = (existing.duration_minutes||0) + mins;
-  const { error } = await sb.from('time_entries').update({ duration_minutes: totalMins, time_logs: logs }).eq('id', editTimeEntryId);
+
+  // If the added time happened on a different day than the entry being
+  // edited, don't fold it into that entry's date — it would silently
+  // vanish from "Heute"/"Diese Woche" (those filter by the entry's date
+  // column). Instead route it to that project's row for the given day,
+  // creating one if it doesn't exist yet.
+  let targetId = editTimeEntryId, targetExisting = existing;
+  if(dateStr !== existing.date){
+    const { data: sameDay } = await sb.from('time_entries').select('*')
+      .eq('project_id', existing.project_id).eq('date', dateStr).limit(1);
+    if(sameDay && sameDay.length){
+      targetId = sameDay[0].id; targetExisting = sameDay[0];
+    } else {
+      const { data: created, error: createErr } = await sb.from('time_entries').insert({
+        project_id: existing.project_id, client_id: existing.client_id,
+        date: dateStr, duration_minutes: 0, time_logs: [],
+      }).select().single();
+      if(createErr || !created){ toast('Fehler: '+(createErr?.message||'Eintrag konnte nicht angelegt werden.'),'err'); return; }
+      targetId = created.id; targetExisting = created;
+    }
+  }
+
+  const logs = Array.isArray(targetExisting.time_logs) ? [...targetExisting.time_logs, logEntry] : [logEntry];
+  const totalMins = (targetExisting.duration_minutes||0) + mins;
+  const { error } = await sb.from('time_entries').update({ duration_minutes: totalMins, time_logs: logs }).eq('id', targetId);
   if(error){ toast('Fehler: '+error.message,'err'); return; }
-  toast('Eintrag hinzugefügt — Gesamtdauer aktualisiert.','ok');
+  toast(targetId === editTimeEntryId ? 'Eintrag hinzugefügt — Gesamtdauer aktualisiert.' : `Eintrag hinzugefügt — auf ${fmtDate(dateStr)} gebucht.`,'ok');
   await reopenTimeModalFresh();
 });
 
