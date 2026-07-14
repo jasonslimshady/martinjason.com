@@ -2282,12 +2282,12 @@ async function loadProjectOverview() {
   }
 
   let { data, error } = await sb.from('time_entries')
-    .select('duration_minutes,date,project_id,projects(name,rate,rate_type,budget_hours,budget_start_day,color,clients(name,won_at))')
+    .select('duration_minutes,date,project_id,rate_override,projects(name,rate,rate_type,budget_hours,budget_start_day,color,clients(name,won_at))')
     .gte('date', from).lte('date', to);
   if(error){
     // "color"/"budget_start_day" may not be migrated on this database yet — never let that hide the overview itself.
     ({ data, error } = await sb.from('time_entries')
-      .select('duration_minutes,date,project_id,projects(name,rate,rate_type,budget_hours,clients(name,won_at))')
+      .select('duration_minutes,date,project_id,rate_override,projects(name,rate,rate_type,budget_hours,clients(name,won_at))')
       .gte('date', from).lte('date', to));
   }
   const entries = data || [];
@@ -2316,7 +2316,7 @@ async function loadProjectOverview() {
       budgetStartDay: p.budget_start_day || null,
       wonAt: p.clients?.won_at || null,
       color: p.color || null,
-      mins: 0
+      mins: 0, amount: 0
     };
   });
 
@@ -2343,9 +2343,14 @@ async function loadProjectOverview() {
       budgetStartDay: e.projects?.budget_start_day||null,
       wonAt: e.projects?.clients?.won_at||null,
       color: e.projects?.color||null,
-      mins: 0
+      mins: 0, amount: 0
     };
     map[pid].mins += e.duration_minutes || 0;
+    // An entry's own rate_override always wins over the project's default
+    // hourly rate — mirrors the per-entry calculation in the time entries
+    // list, so the project total actually matches the sum of its entries.
+    const effRate = e.rate_override != null ? e.rate_override : (map[pid].rateType === 'hourly' ? map[pid].rate : null);
+    if (effRate) map[pid].amount += (e.duration_minutes || 0) / 60 * effRate;
   });
   const projs = sortPtoProjects(Object.values(map));
   const c = $('pto-container');
@@ -2424,7 +2429,7 @@ async function loadProjectOverview() {
       rawPct = maxM > 0 ? Math.round(p.mins / maxM * 100) : 0;
       pct = rawPct;
     }
-    const earn = p.rateType === 'hourly' && p.rate ? fmtEur(p.mins / 60 * p.rate) : '';
+    const earn = p.rateType === 'hourly' && (p.rate || p.amount) ? fmtEur(p.amount || 0) : '';
     return { ...p, budgetMins, pct, rawPct, over, earn };
   });
 
@@ -2516,8 +2521,8 @@ function ptoRingSVG(pct, over, color) {
 // Projects without an hour budget have no % target — show the amount
 // earned so far instead (only meaningful for hourly-rate projects).
 function ptoCircleCenterLabel(p) {
-  if (!p.budgetMins && p.rateType === 'hourly' && p.rate) {
-    return { text: fmtEurShort(p.mins / 60 * p.rate), small: true };
+  if (!p.budgetMins && p.rateType === 'hourly' && (p.rate || p.amount)) {
+    return { text: fmtEurShort(p.amount || 0), small: true };
   }
   return { text: `${p.rawPct}%`, small: false };
 }
