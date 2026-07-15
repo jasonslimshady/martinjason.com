@@ -601,9 +601,9 @@
       <div class="sec-hd" style="margin-top:1.25rem">
         <span class="sec-ttl">Projektübersicht</span>
         <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
-          <button class="pto-btn active" data-pto="week">Diese Woche</button>
+          <button class="pto-btn active" data-pto="customer">Kundenzeitraum</button>
+          <button class="pto-btn" data-pto="week">Diese Woche</button>
           <button class="pto-btn" data-pto="month">Diesen Monat</button>
-          <button class="pto-btn" data-pto="customer">Kundenzeitraum</button>
           <button class="pto-btn" data-pto="total">Gesamt</button>
           <button class="pto-btn" data-pto="date">Datum</button>
           <button class="pto-btn" data-pto="range">Von – Bis</button>
@@ -2157,7 +2157,7 @@ async function loadTimeEntries(){
 }
 
 // ── PROJECT TIME OVERVIEW ──────────────────────────────────────────────
-let ptoFilter = 'week';
+let ptoFilter = 'customer';
 
 // Local Y-M-D string, built from local getters only (unlike toISOString(),
 // this can't shift the date backwards near midnight in UTC+ timezones).
