@@ -1912,7 +1912,7 @@ function openTimeModal(entry = null) {
   $('mt-addlog-wrap').hidden = !entry;
   $('mt-addlog-form').hidden = true;
   $('mt-addlog-desc').value = '';
-  $('mt-addlog-date').value = today();
+  $('mt-addlog-date').value = entry ? (entry.date || today()) : today();
   $('mt-addlog-h').value = 0;
   $('mt-addlog-m').value = 0;
   openModal('ov-time');
