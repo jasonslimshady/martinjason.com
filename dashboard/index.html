@@ -2707,8 +2707,7 @@ function renderRevenueChart(){
     .filter(i => i.status==='paid')
     .filter(i => !clientId || String(i.clients?.id)===clientId)
     .forEach(i => {
-      // prefer paid_at, fall back to invoice_date
-      const d = i.paid_at || i.invoice_date;
+      const d = i.invoice_date;
       if(!d) return;
       const dt = new Date(d);
       if(dt.getFullYear()===year) monthly[dt.getMonth()] += (i.total||0);
