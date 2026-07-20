@@ -286,110 +286,30 @@
                   box-shadow var(--dur-base) var(--ease-apple);
     }
 
-    /* 7b. HERO */
-    .hero {
-      position: relative;
-      height: 100vh;
-      overflow: hidden;
-    }
-    .hero__cta-bar {
-      position: absolute;
-      bottom: 5rem;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      justify-content: center;
-      z-index: 10;
-    }
-    .hero__cta-bar .btn--ghost {
-      background: var(--glass-bg);
-      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
-              backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
-      border-color: var(--glass-border);
-      box-shadow: var(--glass-shadow);
-    }
-    .hero__cta-bar .btn--ghost:hover {
-      background: var(--glass-bg-strong);
-    }
+    /* 7b. HERO SCROLL INDICATOR
+       ai-showcase is now the page's hero section (fullscreen sticky panel).
+       hero__scroll lives inside .ai-showcase__sticky, anchored to the same
+       bottom-of-viewport spot the old hero used. Its z-index sits below
+       .ai-showcase__prompt (z-index: 10) so the prompt box visually overruns
+       it once it slides up on scroll. */
     .hero__scroll {
-      position: absolute; 
+      position: absolute;
       bottom:1.5rem; left: 50%;
       width: 22px; height: 36px;
       border: 1px solid var(--color-border-strong);
       border-radius: 999px; transform: translateX(-50%);
       display: grid; place-items: center;
-      z-index: 10;
+      z-index: 4;
     }
     .hero__scroll span {
       display: block; width: 2px; height: 6px;
-      background: rgba(255,255,255,0.8); border-radius: 1px;
+      background: var(--color-ink-muted); border-radius: 1px;
       animation: scroll-hint 1.6s var(--ease-apple) infinite;
     }
     @keyframes scroll-hint {
       0% { transform: translateY(-6px); opacity: 0; }
       35% { opacity: 1; }
       100% { transform: translateY(8px); opacity: 0; }
-    }
-
-    /* 7c. HERO PARALLAX */
-    :root {
-      --px-max-move: 25px;
-      --px-bleed:    28px;
-    }
-
-    .parallax-layer--bg {
-      background: linear-gradient(to right,
-        #CDCAC3  0%,
-        #D1CCC6 36%,
-        #C1B8AF 63%,
-        #ABA398 85%,
-        #948A80 100%
-      );
-      -webkit-mask-image: linear-gradient(to bottom, black 0%, black 75%, transparent 90%);
-              mask-image: linear-gradient(to bottom, black 0%, black 75%, transparent 90%);
-    }
-
-    .hero__parallax {
-      position: absolute;
-      inset: 0;
-      overflow: hidden;
-    }
-
-    /* Each layer extends past the container on every side by --px-bleed.
-       That extra space lets translate3d shift the layer in any direction
-       without ever exposing a raw edge through the overflow clip.
-       ─────────────────────────────────────────────────────────────────
-       data-depth on each div controls how far it travels (0 = fixed,
-       1 = full --px-max-move). Edit those values in the HTML to retune
-       individual layers without touching this CSS. */
-    .parallax-layer {
-      position: absolute;
-      top:    calc(-1 * var(--px-bleed));
-      left:   calc(-1 * var(--px-bleed));
-      right:  calc(-1 * var(--px-bleed));
-      bottom: calc(-1 * var(--px-bleed));
-    }
-    /* Desktop only: JS mouse-parallax moves the layers, so promote them to
-       their own compositor layers. On mobile the layers are static — no
-       will-change means no GPU texture per layer. */
-    @media (min-width: 981px) {
-      .parallax-layer {
-        transform: translate3d(0, 0, 0);
-        will-change: transform;
-      }
-    }
-
-    .parallax-layer img {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      object-position: center center;
-      pointer-events: none;
-      user-select: none;
-      -webkit-user-drag: none;
     }
 
     /* 8. REVEAL — initial hidden state (prevents FOUC) */
@@ -459,32 +379,17 @@
       .hero__scroll span { animation: none; }
     }
 
-    /* RESPONSIVE — above-fold elements only.
-       Hero layers are static on mobile (no float animations, no JS parallax)
-       to keep GPU memory and compositing cost down. */
+    /* RESPONSIVE — above-fold elements only. */
     @media (max-width: 980px) {
       .nav__links { display: none; }
       .nav__cta { margin-left: auto; }
-      .hero { height: 90svh; margin-top: 0; }
-      .hero__cta-bar { bottom: 2.5rem; }
     }
     @media (max-width: 560px) {
       .nav__brand-name { display: block; font-size: 0.72rem; letter-spacing: -0.01em; }
-      .hero__cta-bar { bottom: 0.5rem; }
-      /* Allow scroll indicator to sit below the hero's bottom edge */
-      .hero { overflow: visible; }
+      /* Allow scroll indicator to sit below the ai-showcase sticky panel's bottom edge */
       .hero__scroll { bottom: -3rem; }
-      .hero__scroll span { background: var(--color-ink-muted); }
     }
   </style>
-
-  <!-- Parallax layers 3, 5 — preload so they render before JS kicks in.
-       media queries match the <picture> sources so each device only
-       downloads the variant it actually renders. -->
-  <link rel="preload" href="images/Homepage%20Header%20Parallax%20Images/3-headline.avif" as="image" type="image/avif" fetchpriority="high" media="(min-width: 981px)" />
-  <link rel="preload" href="images/Homepage%20Header%20Parallax%20Images/5-jason-freisteller.avif" as="image" type="image/avif" fetchpriority="high" media="(min-width: 981px)" />
-  <link rel="preload" href="images/Homepage%20Header%20Parallax%20Images%20Mobile/3-headline.avif" as="image" type="image/avif" fetchpriority="high" media="(max-width: 980px)" />
-  <link rel="preload" href="images/Homepage%20Header%20Parallax%20Images%20Mobile/5-jason-freisteller.avif" as="image" type="image/avif" fetchpriority="high" media="(max-width: 980px)" />
 
   <!-- Full stylesheet — non-render-blocking async load -->
   <link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -530,102 +435,12 @@
   <main id="top">
 
     <!-- ==================================================================
-         HERO — Fullscreen parallax
-         ================================================================== -->
-    <section class="hero">
-
-      <!-- Fullscreen parallax layer stack
-           data-depth: 0 = fixed, 1 = full --px-max-move.
-           Higher depth → travels farther (feels "closer to viewer").
-           Layer order: 1 = lowest (background), 9 = highest (foreground). -->
-      <div class="hero__parallax" id="heroParallax" aria-hidden="true">
-
-        <!-- Layer 1 — Hintergrund CSS-Verlauf, fixed -->
-        <div class="parallax-layer parallax-layer--bg" data-depth="0"></div>
-
-        <!-- Layer 2 — Windows decoration -->
-        <div class="parallax-layer" data-depth="0.2">
-          <picture>
-            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/2-windows.avif" type="image/avif">
-            <img src="images/Homepage%20Header%20Parallax%20Images/2-windows.avif" alt="" decoding="async" />
-          </picture>
-        </div>
-
-        <!-- Layer 3 — Headline "AI-COMMERCE DESIGN" -->
-        <div class="parallax-layer" data-depth="0.25">
-          <picture>
-            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/3-headline.avif" type="image/avif">
-            <img src="images/Homepage%20Header%20Parallax%20Images/3-headline.avif" alt="" fetchpriority="high" />
-          </picture>
-        </div>
-
-        <!-- Layer 4 — Folder "Material" -->
-        <div class="parallax-layer" data-depth="0.30">
-          <picture>
-            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/4-folder-material.avif" type="image/avif">
-            <img src="images/Homepage%20Header%20Parallax%20Images/4-folder-material.avif" alt="" decoding="async" />
-          </picture>
-        </div>
-
-        <!-- Layer 5 — Jason Freisteller (main subject) -->
-        <div class="parallax-layer" data-depth="0.20">
-          <picture>
-            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/5-jason-freisteller.avif" type="image/avif">
-            <img src="images/Homepage%20Header%20Parallax%20Images/5-jason-freisteller.avif" alt="" fetchpriority="high" />
-          </picture>
-        </div>
-
-        <!-- Layer 6 — "günstiger & besser" badge -->
-        <div class="parallax-layer" data-depth="0.55">
-          <picture>
-            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/6-gnstiger-besser.avif" type="image/avif">
-            <img src="images/Homepage%20Header%20Parallax%20Images/6-gnstiger-besser.avif" alt="" decoding="async" />
-          </picture>
-        </div>
-
-        <!-- Layer 7 — Folder "AI Generated" -->
-        <div class="parallax-layer" data-depth="0.65">
-          <picture>
-            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/7-folder-ai-generated.avif" type="image/avif">
-            <img src="images/Homepage%20Header%20Parallax%20Images/7-folder-ai-generated.avif" alt="" decoding="async" />
-          </picture>
-        </div>
-
-        <!-- Layer 8 — Transition overlay, fixed -->
-        <div class="parallax-layer" data-depth="0">
-          <picture>
-            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/8-transition.avif" type="image/avif">
-            <img src="images/Homepage%20Header%20Parallax%20Images/8-transition.avif" alt="" decoding="async" />
-          </picture>
-        </div>
-
-        <!-- Layer 9 — Zitat -->
-        <div class="parallax-layer" data-depth="0.6">
-          <picture>
-            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/9-zitat.avif" type="image/avif">
-            <img src="images/Homepage%20Header%20Parallax%20Images/9-zitat.avif" alt="" decoding="async" />
-          </picture>
-        </div>
-
-      </div><!-- /.hero__parallax -->
-
-      <!-- CTA buttons — below the visible image composition -->
-      <div class="hero__cta-bar">
-        <a class="btn btn--ghost" href="#work">Galerien ansehen</a>
-        <a class="btn btn--primary glass-btn" href="#contact">
-          Kostenloses Erstgespräch
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-        </a>
-      </div>
-
-      <a class="hero__scroll" href="#services" aria-label="Weiter scrollen">
-        <span></span>
-      </a>
-    </section>
-
-    <!-- ==================================================================
          AI SHOWCASE — Lovart-style sticky scroll (light theme)
-         Centered portrait → prompt types in → 4 results appear left-to-right
+         Now the page's hero section. Centered portrait → prompt types in →
+         4 results appear left-to-right. hero__scroll lives inside the sticky
+         panel, at the same bottom-of-viewport spot the old hero used, and
+         sits below .ai-showcase__prompt in z-index so the prompt visually
+         overruns it once it slides up on scroll.
          ================================================================== -->
     <section id="ai-process" class="ai-showcase">
       <div class="ai-showcase__sticky">
@@ -736,6 +551,9 @@
           </div><!-- /.ai-showcase__composition -->
         </div><!-- /.ai-showcase__stage -->
 
+        <a class="hero__scroll" href="#services" aria-label="Weiter scrollen">
+          <span></span>
+        </a>
       </div><!-- /.ai-showcase__sticky -->
     </section>
 
@@ -1198,158 +1016,6 @@
         cards[i].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
       });
     });
-  })();
-  </script>
-
-  <!-- ====================================================================
-       Hero Parallax
-       ==================================================================== -->
-  <script>
-  (function () {
-    'use strict';
-
-    // ╔═══════════════════════════════════════════════════════════════════════╗
-    // ║  PARALLAX CONFIGURATION — all tunable values live here.              ║
-    // ║  No need to touch anything below the closing ═══ line.               ║
-    // ╠═══════════════════════════════════════════════════════════════════════╣
-    var CONFIG = {
-
-      // ── DESKTOP (mouse-driven) ────────────────────────────────────────────
-      maxMove:    25,   // px — Max layer shift when the mouse reaches the viewport edge.
-                        //      Match (or keep ≤) the --px-bleed CSS variable.
-                        //      Raise for more drama, lower for subtlety.
-
-      smoothing: 0.07,  // 0–1 — Lerp factor (animation springiness) per frame.
-                        //      0.04 = very buttery/slow, 0.15 = snappy/fast.
-
-      // ── MOBILE (scroll-driven) ────────────────────────────────────────────
-      mobileMaxMove: 15,      // px — Max layer shift from scroll on mobile.
-      mobileSmoothingFactor: 0.09, // Lerp factor on mobile scroll.
-
-      // ── GENERAL ──────────────────────────────────────────────────────────
-      mobileBreakpoint: 980,  // px — Must match the CSS @media breakpoint above.
-    };
-    // ╚═══════════════════════════════════════════════════════════════════════╝
-
-    // ── Grab elements ────────────────────────────────────────────────────────
-    var parallaxEl = document.getElementById('heroParallax');
-    if (!parallaxEl) return;
-
-    var layers = Array.from(parallaxEl.querySelectorAll('.parallax-layer'));
-    if (!layers.length) return;
-
-    // Read each layer's depth from its data-depth attribute (0 = fixed, 1 = full maxMove)
-    var depths = layers.map(function (l) {
-      return parseFloat(l.dataset.depth) || 0;
-    });
-
-    // ── Bail out if the user prefers reduced motion ──────────────────────────
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    // ── State ────────────────────────────────────────────────────────────────
-    var targetX  = 0, targetY  = 0;   // Where we want to be
-    var currentX = 0, currentY = 0;   // Where we are now (lerped)
-    // isMobile is read lazily inside the first rAF — avoids forced reflow
-    // when layout is still dirty from parsing/style application.
-    var isMobile = false; // updated in first wake() before any layout reads
-
-    // ── Helpers ──────────────────────────────────────────────────────────────
-    function lerp(a, b, t) { return a + (b - a) * t; }
-
-    // Apply translate3d to every layer based on current interpolated position.
-    // currentX / currentY are in the -1..+1 range; multiply by maxMove for pixels.
-    // On mobile, CSS float animations handle the layers — JS must not interfere.
-    function applyTransforms(cx, cy) {
-      if (isMobile) return;
-      var maxMove = CONFIG.maxMove;
-      for (var i = 0; i < layers.length; i++) {
-        var d = depths[i];
-        if (d === 0) continue; // Layer 1 is always fixed — skip it
-        var tx = cx * maxMove * d;
-        var ty = cy * maxMove * d;
-        layers[i].style.transform = 'translate3d(' + tx.toFixed(2) + 'px, ' + ty.toFixed(2) + 'px, 0)';
-      }
-    }
-
-    // ── Animation loop ───────────────────────────────────────────────────────
-    // Idles when nothing is moving — cancels rAF to free the main thread.
-    var IDLE_THRESHOLD = 0.01;
-    var rafId = null;       // Track the pending rAF so we can cancel it
-    var isRunning = false;  // Guard against double-starting the loop
-    var isVisible = true;   // Controlled by IntersectionObserver
-
-    function tick() {
-      rafId = null;
-      // Read layout properties at the TOP of the rAF — layout is clean here.
-      isMobile = window.innerWidth <= CONFIG.mobileBreakpoint;
-      var s = isMobile ? CONFIG.mobileSmoothingFactor : CONFIG.smoothing;
-      currentX = lerp(currentX, targetX, s);
-      currentY = lerp(currentY, targetY, s);
-
-      var stillMoving =
-        Math.abs(currentX - targetX) > IDLE_THRESHOLD ||
-        Math.abs(currentY - targetY) > IDLE_THRESHOLD ||
-        Math.abs(currentX)            > IDLE_THRESHOLD ||
-        Math.abs(currentY)            > IDLE_THRESHOLD;
-
-      if (stillMoving) {
-        applyTransforms(currentX, currentY);
-        rafId = requestAnimationFrame(tick); // Only re-queue while moving
-      } else {
-        isRunning = false; // Loop goes idle — no rAF queued
-      }
-    }
-
-    // Wake the loop when an input event arrives (if not already running).
-    function wake() {
-      if (!isRunning && isVisible) {
-        isRunning = true;
-        rafId = requestAnimationFrame(tick);
-      }
-    }
-
-    // ── DESKTOP: Mouse moves anywhere on the page ────────────────────────────
-    document.addEventListener('mousemove', function (e) {
-      if (isMobile) return;
-      // Read layout before writing — no forced reflow
-      var vw = window.innerWidth;
-      var vh = window.innerHeight;
-      targetX = (e.clientX - vw / 2) / (vw / 2);
-      targetY = (e.clientY - vh / 2) / (vh / 2);
-      wake();
-    }, { passive: true });
-
-    // When the mouse leaves the page, spring layers back to centre
-    document.addEventListener('mouseleave', function () {
-      if (isMobile) return;
-      targetX = 0;
-      targetY = 0;
-      wake();
-    });
-
-    // ── Handle viewport resize (e.g. orientation change) ─────────────────────
-    window.addEventListener('resize', function () {
-      isMobile = window.innerWidth <= CONFIG.mobileBreakpoint;
-      if (isMobile) { targetX = 0; targetY = 0; }
-      wake();
-    }, { passive: true });
-
-    // ── IntersectionObserver — pause rAF when hero is off-screen ────────────
-    if ('IntersectionObserver' in window) {
-      new IntersectionObserver(function (entries) {
-        isVisible = entries[0].isIntersecting;
-        if (!isVisible) {
-          if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
-          isRunning = false;
-        } else {
-          wake();
-        }
-      }, { threshold: 0 }).observe(parallaxEl);
-    }
-
-    // ── Fire ─────────────────────────────────────────────────────────────────
-    wake(); // Start the loop for the first frame (desktop only; mobile uses CSS animations)
-
   })();
   </script>
 
