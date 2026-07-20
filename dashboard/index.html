@@ -624,6 +624,7 @@
         <span class="sec-ttl" id="time-sec-ttl">Letzte Einträge</span>
         <div style="display:flex;gap:.5rem">
           <button class="btn btn--ghost btn--sm" id="btn-pto-clear-filter" title="Projekt-Filter entfernen" hidden>Alle</button>
+          <button class="btn btn--ghost btn--sm" id="btn-filter-uninvoiced" title="Nur noch offene (nicht fakturierte) Zeiteinträge anzeigen">Nicht fakturiert</button>
           <button class="btn btn--ghost btn--sm" id="btn-manage-proj">Projekte verwalten</button>
           <button class="btn btn--ghost btn--sm" id="btn-new-proj">+ Neues Projekt</button>
           <button class="btn btn--ghost btn--sm" id="btn-manual">+ Manuell</button>
@@ -2076,10 +2077,14 @@ async function saveManualTime(e){
 }
 
 async function loadTimeEntries(){
-  let { data, error } = await sb.from('time_entries').select('*,projects(name,color,rate,rate_type)').order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30);
+  let baseQ = sb.from('time_entries').select('*,projects(name,color,rate,rate_type)').order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30);
+  if(ptoOnlyUninvoiced) baseQ = baseQ.eq('is_invoiced', false);
+  let { data, error } = await baseQ;
   if(error){
     // "color" may not be migrated on this database yet — never let that hide the list itself.
-    ({ data, error } = await sb.from('time_entries').select('*,projects(name,rate,rate_type)').order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30));
+    let fallbackQ = sb.from('time_entries').select('*,projects(name,rate,rate_type)').order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30);
+    if(ptoOnlyUninvoiced) fallbackQ = fallbackQ.eq('is_invoiced', false);
+    ({ data, error } = await fallbackQ);
   }
   // Heute/Diese Woche come from a dedicated (unlimited) query over the
   // current calendar week (Mo–So, dashboard timezone) — previously they
@@ -2095,21 +2100,26 @@ async function loadTimeEntries(){
   // overview above, while the Heute/Diese Woche totals stay global.
   let list = data||[];
   if(ptoSelectedProjectId){
-    let filtered = await sb.from('time_entries').select('*,projects(name,color,rate,rate_type)').eq('project_id', ptoSelectedProjectId).order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30);
+    let projQ = sb.from('time_entries').select('*,projects(name,color,rate,rate_type)').eq('project_id', ptoSelectedProjectId).order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30);
+    if(ptoOnlyUninvoiced) projQ = projQ.eq('is_invoiced', false);
+    let filtered = await projQ;
     if(filtered.error){
-      filtered = await sb.from('time_entries').select('*,projects(name,rate,rate_type)').eq('project_id', ptoSelectedProjectId).order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30);
+      let fallbackProjQ = sb.from('time_entries').select('*,projects(name,rate,rate_type)').eq('project_id', ptoSelectedProjectId).order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30);
+      if(ptoOnlyUninvoiced) fallbackProjQ = fallbackProjQ.eq('is_invoiced', false);
+      filtered = await fallbackProjQ;
     }
     list = filtered.data || [];
   }
 
+  const ttlSuffix = [ptoSelectedProjectId ? ptoSelectedProjectName||'' : null, ptoOnlyUninvoiced ? 'nicht fakturiert' : null].filter(Boolean).join(' · ');
   const ttlEl = $('time-sec-ttl');
-  if(ttlEl) ttlEl.textContent = ptoSelectedProjectId ? `Letzte Einträge — ${ptoSelectedProjectName||''}` : 'Letzte Einträge';
+  if(ttlEl) ttlEl.textContent = ttlSuffix ? `Letzte Einträge — ${ttlSuffix}` : 'Letzte Einträge';
   const clearBtn = $('btn-pto-clear-filter');
   if(clearBtn) clearBtn.hidden = !ptoSelectedProjectId;
 
   const tbody=$('time-body');
   if(!list.length){
-    const emptyTtl = ptoSelectedProjectId ? 'Keine Einträge für dieses Projekt' : 'Noch keine Zeiteinträge';
+    const emptyTtl = ptoOnlyUninvoiced ? 'Keine offenen Zeiteinträge' : (ptoSelectedProjectId ? 'Keine Einträge für dieses Projekt' : 'Noch keine Zeiteinträge');
     const emptySub = ptoSelectedProjectId ? 'Klicke „Alle“, um wieder alle Einträge zu sehen.' : 'Starte den Timer oder erfasse manuell.';
     tbody.innerHTML=`<tr><td colspan="7"><div class="empty-st"><p class="empty-ttl">${emptyTtl}</p><p class="empty-sub">${emptySub}</p></div></td></tr>`; return;
   }
@@ -2557,6 +2567,7 @@ $('pto-view-circle').addEventListener('click', () => { ptoViewType = 'circle'; l
 // Einträge" down to just that project's entries; "Alle" clears it again.
 let ptoSelectedProjectId = null;
 let ptoSelectedProjectName = null;
+let ptoOnlyUninvoiced = false;
 
 function selectPtoProject(id, name) {
   ptoSelectedProjectId = id;
@@ -2579,6 +2590,14 @@ function clearPtoProjectFilter() {
 }
 
 $('btn-pto-clear-filter').addEventListener('click', clearPtoProjectFilter);
+
+$('btn-filter-uninvoiced').addEventListener('click', () => {
+  ptoOnlyUninvoiced = !ptoOnlyUninvoiced;
+  const btn = $('btn-filter-uninvoiced');
+  btn.classList.toggle('btn--primary', ptoOnlyUninvoiced);
+  btn.classList.toggle('btn--ghost', !ptoOnlyUninvoiced);
+  loadTimeEntries();
+});
 
 document.querySelectorAll('.pto-btn').forEach(btn =>
   btn.addEventListener('click', () => {
@@ -3026,6 +3045,14 @@ async function getInvoicePdfUrl(path){
   return data.signedUrl;
 }
 
+// Flags (or unflags) the time entries linked to an invoice's positions as
+// "Fakturiert" — called when the invoice transitions into/out of "paid".
+async function markInvoiceTimeEntriesInvoiced(invoiceId, invoiced){
+  const { data: items } = await sb.from('invoice_items').select('time_entry_ids').eq('invoice_id', invoiceId);
+  const ids = Array.from(new Set((items||[]).flatMap(it=>it.time_entry_ids||[])));
+  if(ids.length) await sb.from('time_entries').update({is_invoiced:invoiced}).in('id', ids);
+}
+
 async function saveInvoiceEdit(id){
   const clientId = $('ie-client')?.value;
   const total    = parseFloat($('ie-total')?.value)||0;
@@ -3035,6 +3062,11 @@ async function saveInvoiceEdit(id){
   const paidAt   = status==='paid' ? ($('ie-paid-at')?.value || null) : null;
   const btn = $('inv-edit-save-btn');
   btn.disabled=true; btn.textContent='Speichern…';
+
+  // Needed to detect a transition into/out of "paid" so linked time entries
+  // can be (un)flagged as Fakturiert accordingly.
+  const { data: prevInv } = await sb.from('invoices').select('status').eq('id', id).single();
+  const prevStatus = prevInv?.status;
 
   let pdfUrl = null;
   const pdfInput = $('ie-pdf');
@@ -3067,9 +3099,11 @@ async function saveInvoiceEdit(id){
   const { error } = await sb.from('invoices').update(payload).eq('id', id);
   btn.disabled=false; btn.textContent='Speichern';
   if(error){ toast('Fehler: '+error.message,'err'); return; }
+  if(status==='paid' && prevStatus!=='paid') await markInvoiceTimeEntriesInvoiced(id, true);
+  else if(status!=='paid' && prevStatus==='paid') await markInvoiceTimeEntriesInvoiced(id, false);
   closeModal('ov-inv-edit');
   toast('Rechnung aktualisiert.','ok');
-  loadInvoices(); loadStats();
+  loadInvoices(); loadStats(); loadTimeEntries();
 }
 
 async function deleteInvoice(id, num){
@@ -3402,7 +3436,8 @@ async function loadInvTimeEntries(){
     list.map(e=>{
       // An entry's own rate_override always wins over the project's rate.
       const effRate = e.rate_override != null ? e.rate_override : (e.projects?.rate || 0);
-      return `<div class="te-row${invSelectedTEs.includes(e.id)?' checked':''}" data-id="${e.id}" data-mins="${e.duration_minutes}" data-proj="${esc(e.projects?.name||'')}" data-rate="${effRate}">
+      const rowDesc = `${e.description||e.projects?.name||'Arbeit'} — ${fmtDate(e.date)} · ${fmtDur(e.duration_minutes)}`;
+      return `<div class="te-row${invSelectedTEs.includes(e.id)?' checked':''}" data-id="${e.id}" data-mins="${e.duration_minutes}" data-proj="${esc(e.projects?.name||'')}" data-rate="${effRate}" data-desc="${esc(rowDesc)}">
       <div class="te-check">✓</div>
       <div style="flex:1"><div style="font-size:.875rem">${esc(e.description||e.projects?.name||'Arbeit')}</div><div style="font-size:.75rem;color:var(--ink-s)">${fmtDate(e.date)} · ${fmtDur(e.duration_minutes)}</div></div>
       <div style="font-size:.875rem;font-weight:600">${fmtEur((e.duration_minutes/60)*effRate)}</div>
@@ -3446,17 +3481,14 @@ $('inv-next-btn').addEventListener('click', async ()=>{
     const teKey=JSON.stringify([...invSelectedTEs].sort());
     if(invSelectedTEs.length>0 && teKey!==invLiKey){
       const rows=document.querySelectorAll('.te-row.checked');
-      const grouped={};
-      rows.forEach(r=>{
-        const proj=r.dataset.proj||'Arbeit';
+      // One position per selected time entry (still editable in step 2), not
+      // merged/summed — each keeps a teId so it can be linked to its source
+      // time entry when saved and marked "Fakturiert" once the invoice is paid.
+      invLineItems=Array.from(rows).map(r=>{
         const mins=parseInt(r.dataset.mins)||0;
         const rate=parseFloat(r.dataset.rate)||0;
-        // Summed as amount (not mins × a single group rate), so entries with
-        // a per-entry rate_override are billed correctly within the group.
-        if(!grouped[proj]) grouped[proj]={desc:proj,amount:0};
-        grouped[proj].amount+=(mins/60)*rate;
+        return { desc:r.dataset.desc||r.dataset.proj||'Arbeit', amount:parseFloat(((mins/60)*rate).toFixed(2)), teId:r.dataset.id };
       });
-      invLineItems=Object.values(grouped).map(g=>({ desc:g.desc, amount:parseFloat(g.amount.toFixed(2)) }));
       invLiKey=teKey;
     }
     if(!invLineItems.length) invLineItems=[{desc:'',amount:0}];
@@ -3485,13 +3517,13 @@ async function saveInvoice(){
     notes,
   }).select().single();
   if(error){ toast('Fehler: '+error.message,'err'); return; }
-  // Save line items (amount only; quantity fixed at 1, no "Menge")
-  const liPayload=invLineItems.map((li,i)=>({ invoice_id:inv.id, description:li.desc, quantity:1, unit_price:Number(li.amount)||0, total:Number(li.amount)||0, sort_order:i }));
+  // Save line items (amount only; quantity fixed at 1, no "Menge"). Positions
+  // generated from a time entry keep the link via time_entry_ids so the
+  // entry can be flagged "Fakturiert" once the invoice is marked paid.
+  const liPayload=invLineItems.map((li,i)=>({ invoice_id:inv.id, description:li.desc, quantity:1, unit_price:Number(li.amount)||0, total:Number(li.amount)||0, sort_order:i, time_entry_ids: li.teId ? [li.teId] : [] }));
   await sb.from('invoice_items').insert(liPayload);
   // Remember the billing address for this client for next time.
   if(invClientId && invBillTo){ try{ localStorage.setItem(billToKey(invClientId), invBillTo); }catch(e){} }
-  // Mark time entries as invoiced
-  if(invSelectedTEs.length) await sb.from('time_entries').update({is_invoiced:true}).in('id',invSelectedTEs);
   closeModal('ov-invoice');
   toast('Rechnung als Entwurf gespeichert.','ok');
   loadInvoices(); loadStats(); loadTimeEntries();
