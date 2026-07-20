@@ -448,6 +448,22 @@
   opacity: 1;
 }
 
+/* Glass stat box below each result frame — highlights the one metric that card proves.
+   Combine with the .glass utility class in markup for background/blur/border/shadow. */
+.ai-result__stat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: clamp(0.8rem, 1vw, 0.95rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .ai-result__frame img { transition: none; }
