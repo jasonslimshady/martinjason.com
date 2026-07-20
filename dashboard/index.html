@@ -989,7 +989,8 @@
     <div class="inv-steps" id="inv-steps" style="flex-shrink:0">
       <div class="inv-step active" data-s="1"><span class="inv-step-num">1</span>Kunde & Zeit</div>
       <div class="inv-step" data-s="2"><span class="inv-step-num">2</span>Positionen</div>
-      <div class="inv-step" data-s="3"><span class="inv-step-num">3</span>Vorschau & Senden</div>
+      <div class="inv-step" data-s="3"><span class="inv-step-num">3</span>Bankdaten</div>
+      <div class="inv-step" data-s="4"><span class="inv-step-num">4</span>Vorschau & Senden</div>
     </div>
     <div style="flex:1;overflow-y:auto;padding:1.375rem" id="inv-step-body"></div>
     <div class="modal-ft" style="flex-shrink:0" id="inv-step-ft">
@@ -3394,10 +3395,14 @@ async function viewInvoice(id){
   openInvoicePreviewModal(inv);
 }
 
-// ── INVOICE BUILDER (3 steps) ─────────────────────────────────────────
+// ── INVOICE BUILDER (4 steps) ─────────────────────────────────────────
 let invStep=1, invClientId=null, invSelectedTEs=[], invLineItems=[], invClients=[];
 let invBillTo=null, invBillingPeriod=null, invDue=null;
 let invLiKey=null; // key of the TE selection the current line items were generated from
+let invBank=null; // per-invoice bank override ({bank,accName,iban,bic}) — null = use company defaults
+// Set while re-editing an existing draft instead of creating a new invoice;
+// null means "creating a new invoice". Number/date are preserved as-is.
+let invEditingId=null, invEditingNumber=null, invEditingDate=null;
 
 // Build the "Billed to" block from the client record (company, name,
 // postal address, optional VAT id) — matches the PDF layout. A hand-typed
@@ -3420,7 +3425,9 @@ function defaultBillingPeriod(){
 
 $('btn-new-invoice').addEventListener('click', async ()=>{
   invStep=1; invClientId=null; invSelectedTEs=[]; invLineItems=[]; invLiKey=null;
-  invBillTo=null; invBillingPeriod=null; invDue=null;
+  invBillTo=null; invBillingPeriod=null; invDue=null; invBank=null;
+  invEditingId=null; invEditingNumber=null; invEditingDate=null;
+  $('inv-modal-title').textContent='Neue Rechnung';
   // Load clients for step 1
   const { data }=await sb.from('clients').select('id,name,company,email,address,vat_id').eq('is_active_client',true).order('name');
   invClients=data||[];
@@ -3436,7 +3443,7 @@ async function renderInvStep(){
     else if(n<invStep) s.classList.add('done');
   });
   $('inv-back-btn').hidden = invStep===1;
-  $('inv-next-btn').textContent = invStep===3 ? 'Als Entwurf speichern' : 'Weiter →';
+  $('inv-next-btn').textContent = invStep===4 ? (invEditingId ? 'Entwurf aktualisieren' : 'Als Entwurf speichern') : 'Weiter →';
   const body=$('inv-step-body');
 
   if(invStep===1){
@@ -3501,18 +3508,49 @@ async function renderInvStep(){
   }
 
   if(invStep===3){
+    // Optional per-invoice bank details override — only applied to this
+    // invoice, the default account in the settings stays untouched.
+    const b = invBank || { bank:companySettings.bank||'', accName:companySettings.accName||'', iban:companySettings.iban||'', bic:companySettings.bic||'' };
+    const overriding = !!invBank;
+    body.innerHTML=`
+      <div class="fg">
+        <label class="fl" style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-weight:600">
+          <input type="checkbox" id="inv-bank-override-chk" ${overriding?'checked':''} />
+          Abweichende Bankdaten nur für diese Rechnung verwenden
+        </label>
+        <span style="font-size:.75rem;color:var(--ink-s)">Ohne Häkchen wird die Standard-Bankverbindung aus den Rechnungseinstellungen verwendet.</span>
+      </div>
+      <div class="g2" id="inv-bank-fields" style="margin-top:.75rem">
+        <div class="fg s2"><label class="fl">Bank (Name &amp; Adresse)</label><textarea class="fi" id="inv-bank-bank" rows="2" ${overriding?'':'disabled'}>${esc(b.bank)}</textarea></div>
+        <div class="fg"><label class="fl">Kontoinhaber</label><input class="fi" id="inv-bank-accname" value="${esc(b.accName)}" ${overriding?'':'disabled'} /></div>
+        <div class="fg"><label class="fl">IBAN</label><input class="fi" id="inv-bank-iban" value="${esc(b.iban)}" ${overriding?'':'disabled'} /></div>
+        <div class="fg"><label class="fl">BIC</label><input class="fi" id="inv-bank-bic" value="${esc(b.bic)}" ${overriding?'':'disabled'} /></div>
+      </div>`;
+    $('inv-bank-override-chk').addEventListener('change', e=>{
+      invBank = e.target.checked ? {...b} : null;
+      renderInvStep();
+    });
+    if(overriding){
+      $('inv-bank-bank').addEventListener('input', e=>{ invBank.bank=e.target.value; });
+      $('inv-bank-accname').addEventListener('input', e=>{ invBank.accName=e.target.value; });
+      $('inv-bank-iban').addEventListener('input', e=>{ invBank.iban=e.target.value; });
+      $('inv-bank-bic').addEventListener('input', e=>{ invBank.bic=e.target.value; });
+    }
+  }
+
+  if(invStep===4){
     // Preview — exactly what will be saved / printed
-    const invNum=await nextInvoiceNumber();
+    const invNum = invEditingId ? invEditingNumber : await nextInvoiceNumber();
+    const invDate = invEditingId ? invEditingDate : today();
     const subtotal=invLineItems.reduce((s,i)=>s+(Number(i.amount)||0),0);
     const total=subtotal;
     const client=invClients.find(c=>c.id===invClientId)||{};
-    const notes=invMetaToNotes({ billing_period:invBillingPeriod, bill_to:invBillTo });
-    const fakeInv={ invoice_number:invNum, invoice_date:today(), due_date:invDue||'',
+    const notes=invMetaToNotes({ billing_period:invBillingPeriod, bill_to:invBillTo, bank_override:invBank });
+    const fakeInv={ invoice_number:invNum, invoice_date:invDate, due_date:invDue||'',
       subtotal, tax_rate:0, tax_amount:0, total, notes,
       clients:client, invoice_items:invLineItems.map((li,i)=>({ description:li.desc, quantity:1, unit_price:Number(li.amount)||0, total:Number(li.amount)||0, sort_order:i })) };
     body.innerHTML=buildInvoiceHTML(fakeInv);
-    $('inv-next-btn').textContent='Als Entwurf speichern';
-    body.dataset.invNum=invNum; body.dataset.subtotal=subtotal; body.dataset.total=total;
+    body.dataset.invNum=invNum; body.dataset.invDate=invDate; body.dataset.subtotal=subtotal; body.dataset.total=total;
   }
 }
 
@@ -3585,6 +3623,8 @@ $('inv-next-btn').addEventListener('click', async ()=>{
   } else if(invStep===2){
     invStep=3; renderInvStep();
   } else if(invStep===3){
+    invStep=4; renderInvStep();
+  } else if(invStep===4){
     await saveInvoice();
   }
 });
@@ -3595,16 +3635,28 @@ async function saveInvoice(){
   const body=$('inv-step-body');
   const client=invClients.find(c=>c.id===invClientId)||{};
   const invNum=body.dataset.invNum;
+  const invDate=body.dataset.invDate;
   const subtotal=parseFloat(body.dataset.subtotal)||0;
   const total=parseFloat(body.dataset.total)||0;
-  // Billed-to address + billing period are snapshotted into notes (JSON).
-  const notes=invMetaToNotes({ billing_period:invBillingPeriod, bill_to:invBillTo });
-  const { data:inv, error }=await sb.from('invoices').insert({
-    client_id:invClientId, invoice_number:invNum,
-    invoice_date:today(), due_date:invDue||null,
-    status:'draft', subtotal, tax_rate:0, tax_amount:0, total,
-    notes,
-  }).select().single();
+  // Billed-to address + billing period + per-invoice bank override are
+  // snapshotted into notes (JSON).
+  const notes=invMetaToNotes({ billing_period:invBillingPeriod, bill_to:invBillTo, bank_override:invBank });
+  const isEdit = !!invEditingId;
+
+  let inv, error;
+  if(isEdit){
+    ({ data:inv, error } = await sb.from('invoices')
+      .update({ client_id:invClientId, invoice_number:invNum, invoice_date:invDate, due_date:invDue||null, subtotal, tax_rate:0, tax_amount:0, total, notes })
+      .eq('id', invEditingId).select().single());
+    if(!error) await sb.from('invoice_items').delete().eq('invoice_id', invEditingId);
+  } else {
+    ({ data:inv, error } = await sb.from('invoices').insert({
+      client_id:invClientId, invoice_number:invNum,
+      invoice_date:invDate, due_date:invDue||null,
+      status:'draft', subtotal, tax_rate:0, tax_amount:0, total,
+      notes,
+    }).select().single());
+  }
   if(error){ toast('Fehler: '+error.message,'err'); return; }
   // Save line items (amount only; quantity fixed at 1, no "Menge"). Positions
   // generated from a time entry keep the link via time_entry_ids so the
@@ -3613,8 +3665,9 @@ async function saveInvoice(){
   await sb.from('invoice_items').insert(liPayload);
   // Remember the billing address for this client for next time.
   if(invClientId && invBillTo){ try{ localStorage.setItem(billToKey(invClientId), invBillTo); }catch(e){} }
+  invEditingId=null; invEditingNumber=null; invEditingDate=null;
   closeModal('ov-invoice');
-  toast('Rechnung als Entwurf gespeichert.','ok');
+  toast(isEdit ? 'Rechnungsentwurf aktualisiert.' : 'Rechnung als Entwurf gespeichert.','ok');
   loadInvoices(); loadStats(); loadTimeEntries();
   openInvoicePreviewModal({...inv, clients:client, invoice_items:liPayload});
 }
@@ -3630,9 +3683,10 @@ async function openInvoicePreviewModal(inv){
         <button class="btn btn--ghost btn--sm" onclick="closeModal('${id}')">Schließen</button>
         <button class="btn btn--ghost btn--sm" id="inv-refresh-client-btn" title="Kundendaten (Adresse / USt-IdNr.) neu aus dem Kundenprofil übernehmen" hidden>🔄 Kundendaten</button>
         <button class="btn btn--ghost btn--sm" id="inv-refresh-date-btn" title="Rechnungsdatum & -nummer auf das heutige Datum setzen" hidden>📅 Datum heute</button>
+        <button class="btn btn--ghost btn--sm" id="inv-edit-draft-btn" title="Diesen Rechnungsentwurf erneut bearbeiten (Positionen, Bankdaten, …)" hidden>✎ Entwurf bearbeiten</button>
         <button class="btn btn--danger btn--sm" id="inv-delete-draft-btn" title="Diesen Rechnungsentwurf löschen" hidden>🗑 Entwurf löschen</button>
         <button class="btn btn--ghost btn--sm" id="inv-print-btn" onclick="printInvoice()">🖨 PDF drucken</button>
-        <button class="btn btn--accent btn--sm" id="inv-send-gmail-btn">✉ Per Gmail senden</button>
+        <button class="btn btn--accent btn--sm" id="inv-send-gmail-btn">Per Gmail senden</button>
       </div></div>`;
     document.body.appendChild(ov);
     ov.addEventListener('click',e=>{ if(e.target===ov) closeModal(id); });
@@ -3640,11 +3694,12 @@ async function openInvoicePreviewModal(inv){
   ov.querySelector('.modal-ttl').textContent = `Rechnung ${inv.invoice_number||''}`;
   currentPreviewInv=inv;
 
-  // Draft-only actions: re-pull client data, stamp today's date, or delete.
+  // Draft-only actions: re-pull client data, stamp today's date, re-edit, or delete.
   const isDraft = !inv.status || inv.status==='draft';
-  const rcBtn = $('inv-refresh-client-btn'), rdBtn = $('inv-refresh-date-btn'), delBtn = $('inv-delete-draft-btn');
+  const rcBtn = $('inv-refresh-client-btn'), rdBtn = $('inv-refresh-date-btn'), edBtn = $('inv-edit-draft-btn'), delBtn = $('inv-delete-draft-btn');
   if(rcBtn){ rcBtn.hidden = !isDraft; rcBtn.onclick = refreshInvoiceClientData; }
   if(rdBtn){ rdBtn.hidden = !isDraft; rdBtn.onclick = refreshInvoiceDate; }
+  if(edBtn){ edBtn.hidden = !isDraft; edBtn.onclick = ()=>editInvoiceDraft(inv); }
   if(delBtn){ delBtn.hidden = !isDraft; delBtn.onclick = ()=>deleteInvoice(inv.id, inv.invoice_number); }
 
   const oldPdfBtn = document.getElementById('invprev-pdf-btn');
@@ -3679,6 +3734,46 @@ async function openInvoicePreviewModal(inv){
   }
 
   document.getElementById('inv-send-gmail-btn').onclick=()=>sendViaGmail(inv);
+}
+
+// Reopens the invoice builder for an existing draft, pre-filled with its
+// client, positions (still linked to their source time entries), billing
+// details and bank override — "Weiter"/save then updates this invoice
+// in place instead of creating a new one.
+async function editInvoiceDraft(inv){
+  if(!inv?.id || (inv.status && inv.status!=='draft')){ toast('Nur Entwürfe können erneut bearbeitet werden.','err'); return; }
+  const { data:fullInv, error } = await sb.from('invoices').select('*,clients(*),invoice_items(*)').eq('id', inv.id).single();
+  if(error || !fullInv){ toast('Rechnung nicht gefunden.','err'); return; }
+
+  const { data:clientsData } = await sb.from('clients').select('id,name,company,email,address,vat_id').eq('is_active_client',true).order('name');
+  invClients = clientsData||[];
+  // Keep the invoice's client selectable even if it was deactivated since.
+  if(fullInv.client_id && !invClients.some(c=>c.id===fullInv.client_id) && fullInv.clients){
+    invClients = [...invClients, fullInv.clients];
+  }
+
+  invEditingId = fullInv.id;
+  invEditingNumber = fullInv.invoice_number;
+  invEditingDate = fullInv.invoice_date;
+  invClientId = fullInv.client_id;
+  const meta = parseInvMeta(fullInv);
+  invBillTo = meta.bill_to || '';
+  invBillingPeriod = meta.billing_period || '';
+  invDue = fullInv.due_date || null;
+  invBank = meta.bank_override || null;
+
+  const items = (fullInv.invoice_items||[]).slice().sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+  invLineItems = items.length
+    ? items.map(it=>({ desc:it.description||'', amount:Number(it.total ?? it.unit_price)||0, teId:(it.time_entry_ids&&it.time_entry_ids[0])||undefined }))
+    : [{desc:'',amount:0}];
+  invSelectedTEs = items.flatMap(it=>it.time_entry_ids||[]);
+  invLiKey = JSON.stringify([...invSelectedTEs].sort());
+
+  closeModal('ov-invpreview');
+  $('inv-modal-title').textContent = `Entwurf bearbeiten — ${fullInv.invoice_number||''}`;
+  invStep = 2;
+  await renderInvStep();
+  openModal('ov-invoice');
 }
 
 // Re-render the open preview (and the print area) after an in-place edit.
@@ -3744,12 +3839,12 @@ function fmtInvAmount(v){
 function parseInvMeta(inv){
   const raw = inv && typeof inv.notes==='string' ? inv.notes.trim() : '';
   if(raw.startsWith('{')){
-    try{ const o=JSON.parse(raw); return { billing_period:o.billing_period||'', bill_to:o.bill_to||'', text:o.text||'' }; }catch(e){}
+    try{ const o=JSON.parse(raw); return { billing_period:o.billing_period||'', bill_to:o.bill_to||'', text:o.text||'', bank_override:o.bank_override||null }; }catch(e){}
   }
-  return { billing_period:'', bill_to:'', text:raw };
+  return { billing_period:'', bill_to:'', text:raw, bank_override:null };
 }
 function invMetaToNotes(meta){
-  return JSON.stringify({ billing_period:(meta.billing_period||'').trim(), bill_to:(meta.bill_to||'').trim(), text:(meta.text||'').trim() });
+  return JSON.stringify({ billing_period:(meta.billing_period||'').trim(), bill_to:(meta.bill_to||'').trim(), text:(meta.text||'').trim(), bank_override:meta.bank_override||null });
 }
 // Render a multi-line address block; first non-empty line is bold (name).
 function invAddrBlock(text, fallbackLines){
@@ -3765,6 +3860,9 @@ function buildInvoiceHTML(inv, forModal=false){
   // Only real data-URL images may be injected into the img src.
   const safeLogo = /^data:image\//.test(s.logo||'') ? s.logo : '';
   const meta = parseInvMeta(inv);
+  // A per-invoice bank override (set in the builder's "Bankdaten" step)
+  // replaces the default account for this invoice only.
+  const bank = meta.bank_override || { bank:s.bank, accName:s.accName, iban:s.iban, bic:s.bic };
   const items = (inv.invoice_items||[]).slice().sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
   const itemAmount = i => (i.total!=null ? Number(i.total)
                           : i.amount!=null ? Number(i.amount)
@@ -3826,10 +3924,10 @@ function buildInvoiceHTML(inv, forModal=false){
 
     <div class="invd-account">
       <div class="invd-h">Account</div>
-      ${s.bank?`<div class="invd-acc-bank">Bank name and address:<br>${invMultiline(s.bank)}</div>`:''}
-      ${s.accName?`<div class="invd-acc-line"><span class="invd-acc-k">Name:</span><span>${esc(s.accName)}</span></div>`:''}
-      ${s.iban?`<div class="invd-acc-line"><span class="invd-acc-k">IBAN:</span><span>${esc(s.iban)}</span></div>`:''}
-      ${s.bic?`<div class="invd-acc-line"><span class="invd-acc-k">Swift/BIC:</span><span>${esc(s.bic)}</span></div>`:''}
+      ${bank.bank?`<div class="invd-acc-bank">Bank name and address:<br>${invMultiline(bank.bank)}</div>`:''}
+      ${bank.accName?`<div class="invd-acc-line"><span class="invd-acc-k">Name:</span><span>${esc(bank.accName)}</span></div>`:''}
+      ${bank.iban?`<div class="invd-acc-line"><span class="invd-acc-k">IBAN:</span><span>${esc(bank.iban)}</span></div>`:''}
+      ${bank.bic?`<div class="invd-acc-line"><span class="invd-acc-k">Swift/BIC:</span><span>${esc(bank.bic)}</span></div>`:''}
     </div>
 
     ${s.legal?`<div class="invd-legal">${invMultiline(s.legal)}</div>`:''}
@@ -5176,7 +5274,7 @@ async function sendViaGmail(inv){
     try { gmailToken=await getGmailToken(); } catch(e){ toast('Gmail-Anmeldung fehlgeschlagen.','err'); return; }
   }
   const btn=$('inv-send-gmail-btn');
-  if(btn){ btn.disabled=true; btn.textContent='✉ Wird gesendet…'; }
+  if(btn){ btn.disabled=true; btn.textContent='Wird gesendet…'; }
   try {
     // The mail says the invoice is attached — so actually attach it: a
     // manually attached PDF wins, otherwise render one from the layout.
@@ -5200,7 +5298,7 @@ async function sendViaGmail(inv){
     toast(`Rechnung an ${clientEmail} gesendet.`,'ok');
     loadInvoices(); loadStats();
   } catch(e){ toast('Fehler beim Senden: '+e.message,'err'); }
-  finally { if(btn){ btn.disabled=false; btn.textContent='✉ Per Gmail senden'; } }
+  finally { if(btn){ btn.disabled=false; btn.textContent='Per Gmail senden'; } }
 }
 
 function getGmailToken(){
