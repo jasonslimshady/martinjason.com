@@ -555,105 +555,120 @@
           </div><!-- /.ai-showcase__composition -->
         </div><!-- /.ai-showcase__stage -->
 
-        <a class="hero__scroll" href="#services" aria-label="Weiter scrollen">
+        <a class="hero__scroll" href="#warum" aria-label="Weiter scrollen">
           <span></span>
         </a>
       </div><!-- /.ai-showcase__sticky -->
     </section>
 
     <!-- ==================================================================
-         LEVERAGE — "Warum die Galerie" — the conversion-math argument
-         Problem (100 Besucher) → Fehlfokus → Hebel (2 %→2,5 % = −20 % CPA)
+         LEVERAGE — "Warum die Galerie" — scroll-driven story
+         Sticky panel (like ai-showcase). Scroll progress reveals:
+         headline → 100 visitor dots pop in → 2 buyers light up → cost fact
+         (2 € × 100 = 200 €) → pain (98 weg) → scene 2 (wrong lever) →
+         scene 3 (the real lever: 2 %→2,5 % = −20 % CPA).
+         Without JS or with reduced motion the section renders as a normal
+         static stack — the .is-live class (added by JS) enables the story.
+         data-lev-at   = scroll progress at which the element fades in
+         data-lev-range = "a,b" progress window in which a scene is visible
          ================================================================== -->
     <section id="warum" class="section leverage">
-      <div class="container">
-        <header class="section__head leverage__head">
-          <p class="eyebrow reveal">Die Rechnung</p>
-          <h2 class="section__title reveal" style="--reveal-delay: 80ms">
-            Die meisten Gründer optimieren Ads.<br>
-            <em>Erfolgreiche</em> Gründer optimieren die Produktseite.
-          </h2>
-        </header>
+      <div class="lev-sticky">
+        <div class="container">
+          <header class="leverage__head">
+            <p class="eyebrow lev-fx" data-lev-at="0.01">Die Rechnung</p>
+            <h2 class="section__title lev-title lev-fx" data-lev-at="0.03">
+              <span class="lev-title__line">Die meisten Gründer optimieren Ads.</span>
+              <span class="lev-title__line lev-title__line--gap"><em>Erfolgreiche</em> Gründer optimieren die Produktseite.</span>
+            </h2>
+          </header>
 
-        <div class="leverage__grid">
+          <div class="lev-stage">
 
-          <!-- STEP 1 — Die 100-Besucher-Rechnung -->
-          <div class="lev-card reveal" style="--reveal-delay: 120ms">
-            <span class="lev-card__step">01 — Das Leck</span>
-            <div class="lev-card__body">
-              <div class="lev-visitors">
-                <div class="lev-visitors__dots" aria-hidden="true">
-                  <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-                  <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-                  <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-                  <span></span><span></span><span></span><span></span><span class="is-buyer"></span><span></span><span></span><span></span><span></span><span></span>
-                  <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-                  <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-                  <span></span><span class="is-buyer"></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-                  <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-                  <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-                  <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-                </div>
-                <p class="lev-visitors__caption">100 bezahlte Besucher</p>
-              </div>
-              <div class="lev-facts">
-                <div class="lev-fact">
-                  <strong>1–3 €</strong>
-                  <span>zahlst du pro Klick — für jeden einzelnen der 100.</span>
-                </div>
-                <div class="lev-fact lev-fact--good">
-                  <strong>2 kaufen</strong>
-                  <span>1–2 von 100 werden zu Kunden.</span>
-                </div>
-                <div class="lev-fact lev-fact--bad">
-                  <strong>98 weg</strong>
-                  <span>bezahlt, angeklickt — und wieder verloren.</span>
+            <!-- SCENE 1 — Das Leck: 100 Besucher, 2 Käufer, 200 €, 98 weg -->
+            <div class="lev-scene" data-lev-range="0,0.60">
+              <div class="lev-card">
+                <span class="lev-card__step lev-fx" data-lev-at="0.05">01 — Das Leck</span>
+                <div class="lev-card__body">
+                  <div class="lev-visitors">
+                    <div class="lev-visitors__dots" aria-hidden="true">
+                      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                      <span></span><span></span><span></span><span></span><span class="is-buyer"></span><span></span><span></span><span></span><span></span><span></span>
+                      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                      <span></span><span class="is-buyer"></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                    </div>
+                    <p class="lev-visitors__caption lev-fx" data-lev-at="0.10">100 Besucher klicken deine Anzeige</p>
+                  </div>
+                  <div class="lev-facts">
+                    <div class="lev-fact lev-fact--good lev-fx" data-lev-at="0.36">
+                      <strong>2 kaufen</strong>
+                      <span>nur 2 von 100 werden zu Kunden.</span>
+                    </div>
+                    <div class="lev-fact lev-fx" data-lev-at="0.44">
+                      <strong>200 €</strong>
+                      <span>hast du bezahlt — 2 € für jeden einzelnen Klick.</span>
+                    </div>
+                    <div class="lev-fact lev-fact--bad lev-fx" data-lev-at="0.52">
+                      <strong>98 weg</strong>
+                      <span>angeklickt, bezahlt — und wieder verloren.</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- STEP 2 — Der Fehlfokus -->
-          <div class="lev-card reveal" style="--reveal-delay: 160ms">
-            <span class="lev-card__step">02 — Der falsche Hebel</span>
-            <div class="lev-focus">
-              <div class="lev-focus__col lev-focus__col--muted">
-                <p class="lev-focus__label">Die meisten drehen an…</p>
-                <ul class="lev-focus__list">
-                  <li>Ads</li>
-                  <li>Targeting</li>
-                  <li>Angeboten</li>
-                </ul>
-              </div>
-              <div class="lev-focus__link" aria-hidden="true">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-              </div>
-              <div class="lev-focus__col lev-focus__col--accent">
-                <p class="lev-focus__label">Doch der Ort, an dem 98 % abspringen:</p>
-                <p class="lev-focus__answer">Die Produktseite.<br>Und dort schaut man <em>zuerst</em> auf die Galerie.</p>
+            <!-- SCENE 2 — Der falsche Hebel -->
+            <div class="lev-scene" data-lev-range="0.63,0.80">
+              <div class="lev-card">
+                <span class="lev-card__step lev-fx" data-lev-at="0.65">02 — Der falsche Hebel</span>
+                <div class="lev-focus">
+                  <div class="lev-focus__col lev-focus__col--muted lev-fx" data-lev-at="0.67">
+                    <p class="lev-focus__label">Die meisten drehen jetzt an…</p>
+                    <ul class="lev-focus__list">
+                      <li>Ads</li>
+                      <li>Targeting</li>
+                      <li>Angeboten</li>
+                    </ul>
+                  </div>
+                  <div class="lev-focus__link lev-fx" data-lev-at="0.70" aria-hidden="true">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                  </div>
+                  <div class="lev-focus__col lev-focus__col--accent lev-fx" data-lev-at="0.72">
+                    <p class="lev-focus__label">Doch der Ort, an dem 98 % abspringen:</p>
+                    <p class="lev-focus__answer">Die Produktseite.<br>Und dort schaut man <em>zuerst</em> auf die Galerie.</p>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- STEP 3 — Der Hebel -->
-          <div class="lev-lever reveal" style="--reveal-delay: 200ms">
-            <span class="lev-card__step lev-card__step--invert">03 — Der echte Hebel</span>
-            <div class="lev-lever__math" aria-label="2 Prozent auf 2,5 Prozent Conversion ergibt 20 Prozent weniger CPA">
-              <span class="lev-lever__val">2 %</span>
-              <span class="lev-lever__op">→</span>
-              <span class="lev-lever__val lev-lever__val--hi">2,5 %</span>
-              <span class="lev-lever__op">=</span>
-              <span class="lev-lever__val lev-lever__val--cpa">−20 % CPA</span>
+            <!-- SCENE 3 — Der echte Hebel -->
+            <div class="lev-scene" data-lev-range="0.83,1">
+              <div class="lev-lever">
+                <span class="lev-card__step lev-card__step--invert lev-fx" data-lev-at="0.85">03 — Der echte Hebel</span>
+                <div class="lev-lever__math" aria-label="2 Prozent auf 2,5 Prozent Conversion ergibt 20 Prozent weniger CPA">
+                  <span class="lev-lever__val lev-fx" data-lev-at="0.86">2 %</span>
+                  <span class="lev-lever__op lev-fx" data-lev-at="0.875">→</span>
+                  <span class="lev-lever__val lev-lever__val--hi lev-fx" data-lev-at="0.89">2,5 %</span>
+                  <span class="lev-lever__op lev-fx" data-lev-at="0.905">=</span>
+                  <span class="lev-lever__val lev-lever__val--cpa lev-fx" data-lev-at="0.92">−20 % CPA</span>
+                </div>
+                <p class="lev-lever__note lev-fx" data-lev-at="0.95">
+                  Eine Galerie, die aus 2 % Conversion 2,5 % macht, senkt deinen CPA um 20 %
+                  — auf <strong>jeden Euro</strong> Ad-Spend, für immer, ohne einen Cent mehr Budget.
+                  <br class="lev-lever__br">Genau das ist der Hebel, an dem ich arbeite.
+                </p>
+              </div>
             </div>
-            <p class="lev-lever__note">
-              Eine Galerie, die aus 2 % Conversion 2,5 % macht, senkt deinen CPA um 20 %
-              — auf <strong>jeden Euro</strong> Ad-Spend, für immer, ohne einen Cent mehr Budget.
-              <br class="lev-lever__br">Genau das ist der Hebel, an dem ich arbeite.
-            </p>
-          </div>
 
+          </div><!-- /.lev-stage -->
         </div>
-      </div>
+      </div><!-- /.lev-sticky -->
     </section>
 
     <!-- ==================================================================
@@ -1019,14 +1034,15 @@
     var rPhases = [[0.73,0.80],[0.78,0.85],[0.83,0.90],[0.88,0.95]];
 
     /* How far to lift everything upward during Phase C.
-       MUST be measured after the section is in the viewport (p > 0) so that
-       getBoundingClientRect() reflects the sticky-pinned layout, not the
-       off-screen page position from initial page load. */
+       MUST be measured while the section is sticky-pinned (0 < p < 1) so
+       that getBoundingClientRect() reflects the pinned layout — measuring
+       at p=0 (before) or p=1 (jumped past, e.g. via anchor link) reads an
+       off-screen position and produces a wrong, even positive, lift. */
     var compTransY = -200;
     var measured   = false;
 
     function measureLift(p) {
-      if (measured || !resultsGrid || p <= 0) return;
+      if (measured || !resultsGrid || p <= 0 || p >= 1) return;
       measured = true;
       var rect       = resultsGrid.getBoundingClientRect();
       var gridCenter = (rect.top + rect.bottom) / 2;
@@ -1074,6 +1090,94 @@
         el.style.transform = 'translateY(' + ((1 - rp) * -20) + 'px) scale(' + (1 + (1 - rp) * 0.15) + ')';
         el.classList.toggle('is-visible', rp > 0.5);
       });
+    }
+
+    window.addEventListener('scroll', function () {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () { ticking = false; update(); });
+    }, { passive: true });
+
+    update();
+  })();
+  </script>
+
+  <!-- Leverage section: scroll-driven story (same pattern as AI showcase).
+       Falls back to a static stacked layout when JS is off or the user
+       prefers reduced motion — .is-live gates all story styling. -->
+  <script>
+  (function () {
+    'use strict';
+
+    var section = document.getElementById('warum');
+    if (!section) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    section.classList.add('is-live');
+
+    /* Elements with a scroll-progress threshold (data-lev-at) */
+    var fx = Array.prototype.map.call(
+      section.querySelectorAll('[data-lev-at]'),
+      function (el) { return { el: el, at: parseFloat(el.getAttribute('data-lev-at')) }; }
+    );
+
+    /* Scenes visible inside a progress window (data-lev-range="a,b") */
+    var scenes = Array.prototype.map.call(
+      section.querySelectorAll('[data-lev-range]'),
+      function (el) {
+        var r = el.getAttribute('data-lev-range').split(',');
+        return { el: el, a: parseFloat(r[0]), b: parseFloat(r[1]) };
+      }
+    );
+
+    var dots   = Array.prototype.slice.call(section.querySelectorAll('.lev-visitors__dots span'));
+    var buyers = dots.filter(function (d) { return d.classList.contains('is-buyer'); });
+
+    /* Story beats (scroll progress 0→1)
+       0.10–0.32  dots pop in one by one (100 visitors arrive)
+       0.34       the 2 buyers turn accent-blue
+       0.36/0.44/0.52  facts: 2 kaufen / 200 € bezahlt / 98 weg
+       0.63–0.80  scene 2: wrong lever
+       0.83–1     scene 3: the real lever                                */
+    var DOTS_START = 0.10, DOTS_END = 0.32, BUY_AT = 0.34;
+
+    function c01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+    function mr(v, a, b) { return c01((v - a) / (b - a)); }
+
+    function getP() {
+      var rect = section.getBoundingClientRect();
+      var sc   = section.offsetHeight - window.innerHeight;
+      return sc > 0 ? c01(-rect.top / sc) : 0;
+    }
+
+    var lastP = -1, lastCount = 0, lastBuy = false, ticking = false;
+
+    function update() {
+      var p = getP();
+      if (Math.abs(p - lastP) < 0.0005) return;
+      lastP = p;
+
+      var i, n;
+      for (i = 0, n = fx.length; i < n; i++) {
+        fx[i].el.classList.toggle('is-on', p >= fx[i].at);
+      }
+      for (i = 0, n = scenes.length; i < n; i++) {
+        scenes[i].el.classList.toggle('is-on', p >= scenes[i].a && p <= scenes[i].b);
+      }
+
+      /* Dots: only touch the indices whose state changed since last frame */
+      var count = Math.round(mr(p, DOTS_START, DOTS_END) * dots.length);
+      if (count !== lastCount) {
+        var lo = Math.min(count, lastCount), hi = Math.max(count, lastCount);
+        for (i = lo; i < hi; i++) dots[i].classList.toggle('is-in', i < count);
+        lastCount = count;
+      }
+
+      var buy = p >= BUY_AT;
+      if (buy !== lastBuy) {
+        lastBuy = buy;
+        for (i = 0, n = buyers.length; i < n; i++) buyers[i].classList.toggle('is-buy', buy);
+      }
     }
 
     window.addEventListener('scroll', function () {

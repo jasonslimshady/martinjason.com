@@ -515,11 +515,19 @@
 .gallery-card__image--hover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity 0.4s ease;pointer-events:none;}
 .gallery-card:hover .gallery-card__image--hover{opacity:1;}
 
-/* ── LEVERAGE SECTION — the conversion-math argument ──────────────────────
-   3 stacked "steps": the leak (100 visitors) → wrong lever → the real lever.
+/* ── LEVERAGE SECTION — scroll-driven conversion-math story ───────────────
+   3 scenes: the leak (100 visitors) → wrong lever → the real lever.
+   Static stack by default (no JS / reduced motion); .is-live (set by JS)
+   turns it into a sticky scroll story like .ai-showcase.
    ───────────────────────────────────────────────────────────────────────── */
-.leverage__head { max-width: 900px; margin-bottom: var(--space-5); }
-.leverage__grid { display: grid; gap: var(--space-3); }
+.leverage__head { max-width: 1000px; margin-bottom: var(--space-5); }
+.lev-stage { display: grid; gap: var(--space-3); }
+
+/* Headline: smaller than the default section title so each sentence fits
+   one desktop line; the second sentence gets breathing room on all sizes. */
+.lev-title { font-size: clamp(1.4rem, 2.3vw, 2.15rem); }
+.lev-title__line { display: block; }
+.lev-title__line--gap { margin-top: 0.55em; }
 
 /* Shared card shell for steps 01 + 02 */
 .lev-card {
@@ -559,12 +567,21 @@
   border-radius: 3px;
   background: var(--color-surface-2);
   border: 1px solid var(--color-border);
+  transition: background 320ms var(--ease-apple),
+              border-color 320ms var(--ease-apple),
+              box-shadow 320ms var(--ease-apple),
+              opacity 240ms var(--ease-apple),
+              transform 300ms var(--ease-back);
 }
-.lev-visitors__dots span.is-buyer {
+/* Buyer coloring: static fallback shows it immediately; in live mode JS
+   adds .is-buy at the right scroll moment for the color-change beat. */
+.leverage:not(.is-live) .lev-visitors__dots span.is-buyer,
+.lev-visitors__dots span.is-buyer.is-buy {
   background: var(--color-accent);
   border-color: var(--color-accent);
   box-shadow: 0 0 0 3px var(--color-accent-tint);
 }
+.lev-visitors__dots span.is-buyer.is-buy { transform: scale(1.15); }
 .lev-visitors__caption {
   margin: 0;
   font-size: 0.82rem;
@@ -686,4 +703,83 @@
   .lev-focus { grid-template-columns: 1fr; }
   .lev-focus__link { transform: rotate(90deg); }
   .lev-lever__br { display: none; }
+}
+
+/* ── LEVERAGE — live scroll-story mode (JS adds .is-live) ─────────────────
+   Same mechanics as .ai-showcase: tall outer section, 100vh sticky panel,
+   JS maps scroll progress to class toggles; all motion is opacity/transform
+   (compositor-only — no layout work per frame). */
+.leverage.is-live {
+  height: 400vh;
+  padding-block: 0;
+}
+.leverage.is-live .lev-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  padding-top: 70px; /* clear the fixed nav */
+}
+.leverage.is-live .leverage__head { margin-bottom: var(--space-4); }
+
+/* Stage becomes a fixed-height canvas; scenes stack on top of each other */
+.leverage.is-live .lev-stage {
+  display: block;
+  position: relative;
+  height: clamp(340px, 52vh, 540px);
+}
+.leverage.is-live .lev-scene {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 420ms var(--ease-apple), transform 420ms var(--ease-apple);
+  pointer-events: none;
+}
+.leverage.is-live .lev-scene.is-on {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.leverage.is-live .lev-scene > * { width: 100%; }
+
+/* Per-element beats: hidden until JS flips .is-on at its data-lev-at */
+.leverage.is-live .lev-fx {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 480ms var(--ease-apple), transform 480ms var(--ease-apple);
+}
+.leverage.is-live .lev-fx.is-on { opacity: 1; transform: none; }
+
+/* Visitor dots pop in one by one (JS staggers .is-in with scroll) */
+.leverage.is-live .lev-visitors__dots span {
+  opacity: 0;
+  transform: scale(0.3);
+}
+.leverage.is-live .lev-visitors__dots span.is-in {
+  opacity: 1;
+  transform: scale(1);
+}
+.leverage.is-live .lev-visitors__dots span.is-buyer.is-buy { transform: scale(1.15); }
+
+@media (max-width: 720px) {
+  .leverage.is-live .lev-stage { height: clamp(430px, 62vh, 600px); }
+  .leverage.is-live .lev-title { font-size: clamp(1.3rem, 5.2vw, 1.5rem); }
+  .leverage.is-live .leverage__head { margin-bottom: var(--space-3); }
+  .leverage.is-live .lev-card { padding: 1.1rem; }
+  .leverage.is-live .lev-card__step { margin-bottom: var(--space-2); }
+  .leverage.is-live .lev-card__body { gap: 1rem; }
+  .leverage.is-live .lev-visitors__dots { width: min(190px, 48vw); }
+  .leverage.is-live .lev-visitors__caption { font-size: 0.78rem; }
+  /* Stack each fact: big number above, explanation below — no squeeze */
+  .leverage.is-live .lev-fact { flex-direction: column; align-items: flex-start; gap: 0.1rem; }
+  .leverage.is-live .lev-fact strong { font-size: 1.2rem; min-width: 0; }
+  .leverage.is-live .lev-fact span { font-size: 0.88rem; }
+  .leverage.is-live .lev-facts { gap: 0.65rem; }
 }
