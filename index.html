@@ -448,8 +448,8 @@
         <!-- Centered heading -->
         <div class="ai-showcase__header">
           <p class="ai-showcase__eyebrow">KI-Bildgenerierung</p>
-          <h2 class="ai-showcase__heading">Produktgalerien, die besser konvertieren.</h2>
-          <p class="ai-showcase__subline">Gleicher Traffic. Gleiches Produkt. 317 % mehr Bestellungen.<br>Das allein ändert eine optimierte Produktgalerie.<br>Kein Rabatt, keine neue Kampagne. Nur Bilder, die verkaufen statt dekorieren.</p>
+          <h2 class="ai-showcase__heading">Produktgalerien, die<br>besser konvertieren.</h2>
+          <p class="ai-showcase__subline">Gleicher Traffic. Gleiches Produkt. 317 % mehr Bestellungen.<br>Kein Rabatt, keine neue Kampagne.</p>
         </div>
 
         <!-- Stage: portrait is in-flow; prompt + results are absolute children -->
@@ -889,6 +889,7 @@
     var composition = section.querySelector('.ai-showcase__composition');
     var resultsGrid = section.querySelector('.ai-showcase__results');
     var header      = section.querySelector('.ai-showcase__header');
+    var scrollHint  = section.querySelector('.hero__scroll');
 
     /* Build typed text as individual char <span>s */
     var PROMPT_TEXT = 'Erstelle ein Produktgalerie für dieses Produkt.';
@@ -945,6 +946,9 @@
       measureLift(p);                          /* no-op until section is live */
       if (Math.abs(p - lastP) < 0.0004) return;
       lastP = p;
+
+      /* Scroll hint: fades out over the first 30% of the section's scroll */
+      if (scrollHint) scrollHint.style.opacity = 1 - mr(p, 0, 0.30);
 
       /* Phase A: Prompt slides up from below */
       var pa = mr(p, 0.05, 0.28);

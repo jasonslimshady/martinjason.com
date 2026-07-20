@@ -398,7 +398,7 @@
   width: 100%;
   aspect-ratio: 1 / 1;
   overflow: hidden;
-  border-radius: 15px;
+  border-radius: 15px 15px 0 0;
   background: var(--color-surface-2);
 }
 
@@ -449,14 +449,16 @@
 }
 
 /* Glass stat box below each result frame — highlights the one metric that card proves.
-   Combine with the .glass utility class in markup for background/blur/border/shadow. */
+   Combine with the .glass utility class in markup for background/blur/border/shadow.
+   margin-top cancels .ai-result's flex gap so it sits flush against the frame above it. */
 .ai-result__stat {
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
+  margin-top: -8px;
   padding: 12px 14px;
-  border-radius: var(--radius-md);
+  border-radius: 0 0 15px 15px;
   font-family: var(--font-sans);
   font-size: clamp(0.8rem, 1vw, 0.95rem);
   font-weight: 600;
