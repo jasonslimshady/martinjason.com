@@ -655,6 +655,10 @@
               <option value="">Alle Kunden</option>
             </select>
             <div style="display:flex;border:1px solid var(--glass-b);border-radius:var(--r-sm);overflow:hidden;backdrop-filter:blur(10px) saturate(160%);-webkit-backdrop-filter:blur(10px) saturate(160%)">
+              <button id="rev-date-invoice" title="Im Graphen nach Rechnungsdatum anzeigen" style="padding:.3rem .6rem;background:rgba(10,10,10,.72);border:none;cursor:pointer;font-size:.75rem;font-weight:600;color:#fff">Rechnungsdatum</button>
+              <button id="rev-date-paid" title="Im Graphen nach Bezahlt-Datum anzeigen" style="padding:.3rem .6rem;background:var(--glass);border:none;cursor:pointer;font-size:.75rem;font-weight:600;color:var(--ink-m)">Bezahlt</button>
+            </div>
+            <div style="display:flex;border:1px solid var(--glass-b);border-radius:var(--r-sm);overflow:hidden;backdrop-filter:blur(10px) saturate(160%);-webkit-backdrop-filter:blur(10px) saturate(160%)">
               <button id="rev-type-bar" title="Balkendiagramm" style="padding:.3rem .6rem;background:rgba(10,10,10,.72);border:none;cursor:pointer;display:flex;align-items:center">
                 <svg width="14" height="14" fill="none" stroke="#fff" stroke-width="1.8" viewBox="0 0 16 16"><rect x="1" y="9" width="3" height="6" rx="1"/><rect x="6.5" y="5" width="3" height="10" rx="1"/><rect x="12" y="1.5" width="3" height="13.5" rx="1"/></svg>
               </button>
@@ -685,7 +689,15 @@
         </div>
         <div id="inv-reminders-list"></div>
       </div>
-      <div class="card"><table class="dtable"><thead><tr><th>Nr.</th><th>Kunde</th><th>Datum</th><th>Fällig</th><th>Betrag</th><th>Status</th><th style="width:28px"></th><th style="width:36px"></th></tr></thead><tbody id="inv-body"></tbody></table></div>
+      <div class="card"><table class="dtable"><thead><tr>
+        <th class="inv-th-sort" data-col="nr" style="cursor:pointer;user-select:none" title="Nach Rechnungsdatum in der Nummer sortieren">Nr. <span class="inv-sort-arrow" data-arrow="nr"></span></th>
+        <th class="inv-th-sort" data-col="kunde" style="cursor:pointer;user-select:none" title="Alphabetisch sortieren (A-Z / Z-A)">Kunde <span class="inv-sort-arrow" data-arrow="kunde"></span></th>
+        <th class="inv-th-sort" data-col="datum" style="cursor:pointer;user-select:none" title="Nach Rechnungsdatum sortieren">Datum <span class="inv-sort-arrow" data-arrow="datum"></span></th>
+        <th>Fällig</th>
+        <th class="inv-th-sort" data-col="betrag" style="cursor:pointer;user-select:none" title="Nach Betrag sortieren">Betrag <span class="inv-sort-arrow" data-arrow="betrag"></span></th>
+        <th class="inv-th-sort" data-col="status" style="cursor:pointer;user-select:none" title="Nach Status sortieren">Status <span class="inv-sort-arrow" data-arrow="status"></span></th>
+        <th style="width:28px"></th><th style="width:36px"></th>
+      </tr></thead><tbody id="inv-body"></tbody></table></div>
     </section>
 
     <!-- KLAVIYO PANEL -->
@@ -2650,9 +2662,66 @@ async function loadInvoices(){
   const overdueEl = $('i-overdue');
   overdueEl.textContent = overdueCount;
   overdueEl.style.color = overdueCount>0 ? 'var(--red)' : 'var(--green)';
+  renderInvoiceTable(list);
+  renderRevenueChart();
+}
+
+// ── INVOICE TABLE SORTING ────────────────────────────────────────────────
+// Defaults to "Datum" descending: newest invoice on top, oldest at the bottom.
+let invSortCol = 'datum';
+let invSortDir = 'desc'; // 'asc' | 'desc'
+
+// Invoice numbers follow "INV-DD-MM-YYYY[-n]" — extract the embedded date so
+// "Nr." sorts chronologically instead of alphabetically.
+function invoiceNumberDateValue(num){
+  const m = String(num||'').match(/(\d{1,2})-(\d{1,2})-(\d{4})/);
+  if(!m) return 0;
+  const [, d, mo, y] = m;
+  return new Date(parseInt(y), parseInt(mo)-1, parseInt(d)).getTime();
+}
+
+const INV_SORT_GETTERS = {
+  nr:     inv => invoiceNumberDateValue(inv.invoice_number),
+  kunde:  inv => clientCompanyLabel(inv.clients).toLowerCase(),
+  datum:  inv => inv.invoice_date || '',
+  betrag: inv => Number(inv.total)||0,
+  status: inv => (STATUS_LBL[inv.status]||inv.status||'').toLowerCase(),
+};
+
+function sortInvoiceList(list){
+  const get = INV_SORT_GETTERS[invSortCol];
+  if(!get) return list;
+  const sorted = [...list].sort((a,b)=>{
+    const va=get(a), vb=get(b);
+    if(va<vb) return -1;
+    if(va>vb) return 1;
+    return 0;
+  });
+  if(invSortDir==='desc') sorted.reverse();
+  return sorted;
+}
+
+function updateInvSortIndicators(){
+  document.querySelectorAll('#panel-invoices .inv-sort-arrow').forEach(el=>{
+    el.textContent = el.dataset.arrow===invSortCol ? (invSortDir==='asc'?'▲':'▼') : '';
+  });
+}
+
+document.querySelectorAll('#panel-invoices th.inv-th-sort').forEach(th=>{
+  th.addEventListener('click', ()=>{
+    const col = th.dataset.col;
+    if(invSortCol===col) invSortDir = invSortDir==='asc' ? 'desc' : 'asc';
+    else { invSortCol = col; invSortDir = 'desc'; }
+    renderInvoiceTable(allInvoicesCache);
+  });
+});
+
+function renderInvoiceTable(list){
   const tbody=$('inv-body');
+  updateInvSortIndicators();
   if(!list.length){ tbody.innerHTML=`<tr><td colspan="8"><div class="empty-st"><p class="empty-ttl">Noch keine Rechnungen</p><p class="empty-sub">Erstelle deine erste Rechnung.</p></div></td></tr>`; return; }
-  tbody.innerHTML=list.map(inv=>`<tr data-id="${inv.id}">
+  const sorted = sortInvoiceList(list);
+  tbody.innerHTML=sorted.map(inv=>`<tr data-id="${inv.id}">
     <td class="mono">${esc(inv.invoice_number)}</td><td class="fw6">${esc(clientCompanyLabel(inv.clients))}</td>
     <td class="muted">${fmtDate(inv.invoice_date)}</td><td class="muted">${inv.due_date?fmtDate(inv.due_date):'—'}</td>
     <td class="fw6">${fmtEur(inv.total)}</td><td><span class="tag ${STATUS_TAG[inv.status]||'tag--muted'}">${STATUS_LBL[inv.status]||inv.status}</span></td>
@@ -2664,7 +2733,6 @@ async function loadInvoices(){
     viewInvoice(row.dataset.id);
   }));
   document.querySelectorAll('#inv-body .inv-edit-btn').forEach(btn=>btn.addEventListener('click', e=>{ e.stopPropagation(); openInvoiceEdit(btn.dataset.id); }));
-  renderRevenueChart();
 }
 
 // ── REVENUE CHART ──────────────────────────────────────────────────────
@@ -2696,6 +2764,24 @@ function initRevenueFilters(){
 }
 
 let revChartType = localStorage.getItem('inv_chart_type') || 'bar';
+// Which date the revenue chart buckets invoices by — invoice date (default,
+// requested) or the date they were actually paid.
+let revDateBasis = localStorage.getItem('inv_chart_date_basis') || 'invoice';
+
+function setRevDateBasis(basis){
+  revDateBasis = basis;
+  localStorage.setItem('inv_chart_date_basis', basis);
+  syncRevDateBasisToggle();
+  renderRevenueChart();
+}
+
+function syncRevDateBasisToggle(){
+  const isInvoice = revDateBasis==='invoice';
+  $('rev-date-invoice').style.background = isInvoice ? 'rgba(10,10,10,.72)' : 'var(--glass)';
+  $('rev-date-invoice').style.color      = isInvoice ? '#fff' : 'var(--ink-m)';
+  $('rev-date-paid').style.background    = !isInvoice ? 'rgba(10,10,10,.72)' : 'var(--glass)';
+  $('rev-date-paid').style.color         = !isInvoice ? '#fff' : 'var(--ink-m)';
+}
 
 function setRevChartType(type){
   revChartType = type;
@@ -2717,6 +2803,7 @@ function renderRevenueChart(){
   $('rev-type-bar').querySelector('svg').setAttribute('stroke', isBar  ? '#fff' : 'currentColor');
   $('rev-type-line').style.background = !isBar ? 'rgba(10,10,10,.72)' : 'var(--glass)';
   $('rev-type-line').querySelector('svg').setAttribute('stroke', !isBar ? '#fff' : 'currentColor');
+  syncRevDateBasisToggle();
 
   const year     = parseInt($('rev-year').value) || new Date().getFullYear();
   const clientId = $('rev-client').value;
@@ -2726,8 +2813,8 @@ function renderRevenueChart(){
     .filter(i => i.status==='paid')
     .filter(i => !clientId || String(i.clients?.id)===clientId)
     .forEach(i => {
-      // prefer paid_at, fall back to invoice_date
-      const d = i.paid_at || i.invoice_date;
+      // Bucketed by invoice date (default) or paid date, per the toggle above.
+      const d = revDateBasis==='invoice' ? i.invoice_date : (i.paid_at || i.invoice_date);
       if(!d) return;
       const dt = new Date(d);
       if(dt.getFullYear()===year) monthly[dt.getMonth()] += (i.total||0);
@@ -2787,6 +2874,8 @@ $('rev-year').addEventListener('change', renderRevenueChart);
 $('rev-client').addEventListener('change', renderRevenueChart);
 $('rev-type-bar').addEventListener('click', ()=>setRevChartType('bar'));
 $('rev-type-line').addEventListener('click', ()=>setRevChartType('line'));
+$('rev-date-invoice').addEventListener('click', ()=>setRevDateBasis('invoice'));
+$('rev-date-paid').addEventListener('click', ()=>setRevDateBasis('paid'));
 
 // ── ALL INVOICES MODAL ─────────────────────────────────────────────────
 $('btn-all-invoices').addEventListener('click', openAllInvoices);
