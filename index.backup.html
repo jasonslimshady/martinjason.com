@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="128x128" href="/images/favicon.png">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Martin, Jason — KI-Design für DTC Brands</title>
+  <meta name="description" content="Ich erstelle KI-generierte Produktgalerien in Studioqualität – für DACH-DTC-Marken, die mehr aus ihren Produktseiten herausholen wollen. Ab 599 €/Produkt." />
+  <meta name="theme-color" content="#F7F5F1" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Jason Martin — Produktgrafiken für DTC Brands" />
+  <meta property="og:description" content="Produktgrafiken für DTC Brands in Studioqualität – erstellt mit KI, nicht mit Kameras." />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="de_DE" />
+
+  <!-- Structured Data — WebSite + Organization + SiteNavigationElement -->
+  <script type="application/ld+json">
+  [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "@id": "https://martinjason.com/#website",
+      "name": "Martin, Jason",
+      "url": "https://martinjason.com",
+      "description": "Produktgrafiken für DTC Brands in Studioqualität – erstellt mit KI, nicht mit Kameras.",
+      "inLanguage": "de-DE",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://martinjason.com/?s={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "@id": "https://martinjason.com/#organization",
+      "name": "Martin, Jason",
+      "url": "https://martinjason.com",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://martinjason.com/images/google-search-logo.avif",
+        "width": 512,
+        "height": 512
+      },
+      "image": "https://martinjason.com/images/google-search-logo.avif",
+      "sameAs": ["https://www.linkedin.com/in/imjasonmartin/"]
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "@id": "https://martinjason.com/#webpage",
+      "url": "https://martinjason.com",
+      "name": "Martin, Jason — Produktgrafiken für DTC Brands in Studioqualität",
+      "isPartOf": { "@id": "https://martinjason.com/#website" },
+      "about": { "@id": "https://martinjason.com/#organization" },
+      "inLanguage": "de-DE"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "SiteNavigationElement",
+      "name": ["Leistungen", "Galerien", "Blog", "Über mich", "Termin buchen"],
+      "url": [
+        "https://martinjason.com/#services",
+        "https://martinjason.com/#work",
+        "https://martinjason.com/blog",
+        "https://martinjason.com/#about",
+        "https://martinjason.com/#contact"
+      ]
+    }
+  ]
+  </script>
+
+  <!-- Fonts: system stack — zero network requests, zero layout shift -->
+
+  <!-- =====================================================================
+       Critical CSS — tokens + above-fold styles inlined for instant render.
+       The full styles.css loads async below; this prevents any FOUC.
+       ===================================================================== -->
+  <style>
+    /* 1. DESIGN TOKENS */
+    :root {
+      --color-bg:           #F7F5F1;
+      --color-surface:      #FFFFFF;
+      --color-surface-2:    #F1EEE9;
+      --color-ink:          #0A0A0A;
+      --color-ink-muted:    #54545A;
+      --color-ink-soft:     #8A8A92;
+      --color-border:       rgba(10, 10, 10, 0.08);
+      --color-border-strong:rgba(10, 10, 10, 0.14);
+      --color-accent:       #0A84FF;
+      --color-accent-hover: #0070E0;
+      --color-accent-tint:  rgba(10, 132, 255, 0.08);
+      --color-accent-ink:   #FFFFFF;
+      --glass-bg:          rgba(255, 255, 255, 0.55);
+      --glass-bg-strong:   rgba(255, 255, 255, 0.78);
+      --glass-bg-dark:     rgba(20, 20, 24, 0.55);
+      --glass-border:      rgba(255, 255, 255, 0.65);
+      --glass-border-ink:  rgba(10, 10, 10, 0.06);
+      --glass-blur:        24px;
+      --glass-saturation:  180%;
+      --glass-shadow:      0 1px 1px rgba(10,10,10,0.04), 0 8px 28px rgba(10,10,10,0.06);
+      --glass-shadow-strong: 0 1px 1px rgba(10,10,10,0.05), 0 18px 48px rgba(10,10,10,0.10);
+      --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+      --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+      --font-serif: "New York", "Georgia", serif;
+      --fs-eyebrow:  0.78rem;
+      --fs-body:     1.0625rem;
+      --fs-lede:     1.25rem;
+      --fs-h2:       clamp(2rem, 4vw, 3.25rem);
+      --fs-h1:       clamp(2.6rem, 6vw, 5rem);
+      --lh-tight:    1.04;
+      --lh-snug:     1.18;
+      --lh-body:     1.55;
+      --space-1: 0.5rem; --space-2: 1rem; --space-3: 1.5rem; --space-4: 2rem;
+      --space-5: 3rem;   --space-6: 4.5rem; --space-7: 7rem; --space-8: 10rem;
+      --radius-sm: 8px; --radius-md: 14px; --radius-lg: 22px;
+      --radius-xl: 32px; --radius-pill: 999px;
+      --ease-apple: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-back:  cubic-bezier(0.5, 0, 0.2, 1.4);
+      --dur-fast: 180ms; --dur-base: 380ms; --dur-slow: 720ms;
+      --container-max: 1180px;
+      --container-pad: clamp(1rem, 4vw, 2.5rem);
+    }
+
+    /* 2. RESET & BASE */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--color-bg);
+      color: var(--color-ink);
+      font-family: var(--font-sans);
+      font-size: var(--fs-body);
+      line-height: var(--lh-body);
+      font-feature-settings: "ss01", "cv11";
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+    img, svg, video { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; cursor: pointer; border: 0; background: transparent; }
+    ul { list-style: none; padding: 0; margin: 0; }
+    ::selection { background: var(--color-accent); color: var(--color-accent-ink); }
+    .visually-hidden {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    /* 3. LAYOUT — container + eyebrow */
+    .container {
+      width: 100%; max-width: var(--container-max);
+      margin-inline: auto; padding-inline: var(--container-pad);
+    }
+    .eyebrow {
+      font-size: var(--fs-eyebrow);
+      text-transform: uppercase; letter-spacing: 0.14em;
+      font-weight: 500; color: var(--color-accent); margin: 0 0 var(--space-2);
+    }
+
+    /* 4. BACKGROUND */
+    .bg {
+      position: fixed; inset: 0; z-index: -1;
+      overflow: hidden; pointer-events: none;
+    }
+    /* Blobs are static — the full-viewport blur + blend paints once and is
+       cached as a texture instead of re-compositing every frame. */
+    .bg-blobs {
+      position: absolute; inset: -10%;
+      filter: blur(80px) saturate(120%);
+    }
+    .blob {
+      position: absolute; border-radius: 50%;
+      opacity: 0.55; mix-blend-mode: multiply;
+    }
+    .blob--a {
+      width: 60vmax; height: 60vmax;
+      background: radial-gradient(closest-side, #BFD7FF 0%, transparent 70%);
+      top: -15%; left: -10%;
+    }
+    .blob--b {
+      width: 55vmax; height: 55vmax;
+      background: radial-gradient(closest-side, #FFD9C2 0%, transparent 70%);
+      top: 30%; right: -15%;
+    }
+    .blob--c {
+      width: 50vmax; height: 50vmax;
+      background: radial-gradient(closest-side, #E7DCC8 0%, transparent 70%);
+      bottom: -20%; left: 20%;
+    }
+    .bg-grain {
+      position: absolute; inset: 0;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+      opacity: 0.05; mix-blend-mode: multiply;
+    }
+
+    /* 5. GLASS UTILITIES */
+    .glass {
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+              backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+    }
+    @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+      .glass { background: var(--glass-bg-strong); }
+    }
+
+    /* 6. BUTTONS */
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.85rem 1.4rem; border-radius: var(--radius-pill);
+      font-weight: 500; font-size: 0.98rem; letter-spacing: -0.005em;
+      transition: transform var(--dur-fast) var(--ease-apple),
+                  background var(--dur-fast) var(--ease-apple),
+                  color var(--dur-fast) var(--ease-apple),
+                  box-shadow var(--dur-fast) var(--ease-apple);
+      white-space: nowrap;
+    }
+    .btn--primary {
+      background: var(--color-ink); color: var(--color-bg);
+      box-shadow: 0 1px 1px rgba(0,0,0,0.04), 0 8px 24px rgba(10,10,10,0.18);
+    }
+    .btn--primary:hover { transform: translateY(-1px); background: var(--color-accent); }
+    .btn--primary:active { transform: translateY(0); }
+    .glass-btn { position: relative; isolation: isolate; }
+    .glass-btn::before {
+      content: ""; position: absolute; inset: 0; border-radius: inherit;
+      background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0));
+      pointer-events: none; z-index: 1;
+    }
+    .glass-btn > * { position: relative; z-index: 2; }
+    .btn--ghost {
+      background: transparent; color: var(--color-ink);
+      border: 1px solid var(--color-border-strong); padding: 0.78rem 1.3rem;
+    }
+    .btn--ghost:hover { background: var(--color-surface); border-color: var(--color-ink); }
+    .btn--lg { padding: 1.05rem 1.7rem; font-size: 1.05rem; }
+
+    /* 7a. NAV */
+    .nav-wrap {
+      position: fixed !important; /* override any external stylesheet (e.g. cached styles.css that has sticky) */
+      top: var(--space-2);
+      left: 0; right: 0;
+      z-index: 40;
+      padding-inline: var(--container-pad);
+    }
+    section[id] { scroll-margin-top: 80px; }
+    .nav {
+      max-width: var(--container-max); margin-inline: auto;
+      display: flex; align-items: center; gap: var(--space-3);
+      padding: 0.5rem 0.5rem 0.5rem 1rem; border-radius: var(--radius-pill);
+    }
+    .nav__brand { display: flex; align-items: center; gap: 0.6rem; font-weight: 600; }
+    .nav__brand-mark {
+      display: block; width: 32px; height: 32px;
+      border-radius: 50%; object-fit: cover; flex-shrink: 0;
+    }
+    .nav__brand-name { font-size: 0.96rem; letter-spacing: -0.01em; }
+    .nav__links { display: flex; gap: var(--space-3); margin-left: auto; font-size: 0.95rem; }
+    .nav__links a {
+      position: relative; padding: 0.35rem 0;
+      color: var(--color-ink-muted);
+      transition: color var(--dur-fast) var(--ease-apple);
+    }
+    .nav__links a::after {
+      content: ""; position: absolute; left: 0; right: 0; bottom: -2px;
+      height: 1px; background: var(--color-ink);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform var(--dur-base) var(--ease-apple);
+    }
+    .nav__links a:hover { color: var(--color-ink); }
+    .nav__links a:hover::after { transform: scaleX(1); }
+    .nav__cta {
+      padding: 0.6rem 1.05rem;
+      transition: transform var(--dur-base) var(--ease-apple),
+                  background var(--dur-base) var(--ease-apple),
+                  color var(--dur-base) var(--ease-apple),
+                  box-shadow var(--dur-base) var(--ease-apple);
+    }
+
+    /* 7b. HERO */
+    .hero {
+      position: relative;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .hero__cta-bar {
+      position: absolute;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+      z-index: 10;
+    }
+    .hero__cta-bar .btn--ghost {
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+              backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+      border-color: var(--glass-border);
+      box-shadow: var(--glass-shadow);
+    }
+    .hero__cta-bar .btn--ghost:hover {
+      background: var(--glass-bg-strong);
+    }
+    .hero__scroll {
+      position: absolute; 
+      bottom:1.5rem; left: 50%;
+      width: 22px; height: 36px;
+      border: 1px solid var(--color-border-strong);
+      border-radius: 999px; transform: translateX(-50%);
+      display: grid; place-items: center;
+      z-index: 10;
+    }
+    .hero__scroll span {
+      display: block; width: 2px; height: 6px;
+      background: rgba(255,255,255,0.8); border-radius: 1px;
+      animation: scroll-hint 1.6s var(--ease-apple) infinite;
+    }
+    @keyframes scroll-hint {
+      0% { transform: translateY(-6px); opacity: 0; }
+      35% { opacity: 1; }
+      100% { transform: translateY(8px); opacity: 0; }
+    }
+
+    /* 7c. HERO PARALLAX */
+    :root {
+      --px-max-move: 25px;
+      --px-bleed:    28px;
+    }
+
+    .parallax-layer--bg {
+      background: linear-gradient(to right,
+        #CDCAC3  0%,
+        #D1CCC6 36%,
+        #C1B8AF 63%,
+        #ABA398 85%,
+        #948A80 100%
+      );
+      -webkit-mask-image: linear-gradient(to bottom, black 0%, black 75%, transparent 90%);
+              mask-image: linear-gradient(to bottom, black 0%, black 75%, transparent 90%);
+    }
+
+    .hero__parallax {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    /* Each layer extends past the container on every side by --px-bleed.
+       That extra space lets translate3d shift the layer in any direction
+       without ever exposing a raw edge through the overflow clip.
+       ─────────────────────────────────────────────────────────────────
+       data-depth on each div controls how far it travels (0 = fixed,
+       1 = full --px-max-move). Edit those values in the HTML to retune
+       individual layers without touching this CSS. */
+    .parallax-layer {
+      position: absolute;
+      top:    calc(-1 * var(--px-bleed));
+      left:   calc(-1 * var(--px-bleed));
+      right:  calc(-1 * var(--px-bleed));
+      bottom: calc(-1 * var(--px-bleed));
+    }
+    /* Desktop only: JS mouse-parallax moves the layers, so promote them to
+       their own compositor layers. On mobile the layers are static — no
+       will-change means no GPU texture per layer. */
+    @media (min-width: 981px) {
+      .parallax-layer {
+        transform: translate3d(0, 0, 0);
+        will-change: transform;
+      }
+    }
+
+    .parallax-layer img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center center;
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    /* 8. REVEAL — initial hidden state (prevents FOUC) */
+    .reveal {
+      opacity: 0; transform: translateY(18px);
+      transition: opacity var(--dur-slow) var(--ease-apple) var(--reveal-delay, 0ms),
+                  transform var(--dur-slow) var(--ease-apple) var(--reveal-delay, 0ms);
+      will-change: opacity, transform;
+    }
+    .reveal.is-in { opacity: 1; transform: translateY(0); }
+
+    /* ── FEATURED TIER — BLOB BACKGROUND ─────────────────────────────────
+       Animated glows behind the "Gallery Bundle" card.
+       ↓↓↓ EDIT THESE THREE HEX VALUES to change the card's color mood. ↓↓↓ */
+    :root {
+      --tier-blob-a: #2060E0;   /* Blob A — cool blue    (drifts top-left)   */
+      --tier-blob-b: #B04010;   /* Blob B — warm amber   (drifts mid-right)  */
+      --tier-blob-c: #767F4E;   /* Blob C — deep ochre   (drifts bottom)     */
+    }
+    /* Clip wrapper — keeps blobs inside the card radius without
+       clipping the .tier__badge that sits 12px above the card top */
+    .tier__blob-wrap {
+      position: absolute; inset: 0;
+      overflow: hidden; border-radius: inherit;
+      pointer-events: none; z-index: 0;
+    }
+    .tier__bg-blobs {
+      position: absolute; inset: -25%;
+      filter: blur(55px) saturate(130%);
+      will-change: transform;
+    }
+    .tier__blob {
+      position: absolute; border-radius: 50%;
+      opacity: 0.65; mix-blend-mode: screen;
+      animation: drift 38s ease-in-out infinite;
+    }
+    @keyframes drift {
+      0%,100% { transform: translate3d(0, 0, 0) scale(1); }
+      33%     { transform: translate3d(4vw, -3vh, 0) scale(1.05); }
+      66%     { transform: translate3d(-3vw, 4vh, 0) scale(0.97); }
+    }
+    .tier__blob--a {
+      width: 130%; height: 130%;
+      background: radial-gradient(closest-side, var(--tier-blob-a) 0%, transparent 30%);
+      top: -50%; left: -50%; animation-duration: 42s;
+    }
+    .tier__blob--b {
+      width: 120%; height: 120%;
+      background: radial-gradient(closest-side, var(--tier-blob-b) 0%, transparent 30%);
+      top: 20%; right: 20%;
+      animation-duration: 56s; animation-direction: reverse;
+    }
+    .tier__blob--c {
+      width: 110%; height: 110%;
+      background: radial-gradient(closest-side, var(--tier-blob-c) 0%, transparent 30%);
+      bottom: 0%; left: 35%; animation-duration: 64s;
+    }
+    /* Lift all direct card children above the blob layer */
+    .tier--featured > *:not(.tier__blob-wrap) {
+      z-index: 1;
+    }
+
+    /* REDUCED MOTION */
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1; transform: none; transition: none; }
+      .tier__blob { animation: none; }
+      .hero__scroll span { animation: none; }
+    }
+
+    /* RESPONSIVE — above-fold elements only.
+       Hero layers are static on mobile (no float animations, no JS parallax)
+       to keep GPU memory and compositing cost down. */
+    @media (max-width: 980px) {
+      .nav__links { display: none; }
+      .nav__cta { margin-left: auto; }
+      .hero { height: 90svh; margin-top: 0; }
+      .hero__cta-bar { bottom: 2.5rem; }
+    }
+    @media (max-width: 560px) {
+      .nav__brand-name { display: block; font-size: 0.72rem; letter-spacing: -0.01em; }
+      .hero__cta-bar { bottom: 0.5rem; }
+      /* Allow scroll indicator to sit below the hero's bottom edge */
+      .hero { overflow: visible; }
+      .hero__scroll { bottom: -3rem; }
+      .hero__scroll span { background: var(--color-ink-muted); }
+    }
+  </style>
+
+  <!-- Parallax layers 3, 5 — preload so they render before JS kicks in.
+       media queries match the <picture> sources so each device only
+       downloads the variant it actually renders. -->
+  <link rel="preload" href="images/Homepage%20Header%20Parallax%20Images/3-headline.avif" as="image" type="image/avif" fetchpriority="high" media="(min-width: 981px)" />
+  <link rel="preload" href="images/Homepage%20Header%20Parallax%20Images/5-jason-freisteller.avif" as="image" type="image/avif" fetchpriority="high" media="(min-width: 981px)" />
+  <link rel="preload" href="images/Homepage%20Header%20Parallax%20Images%20Mobile/3-headline.avif" as="image" type="image/avif" fetchpriority="high" media="(max-width: 980px)" />
+  <link rel="preload" href="images/Homepage%20Header%20Parallax%20Images%20Mobile/5-jason-freisteller.avif" as="image" type="image/avif" fetchpriority="high" media="(max-width: 980px)" />
+
+  <!-- Full stylesheet — non-render-blocking async load -->
+  <link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="styles.css"></noscript>
+
+  <!-- Booking popup styles — async (popup never shown on initial load) -->
+  <link rel="preload" href="booking-popup.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="booking-popup.css"></noscript>
+
+  <!-- Cookie consent popup styles -->
+  <link rel="preload" href="cookie-consent.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="cookie-consent.css"></noscript>
+
+  <!-- Google Analytics 4 — queue setup only; cookie-consent.js pushes the
+       js/config commands and injects the script after consent -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    window.gtag = gtag;
+  </script>
+</head>
+<body>
+
+  <!-- ====================================================================
+       Animated background — drifting gradient blobs + grain.
+       This is the "abstract 3D" hero backdrop. Lives behind everything.
+       To swap in a video later: replace .bg-blobs with a <video> element.
+       ==================================================================== -->
+  <div class="bg" aria-hidden="true">
+    <div class="bg-blobs">
+      <span class="blob blob--a"></span>
+      <span class="blob blob--b"></span>
+      <span class="blob blob--c"></span>
+    </div>
+    <div class="bg-grain"></div>
+  </div>
+
+  <!-- ====================================================================
+       Glass nav (sticky)
+       ==================================================================== -->
+  <header class="nav-wrap"></header>
+
+  <main id="top">
+
+    <!-- ==================================================================
+         HERO — Fullscreen parallax
+         ================================================================== -->
+    <section class="hero">
+
+      <!-- Fullscreen parallax layer stack
+           data-depth: 0 = fixed, 1 = full --px-max-move.
+           Higher depth → travels farther (feels "closer to viewer").
+           Layer order: 1 = lowest (background), 9 = highest (foreground). -->
+      <div class="hero__parallax" id="heroParallax" aria-hidden="true">
+
+        <!-- Layer 1 — Hintergrund CSS-Verlauf, fixed -->
+        <div class="parallax-layer parallax-layer--bg" data-depth="0"></div>
+
+        <!-- Layer 2 — Windows decoration -->
+        <div class="parallax-layer" data-depth="0.2">
+          <picture>
+            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/2-windows.avif" type="image/avif">
+            <img src="images/Homepage%20Header%20Parallax%20Images/2-windows.avif" alt="" decoding="async" />
+          </picture>
+        </div>
+
+        <!-- Layer 3 — Headline "AI-COMMERCE DESIGN" -->
+        <div class="parallax-layer" data-depth="0.25">
+          <picture>
+            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/3-headline.avif" type="image/avif">
+            <img src="images/Homepage%20Header%20Parallax%20Images/3-headline.avif" alt="" fetchpriority="high" />
+          </picture>
+        </div>
+
+        <!-- Layer 4 — Folder "Material" -->
+        <div class="parallax-layer" data-depth="0.30">
+          <picture>
+            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/4-folder-material.avif" type="image/avif">
+            <img src="images/Homepage%20Header%20Parallax%20Images/4-folder-material.avif" alt="" decoding="async" />
+          </picture>
+        </div>
+
+        <!-- Layer 5 — Jason Freisteller (main subject) -->
+        <div class="parallax-layer" data-depth="0.20">
+          <picture>
+            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/5-jason-freisteller.avif" type="image/avif">
+            <img src="images/Homepage%20Header%20Parallax%20Images/5-jason-freisteller.avif" alt="" fetchpriority="high" />
+          </picture>
+        </div>
+
+        <!-- Layer 6 — "günstiger & besser" badge -->
+        <div class="parallax-layer" data-depth="0.55">
+          <picture>
+            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/6-gnstiger-besser.avif" type="image/avif">
+            <img src="images/Homepage%20Header%20Parallax%20Images/6-gnstiger-besser.avif" alt="" decoding="async" />
+          </picture>
+        </div>
+
+        <!-- Layer 7 — Folder "AI Generated" -->
+        <div class="parallax-layer" data-depth="0.65">
+          <picture>
+            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/7-folder-ai-generated.avif" type="image/avif">
+            <img src="images/Homepage%20Header%20Parallax%20Images/7-folder-ai-generated.avif" alt="" decoding="async" />
+          </picture>
+        </div>
+
+        <!-- Layer 8 — Transition overlay, fixed -->
+        <div class="parallax-layer" data-depth="0">
+          <picture>
+            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/8-transition.avif" type="image/avif">
+            <img src="images/Homepage%20Header%20Parallax%20Images/8-transition.avif" alt="" decoding="async" />
+          </picture>
+        </div>
+
+        <!-- Layer 9 — Zitat -->
+        <div class="parallax-layer" data-depth="0.6">
+          <picture>
+            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/9-zitat.avif" type="image/avif">
+            <img src="images/Homepage%20Header%20Parallax%20Images/9-zitat.avif" alt="" decoding="async" />
+          </picture>
+        </div>
+
+      </div><!-- /.hero__parallax -->
+
+      <!-- CTA buttons — below the visible image composition -->
+      <div class="hero__cta-bar">
+        <a class="btn btn--ghost" href="#work">Galerien ansehen</a>
+        <a class="btn btn--primary glass-btn" href="#contact">
+          Kostenloses Erstgespräch
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+
+      <a class="hero__scroll" href="#services" aria-label="Weiter scrollen">
+        <span></span>
+      </a>
+    </section>
+
+    <!-- ==================================================================
+         AI SHOWCASE — Lovart-style sticky scroll (light theme)
+         Centered portrait → prompt types in → 4 results appear left-to-right
+         ================================================================== -->
+    <section id="ai-process" class="ai-showcase">
+      <div class="ai-showcase__sticky">
+
+        <!-- Centered heading -->
+        <div class="ai-showcase__header">
+          <p class="ai-showcase__eyebrow">KI-Bildgenerierung</p>
+          <h2 class="ai-showcase__heading">Aus einem Foto.<br>Eine ganze Galerie.</h2>
+          <p class="ai-showcase__subline">Schick mir dein Produktfoto – ich liefere eine komplette Galerie in Studioqualität zurück.</p>
+        </div>
+
+        <!-- Stage: portrait is in-flow; prompt + results are absolute children -->
+        <div class="ai-showcase__stage">
+          <div class="ai-showcase__composition">
+
+            <!-- Portrait with Lovart corner-marker frame -->
+            <div class="ai-showcase__portrait-outer">
+              <div class="ai-showcase__img-meta">
+                <span class="ai-img-label">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 13 13" aria-hidden="true"><path fill="currentColor" d="M7.719 3.656a1.219 1.219 0 1 0 0 2.438 1.219 1.219 0 0 0 0-2.438"></path><path fill="currentColor" fill-rule="evenodd" d="M1.625 2.573c0-.524.424-.948.948-.948h7.854c.524 0 .948.424.948.948v7.854a.95.95 0 0 1-.948.948H2.573a.95.95 0 0 1-.948-.948zm8.938 7.415-2.5-2.5a.677.677 0 0 0-.958 0l-.51.508a.135.135 0 0 1-.19 0L4.805 6.4a.677.677 0 0 0-.942-.015L2.438 7.726V2.573c0-.075.06-.135.135-.135h7.854c.075 0 .136.06.136.135z" clip-rule="evenodd"></path></svg>
+                  Image
+                </span>
+                <span class="ai-img-dims">720 × 960</span>
+              </div>
+              <div class="ai-showcase__portrait-frame">
+                <span class="ai-corner ai-corner--tl"></span>
+                <span class="ai-corner ai-corner--tr"></span>
+                <span class="ai-corner ai-corner--bl"></span>
+                <span class="ai-corner ai-corner--br"></span>
+                <img src="/images/Showcase/showcase-start-image.avif"
+                     alt="Ausgangs-Produktfoto"
+                     width="720" height="960"
+                     loading="lazy" decoding="async" />
+              </div>
+            </div>
+
+            <!-- Prompt box — absolute, slides up on scroll, JS-driven -->
+            <div class="ai-showcase__prompt" id="aiPrompt" aria-hidden="true">
+              <div class="ai-showcase__prompt-content">
+                <span class="ai-showcase__chip">
+                  <span class="ai-showcase__chip-img-wrap">
+                    <img src="/images/Showcase/showcase-start-image.avif" width="24" height="24" alt="" aria-hidden="true">
+                  </span>
+                  <span class="ai-showcase__chip-name">Dein Produkt</span>
+                </span><span class="ai-showcase__typed" id="aiTyped"></span>
+              </div>
+              <div class="ai-showcase__prompt-toolbar">
+                <button class="ai-showcase__toolbar-btn" type="button" tabindex="-1" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 18 18"><path fill="currentColor" fill-opacity="0.6" d="M3.75 11.438V8.062a.563.563 0 0 1 1.125 0v3.376a3.94 3.94 0 0 0 3.938 3.937h.374a3.94 3.94 0 0 0 3.938-3.937V5.25a2.625 2.625 0 0 0-5.25 0v5.906a1.031 1.031 0 1 0 2.063 0V5.812a.562.562 0 1 1 1.124 0v5.344a2.156 2.156 0 1 1-4.312 0V5.25a3.75 3.75 0 0 1 7.5 0v6.188A5.063 5.063 0 0 1 9.188 16.5h-.376a5.063 5.063 0 0 1-5.062-5.062"></path></svg>
+                </button>
+                <div class="ai-showcase__toolbar-right">
+                  <button class="ai-showcase__submit-btn" type="button" tabindex="-1" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 18 18"><path fill="currentColor" d="M8.437 15V4.358l-3.54 3.54a.562.562 0 1 1-.795-.796l4.5-4.5.043-.038a.563.563 0 0 1 .753.038l4.5 4.5a.563.563 0 0 1-.796.796l-3.54-3.54V15a.563.563 0 0 1-1.125 0"></path></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4 result cards — absolute row, JS animates in left-to-right -->
+            <div class="ai-showcase__results">
+
+              <div class="ai-result" data-idx="0">
+                <div class="ai-result__meta">
+                  <span class="ai-img-label"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 13 13" aria-hidden="true"><path fill="currentColor" d="M7.719 3.656a1.219 1.219 0 1 0 0 2.438 1.219 1.219 0 0 0 0-2.438"></path><path fill="currentColor" fill-rule="evenodd" d="M1.625 2.573c0-.524.424-.948.948-.948h7.854c.524 0 .948.424.948.948v7.854a.95.95 0 0 1-.948.948H2.573a.95.95 0 0 1-.948-.948zm8.938 7.415-2.5-2.5a.677.677 0 0 0-.958 0l-.51.508a.135.135 0 0 1-.19 0L4.805 6.4a.677.677 0 0 0-.942-.015L2.438 7.726V2.573c0-.075.06-.135.135-.135h7.854c.075 0 .136.06.136.135z" clip-rule="evenodd"></path></svg> Image</span>
+                  <span class="ai-img-dims">960 × 960</span>
+                </div>
+                <div class="ai-result__frame">
+                  <div class="ai-result__skeleton"><div class="ai-result__pulse"></div></div>
+                  <img src="/images/Showcase/showcase-result-1.avif" width="960" height="960" alt="KI-Galerie Variante 1" loading="lazy" decoding="async">
+                </div>
+              </div>
+
+              <div class="ai-result" data-idx="1">
+                <div class="ai-result__meta">
+                  <span class="ai-img-label"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 13 13" aria-hidden="true"><path fill="currentColor" d="M7.719 3.656a1.219 1.219 0 1 0 0 2.438 1.219 1.219 0 0 0 0-2.438"></path><path fill="currentColor" fill-rule="evenodd" d="M1.625 2.573c0-.524.424-.948.948-.948h7.854c.524 0 .948.424.948.948v7.854a.95.95 0 0 1-.948.948H2.573a.95.95 0 0 1-.948-.948zm8.938 7.415-2.5-2.5a.677.677 0 0 0-.958 0l-.51.508a.135.135 0 0 1-.19 0L4.805 6.4a.677.677 0 0 0-.942-.015L2.438 7.726V2.573c0-.075.06-.135.135-.135h7.854c.075 0 .136.06.136.135z" clip-rule="evenodd"></path></svg> Image</span>
+                  <span class="ai-img-dims">960 × 960</span>
+                </div>
+                <div class="ai-result__frame">
+                  <div class="ai-result__skeleton"><div class="ai-result__pulse"></div></div>
+                  <img src="/images/Showcase/showcase-result-2.avif" width="960" height="960" alt="KI-Galerie Variante 2" loading="lazy" decoding="async">
+                </div>
+              </div>
+
+              <div class="ai-result" data-idx="2">
+                <div class="ai-result__meta">
+                  <span class="ai-img-label"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 13 13" aria-hidden="true"><path fill="currentColor" d="M7.719 3.656a1.219 1.219 0 1 0 0 2.438 1.219 1.219 0 0 0 0-2.438"></path><path fill="currentColor" fill-rule="evenodd" d="M1.625 2.573c0-.524.424-.948.948-.948h7.854c.524 0 .948.424.948.948v7.854a.95.95 0 0 1-.948.948H2.573a.95.95 0 0 1-.948-.948zm8.938 7.415-2.5-2.5a.677.677 0 0 0-.958 0l-.51.508a.135.135 0 0 1-.19 0L4.805 6.4a.677.677 0 0 0-.942-.015L2.438 7.726V2.573c0-.075.06-.135.135-.135h7.854c.075 0 .136.06.136.135z" clip-rule="evenodd"></path></svg> Image</span>
+                  <span class="ai-img-dims">960 × 960</span>
+                </div>
+                <div class="ai-result__frame">
+                  <div class="ai-result__skeleton"><div class="ai-result__pulse"></div></div>
+                  <img src="/images/Showcase/showcase-result-3.avif" width="960" height="960" alt="KI-Galerie Variante 3" loading="lazy" decoding="async">
+                </div>
+              </div>
+
+              <div class="ai-result" data-idx="3">
+                <div class="ai-result__meta">
+                  <span class="ai-img-label"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 13 13" aria-hidden="true"><path fill="currentColor" d="M7.719 3.656a1.219 1.219 0 1 0 0 2.438 1.219 1.219 0 0 0 0-2.438"></path><path fill="currentColor" fill-rule="evenodd" d="M1.625 2.573c0-.524.424-.948.948-.948h7.854c.524 0 .948.424.948.948v7.854a.95.95 0 0 1-.948.948H2.573a.95.95 0 0 1-.948-.948zm8.938 7.415-2.5-2.5a.677.677 0 0 0-.958 0l-.51.508a.135.135 0 0 1-.19 0L4.805 6.4a.677.677 0 0 0-.942-.015L2.438 7.726V2.573c0-.075.06-.135.135-.135h7.854c.075 0 .136.06.136.135z" clip-rule="evenodd"></path></svg> Image</span>
+                  <span class="ai-img-dims">960 × 960</span>
+                </div>
+                <div class="ai-result__frame">
+                  <div class="ai-result__skeleton"><div class="ai-result__pulse"></div></div>
+                  <img src="/images/Showcase/showcase-result-4.avif" width="960" height="960" alt="KI-Galerie Variante 4" loading="lazy" decoding="async">
+                </div>
+              </div>
+
+            </div><!-- /.ai-showcase__results -->
+
+          </div><!-- /.ai-showcase__composition -->
+        </div><!-- /.ai-showcase__stage -->
+
+      </div><!-- /.ai-showcase__sticky -->
+    </section>
+
+    <!-- ==================================================================
+         SERVICES (3 tiers)
+         ================================================================== -->
+    <section id="services" class="section services" style="padding-top: var(--space-4);">
+      <div class="container">
+        <header class="section__head">
+          <p class="eyebrow reveal">Leistungen</p>
+          <h2 class="section__title reveal" style="--reveal-delay: 80ms">
+            Drei Wege zusammenzuarbeiten.
+          </h2>
+          <p class="section__lede reveal" style="--reveal-delay: 160ms">
+            Vom einzelnen Produkt-Sprint bis zum laufenden Gallery-Partner. Du steigst auf der Stufe ein, die zu deiner Marke passt – und kannst jederzeit hochwechseln.
+          </p>
+        </header>
+
+        <div class="tiers">
+          <article class="tier reveal">
+            <div class="tier__head">
+              <span class="tier__tag">Einstieg</span>
+              <h3 class="tier__name">Gallery Sprint</h3>
+              <p class="tier__price">849<span>€</span><small>/ Produkt</small></p>
+            </div>
+            <p class="tier__desc">
+              Komplette Produktgalerie für ein Produkt. 6–10 Bilder nach Aufwand: Freisteller, Hero, Detail, Lifestyle,
+              Feature-Callouts etc.
+            </p>
+            <ul class="tier__list">
+              <li>5 Werktage Lieferzeit</li>
+              <li>2 Revisionsrunden</li>
+              <li>Master-Files + alle Ratios</li>
+            </ul>
+            <a class="btn btn--primary glass-btn tier__cta" href="#contact">Sprint starten</a>
+          </article>
+
+          <article class="tier tier--featured reveal" style="--reveal-delay: 80ms">
+            <!-- Animated blob background — colors controlled by --tier-blob-a/b/c in <style> -->
+            <div class="tier__blob-wrap" aria-hidden="true">
+              <div class="tier__bg-blobs">
+                <span class="tier__blob tier__blob--a"></span>
+                <span class="tier__blob tier__blob--b"></span>
+                <span class="tier__blob tier__blob--c"></span>
+              </div>
+            </div>
+            <div class="tier__badge">Beliebt</div>
+            <div class="tier__head">
+              <span class="tier__tag">Bundle</span>
+              <h3 class="tier__name">Gallery Bundle</h3>
+              <p class="tier__price">599<span>€</span><small>/ Produkt</small></p>
+            </div>
+            <p class="tier__desc">
+              Galerien ab 5 Produkten, für deinen Launch oder eine Kollektion. Grafiken für Landing Pages ebenfalls möglich.
+            </p>
+            <ul class="tier__list2">
+              <li>Individuelle Projektzeit</li>
+              <li>Keine Kündigungsfrist</li>
+              <li>Branding für eine ganze Linie</li>
+            </ul>
+            <a class="btn btn--ghost tier__cta btn_bundle_buchen_cta" href="#contact">Bundle buchen</a>
+          </article>
+
+          <article class="tier reveal" style="--reveal-delay: 160ms">
+            <div class="tier__head">
+              <span class="tier__tag">Retainer</span>
+              <h3 class="tier__name">Gallery Partner</h3>
+              <p class="tier__price">Individueller Preis.<br /><small> </small></p>
+            </div>
+            <p class="tier__desc">
+              Dein laufender Galerie-Partner. Monatlich neue Galerien für deine Produkte
+              und ein monatlicher Conversion-Review.
+            </p>
+            <ul class="tier__list">
+              <li>3 Monate Mindestlaufzeit</li>
+              <li>Priorisierter Slot</li>
+              <li>Monatlicher Performance-Call</li>
+            </ul>
+            <a class="btn btn--primary glass-btn tier__cta" href="#contact">Gallery Partner werden</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         WORK / GALLERIES
+         ================================================================== -->
+    <section id="work" class="section work">
+      <div class="container">
+        <header class="section__head">
+          <p class="eyebrow reveal">Galerien</p>
+          <h2 class="section__title reveal" style="--reveal-delay: 80ms">
+            Ausgewählte Arbeiten.
+          </h2>
+          <p class="section__lede reveal" style="--reveal-delay: 160ms">
+            Eine Auswahl meiner Produktgalerien. Manche Marken sind unter NDA – die Bilder sind anonymisiert, aber die Bildlogik bleibt sichtbar.
+          </p>
+        </header>
+
+        <div class="gallery-grid">
+          <a class="gallery-card reveal" href="/galerie-verse-fragrances" data-tone="warm">
+            <div class="gallery-card__image-wrap">
+              <img class="gallery-card__image" src="/images/Ausgewaehlte%20Arbeiten/Verse%20Fragrances/7-verse-fragrances-diffuser.avif" srcset="/images/Ausgewaehlte%20Arbeiten/Verse%20Fragrances/7-verse-fragrances-diffuser-750w.avif 750w, /images/Ausgewaehlte%20Arbeiten/Verse%20Fragrances/7-verse-fragrances-diffuser.avif 1500w" sizes="(max-width: 560px) 82vw, (max-width: 980px) 50vw, 370px" width="1500" height="1500" loading="lazy" decoding="async" alt="" aria-hidden="true">
+              <img class="gallery-card__image--hover" src="/images/Ausgewaehlte%20Arbeiten/Verse%20Fragrances/6-verse-fragrances-diffuser.avif" srcset="/images/Ausgewaehlte%20Arbeiten/Verse%20Fragrances/6-verse-fragrances-diffuser-750w.avif 750w, /images/Ausgewaehlte%20Arbeiten/Verse%20Fragrances/6-verse-fragrances-diffuser.avif 1500w" sizes="(max-width: 560px) 82vw, (max-width: 980px) 50vw, 370px" width="1500" height="1500" loading="lazy" decoding="async" alt="" aria-hidden="true">
+            </div>
+            <div class="gallery-card__meta">
+              <span class="gallery-card__cat">Fragrance · International</span>
+              <h3 class="gallery-card__title">Verse Fragrances</h3>
+              <p class="gallery-card__note">3 Galerien, 2 Wochen, -58% Foto-Kosten</p>
+            </div>
+          </a>
+          <a class="gallery-card reveal" href="/galerie-aurum-collective" data-tone="cool" style="--reveal-delay: 80ms">
+            <div class="gallery-card__image-wrap">
+              <img class="gallery-card__image" src="/images/Ausgewaehlte%20Arbeiten/Aurum%20Collective/showcase-aurum-collective-3.avif" srcset="/images/Ausgewaehlte%20Arbeiten/Aurum%20Collective/showcase-aurum-collective-3-750w.avif 750w, /images/Ausgewaehlte%20Arbeiten/Aurum%20Collective/showcase-aurum-collective-3.avif 1500w" sizes="(max-width: 560px) 82vw, (max-width: 980px) 50vw, 370px" width="1500" height="1500" loading="lazy" decoding="async" alt="" aria-hidden="true">
+              <img class="gallery-card__image--hover" src="/images/Ausgewaehlte%20Arbeiten/Aurum%20Collective/showcase-aurum-collective-1.avif" srcset="/images/Ausgewaehlte%20Arbeiten/Aurum%20Collective/showcase-aurum-collective-1-750w.avif 750w, /images/Ausgewaehlte%20Arbeiten/Aurum%20Collective/showcase-aurum-collective-1.avif 1500w" sizes="(max-width: 560px) 82vw, (max-width: 980px) 50vw, 370px" width="1500" height="1500" loading="lazy" decoding="async" alt="" aria-hidden="true">
+            </div>
+            <div class="gallery-card__meta">
+              <span class="gallery-card__cat">Jewellery · DACH</span>
+              <h3 class="gallery-card__title">Aurum Collective</h3>
+              <p class="gallery-card__note">3 Products - 1 Woche - 62% Foto-Kosten</p>
+            </div>
+          </a>
+          <a class="gallery-card reveal" href="/galerie-pulse-wearables" data-tone="midnight" style="--reveal-delay: 160ms">
+            <div class="gallery-card__image-wrap">
+              <img class="gallery-card__image" src="/images/Ausgewaehlte%20Arbeiten/Pulse%20Wearables/2-pulse-wearables-smart-watch.avif" srcset="/images/Ausgewaehlte%20Arbeiten/Pulse%20Wearables/2-pulse-wearables-smart-watch-750w.avif 750w, /images/Ausgewaehlte%20Arbeiten/Pulse%20Wearables/2-pulse-wearables-smart-watch.avif 1500w" sizes="(max-width: 560px) 82vw, (max-width: 980px) 50vw, 370px" width="1500" height="1500" loading="lazy" decoding="async" alt="" aria-hidden="true">
+              <img class="gallery-card__image--hover" src="/images/Ausgewaehlte%20Arbeiten/Pulse%20Wearables/3-pulse-wearables-smart-watch.avif" srcset="/images/Ausgewaehlte%20Arbeiten/Pulse%20Wearables/3-pulse-wearables-smart-watch-750w.avif 750w, /images/Ausgewaehlte%20Arbeiten/Pulse%20Wearables/3-pulse-wearables-smart-watch.avif 1500w" sizes="(max-width: 560px) 82vw, (max-width: 980px) 50vw, 370px" width="1500" height="1500" loading="lazy" decoding="async" alt="" aria-hidden="true">
+            </div>
+            <div class="gallery-card__meta">
+              <span class="gallery-card__cat">Wearables · Europe</span>
+              <h3 class="gallery-card__title">Pulse Wearables</h3>
+              <p class="gallery-card__note">2 Produkte, 2 Wochen, -67% Foto-Kosten</p>
+            </div>
+          </a>
+          <!-- ==================================================================
+          <a class="gallery-card reveal" href="/galerie-lipcare-launch" data-tone="rose" style="--reveal-delay: 240ms">
+            <div class="gallery-card__image" aria-hidden="true"></div>
+            <div class="gallery-card__meta">
+              <span class="gallery-card__cat">Beauty · CH</span>
+              <h3 class="gallery-card__title">Lipcare Launch</h3>
+              <p class="gallery-card__note">3 Farben · 24 Bilder gesamt</p>
+            </div>
+          </a>
+          <a class="gallery-card reveal" href="/galerie-supplement-reihe" data-tone="fog" style="--reveal-delay: 320ms">
+            <div class="gallery-card__image" aria-hidden="true"></div>
+            <div class="gallery-card__meta">
+              <span class="gallery-card__cat">Wellness · DE</span>
+              <h3 class="gallery-card__title">Supplement Reihe</h3>
+              <p class="gallery-card__note">Galerien + Feature-Tiles für 5 SKUs</p>
+            </div>
+          </a>
+          <a class="gallery-card reveal" href="/galerie-audio-accessory" data-tone="midnight" style="--reveal-delay: 400ms">
+            <div class="gallery-card__image" aria-hidden="true"></div>
+            <div class="gallery-card__meta">
+              <span class="gallery-card__cat">Tech · DACH</span>
+              <h3 class="gallery-card__title">Audio-Accessory</h3>
+              <p class="gallery-card__note">Studio-Hero + Lifestyle</p>
+            </div>
+          </a>
+        </div>
+        ================================================================== -->
+
+        <!-- Dot navigation — only rendered/used on mobile via CSS + JS -->
+        <div class="gallery-dots" aria-hidden="true">
+          <button class="gallery-dot is-active" aria-label="Galerie 1"></button>
+          <button class="gallery-dot" aria-label="Galerie 2"></button>
+          <button class="gallery-dot" aria-label="Galerie 3"></button>
+          <button class="gallery-dot" aria-label="Galerie 4"></button>
+          <button class="gallery-dot" aria-label="Galerie 5"></button>
+          <button class="gallery-dot" aria-label="Galerie 6"></button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         BLOG FEATURED
+         ================================================================== -->
+    <section class="section" style="padding-top: 0; padding-bottom: var(--space-4);">
+      <div class="container">
+        <a class="blog-featured reveal" href="/aus-iphone-fotos-eine-komplette-AI-Galerie-f%C3%BCr-eine-Produktseite-generieren" style="--reveal-delay: 80ms">
+          <div class="blog-featured__copy">
+            <div class="blog-featured__meta">
+              <span class="blog-card__tag">Workflow</span>
+              <span class="blog-card__date">Juni 2026</span>
+            </div>
+            <h2 class="blog-featured__title">Wie ich aus iPhone Fotos eine komplette <em>AI-Galerie</em> für eine Produktseite generiere</h2>
+            <p class="blog-featured__excerpt">
+              Kein Fotostudio, kein Set, kein Shooting-Tag. Ein paar ehrliche iPhone-Fotos rein — eine vollständige, konsistente PDP-Galerie raus. Mein kompletter Workflow mit Claude, Figma und ChatGPT Images 2.0.
+            </p>
+            <span class="blog-card__read">Jetzt lesen →</span>
+          </div>
+          <div class="blog-featured__image-wrap">
+            <img class="blog-featured__image is-active" src="/images/pillar-content/iPhone Fotos zu AI Galerie/wie-ich-aus-iphone-fotos-eine-komplette-ai-galerie-fuerr-eine-produktseite-generiere.avif" alt="Wie ich aus iPhone-Fotos eine komplette AI-Galerie für eine Produktseite generiere" width="1750" height="1750" loading="lazy" decoding="async" />
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         INSIGHTS — Newsletter signup
+         ================================================================== -->
+    <section id="insights" class="section">
+      <div class="container">
+        <div class="insights__inner">
+          <div class="insights__copy">
+            <p class="eyebrow reveal">Insights</p>
+            <h2 class="section__title reveal" style="--reveal-delay: 80ms">
+              KI-Bildlogik direkt<br>in dein Postfach.
+            </h2>
+            <p class="reveal" style="--reveal-delay: 160ms">
+              Praxisnahe Frameworks, ehrliche Einschätzungen und die neuesten Entwicklungen rund um KI-Produktgalerien und DTC-Conversion — monatlich, ohne Spam.
+            </p>
+            <div class="insights__cta-wrap reveal" style="--reveal-delay: 200ms">
+              <form class="insights__form" id="insights-form" novalidate>
+                <input type="email" placeholder="deine@email.de" required autocomplete="email" aria-label="E-Mail-Adresse" />
+                <button class="btn btn--primary glass-btn" type="submit">Jetzt anmelden</button>
+              </form>
+              <a class="btn btn--ghost insights__alle-btn" href="/blog">Alle Artikel</a>
+            </div>
+            <p class="insights__feedback" id="insights-success" hidden style="color: var(--color-accent);">✓ Du bist dabei — schau bald in dein Postfach.</p>
+            <p class="insights__feedback" id="insights-error" hidden style="color: #D94A4A;">Etwas ist schiefgelaufen. Bitte versuche es erneut.</p>
+            <p class="insights__privacy">Kein Spam. Abmeldung jederzeit möglich.</p>
+          </div>
+          <div class="insights__visual reveal" style="--reveal-delay: 120ms" aria-hidden="true">
+            <div class="insights__mock glass" style="aspect-ratio:auto;display:flex;flex-direction:column;padding:0;">
+              <div style="aspect-ratio:1/1;overflow:hidden;flex-shrink:0;border-radius:var(--radius-lg) var(--radius-lg) 0 0;">
+                <img src="images/Blog/Blog Artikel/ki-bilder-vs-fotostudio-was-wirklich-den-unterschied-macht.avif"
+                     alt="" aria-hidden="true"
+                     width="1024" height="1024" loading="lazy" decoding="async"
+                     style="width:100%;height:100%;object-fit:cover;display:block;">
+              </div>
+              <div class="insights__mock-cover" style="padding:var(--space-3);">
+                <span class="insights__mock-tag">Insights</span>
+                <h3>KI-Bilder vs. Fotostudio:<br>Was wirklich den<br>Unterschied macht</h3>
+                <p class="insights__mock-byline">Jason Martin, wöchentlich</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         ABOUT
+         ================================================================== -->
+    <section id="about" class="section about">
+      <div class="container about__grid">
+        <div class="about__visual reveal">
+          <div class="about__portrait">
+            <img class="about__portrait-img" src="images/jason-martin-vertical-full-res.avif" alt="Jason Martin" width="610" height="800" loading="lazy" decoding="async" />
+          </div>
+        </div>
+        <div class="about__copy">
+          <p class="eyebrow reveal">Über mich</p>
+          <h2 class="section__title reveal" style="--reveal-delay: 80ms">
+            Deine Produktgalerien sehen zwar gut aus, <em>aber konvertieren schlecht?</em>
+          </h2>
+          <p class="reveal" style="--reveal-delay: 160ms">
+            Ich weiß warum! Ich bin Jason & habe 7+ Jahre Erfahrung im Meta Media Buying, Ad Creative & mehrere Million Euro für Brands ausgegeben. Dabei habe ich gelernt, was wirklich verkauft, und was nur schön aussieht.
+          </p>
+          <p class="reveal" style="--reveal-delay: 200ms">
+            Heute baue ich mit KI Produktgalerien für E-Commerce-Shops, die nicht nur gut aussehen – sondern Besucher auch zu Kunden machen.
+          </p>
+          <p class="reveal" style="--reveal-delay: 240ms">
+            12+ Jahre Design + KI-Tools + Blick eines Performance-Marketers + weniger Kosten = mehr Gewinn
+          </p>
+          <p class="reveal" style="--reveal-delay: 260ms">
+            Kein Studio. Kein Fotograf. Keine wochenlange Wartezeit.
+          </p>
+          <ul class="about__points reveal" style="--reveal-delay: 280ms">
+            <li>Mehr Conversions – Bildlogik, die verkauft, nicht nur beeindruckt.</li>
+            <li>Weniger Kosten – professionelle Produktbilder ohne Begrenzungen, teuren Fotograf oder Models.</li>
+            <li>Fertige Galerie in Tagen – fertig bevor dein nächster Konkurrent überhaupt bucht.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         CONTACT CTA
+         ================================================================== -->
+    <section id="contact" class="section contact">
+      <div class="container contact__inner">
+        <p class="eyebrow reveal">Kontakt</p>
+        <h2 class="contact__title reveal" style="--reveal-delay: 80ms">
+          Lass uns über deine Produktseite sprechen.
+        </h2>
+        <p class="contact__sub reveal" style="--reveal-delay: 160ms">
+          30 Minuten, kostenlos, kein Pitch. Wir schauen uns deine Produktseite gemeinsam an –
+          und du gehst mit drei konkreten Verbesserungen raus, ob wir zusammenarbeiten oder nicht.
+        </p>
+        <div class="contact__cta reveal" style="--reveal-delay: 240ms">
+          <a class="btn btn--primary btn--lg glass-btn" href="#contact" data-booking>
+            Termin buchen
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer"></footer>
+
+  <script src="/shared-components.js" defer></script>
+  <script src="script.js" defer></script>
+
+  <!-- ====================================================================
+       Booking popup — replace YOUR-VERCEL-URL after deploying the API.
+       See booking-api/SETUP.md for instructions.
+       ==================================================================== -->
+  <script>
+    window.BOOKING_API_BASE = 'https://project-bh9tx.vercel.app';
+  </script>
+  <script src="booking-popup.js" defer></script>
+  <script src="booking-glass.js" defer></script>
+  <script src="cookie-consent.js" defer></script>
+
+  <!-- AI Showcase: continuous scroll-driven animation (Lovart-style) -->
+  <script>
+  (function () {
+    'use strict';
+
+    var section  = document.getElementById('ai-process');
+    var prompt   = document.getElementById('aiPrompt');
+    var typedEl  = document.getElementById('aiTyped');
+    if (!section || !prompt || !typedEl) return;
+
+    var results     = Array.from(section.querySelectorAll('.ai-result'));
+    var composition = section.querySelector('.ai-showcase__composition');
+    var resultsGrid = section.querySelector('.ai-showcase__results');
+    var header      = section.querySelector('.ai-showcase__header');
+
+    /* Build typed text as individual char <span>s */
+    var PROMPT_TEXT = 'Erstelle ein Produktgalerie für dieses Produkt.';
+    var chars = PROMPT_TEXT.split('').map(function (ch) {
+      var s = document.createElement('span');
+      s.className = 'char';
+      s.textContent = ch;
+      s.style.opacity = '0';
+      return s;
+    });
+    chars.forEach(function (c) { typedEl.appendChild(c); });
+
+    /* ── Helpers ──────────────────────────────────── */
+    function c01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+    function mr(v, a, b) { return c01((v - a) / (b - a)); }
+
+    function getP() {
+      var rect = section.getBoundingClientRect();
+      var sc   = section.offsetHeight - window.innerHeight;
+      return sc > 0 ? c01(-rect.top / sc) : 0;
+    }
+
+    /* ── Animation phases (scroll progress 0→1)
+       A  0.05–0.28  Prompt slides up
+       B  0.18–0.52  Characters type in (staggered)
+       C0 0.42–0.56  Result 1
+       C1 0.52–0.66  Result 2
+       C2 0.62–0.76  Result 3
+       C3 0.72–0.86  Result 4
+    ─────────────────────────────────────────────── */
+    /* Phase D: result cards appear staggered after composition has scrolled up */
+    var rPhases = [[0.73,0.80],[0.78,0.85],[0.83,0.90],[0.88,0.95]];
+
+    /* How far to lift everything upward during Phase C.
+       MUST be measured after the section is in the viewport (p > 0) so that
+       getBoundingClientRect() reflects the sticky-pinned layout, not the
+       off-screen page position from initial page load. */
+    var compTransY = -200;
+    var measured   = false;
+
+    function measureLift(p) {
+      if (measured || !resultsGrid || p <= 0) return;
+      measured = true;
+      var rect       = resultsGrid.getBoundingClientRect();
+      var gridCenter = (rect.top + rect.bottom) / 2;
+      compTransY     = Math.round(window.innerHeight / 2 - gridCenter);
+    }
+
+    var ticking = false;
+    var lastP   = -1;
+
+    function update() {
+      var p = getP();
+      measureLift(p);                          /* no-op until section is live */
+      if (Math.abs(p - lastP) < 0.0004) return;
+      lastP = p;
+
+      /* Phase A: Prompt slides up from below */
+      var pa = mr(p, 0.05, 0.28);
+      prompt.style.opacity   = pa;
+      prompt.style.transform = 'translateX(-50%) translateY(' + ((1 - pa) * 110) + 'px)';
+
+      /* Phase B: Characters type in staggered */
+      var N = chars.length;
+      for (var i = 0; i < N; i++) {
+        chars[i].style.opacity = mr(p, 0.18 + (i / N) * 0.30, 0.22 + (i / N) * 0.30);
+      }
+
+      /* Phase C: header + portrait + prompt + results all scroll up as one unit.
+         composition translateY carries portrait, prompt (abs child) and results
+         (abs child) with it. header translates by the same amount so the whole
+         visible block rises together. Movement stops once Phase C ends, freezing
+         everything in place while Phase D runs. */
+      var pc   = mr(p, 0.55, 0.73);
+      var lift = pc * compTransY;
+      if (header)      header.style.transform      = 'translateY(' + lift + 'px)';
+      if (composition) composition.style.transform = 'translateY(' + lift + 'px)';
+
+      /* Phase D: Individual result cards appear left-to-right */
+      results.forEach(function (el, i) {
+        var ph = rPhases[i];
+        var rp = mr(p, ph[0], ph[1]);
+        el.style.opacity   = rp;
+        el.style.transform = 'translateY(' + ((1 - rp) * -20) + 'px) scale(' + (1 + (1 - rp) * 0.15) + ')';
+        el.classList.toggle('is-visible', rp > 0.5);
+      });
+    }
+
+    window.addEventListener('scroll', function () {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () { ticking = false; update(); });
+    }, { passive: true });
+
+    update();
+  })();
+  </script>
+
+  <!-- Gallery mobile slider dots -->
+  <script>
+  (function () {
+    // Only wire up on mobile viewports
+    if (!window.matchMedia('(max-width: 560px)').matches) return;
+
+    var grid  = document.querySelector('.gallery-grid');
+    var dots  = document.querySelector('.gallery-dots');
+    if (!grid || !dots) return;
+
+    var cards  = Array.from(grid.querySelectorAll('.gallery-card'));
+    var dotEls = Array.from(dots.querySelectorAll('.gallery-dot'));
+
+    // IntersectionObserver: mark dot active when card is ≥55% visible inside the scroll container
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          var idx = cards.indexOf(entry.target);
+          dotEls.forEach(function (dot, i) {
+            dot.classList.toggle('is-active', i === idx);
+          });
+        }
+      });
+    }, { root: grid, threshold: 0.55 });
+
+    cards.forEach(function (card) { observer.observe(card); });
+
+    // Dot click → scroll card into view
+    dotEls.forEach(function (dot, i) {
+      dot.addEventListener('click', function () {
+        cards[i].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+      });
+    });
+  })();
+  </script>
+
+  <!-- ====================================================================
+       Hero Parallax
+       ==================================================================== -->
+  <script>
+  (function () {
+    'use strict';
+
+    // ╔═══════════════════════════════════════════════════════════════════════╗
+    // ║  PARALLAX CONFIGURATION — all tunable values live here.              ║
+    // ║  No need to touch anything below the closing ═══ line.               ║
+    // ╠═══════════════════════════════════════════════════════════════════════╣
+    var CONFIG = {
+
+      // ── DESKTOP (mouse-driven) ────────────────────────────────────────────
+      maxMove:    25,   // px — Max layer shift when the mouse reaches the viewport edge.
+                        //      Match (or keep ≤) the --px-bleed CSS variable.
+                        //      Raise for more drama, lower for subtlety.
+
+      smoothing: 0.07,  // 0–1 — Lerp factor (animation springiness) per frame.
+                        //      0.04 = very buttery/slow, 0.15 = snappy/fast.
+
+      // ── MOBILE (scroll-driven) ────────────────────────────────────────────
+      mobileMaxMove: 15,      // px — Max layer shift from scroll on mobile.
+      mobileSmoothingFactor: 0.09, // Lerp factor on mobile scroll.
+
+      // ── GENERAL ──────────────────────────────────────────────────────────
+      mobileBreakpoint: 980,  // px — Must match the CSS @media breakpoint above.
+    };
+    // ╚═══════════════════════════════════════════════════════════════════════╝
+
+    // ── Grab elements ────────────────────────────────────────────────────────
+    var parallaxEl = document.getElementById('heroParallax');
+    if (!parallaxEl) return;
+
+    var layers = Array.from(parallaxEl.querySelectorAll('.parallax-layer'));
+    if (!layers.length) return;
+
+    // Read each layer's depth from its data-depth attribute (0 = fixed, 1 = full maxMove)
+    var depths = layers.map(function (l) {
+      return parseFloat(l.dataset.depth) || 0;
+    });
+
+    // ── Bail out if the user prefers reduced motion ──────────────────────────
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    // ── State ────────────────────────────────────────────────────────────────
+    var targetX  = 0, targetY  = 0;   // Where we want to be
+    var currentX = 0, currentY = 0;   // Where we are now (lerped)
+    // isMobile is read lazily inside the first rAF — avoids forced reflow
+    // when layout is still dirty from parsing/style application.
+    var isMobile = false; // updated in first wake() before any layout reads
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+    function lerp(a, b, t) { return a + (b - a) * t; }
+
+    // Apply translate3d to every layer based on current interpolated position.
+    // currentX / currentY are in the -1..+1 range; multiply by maxMove for pixels.
+    // On mobile, CSS float animations handle the layers — JS must not interfere.
+    function applyTransforms(cx, cy) {
+      if (isMobile) return;
+      var maxMove = CONFIG.maxMove;
+      for (var i = 0; i < layers.length; i++) {
+        var d = depths[i];
+        if (d === 0) continue; // Layer 1 is always fixed — skip it
+        var tx = cx * maxMove * d;
+        var ty = cy * maxMove * d;
+        layers[i].style.transform = 'translate3d(' + tx.toFixed(2) + 'px, ' + ty.toFixed(2) + 'px, 0)';
+      }
+    }
+
+    // ── Animation loop ───────────────────────────────────────────────────────
+    // Idles when nothing is moving — cancels rAF to free the main thread.
+    var IDLE_THRESHOLD = 0.01;
+    var rafId = null;       // Track the pending rAF so we can cancel it
+    var isRunning = false;  // Guard against double-starting the loop
+    var isVisible = true;   // Controlled by IntersectionObserver
+
+    function tick() {
+      rafId = null;
+      // Read layout properties at the TOP of the rAF — layout is clean here.
+      isMobile = window.innerWidth <= CONFIG.mobileBreakpoint;
+      var s = isMobile ? CONFIG.mobileSmoothingFactor : CONFIG.smoothing;
+      currentX = lerp(currentX, targetX, s);
+      currentY = lerp(currentY, targetY, s);
+
+      var stillMoving =
+        Math.abs(currentX - targetX) > IDLE_THRESHOLD ||
+        Math.abs(currentY - targetY) > IDLE_THRESHOLD ||
+        Math.abs(currentX)            > IDLE_THRESHOLD ||
+        Math.abs(currentY)            > IDLE_THRESHOLD;
+
+      if (stillMoving) {
+        applyTransforms(currentX, currentY);
+        rafId = requestAnimationFrame(tick); // Only re-queue while moving
+      } else {
+        isRunning = false; // Loop goes idle — no rAF queued
+      }
+    }
+
+    // Wake the loop when an input event arrives (if not already running).
+    function wake() {
+      if (!isRunning && isVisible) {
+        isRunning = true;
+        rafId = requestAnimationFrame(tick);
+      }
+    }
+
+    // ── DESKTOP: Mouse moves anywhere on the page ────────────────────────────
+    document.addEventListener('mousemove', function (e) {
+      if (isMobile) return;
+      // Read layout before writing — no forced reflow
+      var vw = window.innerWidth;
+      var vh = window.innerHeight;
+      targetX = (e.clientX - vw / 2) / (vw / 2);
+      targetY = (e.clientY - vh / 2) / (vh / 2);
+      wake();
+    }, { passive: true });
+
+    // When the mouse leaves the page, spring layers back to centre
+    document.addEventListener('mouseleave', function () {
+      if (isMobile) return;
+      targetX = 0;
+      targetY = 0;
+      wake();
+    });
+
+    // ── Handle viewport resize (e.g. orientation change) ─────────────────────
+    window.addEventListener('resize', function () {
+      isMobile = window.innerWidth <= CONFIG.mobileBreakpoint;
+      if (isMobile) { targetX = 0; targetY = 0; }
+      wake();
+    }, { passive: true });
+
+    // ── IntersectionObserver — pause rAF when hero is off-screen ────────────
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) {
+        isVisible = entries[0].isIntersecting;
+        if (!isVisible) {
+          if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+          isRunning = false;
+        } else {
+          wake();
+        }
+      }, { threshold: 0 }).observe(parallaxEl);
+    }
+
+    // ── Fire ─────────────────────────────────────────────────────────────────
+    wake(); // Start the loop for the first frame (desktop only; mobile uses CSS animations)
+
+  })();
+  </script>
+
+  <!-- Hero card slider -->
+  <script>
+  (function () {
+    var slider = document.querySelector('.hero__slider');
+    if (!slider) return;
+
+    var slides = Array.from(slider.querySelectorAll('.slide'));
+    var N = slides.length;          // 6 cards
+    var TRANSITION_MS = 750;        // must match CSS transition duration
+    var INTERVAL_MS   = 5000;       // 5 s per slide
+
+    function advance() {
+      var front = slides.find(function(s){ return s.dataset.pos === '0'; });
+      if (!front) return;
+
+      // 1. Animate front card out (left + fade)
+      front.classList.add('exiting');
+
+      // 2. Shift every other card one step forward
+      slides.forEach(function(slide) {
+        var pos = parseInt(slide.dataset.pos, 10);
+        if (!isNaN(pos) && pos > 0) {
+          slide.dataset.pos = String(pos - 1);
+        }
+      });
+
+      // 3. After transition, snap front card to the back of the queue
+      setTimeout(function() {
+        front.style.transition = 'none';
+        front.classList.remove('exiting');
+        front.dataset.pos = String(N - 1);
+        // Re-enable transitions after layout flush
+        requestAnimationFrame(function() {
+          requestAnimationFrame(function() {
+            front.style.transition = '';
+          });
+        });
+      }, TRANSITION_MS);
+    }
+
+    setInterval(advance, INTERVAL_MS);
+  })();
+  </script>
+</body>
+</html>
