@@ -1150,13 +1150,12 @@
       return sc > 0 ? c01(-rect.top / sc) : 0;
     }
 
-    var lastP = -1, lastCount = 0, lastBuy = false, ticking = false;
+    var lastCount = 0, lastBuy = false;
 
-    function update() {
-      var p = getP();
-      if (Math.abs(p - lastP) < 0.0005) return;
-      lastP = p;
-
+    /* Render the story at an (already-smoothed) progress value. Class toggles
+       are idempotent — add/remove on an unchanged class is a no-op — so this
+       is safe to call every animation frame. */
+    function render(p) {
       var i, n;
       for (i = 0, n = fx.length; i < n; i++) {
         fx[i].el.classList.toggle('is-on', p >= fx[i].at);
@@ -1180,13 +1179,41 @@
       }
     }
 
-    window.addEventListener('scroll', function () {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(function () { ticking = false; update(); });
-    }, { passive: true });
+    /* Smoothing: raw scroll (especially mobile momentum) arrives in coarse,
+       uneven bursts. Instead of rendering the raw position — which makes the
+       dots pop in blocks and the beats jump — we lerp a smoothed value toward
+       the scroll target every frame. The rAF loop keeps interpolating between
+       sparse scroll samples, so the story always flows. It idles once settled. */
+    var SMOOTH = 0.16;     /* per-frame easing toward the scroll target      */
+    var SETTLE = 0.0004;   /* snap + stop when this close to the target       */
+    var targetP  = getP();
+    var currentP = targetP;
+    var running  = false, rafId = null;
 
-    update();
+    function tick() {
+      rafId = null;
+      currentP += (targetP - currentP) * SMOOTH;
+      if (Math.abs(targetP - currentP) < SETTLE) currentP = targetP;
+      render(currentP);
+      if (currentP !== targetP) {
+        running = true;
+        rafId = requestAnimationFrame(tick);
+      } else {
+        running = false;
+      }
+    }
+
+    function wake() {
+      targetP = getP();
+      if (running || Math.abs(targetP - currentP) < SETTLE) return;
+      running = true;
+      rafId = requestAnimationFrame(tick);
+    }
+
+    window.addEventListener('scroll', wake, { passive: true });
+    window.addEventListener('resize', wake, { passive: true });
+
+    render(currentP);
   })();
   </script>
 
