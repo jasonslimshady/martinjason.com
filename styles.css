@@ -514,3 +514,176 @@
 .gallery-card__image-wrap{position:relative;overflow:hidden;display:block;}
 .gallery-card__image--hover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity 0.4s ease;pointer-events:none;}
 .gallery-card:hover .gallery-card__image--hover{opacity:1;}
+
+/* ── LEVERAGE SECTION — the conversion-math argument ──────────────────────
+   3 stacked "steps": the leak (100 visitors) → wrong lever → the real lever.
+   ───────────────────────────────────────────────────────────────────────── */
+.leverage__head { max-width: 900px; margin-bottom: var(--space-5); }
+.leverage__grid { display: grid; gap: var(--space-3); }
+
+/* Shared card shell for steps 01 + 02 */
+.lev-card {
+  position: relative;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+}
+.lev-card__step {
+  display: inline-block;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+  color: var(--color-accent);
+  margin-bottom: var(--space-3);
+}
+.lev-card__step--invert { color: rgba(255,255,255,0.85); }
+
+/* STEP 01 — visitor dots + facts, two columns on desktop */
+.lev-card__body {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  align-items: center;
+}
+.lev-visitors { display: flex; flex-direction: column; gap: 0.9rem; align-items: center; }
+.lev-visitors__dots {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 5px;
+  width: min(300px, 60vw);
+}
+.lev-visitors__dots span {
+  aspect-ratio: 1;
+  border-radius: 3px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+}
+.lev-visitors__dots span.is-buyer {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-tint);
+}
+.lev-visitors__caption {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--color-ink-soft);
+  letter-spacing: 0.02em;
+}
+.lev-facts { display: grid; gap: 0.9rem; }
+.lev-fact {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--color-border-strong);
+}
+.lev-fact strong {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  min-width: 4.2rem;
+}
+.lev-fact span { color: var(--color-ink-muted); font-size: 0.96rem; line-height: 1.4; }
+.lev-fact--good { border-left-color: var(--color-accent); }
+.lev-fact--good strong { color: var(--color-accent); }
+.lev-fact--bad { border-left-color: #C4462F; }
+.lev-fact--bad strong { color: #C4462F; }
+
+/* STEP 02 — misdirection: crossed-out focus → the real leak */
+.lev-focus {
+  display: grid;
+  grid-template-columns: 1fr auto 1.4fr;
+  gap: clamp(1rem, 3vw, 2rem);
+  align-items: center;
+}
+.lev-focus__label {
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-ink-soft);
+  margin: 0 0 0.7rem;
+}
+.lev-focus__list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.lev-focus__list li {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--color-ink-muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--color-border-strong);
+  text-decoration-thickness: 2px;
+}
+.lev-focus__link { color: var(--color-ink-soft); display: grid; place-items: center; }
+.lev-focus__answer {
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 2vw, 1.6rem);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  color: var(--color-ink);
+  margin: 0;
+}
+.lev-focus__answer em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--color-accent);
+}
+
+/* STEP 03 — the lever payoff, dark high-contrast card */
+.lev-lever {
+  position: relative;
+  background: var(--color-ink);
+  color: #ECECF0;
+  border-radius: var(--radius-lg);
+  padding: clamp(1.75rem, 4vw, 2.75rem);
+  overflow: hidden;
+}
+.lev-lever__math {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.9rem;
+  margin-bottom: var(--space-3);
+}
+.lev-lever__val {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+.lev-lever__val--hi { color: var(--color-accent); }
+.lev-lever__val--cpa {
+  color: #fff;
+  background: var(--color-accent);
+  border-radius: var(--radius-pill);
+  padding: 0.2em 0.7em;
+  font-size: clamp(1.4rem, 3.4vw, 2.2rem);
+}
+.lev-lever__op {
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 3vw, 2rem);
+  font-weight: 300;
+  color: rgba(255,255,255,0.5);
+}
+.lev-lever__note {
+  margin: 0;
+  max-width: 62ch;
+  font-size: var(--fs-lede);
+  line-height: 1.5;
+  color: #B8B8C2;
+}
+.lev-lever__note strong { color: #fff; font-weight: 600; }
+
+@media (max-width: 720px) {
+  .lev-card__body { grid-template-columns: 1fr; justify-items: center; text-align: left; }
+  .lev-facts { width: 100%; }
+  .lev-focus { grid-template-columns: 1fr; }
+  .lev-focus__link { transform: rotate(90deg); }
+  .lev-lever__br { display: none; }
+}
