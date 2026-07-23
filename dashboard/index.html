@@ -326,6 +326,7 @@
     .invd-items th.c-amt{width:130px}
     .invd-items td{padding:15px 16px 15px 0;font-size:13px;vertical-align:top}
     .invd-items td.c-pos{width:88px}
+    .invd-items td.c-desc .c-desc-detail{margin-top:3px;font-size:11px;line-height:1.45;color:#6b6b6b}
     .invd-items tbody tr:last-child td{border-bottom:1px solid #b9b9b9}
     .invd-totals{margin-left:auto;width:360px;margin:14px 0 30px auto}
     .invd-tot-row{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:1px solid #d8d8d8;font-size:14px}
@@ -630,7 +631,7 @@
           <button class="btn btn--ghost btn--sm" id="btn-manual">+ Manuell</button>
         </div>
       </div>
-      <div class="card"><table class="dtable"><thead><tr><th>Beschreibung</th><th>Projekt</th><th>Datum</th><th>Dauer</th><th>Betrag</th><th>Status</th><th style="width:36px"></th></tr></thead><tbody id="time-body"></tbody></table></div>
+      <div class="card"><table class="dtable"><thead><tr><th>Titel</th><th>Projekt</th><th>Datum</th><th>Dauer</th><th>Betrag</th><th>Status</th><th style="width:36px"></th></tr></thead><tbody id="time-body"></tbody></table></div>
     </section>
 
     <!-- INVOICES PANEL -->
@@ -914,7 +915,8 @@
       <div class="modal-body">
         <div class="g2">
           <div class="fg s2"><label class="fl">Projekt *</label><select class="fi" id="mt-proj" required><option value="">Projekt wählen…</option></select></div>
-          <div class="fg s2"><label class="fl">Beschreibung</label><input class="fi" id="mt-desc" placeholder="Was hast du gemacht?" /></div>
+          <div class="fg s2"><label class="fl">Titel</label><input class="fi" id="mt-desc" placeholder="Kurzer Titel …" /></div>
+          <div class="fg s2"><label class="fl">Beschreibung</label><textarea class="fi" id="mt-detail" rows="2" placeholder="Was hast du gemacht? (optional, erscheint kleiner unter dem Titel)"></textarea></div>
           <div class="fg"><label class="fl">Datum</label><input class="fi" id="mt-date" type="date" /></div>
           <div class="fg" style="display:flex;gap:.5rem;align-items:flex-end">
             <div style="flex:1"><label class="fl">Von</label><input class="fi" id="mt-von" type="time" /></div>
@@ -1846,6 +1848,7 @@ function openTimeModal(entry = null) {
   if (entry) {
     projSel.value          = entry.project_id || '';
     $('mt-desc').value     = entry.description || '';
+    $('mt-detail').value   = entry.detail || '';
     $('mt-date').value     = entry.date || today();
     $('mt-invoiced').value = entry.is_invoiced ? 'true' : 'false';
     $('mt-rate').value = entry.rate_override != null ? entry.rate_override : '';
@@ -2058,6 +2061,7 @@ async function saveManualTime(e){
     project_id:       pid,
     client_id:        proj?.client_id || null,
     description:      $('mt-desc').value.trim() || null,
+    detail:           $('mt-detail').value.trim() || null,
     duration_minutes: mins,
     date:             dateStr,
     is_invoiced:      $('mt-invoiced').value === 'true',
@@ -2075,13 +2079,13 @@ async function saveManualTime(e){
   } else {
     ({ error } = await sb.from('time_entries').insert(payload));
   }
-  // Graceful fallback if "rate_override" isn't migrated yet.
-  if (error && /rate_override|column|schema cache/i.test(error.message||'')) {
-    const { rate_override, ...base } = payload;
+  // Graceful fallback if "rate_override" / "detail" isn't migrated yet.
+  if (error && /rate_override|detail|column|schema cache/i.test(error.message||'')) {
+    const { rate_override, detail, ...base } = payload;
     ({ error } = editTimeEntryId
       ? await sb.from('time_entries').update(base).eq('id', editTimeEntryId)
       : await sb.from('time_entries').insert(base));
-    if (!error) toast('Individueller Stundensatz nicht gespeichert — bitte das aktualisierte supabase-setup.sql in Supabase ausführen.','err');
+    if (!error) toast('Stundensatz/Beschreibung nicht vollständig gespeichert — bitte das aktualisierte supabase-setup.sql in Supabase ausführen.','err');
   }
   if (error) { toast('Fehler: '+error.message,'err'); return; }
   closeModal('ov-time');
@@ -2143,7 +2147,7 @@ async function loadTimeEntries(){
     const effRate = e.rate_override != null ? e.rate_override : (e.projects?.rate_type === 'hourly' ? e.projects?.rate : null);
     const betrag = effRate ? fmtEur(e.duration_minutes / 60 * effRate) : '—';
     return `<tr data-id="${e.id}" title="Klicken zum Bearbeiten">
-    <td>${esc(e.description||'—')}</td><td class="muted">${safeColor(e.projects?.color)?`<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${e.projects.color};margin-right:.375rem"></span>`:''}${esc(e.projects?.name||'—')}</td>
+    <td>${esc(e.description||'—')}${e.detail?`<div style="font-size:.75rem;color:var(--ink-s);margin-top:.125rem">${esc(e.detail)}</div>`:''}</td><td class="muted">${safeColor(e.projects?.color)?`<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${e.projects.color};margin-right:.375rem"></span>`:''}${esc(e.projects?.name||'—')}</td>
     <td class="muted">${fmtDate(e.date)}</td>
     <td class="mono">${fmtDur(e.duration_minutes)}</td>
     <td class="mono">${betrag}</td>
@@ -3493,7 +3497,7 @@ async function renderInvStep(){
       <label class="fl">Positionen</label>
       <div style="margin-bottom:.5rem">
         <div style="display:grid;grid-template-columns:1fr 140px 28px;gap:.5rem;padding:.375rem 0" class="li-row">
-          <span class="li-hd">Description</span><span class="li-hd" style="text-align:right">Amount (${esc((companySettings.currency||'EUR'))})</span><span></span>
+          <span class="li-hd">Titel &amp; Beschreibung</span><span class="li-hd" style="text-align:right">Amount (${esc((companySettings.currency||'EUR'))})</span><span></span>
         </div>
         <div id="li-rows">${invLineItems.map((li,i)=>liRowHTML(li,i)).join('')}</div>
         <button class="btn btn--ghost btn--sm" style="margin-top:.75rem" onclick="addLiRow()">+ Position hinzufügen</button>
@@ -3548,7 +3552,7 @@ async function renderInvStep(){
     const notes=invMetaToNotes({ billing_period:invBillingPeriod, bill_to:invBillTo, bank_override:invBank });
     const fakeInv={ invoice_number:invNum, invoice_date:invDate, due_date:invDue||'',
       subtotal, tax_rate:0, tax_amount:0, total, notes,
-      clients:client, invoice_items:invLineItems.map((li,i)=>({ description:li.desc, quantity:1, unit_price:Number(li.amount)||0, total:Number(li.amount)||0, sort_order:i })) };
+      clients:client, invoice_items:invLineItems.map((li,i)=>({ description:li.desc, detail:li.detail||null, quantity:1, unit_price:Number(li.amount)||0, total:Number(li.amount)||0, sort_order:i })) };
     body.innerHTML=buildInvoiceHTML(fakeInv);
     body.dataset.invNum=invNum; body.dataset.invDate=invDate; body.dataset.subtotal=subtotal; body.dataset.total=total;
   }
@@ -3564,9 +3568,9 @@ async function loadInvTimeEntries(){
       // An entry's own rate_override always wins over the project's rate.
       const effRate = e.rate_override != null ? e.rate_override : (e.projects?.rate || 0);
       const rowDesc = `${e.description||e.projects?.name||'Arbeit'} — ${fmtDate(e.date)} · ${fmtDur(e.duration_minutes)}`;
-      return `<div class="te-row${invSelectedTEs.includes(e.id)?' checked':''}" data-id="${e.id}" data-mins="${e.duration_minutes}" data-proj="${esc(e.projects?.name||'')}" data-rate="${effRate}" data-desc="${esc(rowDesc)}">
+      return `<div class="te-row${invSelectedTEs.includes(e.id)?' checked':''}" data-id="${e.id}" data-mins="${e.duration_minutes}" data-proj="${esc(e.projects?.name||'')}" data-rate="${effRate}" data-desc="${esc(rowDesc)}" data-detail="${esc(e.detail||'')}">
       <div class="te-check">✓</div>
-      <div style="flex:1"><div style="font-size:.875rem">${esc(e.description||e.projects?.name||'Arbeit')}</div><div style="font-size:.75rem;color:var(--ink-s)">${fmtDate(e.date)} · ${fmtDur(e.duration_minutes)}</div></div>
+      <div style="flex:1"><div style="font-size:.875rem">${esc(e.description||e.projects?.name||'Arbeit')}</div>${e.detail?`<div style="font-size:.75rem;color:var(--ink-s)">${esc(e.detail)}</div>`:''}<div style="font-size:.75rem;color:var(--ink-s)">${fmtDate(e.date)} · ${fmtDur(e.duration_minutes)}</div></div>
       <div style="font-size:.875rem;font-weight:600">${fmtEur((e.duration_minutes/60)*effRate)}</div>
     </div>`;
     }).join('');
@@ -3580,7 +3584,10 @@ async function loadInvTimeEntries(){
 
 function liRowHTML(li,i){
   return `<div class="li-row" data-li="${i}">
-    <textarea class="fi li-desc" rows="2" style="padding:.375rem .5rem;font-size:.8125rem;resize:vertical" placeholder="Leistung beschreiben (mehrzeilig möglich)">${esc(li.desc||'')}</textarea>
+    <div style="display:flex;flex-direction:column;gap:.375rem">
+      <textarea class="fi li-desc" rows="1" style="padding:.375rem .5rem;font-size:.8125rem;resize:vertical" placeholder="Titel">${esc(li.desc||'')}</textarea>
+      <textarea class="fi li-detail" rows="2" style="padding:.375rem .5rem;font-size:.75rem;resize:vertical;color:var(--ink-m)" placeholder="Beschreibung (optional, erscheint kleiner unter dem Titel)">${esc(li.detail||'')}</textarea>
+    </div>
     <input class="fi li-amount" style="padding:.375rem .5rem;font-size:.8125rem;text-align:right" type="number" min="0" step="0.01" value="${li.amount!=null?li.amount:''}" placeholder="0.00" />
     <button class="btn--icon btn--ghost li-del" style="color:var(--ink-s)">✕</button>
   </div>`;
@@ -3588,11 +3595,12 @@ function liRowHTML(li,i){
 
 function attachLiListeners(){
   document.querySelectorAll('.li-desc').forEach((inp,i)=>inp.addEventListener('input',()=>{ invLineItems[i].desc=inp.value; }));
+  document.querySelectorAll('.li-detail').forEach((inp,i)=>inp.addEventListener('input',()=>{ invLineItems[i].detail=inp.value; }));
   document.querySelectorAll('.li-amount').forEach((inp,i)=>inp.addEventListener('input',()=>{ invLineItems[i].amount=parseFloat(inp.value)||0; refreshLiTotals(); }));
   document.querySelectorAll('.li-del').forEach((btn,i)=>btn.addEventListener('click',()=>{ invLineItems.splice(i,1); renderInvStep(); }));
 }
 
-function addLiRow(){ invLineItems.push({desc:'',amount:0}); renderInvStep(); }
+function addLiRow(){ invLineItems.push({desc:'',detail:'',amount:0}); renderInvStep(); }
 
 function refreshLiTotals(){
   const sub=invLineItems.reduce((s,i)=>s+(Number(i.amount)||0),0);
@@ -3614,11 +3622,11 @@ $('inv-next-btn').addEventListener('click', async ()=>{
       invLineItems=Array.from(rows).map(r=>{
         const mins=parseInt(r.dataset.mins)||0;
         const rate=parseFloat(r.dataset.rate)||0;
-        return { desc:r.dataset.desc||r.dataset.proj||'Arbeit', amount:parseFloat(((mins/60)*rate).toFixed(2)), teId:r.dataset.id };
+        return { desc:r.dataset.desc||r.dataset.proj||'Arbeit', detail:r.dataset.detail||'', amount:parseFloat(((mins/60)*rate).toFixed(2)), teId:r.dataset.id };
       });
       invLiKey=teKey;
     }
-    if(!invLineItems.length) invLineItems=[{desc:'',amount:0}];
+    if(!invLineItems.length) invLineItems=[{desc:'',detail:'',amount:0}];
     invStep=2; renderInvStep();
   } else if(invStep===2){
     invStep=3; renderInvStep();
@@ -3661,8 +3669,14 @@ async function saveInvoice(){
   // Save line items (amount only; quantity fixed at 1, no "Menge"). Positions
   // generated from a time entry keep the link via time_entry_ids so the
   // entry can be flagged "Fakturiert" once the invoice is marked paid.
-  const liPayload=invLineItems.map((li,i)=>({ invoice_id:inv.id, description:li.desc, quantity:1, unit_price:Number(li.amount)||0, total:Number(li.amount)||0, sort_order:i, time_entry_ids: li.teId ? [li.teId] : [] }));
-  await sb.from('invoice_items').insert(liPayload);
+  const liPayload=invLineItems.map((li,i)=>({ invoice_id:inv.id, description:li.desc, detail:(li.detail&&li.detail.trim())?li.detail.trim():null, quantity:1, unit_price:Number(li.amount)||0, total:Number(li.amount)||0, sort_order:i, time_entry_ids: li.teId ? [li.teId] : [] }));
+  let { error:liErr } = await sb.from('invoice_items').insert(liPayload);
+  // Graceful fallback if the "detail" column isn't migrated yet.
+  if(liErr && /detail|column|schema cache/i.test(liErr.message||'')){
+    ({ error:liErr } = await sb.from('invoice_items').insert(liPayload.map(({detail,...rest})=>rest)));
+    if(!liErr) toast('Beschreibung der Positionen nicht gespeichert — bitte das aktualisierte supabase-setup.sql in Supabase ausführen.','err');
+  }
+  if(liErr){ toast('Fehler beim Speichern der Positionen: '+liErr.message,'err'); }
   // Remember the billing address for this client for next time.
   if(invClientId && invBillTo){ try{ localStorage.setItem(billToKey(invClientId), invBillTo); }catch(e){} }
   invEditingId=null; invEditingNumber=null; invEditingDate=null;
@@ -3764,8 +3778,8 @@ async function editInvoiceDraft(inv){
 
   const items = (fullInv.invoice_items||[]).slice().sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
   invLineItems = items.length
-    ? items.map(it=>({ desc:it.description||'', amount:Number(it.total ?? it.unit_price)||0, teId:(it.time_entry_ids&&it.time_entry_ids[0])||undefined }))
-    : [{desc:'',amount:0}];
+    ? items.map(it=>({ desc:it.description||'', detail:it.detail||'', amount:Number(it.total ?? it.unit_price)||0, teId:(it.time_entry_ids&&it.time_entry_ids[0])||undefined }))
+    : [{desc:'',detail:'',amount:0}];
   invSelectedTEs = items.flatMap(it=>it.time_entry_ids||[]);
   invLiKey = JSON.stringify([...invSelectedTEs].sort());
 
@@ -3870,7 +3884,7 @@ function buildInvoiceHTML(inv, forModal=false){
                           : (Number(i.qty)||0)*(Number(i.price)||0));
   const rows = items.map((i,idx)=>`<tr>
       <td class="c-pos">${idx+1}</td>
-      <td class="c-desc">${invMultiline(i.description||'')}</td>
+      <td class="c-desc">${invMultiline(i.description||'')}${i.detail?`<div class="c-desc-detail">${invMultiline(i.detail)}</div>`:''}</td>
       <td class="c-amt">${fmtInvAmount(itemAmount(i))}</td>
     </tr>`).join('');
 
