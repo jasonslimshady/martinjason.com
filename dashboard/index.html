@@ -2918,7 +2918,7 @@ function renderRevenueChart(){
       </div>`;
     }).join('');
     const avgLine = avg>0
-      ? `<div title="Ø Umsatz/Monat: ${fmtEur(avg)}" style="position:absolute;left:0;right:0;bottom:${avgY}px;border-top:2px dashed var(--ink-m);pointer-events:none">
+      ? `<div title="Ø Umsatz/Monat: ${fmtEur(avg)}" style="position:absolute;left:0;right:0;bottom:${avgY}px;border-top:1px dashed var(--ink-s);pointer-events:none">
            <span style="position:absolute;right:1px;bottom:1px;font-size:.5625rem;font-weight:600;color:var(--ink-m);background:var(--surface);padding:0 3px;border-radius:3px;white-space:nowrap">Ø ${fmtEur(avg)}/Mon</span>
          </div>`
       : '';
@@ -2954,7 +2954,7 @@ function renderRevenueChart(){
     }).join('');
     const yAvg = H - Math.round((avg/maxVal)*(H-PAD*2));
     const avgLine = avg>0
-      ? `<line x1="${PAD}" y1="${yAvg}" x2="${W-PAD}" y2="${yAvg}" stroke="var(--ink-m)" stroke-width="1.5" stroke-dasharray="5 4"/>
+      ? `<line x1="${PAD}" y1="${yAvg}" x2="${W-PAD}" y2="${yAvg}" stroke="var(--ink-s)" stroke-width="0.75" stroke-dasharray="5 4"/>
          <text x="${W-PAD}" y="${yAvg-3}" text-anchor="end" font-size="8" font-weight="600" fill="var(--ink-m)">Ø ${fmtEur(avg)}/Mon</text>`
       : '';
     $('rev-bars').style.display='block';
@@ -3067,9 +3067,15 @@ async function generateInvoicePdfBlob(invId){
   ));
   try {
     return await html2pdf().set({
-      margin: 0,
+      // Top/bottom page margin so multi-page invoices get clean whitespace at
+      // every page break (the .inv-doc padding only covers the very first/last
+      // page). Horizontal margin stays 0 — .inv-doc brings its own side padding.
+      margin: [36, 0, 36, 0],
       html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
       jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' },
+      // Never slice through a line-item row or a summary block across pages —
+      // move the whole element to the next page instead (fixes cut-off text).
+      pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', 'thead', '.invd-parties', '.invd-totals', '.invd-account', '.invd-top', '.invd-period'] },
     }).from(container).outputPdf('blob');
   } finally {
     wrap.remove();
