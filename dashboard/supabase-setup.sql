@@ -130,6 +130,7 @@ CREATE TABLE IF NOT EXISTS time_entries (
   project_id       UUID        NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   client_id        UUID        NOT NULL REFERENCES clients(id),
   description      TEXT,
+  detail           TEXT,
   start_time       TIMESTAMPTZ,
   end_time         TIMESTAMPTZ,
   duration_minutes INTEGER     NOT NULL DEFAULT 0,
@@ -161,6 +162,18 @@ BEGIN
     WHERE table_name = 'time_entries' AND column_name = 'rate_override'
   ) THEN
     ALTER TABLE time_entries ADD COLUMN rate_override NUMERIC;
+  END IF;
+END $$;
+
+-- Migration helper: add detail column (the longer "Beschreibung" shown under
+-- the "Titel"/description on the invoice) if table already exists
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'time_entries' AND column_name = 'detail'
+  ) THEN
+    ALTER TABLE time_entries ADD COLUMN detail TEXT;
   END IF;
 END $$;
 
@@ -302,12 +315,25 @@ CREATE TABLE IF NOT EXISTS invoice_items (
   id              UUID          DEFAULT gen_random_uuid() PRIMARY KEY,
   invoice_id      UUID          NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,
   description     TEXT          NOT NULL,
+  detail          TEXT,
   quantity        DECIMAL(10,2) NOT NULL DEFAULT 1,
   unit_price      DECIMAL(10,2) NOT NULL DEFAULT 0,
   total           DECIMAL(10,2) NOT NULL DEFAULT 0,
   time_entry_ids  UUID[]        DEFAULT '{}',
   sort_order      INTEGER       NOT NULL DEFAULT 0
 );
+
+-- Migration helper: add detail column (the longer "Beschreibung" shown under
+-- the line-item title on the invoice) if invoice_items already exists
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'invoice_items' AND column_name = 'detail'
+  ) THEN
+    ALTER TABLE invoice_items ADD COLUMN detail TEXT;
+  END IF;
+END $$;
 
 
 -- ============================================================
