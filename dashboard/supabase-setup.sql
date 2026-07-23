@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS clients (
   pipeline_stage    TEXT        NOT NULL DEFAULT 'new_lead'
                     CHECK (pipeline_stage IN (
                       'new_lead', 'contacted', 'proposal',
-                      'negotiation', 'won', 'lost'
+                      'negotiation', 'won', 'closed', 'lost'
                     )),
   is_active_client  BOOLEAN     NOT NULL DEFAULT false,
   won_at            DATE,                   -- date the client was won (used for budget proration)
