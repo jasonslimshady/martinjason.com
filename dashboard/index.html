@@ -3685,7 +3685,9 @@ async function loadInvTimeEntries(){
     list.map(e=>{
       // An entry's own rate_override always wins over the project's rate.
       const effRate = e.rate_override != null ? e.rate_override : (e.projects?.rate || 0);
-      const rowDesc = `${e.description||e.projects?.name||'Arbeit'} — ${fmtDate(e.date)} · ${fmtDur(e.duration_minutes)}`;
+      // Position title = the entry's own title only. Date/duration are shown
+      // in the picker row below but are NOT folded into the invoice position.
+      const rowDesc = `${e.description||e.projects?.name||'Arbeit'}`;
       return `<div class="te-row${invSelectedTEs.includes(e.id)?' checked':''}" data-id="${e.id}" data-mins="${e.duration_minutes}" data-proj="${esc(e.projects?.name||'')}" data-rate="${effRate}" data-desc="${esc(rowDesc)}" data-detail="${esc(e.detail||'')}">
       <div class="te-check">✓</div>
       <div style="flex:1"><div style="font-size:.875rem">${esc(e.description||e.projects?.name||'Arbeit')}</div>${e.detail?`<div style="font-size:.75rem;color:var(--ink-s)">${esc(e.detail)}</div>`:''}<div style="font-size:.75rem;color:var(--ink-s)">${fmtDate(e.date)} · ${fmtDur(e.duration_minutes)}</div></div>
