@@ -129,6 +129,7 @@
     .tag--green{background:var(--green-t);color:#1a8c3a} .tag--orange{background:var(--orange-t);color:#b87000}
     .tag--red{background:var(--red-t);color:var(--red)} .tag--blue{background:var(--accent-t);color:var(--accent)}
     .tag--purple{background:var(--purple-t);color:var(--purple)} .tag--muted{background:var(--surface-2);color:var(--ink-m)}
+    .tag--teal{background:rgba(0,184,169,.14);color:#0a8f83}
     /* Inline, editable status pill in the invoice list — looks like a .tag but
        is a real <select> so the status can be changed straight from the list. */
     .inv-status-sel{-webkit-appearance:none;appearance:none;border:none;outline:none;cursor:pointer;line-height:1.2;padding-right:1.15rem;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'><path d='M1 2.5L4 5.5L7 2.5' fill='none' stroke='%23888' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'/></svg>");background-repeat:no-repeat;background-position:right .4rem center}
@@ -856,7 +857,7 @@
             <select class="fi" id="mc-stage">
               <option value="new_lead">Neuer Lead</option><option value="contacted">Kontaktiert</option>
               <option value="proposal">Angebot</option><option value="negotiation">Verhandlung</option>
-              <option value="won">Gewonnen</option><option value="lost">Verloren</option>
+              <option value="won">Gewonnen</option><option value="closed">Abgeschlossen</option><option value="lost">Verloren</option>
             </select>
           </div>
           <div class="fg" id="mc-won-at-row" style="display:none"><label class="fl">Gewonnen am</label><input class="fi" id="mc-won-at" type="date" /></div>
@@ -1207,6 +1208,7 @@ const STAGE_CFG = [
   { id:'proposal',    label:'Angebot',     color:'#FF9F0A', tag:'tag--orange' },
   { id:'negotiation', label:'Verhandlung', color:'#BF5AF2', tag:'tag--purple' },
   { id:'won',         label:'Gewonnen',    color:'#30D158', tag:'tag--green' },
+  { id:'closed',      label:'Abgeschlossen', color:'#00B8A9', tag:'tag--teal' },
   { id:'lost',        label:'Verloren',    color:'#FF453A', tag:'tag--red' },
 ];
 const STAGE_MAP = Object.fromEntries(STAGE_CFG.map(s => [s.id, s]));
@@ -1357,7 +1359,7 @@ async function loadStats() {
   try {
     const [{ count:c1 },{ count:c2 },{ data:te },{ count:c3 }] = await Promise.all([
       sb.from('clients').select('*',{count:'exact',head:true}).eq('is_active_client',true),
-      sb.from('clients').select('*',{count:'exact',head:true}).eq('is_active_client',false).not('pipeline_stage','in','("won","lost")'),
+      sb.from('clients').select('*',{count:'exact',head:true}).eq('is_active_client',false).not('pipeline_stage','in','("won","lost","closed")'),
       sb.from('time_entries').select('duration_minutes').eq('is_invoiced',false),
       sb.from('invoices').select('*',{count:'exact',head:true}).in('status',['sent','overdue']),
     ]);
@@ -1378,7 +1380,7 @@ async function loadCRM() {
   if(error) toast('Fehler beim Laden der Kunden: '+error.message,'err');
   const list = data||[];
   renderKanban(list); renderFollowups(list);
-  const leadCount = list.filter(c=>!c.is_active_client&&!['won','lost'].includes(c.pipeline_stage)).length;
+  const leadCount = list.filter(c=>!c.is_active_client&&!['won','lost','closed'].includes(c.pipeline_stage)).length;
   $('badge-crm').textContent = leadCount;
   $('badge-crm').hidden = leadCount === 0;
 }
