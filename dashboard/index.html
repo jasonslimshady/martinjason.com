@@ -345,6 +345,11 @@
       body > *{display:none!important}
       #print-area{display:block!important;position:static!important;width:auto!important;background:#fff}
       .inv-doc{padding:0;max-width:100%;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      /* A4 print width (~794px) falls under the 900px responsive breakpoint,
+         which stacks the parties vertically — force them back into two
+         columns so "Billed to" / "Pay to" stay side by side on paper. */
+      .invd-parties{flex-direction:row!important;gap:48px!important}
+      .invd-party{flex:1!important}
       @page{size:A4;margin:18mm 16mm}
     }
 
