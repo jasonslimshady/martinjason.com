@@ -3067,9 +3067,15 @@ async function generateInvoicePdfBlob(invId){
   ));
   try {
     return await html2pdf().set({
-      margin: 0,
+      // Top/bottom page margin so multi-page invoices get clean whitespace at
+      // every page break (the .inv-doc padding only covers the very first/last
+      // page). Horizontal margin stays 0 — .inv-doc brings its own side padding.
+      margin: [36, 0, 36, 0],
       html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
       jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' },
+      // Never slice through a line-item row or a summary block across pages —
+      // move the whole element to the next page instead (fixes cut-off text).
+      pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', 'thead', '.invd-parties', '.invd-totals', '.invd-account', '.invd-top', '.invd-period'] },
     }).from(container).outputPdf('blob');
   } finally {
     wrap.remove();
