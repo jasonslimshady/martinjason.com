@@ -2349,12 +2349,12 @@ async function loadProjectOverview() {
 
   entries.forEach(e => {
     const pid = e.project_id; if (!pid) return;
-    // Reuse an existing (seeded) row so we don't create rows for inactive
-    // projects whose entries all fall outside the current cycle window.
-    const rowForClip = map[pid] || {
-      budgetStartDay: e.projects?.budget_start_day || null,
-      wonAt: e.projects?.clients?.won_at || null
-    };
+    // Only count entries that belong to an *active* project. Non-active
+    // projects (pausiert/abgeschlossen/abgebrochen) are never seeded above,
+    // so if there's no row for this project we skip the entry entirely
+    // instead of creating a row for it — the overview lists active projects only.
+    const rowForClip = map[pid];
+    if (!rowForClip) return;
     if (ptoFilter === 'customer' && !rowForClip.wonAt) return; // no cycle to anchor to
     // Week/Month/Kundenzeitraum were fetched a bit wider than their true
     // window (to cover every possible cycle start day) — narrow each
@@ -2362,16 +2362,6 @@ async function loadProjectOverview() {
     // counting the minutes.
     const clip = workedClipStartISO(rowForClip);
     if (clip && e.date < clip) return;
-    if (!map[pid]) map[pid] = {
-      id: pid,
-      name: e.projects?.name||'—', client: e.projects?.clients?.name||'',
-      rate: e.projects?.rate||0, rateType: e.projects?.rate_type||'hourly',
-      budgetHours: e.projects?.budget_hours||null,
-      budgetStartDay: e.projects?.budget_start_day||null,
-      wonAt: e.projects?.clients?.won_at||null,
-      color: e.projects?.color||null,
-      mins: 0, amount: 0
-    };
     map[pid].mins += e.duration_minutes || 0;
     // An entry's own rate_override always wins over the project's default
     // hourly rate — mirrors the per-entry calculation in the time entries
