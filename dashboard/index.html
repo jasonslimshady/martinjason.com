@@ -5511,7 +5511,7 @@ async function sendViaGmail(inv){
     const zeitraum=meta.billing_period||'';
     const faellig=inv.due_date?fmtDate(inv.due_date):'';
     const subject=`Rechnung ${inv.invoice_number||''} von ${CONFIG.INVOICE_FROM.name}`;
-    const body=`Hallo ${firstName},\nim Anhang findest du Rechnung ${inv.invoice_number||''} für den Zeitraum ${zeitraum}.\n\nBitte überweise den Betrag bis zum ${faellig} auf mein Konto.\n\nLiebe Grüße,\nJason`;
+    const body=`Hallo ${firstName},\nim Anhang findest du Rechnung ${inv.invoice_number||''} für den Zeitraum ${zeitraum}.\n\nBitte überweise den Betrag bis zum ${faellig} auf das genannte Konto in der Rechnung.\n\nLiebe Grüße,\nJason`;
     // Create a Gmail draft (with the PDF attached) instead of sending right
     // away — the mail is only sent once you review it in Gmail and click
     // send yourself, so you can double-check every detail beforehand.
