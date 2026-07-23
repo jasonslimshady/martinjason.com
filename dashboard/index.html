@@ -298,9 +298,13 @@
     .te-row:hover{background:var(--surface-2)}
     .te-check{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border-s);background:var(--surface);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.625rem;color:#fff;transition:all var(--fast)}
     .te-row.checked .te-check{background:var(--accent);border-color:var(--accent)}
-    .li-row{display:grid;grid-template-columns:1fr 140px 28px;gap:.5rem;align-items:start;padding:.5rem 0;border-bottom:1px solid var(--border)}
+    .li-row{display:grid;grid-template-columns:22px 1fr 140px 28px;gap:.5rem;align-items:start;padding:.5rem 0;border-bottom:1px solid var(--border)}
     .li-row:last-child{border-bottom:none}
     .li-hd{font-size:.6875rem;font-weight:600;color:var(--ink-s);text-transform:uppercase;letter-spacing:.04em}
+    .li-drag{align-self:stretch;display:flex;align-items:center;justify-content:center;cursor:grab;color:var(--ink-s);user-select:none;font-size:15px;line-height:1;touch-action:none}
+    .li-drag:active{cursor:grabbing}
+    .li-row.li-dragging{opacity:.45}
+    .li-row.li-drop-target{box-shadow:inset 0 0 0 2px var(--accent);border-radius:6px}
     .li-total{font-size:.875rem;font-weight:600;text-align:right}
     .inv-summary{background:var(--surface-2);border-radius:var(--r-md);padding:1rem 1.125rem;margin-top:1rem}
     .inv-sum-row{display:flex;justify-content:space-between;font-size:.875rem;padding:.25rem 0}
@@ -3614,8 +3618,8 @@ async function renderInvStep(){
       </div>
       <label class="fl">Positionen</label>
       <div style="margin-bottom:.5rem">
-        <div style="display:grid;grid-template-columns:1fr 140px 28px;gap:.5rem;padding:.375rem 0" class="li-row">
-          <span class="li-hd">Titel &amp; Beschreibung</span><span class="li-hd" style="text-align:right">Amount (${esc((companySettings.currency||'EUR'))})</span><span></span>
+        <div style="display:grid;grid-template-columns:22px 1fr 140px 28px;gap:.5rem;padding:.375rem 0" class="li-row">
+          <span></span><span class="li-hd">Titel &amp; Beschreibung</span><span class="li-hd" style="text-align:right">Amount (${esc((companySettings.currency||'EUR'))})</span><span></span>
         </div>
         <div id="li-rows">${invLineItems.map((li,i)=>liRowHTML(li,i)).join('')}</div>
         <button class="btn btn--ghost btn--sm" style="margin-top:.75rem" onclick="addLiRow()">+ Position hinzufügen</button>
@@ -3704,6 +3708,7 @@ async function loadInvTimeEntries(){
 
 function liRowHTML(li,i){
   return `<div class="li-row" data-li="${i}">
+    <div class="li-drag" draggable="true" title="Zum Verschieben ziehen">⠿</div>
     <div style="display:flex;flex-direction:column;gap:.375rem">
       <textarea class="fi li-desc" rows="1" style="padding:.375rem .5rem;font-size:.8125rem;resize:vertical" placeholder="Titel">${esc(li.desc||'')}</textarea>
       <textarea class="fi li-detail" rows="2" style="padding:.375rem .5rem;font-size:.75rem;resize:vertical;color:var(--ink-m)" placeholder="Beschreibung (optional, erscheint kleiner unter dem Titel)">${esc(li.detail||'')}</textarea>
@@ -3718,6 +3723,50 @@ function attachLiListeners(){
   document.querySelectorAll('.li-detail').forEach((inp,i)=>inp.addEventListener('input',()=>{ invLineItems[i].detail=inp.value; }));
   document.querySelectorAll('.li-amount').forEach((inp,i)=>inp.addEventListener('input',()=>{ invLineItems[i].amount=parseFloat(inp.value)||0; refreshLiTotals(); }));
   document.querySelectorAll('.li-del').forEach((btn,i)=>btn.addEventListener('click',()=>{ invLineItems.splice(i,1); renderInvStep(); }));
+  attachLiDragHandlers();
+}
+
+// Drag & drop reordering of invoice positions (via the grip handle). The row
+// order is the source of truth for the invoice's sort_order on save.
+function attachLiDragHandlers(){
+  const container = document.getElementById('li-rows');
+  if(!container) return;
+  let srcIdx = null;
+  container.querySelectorAll('.li-row').forEach(row => {
+    const handle = row.querySelector('.li-drag');
+    if(handle){
+      handle.addEventListener('dragstart', e => {
+        srcIdx = parseInt(row.dataset.li);
+        row.classList.add('li-dragging');
+        if(e.dataTransfer){
+          e.dataTransfer.effectAllowed = 'move';
+          try{ e.dataTransfer.setData('text/plain', String(srcIdx)); }catch(_){}
+          try{ e.dataTransfer.setDragImage(row, 20, 20); }catch(_){}
+        }
+      });
+      handle.addEventListener('dragend', () => {
+        row.classList.remove('li-dragging');
+        container.querySelectorAll('.li-row').forEach(r => r.classList.remove('li-drop-target'));
+      });
+    }
+    row.addEventListener('dragover', e => {
+      e.preventDefault();
+      if(e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+      if(!row.classList.contains('li-dragging')) row.classList.add('li-drop-target');
+    });
+    row.addEventListener('dragleave', () => row.classList.remove('li-drop-target'));
+    row.addEventListener('drop', e => {
+      e.preventDefault();
+      row.classList.remove('li-drop-target');
+      const from = srcIdx!=null ? srcIdx : parseInt(e.dataTransfer?.getData('text/plain'));
+      const to   = parseInt(row.dataset.li);
+      srcIdx = null;
+      if(isNaN(from) || isNaN(to) || from===to) return;
+      const [moved] = invLineItems.splice(from, 1);
+      invLineItems.splice(to, 0, moved);
+      renderInvStep();
+    });
+  });
 }
 
 function addLiRow(){ invLineItems.push({desc:'',detail:'',amount:0}); renderInvStep(); }
@@ -3759,51 +3808,80 @@ $('inv-next-btn').addEventListener('click', async ()=>{
 
 $('inv-back-btn').addEventListener('click', ()=>{ invStep--; renderInvStep(); });
 
+let invSaving=false;
 async function saveInvoice(){
-  const body=$('inv-step-body');
-  const client=invClients.find(c=>c.id===invClientId)||{};
-  const invNum=body.dataset.invNum;
-  const invDate=body.dataset.invDate;
-  const subtotal=parseFloat(body.dataset.subtotal)||0;
-  const total=parseFloat(body.dataset.total)||0;
-  // Billed-to address + billing period + per-invoice bank override are
-  // snapshotted into notes (JSON).
-  const notes=invMetaToNotes({ billing_period:invBillingPeriod, bill_to:invBillTo, bank_override:invBank });
-  const isEdit = !!invEditingId;
+  // Guard against a double submit (two quick clicks would try to insert the
+  // same invoice number twice).
+  if(invSaving) return;
+  invSaving=true;
+  const nextBtn=$('inv-next-btn');
+  const prevLabel=nextBtn?nextBtn.textContent:'';
+  if(nextBtn){ nextBtn.disabled=true; nextBtn.textContent='Speichern…'; }
+  try {
+    const body=$('inv-step-body');
+    const client=invClients.find(c=>c.id===invClientId)||{};
+    // Never save without a number: if the async step-4 render hadn't set it yet
+    // (or the dataset was stale), compute a fresh one — invoice_number is
+    // NOT NULL, so an empty value would fail with a "null value" error.
+    let invNum=body.dataset.invNum;
+    if(!invNum) invNum = invEditingId ? (invEditingNumber || await nextInvoiceNumber(invEditingId)) : await nextInvoiceNumber();
+    const invDate=body.dataset.invDate || (invEditingId ? invEditingDate : today());
+    // Amounts come straight from the positions (source of truth), not a
+    // possibly-stale dataset snapshot.
+    const subtotal=invLineItems.reduce((s,i)=>s+(Number(i.amount)||0),0);
+    const total=subtotal;
+    // Billed-to address + billing period + per-invoice bank override are
+    // snapshotted into notes (JSON).
+    const notes=invMetaToNotes({ billing_period:invBillingPeriod, bill_to:invBillTo, bank_override:invBank });
+    const isEdit = !!invEditingId;
 
-  let inv, error;
-  if(isEdit){
-    ({ data:inv, error } = await sb.from('invoices')
-      .update({ client_id:invClientId, invoice_number:invNum, invoice_date:invDate, due_date:invDue||null, subtotal, tax_rate:0, tax_amount:0, total, notes })
-      .eq('id', invEditingId).select().single());
-    if(!error) await sb.from('invoice_items').delete().eq('invoice_id', invEditingId);
-  } else {
-    ({ data:inv, error } = await sb.from('invoices').insert({
-      client_id:invClientId, invoice_number:invNum,
-      invoice_date:invDate, due_date:invDue||null,
-      status:'draft', subtotal, tax_rate:0, tax_amount:0, total,
-      notes,
-    }).select().single());
+    let inv, error;
+    if(isEdit){
+      ({ data:inv, error } = await sb.from('invoices')
+        .update({ client_id:invClientId, invoice_number:invNum, invoice_date:invDate, due_date:invDue||null, subtotal, tax_rate:0, tax_amount:0, total, notes })
+        .eq('id', invEditingId).select().single());
+      if(!error) await sb.from('invoice_items').delete().eq('invoice_id', invEditingId);
+    } else {
+      // Retry on a unique-number collision (e.g. a just-deleted test invoice
+      // freed the number, or two invoices were created in the same second) by
+      // fetching the next free number and trying again.
+      for(let attempt=0; attempt<4; attempt++){
+        ({ data:inv, error } = await sb.from('invoices').insert({
+          client_id:invClientId, invoice_number:invNum,
+          invoice_date:invDate, due_date:invDue||null,
+          status:'draft', subtotal, tax_rate:0, tax_amount:0, total,
+          notes,
+        }).select().single());
+        if(error && /duplicate key|unique|23505/i.test(error.message||'') && attempt<3){
+          invNum = await nextInvoiceNumber();
+          continue;
+        }
+        break;
+      }
+    }
+    if(error){ toast('Fehler: '+error.message,'err'); return; }
+    // Save line items (amount only; quantity fixed at 1, no "Menge"). Positions
+    // generated from a time entry keep the link via time_entry_ids so the
+    // entry can be flagged "Fakturiert" once the invoice is marked paid.
+    const liPayload=invLineItems.map((li,i)=>({ invoice_id:inv.id, description:li.desc, detail:(li.detail&&li.detail.trim())?li.detail.trim():null, quantity:1, unit_price:Number(li.amount)||0, total:Number(li.amount)||0, sort_order:i, time_entry_ids: li.teId ? [li.teId] : [] }));
+    let { error:liErr } = await sb.from('invoice_items').insert(liPayload);
+    // Graceful fallback if the "detail" column isn't migrated yet.
+    if(liErr && /detail|column|schema cache/i.test(liErr.message||'')){
+      ({ error:liErr } = await sb.from('invoice_items').insert(liPayload.map(({detail,...rest})=>rest)));
+      if(!liErr) toast('Beschreibung der Positionen nicht gespeichert — bitte das aktualisierte supabase-setup.sql in Supabase ausführen.','err');
+    }
+    if(liErr){ toast('Fehler beim Speichern der Positionen: '+liErr.message,'err'); }
+    // Remember the billing address for this client for next time.
+    if(invClientId && invBillTo){ try{ localStorage.setItem(billToKey(invClientId), invBillTo); }catch(e){} }
+    invEditingId=null; invEditingNumber=null; invEditingDate=null;
+    closeModal('ov-invoice');
+    toast(isEdit ? 'Rechnungsentwurf aktualisiert.' : 'Rechnung als Entwurf gespeichert.','ok');
+    loadInvoices(); loadStats(); loadTimeEntries();
+    openInvoicePreviewModal({...inv, clients:client, invoice_items:liPayload});
+  } finally {
+    invSaving=false;
+    if(nextBtn){ nextBtn.disabled=false; nextBtn.textContent=prevLabel; }
   }
-  if(error){ toast('Fehler: '+error.message,'err'); return; }
-  // Save line items (amount only; quantity fixed at 1, no "Menge"). Positions
-  // generated from a time entry keep the link via time_entry_ids so the
-  // entry can be flagged "Fakturiert" once the invoice is marked paid.
-  const liPayload=invLineItems.map((li,i)=>({ invoice_id:inv.id, description:li.desc, detail:(li.detail&&li.detail.trim())?li.detail.trim():null, quantity:1, unit_price:Number(li.amount)||0, total:Number(li.amount)||0, sort_order:i, time_entry_ids: li.teId ? [li.teId] : [] }));
-  let { error:liErr } = await sb.from('invoice_items').insert(liPayload);
-  // Graceful fallback if the "detail" column isn't migrated yet.
-  if(liErr && /detail|column|schema cache/i.test(liErr.message||'')){
-    ({ error:liErr } = await sb.from('invoice_items').insert(liPayload.map(({detail,...rest})=>rest)));
-    if(!liErr) toast('Beschreibung der Positionen nicht gespeichert — bitte das aktualisierte supabase-setup.sql in Supabase ausführen.','err');
-  }
-  if(liErr){ toast('Fehler beim Speichern der Positionen: '+liErr.message,'err'); }
-  // Remember the billing address for this client for next time.
-  if(invClientId && invBillTo){ try{ localStorage.setItem(billToKey(invClientId), invBillTo); }catch(e){} }
-  invEditingId=null; invEditingNumber=null; invEditingDate=null;
-  closeModal('ov-invoice');
-  toast(isEdit ? 'Rechnungsentwurf aktualisiert.' : 'Rechnung als Entwurf gespeichert.','ok');
-  loadInvoices(); loadStats(); loadTimeEntries();
-  openInvoicePreviewModal({...inv, clients:client, invoice_items:liPayload});
 }
 
 async function openInvoicePreviewModal(inv){
