@@ -2102,6 +2102,23 @@ async function saveManualTime(e){
   loadTimeEntries(); loadProjectOverview(); loadStats();
 }
 
+// Editable status pill for a time entry — Offen (open) / Fakturiert (invoiced),
+// changeable directly from the "Letzte Einträge" list without opening the entry.
+function teStatusSelect(e){
+  const cls = e.is_invoiced ? 'tag--green' : 'tag--muted';
+  return `<select class="inv-status-sel te-status-sel tag ${cls}" data-id="${e.id}" title="Status ändern">
+    <option value="false" ${!e.is_invoiced?'selected':''}>Offen</option>
+    <option value="true" ${e.is_invoiced?'selected':''}>Fakturiert</option>
+  </select>`;
+}
+
+async function changeTimeEntryInvoiced(id, invoiced){
+  const { error } = await sb.from('time_entries').update({ is_invoiced:invoiced }).eq('id', id);
+  if(error){ toast('Status konnte nicht geändert werden: '+error.message,'err'); loadTimeEntries(); return; }
+  toast(invoiced ? 'Als fakturiert markiert.' : 'Als offen markiert.','ok');
+  loadTimeEntries(); loadStats();
+}
+
 async function loadTimeEntries(){
   let baseQ = sb.from('time_entries').select('*,projects(name,color,rate,rate_type)').order('date',{ascending:false}).order('created_at',{ascending:false}).limit(30);
   if(ptoOnlyUninvoiced) baseQ = baseQ.eq('is_invoiced', false);
@@ -2160,16 +2177,23 @@ async function loadTimeEntries(){
     <td class="muted">${fmtDate(e.date)}</td>
     <td class="mono">${fmtDur(e.duration_minutes)}</td>
     <td class="mono">${betrag}</td>
-    <td>${e.is_invoiced?'<span class="tag tag--green">Fakturiert</span>':'<span class="tag tag--muted">Offen</span>'}</td>
+    <td>${teStatusSelect(e)}</td>
     <td style="padding:.5rem .625rem"><button class="btn btn--icon btn--ghost te-restart-btn" data-proj="${e.project_id}" data-entry="${e.id}" data-mins="${e.duration_minutes}" title="Timer für diesen Eintrag fortsetzen" style="width:28px;height:28px;color:var(--green)"><svg width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M5 3.5v9l7-4.5z"/></svg></button></td>
   </tr>`;}).join('');
   const entryMap = Object.fromEntries(list.map(e => [e.id, e]));
   tbody.querySelectorAll('tr[data-id]').forEach(row =>
     row.addEventListener('click', e => {
       if(e.target.closest('.te-restart-btn')) return;
+      if(e.target.closest('.te-status-sel')) return;
       openTimeModal(entryMap[row.dataset.id]);
     })
   );
+  // Inline status (Offen/Fakturiert) change straight from the list — stop the
+  // click from also opening the entry's edit modal.
+  tbody.querySelectorAll('.te-status-sel').forEach(sel=>{
+    sel.addEventListener('click', e=>e.stopPropagation());
+    sel.addEventListener('change', e=>{ e.stopPropagation(); changeTimeEntryInvoiced(sel.dataset.id, sel.value==='true'); });
+  });
   tbody.querySelectorAll('.te-restart-btn').forEach(btn =>
     btn.addEventListener('click', e => {
       e.stopPropagation();
@@ -2846,53 +2870,95 @@ function renderRevenueChart(){
   const year     = parseInt($('rev-year').value) || new Date().getFullYear();
   const clientId = $('rev-client').value;
   const MONTHS   = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
-  const monthly  = Array(12).fill(0);
+  // Paid revenue (green) and already-sent-but-unpaid revenue (gray) are tracked
+  // separately: "sent" and "overdue" are invoiced but not yet paid.
+  const paid   = Array(12).fill(0);
+  const unpaid = Array(12).fill(0);
   allInvoicesCache
-    .filter(i => i.status==='paid')
     .filter(i => !clientId || String(i.clients?.id)===clientId)
     .forEach(i => {
+      const isPaid   = i.status==='paid';
+      const isUnpaid = i.status==='sent' || i.status==='overdue';
+      if(!isPaid && !isUnpaid) return; // drafts & cancelled don't count
       // Bucketed by invoice date (default) or paid date, per the toggle above.
       const d = revDateBasis==='invoice' ? i.invoice_date : (i.paid_at || i.invoice_date);
       if(!d) return;
       const dt = new Date(d);
-      if(dt.getFullYear()===year) monthly[dt.getMonth()] += (i.total||0);
+      if(dt.getFullYear()!==year) return;
+      if(isPaid) paid[dt.getMonth()]   += (i.total||0);
+      else       unpaid[dt.getMonth()] += (i.total||0);
     });
-  const maxVal = Math.max(...monthly, 1);
-  const total  = monthly.reduce((s,v)=>s+v, 0);
-  $('rev-total-lbl').textContent = fmtEur(total);
+  const monthlyTotal = paid.map((p,i)=>p+unpaid[i]);
+  const maxVal = Math.max(...monthlyTotal, 1);
+  // "Umsatz" total stays the realized (paid) revenue.
+  $('rev-total-lbl').textContent = fmtEur(paid.reduce((s,v)=>s+v, 0));
+  // Average monthly revenue across the months that actually have invoices
+  // (paid or sent-unpaid) — drawn as a dashed reference line.
+  const grandTotal   = monthlyTotal.reduce((s,v)=>s+v, 0);
+  const activeMonths = monthlyTotal.filter(v=>v>0).length;
+  const avg = activeMonths>0 ? grandTotal/activeMonths : 0;
+  const GRAY = 'var(--ink-s)';
 
   if(revChartType==='bar'){
-    $('rev-bars').innerHTML = monthly.map((val, idx) => {
-      const h   = Math.max(val>0?4:0, Math.round((val/maxVal)*108));
-      const col = val > 0 ? 'var(--green)' : 'var(--border-s)';
-      return `<div class="rev-bar-col" title="${MONTHS[idx]}: ${fmtEur(val)}">
+    const ZONE = 108;
+    const avgY = Math.round((avg/maxVal)*ZONE);
+    const cols = monthlyTotal.map((val, idx) => {
+      const totalH = Math.max(val>0?4:0, Math.round((val/maxVal)*ZONE));
+      let paidH   = val>0 ? Math.round((paid[idx]/val)*totalH) : 0;
+      let unpaidH = totalH - paidH;
+      // Keep a visible sliver whenever there's any unpaid (or paid) amount.
+      if(unpaid[idx]>0 && unpaidH<1 && totalH>0){ unpaidH=1; paidH=Math.max(totalH-unpaidH,0); }
+      const tip = `${MONTHS[idx]}: ${fmtEur(val)}${unpaid[idx]>0?` · davon offen: ${fmtEur(unpaid[idx])}`:''}`;
+      const inner = val>0
+        ? `${unpaidH>0?`<div style="height:${unpaidH}px;background:${GRAY}"></div>`:''}${paidH>0?`<div style="height:${paidH}px;background:var(--green)"></div>`:''}`
+        : '';
+      return `<div class="rev-bar-col" title="${tip}">
         <div class="rev-bar-val">${val>0?(val>=1000?(val/1000).toFixed(1)+'k':Math.round(val)):''}</div>
-        <div class="rev-bar-fill" style="height:${h}px;background:${col}"></div>
-        <div class="rev-bar-lbl">${MONTHS[idx]}</div>
+        <div class="rev-bar-fill" style="height:${totalH}px;background:${val>0?'transparent':'var(--border-s)'};display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden">${inner}</div>
       </div>`;
     }).join('');
+    const avgLine = avg>0
+      ? `<div title="Ø Umsatz/Monat: ${fmtEur(avg)}" style="position:absolute;left:0;right:0;bottom:${avgY}px;border-top:2px dashed var(--ink-m);pointer-events:none">
+           <span style="position:absolute;right:1px;bottom:1px;font-size:.5625rem;font-weight:600;color:var(--ink-m);background:var(--surface);padding:0 3px;border-radius:3px;white-space:nowrap">Ø ${fmtEur(avg)}/Mon</span>
+         </div>`
+      : '';
+    const labels = `<div style="display:flex;gap:4px;margin-top:.25rem">${MONTHS.map(m=>`<div class="rev-bar-lbl" style="flex:1;text-align:center;min-width:0">${m}</div>`).join('')}</div>`;
+    $('rev-bars').style.display='block';
+    $('rev-bars').style.height='auto';
+    $('rev-bars').style.paddingTop='0';
+    $('rev-bars').innerHTML = `<div style="position:relative;display:flex;gap:4px;align-items:flex-end;height:${ZONE}px;padding-top:.75rem">${cols}${avgLine}</div>${labels}`;
+    return;
   } else {
     // Line chart via inline SVG
     const W=600, H=108, PAD=4;
-    const pts = monthly.map((val,i)=>{
+    const yFor = val => H - Math.max(val>0?4:0, Math.round((val/maxVal)*(H-PAD*2)));
+    const pts = monthlyTotal.map((val,i)=>{
       const x = PAD + (i/(11))*( W - PAD*2);
-      const y = H - Math.max(val>0?4:0, Math.round((val/maxVal)*(H-PAD*2)));
-      return `${x},${y}`;
+      return `${x},${yFor(val)}`;
     });
     const filled = pts.map((p,i)=>{
       const [x,y]=p.split(',');
       return i===0?`M${x},${y}`:`L${x},${y}`;
     }).join(' ');
     const area = filled + ` L${600-PAD},${H} L${PAD},${H} Z`;
-    const dots = monthly.map((val,i)=>{
+    const dots = monthlyTotal.map((val,i)=>{
       const [x,y]=pts[i].split(',');
-      return `<circle cx="${x}" cy="${y}" r="3.5" fill="${val>0?'var(--green)':'var(--border-s)'}" stroke="var(--surface)" stroke-width="1.5">
-        <title>${MONTHS[i]}: ${fmtEur(val)}</title></circle>`;
+      // Gray dot when the month's amount is (partly) sent-but-unpaid.
+      const col = val>0 ? (unpaid[i]>0 ? GRAY : 'var(--green)') : 'var(--border-s)';
+      return `<circle cx="${x}" cy="${y}" r="3.5" fill="${col}" stroke="var(--surface)" stroke-width="1.5">
+        <title>${MONTHS[i]}: ${fmtEur(val)}${unpaid[i]>0?` · davon offen: ${fmtEur(unpaid[i])}`:''}</title></circle>`;
     }).join('');
-    const labels = monthly.map((val,i)=>{
+    const labels = monthlyTotal.map((val,i)=>{
       const x=PAD+(i/11)*(W-PAD*2);
       return `<text x="${x}" y="${H+14}" text-anchor="middle" font-size="8" fill="var(--ink-s)">${MONTHS[i]}</text>`;
     }).join('');
+    const yAvg = H - Math.round((avg/maxVal)*(H-PAD*2));
+    const avgLine = avg>0
+      ? `<line x1="${PAD}" y1="${yAvg}" x2="${W-PAD}" y2="${yAvg}" stroke="var(--ink-m)" stroke-width="1.5" stroke-dasharray="5 4"/>
+         <text x="${W-PAD}" y="${yAvg-3}" text-anchor="end" font-size="8" font-weight="600" fill="var(--ink-m)">Ø ${fmtEur(avg)}/Mon</text>`
+      : '';
+    $('rev-bars').style.display='block';
+    $('rev-bars').style.paddingTop='0';
     $('rev-bars').style.height='auto';
     $('rev-bars').innerHTML = `<svg viewBox="0 0 ${W} ${H+20}" style="width:100%;overflow:visible">
       <defs><linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
@@ -2901,11 +2967,10 @@ function renderRevenueChart(){
       </linearGradient></defs>
       <path d="${area}" fill="url(#revGrad)"/>
       <path d="${filled}" fill="none" stroke="var(--green)" stroke-width="2" stroke-linejoin="round"/>
-      ${dots}${labels}
+      ${avgLine}${dots}${labels}
     </svg>`;
     return; // skip the bar-wrap height reset below
   }
-  $('rev-bars').style.height='';
 }
 
 $('rev-year').addEventListener('change', renderRevenueChart);
@@ -2984,18 +3049,30 @@ async function generateInvoicePdfBlob(invId){
   if(!full) return null;
   if(typeof html2pdf==='undefined') await loadScript(LIB_HTML2PDF).catch(()=>{});
   if(typeof html2pdf==='undefined') return null;
+  // html2canvas renders blank when the target sits at a negative offset
+  // (left:-9999px) — that produced empty invoice PDFs. Keep the invoice at
+  // left:0 and hide it via a wrapper's opacity instead: html2canvas clones the
+  // invoice in isolation, so the wrapper's opacity never touches the snapshot.
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'position:fixed;left:0;top:0;z-index:-1;opacity:0;pointer-events:none';
   const container = document.createElement('div');
-  container.style.cssText = 'position:fixed;left:-9999px;top:0;width:820px;background:#fff';
+  container.style.cssText = 'width:820px;background:#fff';
   container.innerHTML = buildInvoiceHTML(full, true);
-  document.body.appendChild(container);
+  wrap.appendChild(container);
+  document.body.appendChild(wrap);
+  // Wait for the logo (and any other images) to actually load, otherwise the
+  // snapshot can be taken before they paint — another source of blank output.
+  await Promise.all(Array.from(container.querySelectorAll('img')).map(img =>
+    img.complete ? Promise.resolve() : new Promise(res => { img.onload = img.onerror = res; })
+  ));
   try {
     return await html2pdf().set({
       margin: 0,
-      html2canvas: { scale: 2, useCORS: true },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
       jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' },
     }).from(container).outputPdf('blob');
   } finally {
-    container.remove();
+    wrap.remove();
   }
 }
 
@@ -5317,12 +5394,18 @@ async function sendViaGmail(inv){
   }
   const clientEmail=inv.clients?.email;
   if(!clientEmail){ toast('Dieser Kunde hat keine E-Mail-Adresse.','err'); return; }
-  if(!gmailToken){
-    try { gmailToken=await getGmailToken(); } catch(e){ toast('Gmail-Anmeldung fehlgeschlagen.','err'); return; }
-  }
+  // Open the destination tab NOW, still inside the click gesture, so the
+  // browser doesn't block it as a pop-up after the awaits below. It shows a
+  // brief loading state and is navigated to the draft once it's ready (or
+  // closed again if anything fails).
+  const draftTab=window.open('', '_blank');
+  if(draftTab){ try{ draftTab.document.write('<title>Gmail-Entwurf…</title><p style="font:15px system-ui;padding:2rem">Gmail-Entwurf wird erstellt…</p>'); }catch(e){} }
   const btn=$('inv-send-gmail-btn');
   if(btn){ btn.disabled=true; btn.textContent='Entwurf wird erstellt…'; }
   try {
+    // Silent re-auth when the account is already remembered, and remember it
+    // on the first authorization so the chooser doesn't reappear next time.
+    await ensureGmailAuth();
     // The mail says the invoice is attached — so actually attach it: a
     // manually attached PDF wins, otherwise render one from the layout.
     let pdfBlob=null;
@@ -5334,9 +5417,13 @@ async function sendViaGmail(inv){
     if(!pdfBlob) throw new Error('Rechnungs-PDF konnte nicht erstellt werden.');
     const pdfName=`Rechnung-${String(inv.invoice_number||inv.id||'').replace(/[^\w.\-]+/g,'-')||'Rechnung'}.pdf`;
 
+    // Template variables pulled from the invoice / client record.
+    const meta=parseInvMeta(inv);
+    const firstName=(inv.clients?.name||'').trim().split(/\s+/)[0] || inv.clients?.company || '';
+    const zeitraum=meta.billing_period||'';
+    const faellig=inv.due_date?fmtDate(inv.due_date):'';
     const subject=`Rechnung ${inv.invoice_number||''} von ${CONFIG.INVOICE_FROM.name}`;
-    const dueLine=inv.due_date?`\n\nBitte überweise den Betrag bis zum ${fmtDate(inv.due_date)} auf mein Konto.`:'';
-    const body=`Hallo,\n\nim Anhang findest du Rechnung ${inv.invoice_number} über ${fmtEur(inv.total)}.${dueLine}\n\nMit freundlichen Grüßen,\n${CONFIG.INVOICE_FROM.name}`;
+    const body=`Hallo ${firstName},\nim Anhang findest du Rechnung ${inv.invoice_number||''} für den Zeitraum ${zeitraum}.\n\nBitte überweise den Betrag bis zum ${faellig} auf mein Konto.\n\nLiebe Grüße,\nJason`;
     // Create a Gmail draft (with the PDF attached) instead of sending right
     // away — the mail is only sent once you review it in Gmail and click
     // send yourself, so you can double-check every detail beforehand.
@@ -5344,28 +5431,52 @@ async function sendViaGmail(inv){
     // Status intentionally left unchanged: the invoice is NOT sent yet, it's
     // only a draft. Mark it "Versendet" manually once you've actually sent it.
     toast(`Entwurf für ${clientEmail} in Gmail erstellt – bitte prüfen und senden.`,'ok');
-    // Open the draft directly in Gmail's compose window (falls back to the
-    // drafts list if the deep link can't resolve the compose overlay).
+    // Navigate the already-open tab straight to Gmail's compose window (falls
+    // back to the drafts list if the deep link can't resolve the overlay).
     const composeUrl=draftMsgId
       ? `https://mail.google.com/mail/u/0/#drafts?compose=${encodeURIComponent(draftMsgId)}`
       : 'https://mail.google.com/mail/u/0/#drafts';
-    window.open(composeUrl,'_blank','noopener');
-  } catch(e){ toast('Fehler beim Erstellen des Entwurfs: '+e.message,'err'); }
+    if(draftTab){ draftTab.location.href=composeUrl; } else { window.open(composeUrl,'_blank','noopener'); }
+  } catch(e){
+    if(draftTab) draftTab.close();
+    toast('Fehler beim Erstellen des Entwurfs: '+e.message,'err');
+  }
   finally { if(btn){ btn.disabled=false; btn.textContent='Per Gmail senden'; } }
 }
+
+const GMAIL_HINT_KEY='jm_gmail_account';
 
 function getGmailToken(){
   return new Promise((resolve,reject)=>{
     if(!window.google){ reject(new Error('Google Identity Services nicht geladen')); return; }
+    // Remembered sender account from a previous authorization — passing it as a
+    // login hint lets Google reuse it and skip the account chooser next time.
+    const hint=localStorage.getItem(GMAIL_HINT_KEY)||undefined;
     const client=google.accounts.oauth2.initTokenClient({
       client_id:CONFIG.GMAIL_CLIENT_ID,
       // gmail.compose lets us create a draft (incl. attachment) for you to
       // review and send manually — gmail.send alone can't create drafts.
       scope:'https://www.googleapis.com/auth/gmail.compose',
-      callback:(res)=>{ if(res.error) reject(new Error(res.error)); else resolve(res.access_token); }
+      hint,
+      callback:(res)=>{ if(res.error) reject(new Error(res.error)); else resolve(res.access_token); },
+      error_callback:(err)=>reject(new Error(err?.type||'Gmail-Anmeldung abgebrochen')),
     });
-    client.requestAccessToken();
+    // With a remembered account, request a silent grant (no chooser/consent);
+    // the very first time we let Google prompt as needed.
+    client.requestAccessToken(hint ? { prompt:'' } : {});
   });
+}
+
+// Make sure we hold a valid Gmail token AND have remembered which Google
+// account is being used, so subsequent sends skip the account selection.
+async function ensureGmailAuth(){
+  if(!gmailToken) gmailToken=await getGmailToken();
+  if(!localStorage.getItem(GMAIL_HINT_KEY)){
+    try{
+      const r=await fetch('https://gmail.googleapis.com/gmail/v1/users/me/profile',{headers:{Authorization:'Bearer '+gmailToken}});
+      if(r.ok){ const p=await r.json(); if(p.emailAddress) localStorage.setItem(GMAIL_HINT_KEY,p.emailAddress); }
+    }catch(e){}
+  }
 }
 
 async function blobToBase64(blob){
