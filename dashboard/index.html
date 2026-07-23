@@ -2918,7 +2918,7 @@ function renderRevenueChart(){
       </div>`;
     }).join('');
     const avgLine = avg>0
-      ? `<div title="Ø Umsatz/Monat: ${fmtEur(avg)}" style="position:absolute;left:0;right:0;bottom:${avgY}px;border-top:2px dashed var(--ink-m);pointer-events:none">
+      ? `<div title="Ø Umsatz/Monat: ${fmtEur(avg)}" style="position:absolute;left:0;right:0;bottom:${avgY}px;border-top:1px dashed var(--ink-s);pointer-events:none">
            <span style="position:absolute;right:1px;bottom:1px;font-size:.5625rem;font-weight:600;color:var(--ink-m);background:var(--surface);padding:0 3px;border-radius:3px;white-space:nowrap">Ø ${fmtEur(avg)}/Mon</span>
          </div>`
       : '';
@@ -2954,7 +2954,7 @@ function renderRevenueChart(){
     }).join('');
     const yAvg = H - Math.round((avg/maxVal)*(H-PAD*2));
     const avgLine = avg>0
-      ? `<line x1="${PAD}" y1="${yAvg}" x2="${W-PAD}" y2="${yAvg}" stroke="var(--ink-m)" stroke-width="1.5" stroke-dasharray="5 4"/>
+      ? `<line x1="${PAD}" y1="${yAvg}" x2="${W-PAD}" y2="${yAvg}" stroke="var(--ink-s)" stroke-width="0.75" stroke-dasharray="5 4"/>
          <text x="${W-PAD}" y="${yAvg-3}" text-anchor="end" font-size="8" font-weight="600" fill="var(--ink-m)">Ø ${fmtEur(avg)}/Mon</text>`
       : '';
     $('rev-bars').style.display='block';
