@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS clients (
   email             TEXT,
   company           TEXT,
   phone             TEXT,
+  linkedin_url      TEXT,                   -- LinkedIn profile URL of the lead
   website           TEXT,
   address           TEXT,                   -- postal address for invoices ("Billed to")
   vat_id            TEXT,                   -- optional VAT / USt-IdNr. for invoices
@@ -72,6 +73,12 @@ BEGIN
   ) THEN
     ALTER TABLE clients ADD COLUMN vat_id TEXT;
   END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'clients' AND column_name = 'linkedin_url'
+  ) THEN
+    ALTER TABLE clients ADD COLUMN linkedin_url TEXT;
+  END IF;
 END $$;
 
 
@@ -83,10 +90,19 @@ CREATE TABLE IF NOT EXISTS contacts_log (
   id         UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
   client_id  UUID        NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
   type       TEXT        NOT NULL DEFAULT 'note'
-             CHECK (type IN ('call', 'email', 'meeting', 'note', 'other')),
+             CHECK (type IN ('call', 'email', 'meeting', 'note', 'other', 'stage')),
   notes      TEXT        NOT NULL,
   logged_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Migration helper: allow the 'stage' activity type on an existing
+-- contacts_log table (pipeline create/move events). Safe to re-run.
+DO $$
+BEGIN
+  ALTER TABLE contacts_log DROP CONSTRAINT IF EXISTS contacts_log_type_check;
+  ALTER TABLE contacts_log ADD CONSTRAINT contacts_log_type_check
+    CHECK (type IN ('call', 'email', 'meeting', 'note', 'other', 'stage'));
+END $$;
 
 
 -- ============================================================

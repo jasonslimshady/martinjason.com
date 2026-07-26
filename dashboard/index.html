@@ -213,6 +213,7 @@
     .act-meeting{background:var(--purple-t);color:var(--purple)}
     .act-note{background:var(--surface-2);color:var(--ink-m)}
     .act-other{background:var(--orange-t);color:#b87000}
+    .act-stage{background:var(--accent-t);color:var(--accent)}
     .act-meta{font-size:.75rem;color:var(--ink-s);margin-top:.125rem}
     .act-form{background:var(--surface-2);border-radius:var(--r-md);padding:1rem;margin-bottom:1.25rem}
     .act-type-row{display:flex;gap:.5rem;margin-bottom:.75rem;flex-wrap:wrap}
@@ -854,6 +855,7 @@
           <div class="fg"><label class="fl">E-Mail</label><input class="fi" id="mc-email" type="email" placeholder="max@firma.de" /></div>
           <div class="fg"><label class="fl">Telefon</label><input class="fi" id="mc-phone" placeholder="+49 …" /></div>
           <div class="fg s2"><label class="fl">Unternehmen</label><input class="fi" id="mc-company" placeholder="Musterfirma GmbH" /></div>
+          <div class="fg s2"><label class="fl">LinkedIn Profil URL</label><input class="fi" id="mc-linkedin" type="url" placeholder="https://www.linkedin.com/in/…" /></div>
           <div class="fg s2"><label class="fl">Website</label><input class="fi" id="mc-web" type="url" placeholder="https://…" /></div>
           <div class="fg s2"><label class="fl">Adresse (für Rechnung)</label><textarea class="fi" id="mc-address" rows="3" placeholder="Straße Nr.&#10;PLZ Ort&#10;Land"></textarea></div>
           <div class="fg s2"><label class="fl">USt-IdNr. (optional, für Rechnung)</label><input class="fi" id="mc-vatid" placeholder="z.B. DE299831460" /></div>
@@ -1216,8 +1218,8 @@ const STAGE_CFG = [
   { id:'lost',        label:'Verloren',    color:'#FF453A', tag:'tag--red' },
 ];
 const STAGE_MAP = Object.fromEntries(STAGE_CFG.map(s => [s.id, s]));
-const ACT_ICONS = { call:'📞', email:'✉️', meeting:'🤝', note:'📝', other:'💬' };
-const ACT_CSS   = { call:'act-call', email:'act-email', meeting:'act-meeting', note:'act-note', other:'act-other' };
+const ACT_ICONS = { call:'📞', email:'✉️', meeting:'🤝', note:'📝', other:'💬', stage:'🔄' };
+const ACT_CSS   = { call:'act-call', email:'act-email', meeting:'act-meeting', note:'act-note', other:'act-other', stage:'act-stage' };
 
 // ── AUTH ────────────────────────────────────────────────────────────
 async function boot() {
@@ -1378,6 +1380,7 @@ async function loadStats() {
 
 // ── CRM ─────────────────────────────────────────────────────────────
 let editClientId = null;
+let editClientStageBefore = null; // pipeline stage before an edit, to detect moves
 
 async function loadCRM() {
   const { data, error } = await sb.from('clients').select('*').order('created_at',{ascending:false});
@@ -1434,7 +1437,7 @@ function renderFollowups(clients){
   document.querySelectorAll('.followup-row').forEach(r=>r.addEventListener('click',()=>openDrawer(r.dataset.id)));
 }
 
-$('btn-new-client').addEventListener('click',()=>{ editClientId=null; $('mc-title').textContent='Neuer Lead'; $('mc-form').reset(); $('mc-won-at-row').style.display='none'; openModal('ov-client'); });
+$('btn-new-client').addEventListener('click',()=>{ editClientId=null; editClientStageBefore=null; $('mc-title').textContent='Neuer Lead'; $('mc-form').reset(); $('mc-won-at-row').style.display='none'; openModal('ov-client'); });
 $('mc-stage').addEventListener('change',()=>{ $('mc-won-at-row').style.display=$('mc-stage').value==='won'?'':'none'; });
 
 async function saveClient(e){
@@ -1445,28 +1448,57 @@ async function saveClient(e){
   const wonAtVal = $('mc-won-at').value || (stage === 'won' ? today() : null);
   const payload={ name:$('mc-name').value.trim(), email:$('mc-email').value.trim()||null,
     company:$('mc-company').value.trim()||null, phone:$('mc-phone').value.trim()||null,
+    linkedin_url:$('mc-linkedin').value.trim()||null,
     website:$('mc-web').value.trim()||null, pipeline_stage:stage,
     address:$('mc-address').value.trim()||null, vat_id:$('mc-vatid').value.trim()||null,
     won_at: stage === 'won' ? wonAtVal : null,
     next_followup_date:$('mc-followup').value||null, notes:$('mc-notes').value.trim()||null,
     is_active_client:stage==='won' };
-  let { error } = editClientId
-    ? await sb.from('clients').update(payload).eq('id',editClientId)
-    : await sb.from('clients').insert(payload);
+  const wasEditing = !!editClientId;
+  let savedId = editClientId;
+  let error;
+  if(editClientId){
+    ({ error } = await sb.from('clients').update(payload).eq('id',editClientId));
+  } else {
+    const ins = await sb.from('clients').insert(payload).select('id').single();
+    error = ins.error; if(ins.data) savedId = ins.data.id;
+  }
   // Graceful fallback if new columns aren't migrated yet.
-  if(error && /address|vat_id|won_at|column|schema cache/i.test(error.message||'')){
-    const { address, vat_id, won_at, ...base } = payload;
-    const retry = editClientId
-      ? await sb.from('clients').update(base).eq('id',editClientId)
-      : await sb.from('clients').insert(base);
-    error = retry.error;
+  if(error && /address|vat_id|won_at|linkedin_url|column|schema cache/i.test(error.message||'')){
+    const { address, vat_id, won_at, linkedin_url, ...base } = payload;
+    if(editClientId){
+      ({ error } = await sb.from('clients').update(base).eq('id',editClientId));
+    } else {
+      const ins = await sb.from('clients').insert(base).select('id').single();
+      error = ins.error; if(ins.data) savedId = ins.data.id;
+    }
     if(!error) toast('Einige Felder nicht gespeichert — bitte das aktualisierte supabase-setup.sql in Supabase ausführen.','err');
   }
   btn.textContent='Speichern'; btn.disabled=false;
   if(error){ toast('Fehler: '+error.message,'err'); return; }
-  closeModal('ov-client'); toast(editClientId?'Kontakt aktualisiert.':'Lead hinzugefügt.','ok');
+  // Pipeline activity: log lead creation and stage moves with date + time.
+  if(savedId){
+    const stageLabel = STAGE_MAP[stage]?.label || stage;
+    if(!wasEditing){
+      await logStageActivity(savedId, `Lead erstellt – Phase „${stageLabel}“`);
+    } else if(editClientStageBefore != null && editClientStageBefore !== stage){
+      const fromLabel = STAGE_MAP[editClientStageBefore]?.label || editClientStageBefore;
+      await logStageActivity(savedId, `Verschoben von „${fromLabel}“ zu „${stageLabel}“`);
+    }
+  }
+  editClientStageBefore = null;
+  closeModal('ov-client'); toast(wasEditing?'Kontakt aktualisiert.':'Lead hinzugefügt.','ok');
   loadCRM(); loadStats();
-  if(editClientId) openDrawer(editClientId);
+  if(wasEditing) openDrawer(savedId);
+}
+
+// Log a pipeline event (create/move) to the activity timeline. Falls back to
+// the 'other' type if the DB's CHECK constraint hasn't been migrated yet.
+async function logStageActivity(clientId, notes){
+  let { error } = await sb.from('contacts_log').insert({ client_id:clientId, type:'stage', notes });
+  if(error && /type|check|constraint|valid|violat/i.test(error.message||'')){
+    await sb.from('contacts_log').insert({ client_id:clientId, type:'other', notes });
+  }
 }
 
 // ── CLIENT DRAWER ───────────────────────────────────────────────────
@@ -1484,9 +1516,11 @@ async function openDrawer(id){
   $('dr-stage-tag').innerHTML = `<span class="tag ${st.tag}">${st.label}</span>${c.is_active_client?'<span class="tag tag--green" style="margin-left:.375rem">Aktiver Kunde</span>':''}`;
   // Info tab
   const webUrl = safeUrl(c.website); // only http(s) becomes a clickable link
+  const liUrl = safeUrl(c.linkedin_url);
   $('dr-info-rows').innerHTML = [
     ['E-Mail', c.email ? `<a href="mailto:${esc(c.email)}" style="color:var(--accent)">${esc(c.email)}</a>` : '—'],
     ['Telefon', c.phone ? esc(c.phone) : '—'],
+    ['LinkedIn', c.linkedin_url ? (liUrl ? `<a href="${esc(liUrl)}" target="_blank" style="color:var(--accent)">${esc(c.linkedin_url)}</a>` : esc(c.linkedin_url)) : '—'],
     ['Website', c.website ? (webUrl ? `<a href="${esc(webUrl)}" target="_blank" style="color:var(--accent)">${esc(c.website)}</a>` : esc(c.website)) : '—'],
     ['Adresse', c.address ? esc(c.address).replace(/\n/g,'<br>') : '—'],
     ['USt-IdNr.', c.vat_id ? esc(c.vat_id) : '—'],
@@ -1498,9 +1532,10 @@ async function openDrawer(id){
 
   // Wire edit/delete
   $('dr-edit-btn').onclick = () => {
-    editClientId=id; $('mc-title').textContent='Kontakt bearbeiten';
+    editClientId=id; editClientStageBefore=c.pipeline_stage||'new_lead'; $('mc-title').textContent='Kontakt bearbeiten';
     $('mc-name').value=c.name||''; $('mc-email').value=c.email||'';
     $('mc-phone').value=c.phone||''; $('mc-company').value=c.company||'';
+    $('mc-linkedin').value=c.linkedin_url||'';
     $('mc-web').value=c.website||''; $('mc-stage').value=c.pipeline_stage||'new_lead';
     $('mc-address').value=c.address||''; $('mc-vatid').value=c.vat_id||'';
     $('mc-won-at').value=c.won_at||''; $('mc-won-at-row').style.display=c.pipeline_stage==='won'?'':'none';
