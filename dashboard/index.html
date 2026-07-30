@@ -1800,44 +1800,21 @@ $('btn-stop').addEventListener('click', async ()=>{
     const logEntry = { start:sessionStart, stop:sessionEnd, minutes:sessionMins, seconds:sessionSecs };
 
     if(timerResumeEntryId){
+      // Resuming a "Letzter Eintrag" always folds the new session into that
+      // same entry as a sub-entry (time_log) — no new row appears in the
+      // list. The session carries its own start/stop timestamps, so the
+      // "Heute"/"Diese Woche" totals attribute it to today from those logs
+      // even though it lives inside an older entry (see loadTimeEntries).
       const { data:existing } = await sb.from('time_entries').select('*').eq('id',timerResumeEntryId).single();
       if(existing){
-        const todayStr = today();
-        // The resumed entry may be from an earlier day. Folding today's
-        // tracked time into it would keep that entry's old `date`, so the
-        // time would never show up under "Heute"/"Diese Woche" (both filter
-        // by the entry's date column). Route it to that project's entry for
-        // today instead, creating one if none exists yet — same behaviour as
-        // adding a manual log on a different day.
-        let target = existing;
-        if(existing.date !== todayStr){
-          const { data: sameDay } = await sb.from('time_entries').select('*')
-            .eq('project_id', existing.project_id).eq('date', todayStr).limit(1);
-          if(sameDay && sameDay.length){
-            target = sameDay[0];
-          } else {
-            let { data: created } = await sb.from('time_entries').insert({
-              project_id: existing.project_id, client_id: existing.client_id,
-              date: todayStr, duration_minutes: 0, start_time: sessionStart, time_logs: [],
-            }).select().single();
-            if(!created){
-              ({ data: created } = await sb.from('time_entries').insert({
-                project_id: existing.project_id, client_id: existing.client_id,
-                date: todayStr, duration_minutes: 0, start_time: sessionStart,
-              }).select().single());
-            }
-            if(created) target = created;
-          }
-        }
-        const logs = Array.isArray(target.time_logs) ? [...target.time_logs, logEntry] : [logEntry];
-        const totalMins = (target.duration_minutes||0) + sessionMins;
+        const logs = Array.isArray(existing.time_logs) ? [...existing.time_logs, logEntry] : [logEntry];
+        const totalMins = (existing.duration_minutes||0) + sessionMins;
         const updatePayload = { duration_minutes: totalMins, end_time: sessionEnd };
-        let { error } = await sb.from('time_entries').update({ ...updatePayload, time_logs: logs }).eq('id', target.id);
+        let { error } = await sb.from('time_entries').update({ ...updatePayload, time_logs: logs }).eq('id', timerResumeEntryId);
         if(error){
-          ({ error } = await sb.from('time_entries').update(updatePayload).eq('id', target.id));
+          ({ error } = await sb.from('time_entries').update(updatePayload).eq('id', timerResumeEntryId));
         }
         if(error){ toast('Fehler beim Speichern: '+error.message,'err'); }
-        else if(target.id !== timerResumeEntryId){ toast(`${fmtDur(sessionMins)} auf „Heute" gebucht — gesamt ${fmtDur(totalMins)}.`,'ok'); }
         else { toast(`${fmtDur(sessionMins)} hinzugefügt — gesamt ${fmtDur(totalMins)}.`,'ok'); }
       } else {
         toast('Zeit konnte nicht gespeichert werden — ursprünglicher Eintrag nicht gefunden.','err');
@@ -2163,15 +2140,58 @@ async function loadTimeEntries(){
     if(ptoOnlyUninvoiced) fallbackQ = fallbackQ.eq('is_invoiced', false);
     ({ data, error } = await fallbackQ);
   }
-  // Heute/Diese Woche come from a dedicated (unlimited) query over the
-  // current calendar week (Mo–So, dashboard timezone) — previously they
-  // were summed from just the last 30 rows and used a rolling 7-day window.
+  // Heute/Diese Woche (Mo–So, dashboard timezone). Time is attributed by the
+  // timestamp of each tracked session (time_logs), NOT just the entry's
+  // `date`. That way a session tracked today by resuming an older "Letzter
+  // Eintrag" counts under Heute/Diese Woche even though it lives as a
+  // sub-entry inside that older entry. Minutes without a timestamped session
+  // (manual add-logs, pre-time_logs entries, rounding) fall back to the
+  // entry's own date.
   const todayStr=today();
   const [weekStart, weekEnd] = tzWeekRange();
-  const { data: statEntries } = await sb.from('time_entries')
-    .select('duration_minutes,date').gte('date', weekStart).lte('date', weekEnd);
-  $('t-today').textContent=fmtDur((statEntries||[]).filter(e=>e.date===todayStr).reduce((s,e)=>s+(e.duration_minutes||0),0));
-  $('t-week').textContent=fmtDur((statEntries||[]).reduce((s,e)=>s+(e.duration_minutes||0),0));
+  let todayMins=0, weekMins=0;
+  // An older entry (date before this week) can still carry sessions tracked
+  // this week, so widen the window: match by date in-week OR recent activity
+  // (end_time). The lower bound is 2 days before the week start to safely
+  // cover the timezone offset between the stored UTC end_time and the local
+  // week boundary; the precise per-log attribution below handles correctness.
+  const [wy,wm,wd]=weekStart.split('-').map(Number);
+  const actSince=new Date(Date.UTC(wy,wm-1,wd-2)).toISOString();
+  let statRes = await sb.from('time_entries')
+    .select('duration_minutes,date,end_time,time_logs')
+    .or(`and(date.gte.${weekStart},date.lte.${weekEnd}),end_time.gte.${actSince}`);
+  if(statRes.error){
+    // time_logs/end_time not migrated on this database yet — fall back to
+    // summing purely by the entry's date (old behaviour).
+    statRes = await sb.from('time_entries').select('duration_minutes,date').gte('date', weekStart).lte('date', weekEnd);
+    for(const e of (statRes.data||[])){
+      const m=e.duration_minutes||0;
+      if(e.date===todayStr) todayMins+=m;
+      if(e.date>=weekStart && e.date<=weekEnd) weekMins+=m;
+    }
+  } else {
+    for(const e of (statRes.data||[])){
+      const logs=Array.isArray(e.time_logs)?e.time_logs:[];
+      let logged=0;
+      for(const l of logs){
+        const ts=l.stop||l.start;           // only sessions carry a timestamp
+        const mins=l.minutes||0;
+        if(ts){
+          logged+=mins;
+          const d=tzDateStr(new Date(ts));
+          if(d===todayStr) todayMins+=mins;
+          if(d>=weekStart && d<=weekEnd) weekMins+=mins;
+        }
+      }
+      const remaining=Math.max((e.duration_minutes||0)-logged,0);
+      if(remaining){
+        if(e.date===todayStr) todayMins+=remaining;
+        if(e.date>=weekStart && e.date<=weekEnd) weekMins+=remaining;
+      }
+    }
+  }
+  $('t-today').textContent=fmtDur(todayMins);
+  $('t-week').textContent=fmtDur(weekMins);
 
   // "Letzte Einträge" itself narrows down to the project selected in the
   // overview above, while the Heute/Diese Woche totals stay global.
