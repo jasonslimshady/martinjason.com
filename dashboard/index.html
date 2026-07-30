@@ -1802,14 +1802,42 @@ $('btn-stop').addEventListener('click', async ()=>{
     if(timerResumeEntryId){
       const { data:existing } = await sb.from('time_entries').select('*').eq('id',timerResumeEntryId).single();
       if(existing){
-        const logs = Array.isArray(existing.time_logs) ? [...existing.time_logs, logEntry] : [logEntry];
-        const totalMins = (existing.duration_minutes||0) + sessionMins;
+        const todayStr = today();
+        // The resumed entry may be from an earlier day. Folding today's
+        // tracked time into it would keep that entry's old `date`, so the
+        // time would never show up under "Heute"/"Diese Woche" (both filter
+        // by the entry's date column). Route it to that project's entry for
+        // today instead, creating one if none exists yet — same behaviour as
+        // adding a manual log on a different day.
+        let target = existing;
+        if(existing.date !== todayStr){
+          const { data: sameDay } = await sb.from('time_entries').select('*')
+            .eq('project_id', existing.project_id).eq('date', todayStr).limit(1);
+          if(sameDay && sameDay.length){
+            target = sameDay[0];
+          } else {
+            let { data: created } = await sb.from('time_entries').insert({
+              project_id: existing.project_id, client_id: existing.client_id,
+              date: todayStr, duration_minutes: 0, start_time: sessionStart, time_logs: [],
+            }).select().single();
+            if(!created){
+              ({ data: created } = await sb.from('time_entries').insert({
+                project_id: existing.project_id, client_id: existing.client_id,
+                date: todayStr, duration_minutes: 0, start_time: sessionStart,
+              }).select().single());
+            }
+            if(created) target = created;
+          }
+        }
+        const logs = Array.isArray(target.time_logs) ? [...target.time_logs, logEntry] : [logEntry];
+        const totalMins = (target.duration_minutes||0) + sessionMins;
         const updatePayload = { duration_minutes: totalMins, end_time: sessionEnd };
-        let { error } = await sb.from('time_entries').update({ ...updatePayload, time_logs: logs }).eq('id', timerResumeEntryId);
+        let { error } = await sb.from('time_entries').update({ ...updatePayload, time_logs: logs }).eq('id', target.id);
         if(error){
-          ({ error } = await sb.from('time_entries').update(updatePayload).eq('id', timerResumeEntryId));
+          ({ error } = await sb.from('time_entries').update(updatePayload).eq('id', target.id));
         }
         if(error){ toast('Fehler beim Speichern: '+error.message,'err'); }
+        else if(target.id !== timerResumeEntryId){ toast(`${fmtDur(sessionMins)} auf „Heute" gebucht — gesamt ${fmtDur(totalMins)}.`,'ok'); }
         else { toast(`${fmtDur(sessionMins)} hinzugefügt — gesamt ${fmtDur(totalMins)}.`,'ok'); }
       } else {
         toast('Zeit konnte nicht gespeichert werden — ursprünglicher Eintrag nicht gefunden.','err');
