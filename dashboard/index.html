@@ -628,6 +628,10 @@
             <span style="color:var(--ink-s);font-size:.8125rem">–</span>
             <input type="date" id="pto-date-to" class="fi" style="width:140px;font-size:.8125rem;padding:.375rem .625rem" />
           </span>
+          <div class="pto-view-toggle" id="pto-amount-toggle" title="Betrag nach Rechnungsstatus filtern">
+            <button class="pto-view-btn" id="pto-amount-open" title="Offen — nur noch nicht fakturierte Beträge anzeigen"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5V8l2.4 1.6"/></svg></button>
+            <button class="pto-view-btn" id="pto-amount-invoiced" title="Fakturiert — bereits fakturierte Beträge anzeigen"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><path d="M2.5 8.4l3.3 3.3L13.5 4.2"/></svg></button>
+          </div>
           <div class="pto-view-toggle">
             <button class="pto-view-btn" id="pto-view-bar" title="Balkenansicht"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><rect x="1" y="9" width="14" height="3" rx="1"/><rect x="1" y="4" width="9" height="3" rx="1"/></svg></button>
             <button class="pto-view-btn" id="pto-view-circle" title="Kreisansicht"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/></svg></button>
@@ -2396,12 +2400,12 @@ async function loadProjectOverview() {
   }
 
   let { data, error } = await sb.from('time_entries')
-    .select('duration_minutes,date,project_id,rate_override,projects(name,rate,rate_type,budget_hours,budget_start_day,color,clients(name,won_at))')
+    .select('duration_minutes,date,project_id,rate_override,is_invoiced,projects(name,rate,rate_type,budget_hours,budget_start_day,color,clients(name,won_at))')
     .gte('date', from).lte('date', to);
   if(error){
     // "color"/"budget_start_day" may not be migrated on this database yet — never let that hide the overview itself.
     ({ data, error } = await sb.from('time_entries')
-      .select('duration_minutes,date,project_id,rate_override,projects(name,rate,rate_type,budget_hours,clients(name,won_at))')
+      .select('duration_minutes,date,project_id,rate_override,is_invoiced,projects(name,rate,rate_type,budget_hours,clients(name,won_at))')
       .gte('date', from).lte('date', to));
   }
   const entries = data || [];
@@ -2430,7 +2434,10 @@ async function loadProjectOverview() {
       budgetStartDay: p.budget_start_day || null,
       wonAt: p.clients?.won_at || null,
       color: p.color || null,
-      mins: 0, amount: 0
+      // `amount` stays the grand total; amountOpen / amountInvoiced split it by
+      // each entry's Offen/Fakturiert status so the Projektübersicht can show
+      // just the still-open or just the already-invoiced € on demand.
+      mins: 0, amount: 0, amountOpen: 0, amountInvoiced: 0
     };
   });
 
@@ -2454,11 +2461,18 @@ async function loadProjectOverview() {
     // hourly rate — mirrors the per-entry calculation in the time entries
     // list, so the project total actually matches the sum of its entries.
     const effRate = e.rate_override != null ? e.rate_override : (map[pid].rateType === 'hourly' ? map[pid].rate : null);
-    if (effRate) map[pid].amount += (e.duration_minutes || 0) / 60 * effRate;
+    if (effRate) {
+      const amt = (e.duration_minutes || 0) / 60 * effRate;
+      map[pid].amount += amt;
+      // "Fakturiert" once its status pill is set to invoiced, otherwise "Offen".
+      if (e.is_invoiced) map[pid].amountInvoiced += amt;
+      else map[pid].amountOpen += amt;
+    }
   });
   const projs = sortPtoProjects(Object.values(map));
   const c = $('pto-container');
   syncPtoViewButtons();
+  syncPtoAmountButtons();
   if (!projs.length) {
     c.innerHTML = `<div class="card"><div class="empty-st" style="padding:1.5rem 1rem"><p class="empty-ttl" style="margin:0">Keine Einträge im gewählten Zeitraum</p></div></div>`;
     return;
@@ -2533,8 +2547,11 @@ async function loadProjectOverview() {
       rawPct = maxM > 0 ? Math.round(p.mins / maxM * 100) : 0;
       pct = rawPct;
     }
-    const earn = p.rateType === 'hourly' && (p.rate || p.amount) ? fmtEur(p.amount || 0) : '';
-    return { ...p, budgetMins, pct, rawPct, over, earn };
+    // Offen (default) shows only the still-to-invoice €; Fakturiert shows the
+    // already-invoiced €. Minutes / budget progress stay based on all work.
+    const shownAmount = ptoAmountStatus === 'invoiced' ? p.amountInvoiced : p.amountOpen;
+    const earn = p.rateType === 'hourly' && (p.rate || shownAmount) ? fmtEur(shownAmount || 0) : '';
+    return { ...p, amount: shownAmount, budgetMins, pct, rawPct, over, earn };
   });
 
   c.innerHTML = ptoViewType === 'circle' ? renderPtoCircles(rows) : renderPtoBars(rows);
@@ -2656,6 +2673,21 @@ function syncPtoViewButtons() {
 
 $('pto-view-bar').addEventListener('click', () => { ptoViewType = 'bar'; localStorage.setItem('pto_view_type','bar'); loadProjectOverview(); });
 $('pto-view-circle').addEventListener('click', () => { ptoViewType = 'circle'; localStorage.setItem('pto_view_type','circle'); loadProjectOverview(); });
+
+// Betrag nach Rechnungsstatus: "Offen" (Standard) zeigt nur noch nicht
+// fakturierte Beträge, "Fakturiert" nur die bereits fakturierten.
+let ptoAmountStatus = localStorage.getItem('pto_amount_status') || 'open';
+
+function syncPtoAmountButtons() {
+  const isOpen = ptoAmountStatus === 'open';
+  $('pto-amount-open').style.background = isOpen ? 'rgba(10,10,10,.72)' : 'var(--glass)';
+  $('pto-amount-open').style.color = isOpen ? '#fff' : 'var(--ink-m)';
+  $('pto-amount-invoiced').style.background = !isOpen ? 'rgba(10,10,10,.72)' : 'var(--glass)';
+  $('pto-amount-invoiced').style.color = !isOpen ? '#fff' : 'var(--ink-m)';
+}
+
+$('pto-amount-open').addEventListener('click', () => { ptoAmountStatus = 'open'; localStorage.setItem('pto_amount_status','open'); loadProjectOverview(); });
+$('pto-amount-invoiced').addEventListener('click', () => { ptoAmountStatus = 'invoiced'; localStorage.setItem('pto_amount_status','invoiced'); loadProjectOverview(); });
 
 // Clicking a project in the overview highlights it and scopes "Letzte
 // Einträge" down to just that project's entries; "Alle" clears it again.
