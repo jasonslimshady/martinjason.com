@@ -931,9 +931,9 @@
 
 /* ── LÖSUNG ───────────────────────────────────────── */
 .solution { text-align: center; }
-.solution__inner { margin-inline: auto; }
+.solution__inner { margin-inline: auto; max-width: var(--container-max); }
 .solution .eyebrow { color: var(--color-accent); }
-.solution .contact__sub { margin-inline: auto; max-width: 62ch; }
+.solution .contact__sub { margin-inline: auto; max-width: 100ch; }
 .solution .contact__cta { justify-content: center; }
 .solution .contact__title em {
   font-family: var(--font-serif);
@@ -1101,3 +1101,7 @@
   justify-content: center;
   margin-top: var(--space-4);
 }
+
+/* ── FAQ answers with multiple paragraphs ─────────── */
+.faq-answer p { margin: 0 0 0.9em; }
+.faq-answer p:last-child { margin-bottom: 0; }
