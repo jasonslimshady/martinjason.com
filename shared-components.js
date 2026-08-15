@@ -19,7 +19,7 @@
     '    <li><a href="/#about">Über mich</a></li>' +
     '    <li><a href="/blog">Blog</a></li>' +
     '  </ul>' +
-    '  <a class="btn btn--primary glass-btn nav__cta" href="/booking" data-booking>Termin buchen</a>' +
+    '  <a class="btn btn--primary glass-btn nav__cta" href="/booking" data-booking>Audit buchen</a>' +
     '</nav>';
 
   var FOOTER_HTML =
