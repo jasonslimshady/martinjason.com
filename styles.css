@@ -1094,3 +1094,10 @@
   .vsl__play-ring { width: 68px; height: 68px; }
   .vsl__play-ring svg { width: 24px; height: 24px; }
 }
+
+/* ── Referenzen / logo bar CTA ────────────────────── */
+.logos__cta {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-4);
+}
