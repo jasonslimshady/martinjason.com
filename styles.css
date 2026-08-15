@@ -100,14 +100,12 @@
 }
 
 .ai-showcase__sticky {
-  min-height: 100vh;
-  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   overflow: visible;
-  padding-top: 80px;
+  padding-top: clamp(88px, 11vw, 112px);
 }
 
 /* ── Heading block ──────────────────────────────────── */
@@ -118,7 +116,7 @@
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  padding: clamp(20px, 3vh, 36px) var(--container-pad) 0;
+  padding: 0 var(--container-pad);
   text-align: center;
 }
 
@@ -804,9 +802,9 @@
 
 /* ── VIDEO (VSL) ──────────────────────────────────── */
 .vsl-section {
-  padding-block: clamp(1rem, 3vh, 2.5rem) clamp(2.5rem, 6vw, 5rem);
+  padding-block: 0 clamp(1.5rem, 4vw, 3rem);
 }
-.vsl-wrap { max-width: 960px; }
+.vsl-wrap { max-width: 1200px; } /* 960px × 1.25 — preview reads ~25% larger */
 .vsl {
   position: relative;
   margin: 0;
@@ -878,7 +876,12 @@
 }
 
 /* ── PROBLEM ──────────────────────────────────────── */
-.problem__head { max-width: 760px; margin-bottom: var(--space-5); }
+.problem__head { margin-bottom: var(--space-5); }
+.problem__headline { white-space: nowrap; }
+.problem__lede { max-width: none; }
+@media (max-width: 900px) {
+  .problem__headline { white-space: normal; }
+}
 .problem__grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
