@@ -1101,3 +1101,7 @@
   justify-content: center;
   margin-top: var(--space-4);
 }
+
+/* ── FAQ answers with multiple paragraphs ─────────── */
+.faq-answer p { margin: 0 0 0.9em; }
+.faq-answer p:last-child { margin-bottom: 0; }
