@@ -971,7 +971,7 @@
 }
 .process__steps {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--space-2);
   margin: 0;
   padding: 0;
@@ -1028,9 +1028,10 @@
   font-size: clamp(1.05rem, 0.75rem + 1.8vw, 1.53rem); /* 1.53rem (× 1.5) at desktop, scales down on narrow screens so the longest step still fits the sticky viewport */
   line-height: 1.5;
 }
+.proc-scene__cta { margin-top: 1.25rem; }
 
 /* Scroll-active upgrade */
-.process.is-live { height: 480vh; }
+.process.is-live { height: 400vh; }
 .process.is-live .process__sticky {
   position: sticky;
   top: 0;
@@ -1078,7 +1079,7 @@
   .problem__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 720px) {
-  .process.is-live { height: 420vh; }
+  .process.is-live { height: 360vh; }
   .process__head { margin-bottom: var(--space-3); }
   .process__rail { margin-bottom: var(--space-3); }
   .process__steps { gap: 0.4rem; }
