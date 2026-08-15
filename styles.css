@@ -127,7 +127,7 @@
 
 .ai-showcase__eyebrow {
   font-family: var(--font-sans);
-  font-size: 0.78rem;
+  font-size: 0.95rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--color-accent);
@@ -145,7 +145,8 @@
 }
 
 .ai-showcase__subline {
-  font-size: clamp(0.88rem, 1.2vw, 1.05rem);
+  font-size: clamp(1.02rem, 1.5vw, 1.25rem);
+  font-weight: 600;
   color: var(--color-ink-muted);
   max-width: 52ch;
   line-height: 1.5;
