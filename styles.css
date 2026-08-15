@@ -796,3 +796,290 @@
   .leverage.is-live .lev-fact span { font-size: 0.88rem; }
   .leverage.is-live .lev-facts { gap: 0.65rem; }
 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   HOMEPAGE REBUILD — Video / Problem / Lösung / Prozess
+   (added Aug 2026 — profitabledesigner-style sections)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* ── VIDEO (VSL) ──────────────────────────────────── */
+.vsl-section {
+  padding-block: clamp(1rem, 3vh, 2.5rem) clamp(2.5rem, 6vw, 5rem);
+}
+.vsl-wrap { max-width: 960px; }
+.vsl {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: #ECE6DC;
+  box-shadow: var(--glass-shadow-strong);
+  border: 1px solid var(--color-border);
+}
+.vsl__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+}
+/* Play affordance — poster overlay (button fills the frame so the whole
+   thumbnail is clickable, Loom-style) */
+.vsl__play {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: transparent;
+  transition: opacity var(--dur-base) var(--ease-apple),
+              visibility var(--dur-base) var(--ease-apple);
+}
+.vsl__play-ring {
+  display: grid;
+  place-items: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  color: var(--color-bg);
+  background: rgba(10, 10, 10, 0.9);
+  box-shadow: 0 10px 30px rgba(10, 10, 10, 0.28);
+  transition: transform var(--dur-base) var(--ease-back),
+              background var(--dur-fast) var(--ease-apple);
+}
+.vsl__play-ring svg { margin-left: 4px; } /* optically centre the triangle */
+.vsl__play:hover .vsl__play-ring {
+  transform: scale(1.08);
+  background: var(--color-accent);
+}
+.vsl__play-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: blur(10px);
+          backdrop-filter: blur(10px);
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--glass-border);
+}
+/* Once playing: hide the overlay and let the native controls take over */
+.vsl.is-playing .vsl__play {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* ── PROBLEM ──────────────────────────────────────── */
+.problem__head { max-width: 760px; margin-bottom: var(--space-5); }
+.problem__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.problem__card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: clamp(1.3rem, 2.4vw, 1.9rem);
+  box-shadow: var(--glass-shadow);
+  transition: transform var(--dur-base) var(--ease-apple),
+              box-shadow var(--dur-base) var(--ease-apple),
+              border-color var(--dur-base) var(--ease-apple);
+}
+.problem__card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--glass-shadow-strong);
+  border-color: var(--color-border-strong);
+}
+.problem__icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: var(--radius-md);
+  background: var(--color-accent-tint);
+  color: var(--color-accent);
+  margin-bottom: var(--space-3);
+}
+.problem__icon svg { width: 24px; height: 24px; }
+.problem__title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: var(--lh-snug);
+  margin: 0 0 0.5rem;
+  color: var(--color-ink);
+}
+.problem__text {
+  margin: 0;
+  color: var(--color-ink-muted);
+  font-size: 0.98rem;
+  line-height: 1.55;
+}
+
+/* ── LÖSUNG ───────────────────────────────────────── */
+.solution { text-align: center; }
+.solution__inner { margin-inline: auto; }
+.solution .eyebrow { color: var(--color-accent); }
+.solution .contact__sub { margin-inline: auto; max-width: 62ch; }
+.solution .contact__cta { justify-content: center; }
+.solution .contact__title em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* ── PROZESS (scroll-driven) ──────────────────────────
+   Default (no JS / reduced motion): a plain stacked list.
+   .is-live (added by JS) upgrades it to a sticky scroll story. */
+.process { position: relative; }
+.process__head { max-width: 760px; margin-bottom: var(--space-5); }
+.process__head .section__title em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.process__rail { margin-bottom: var(--space-5); }
+.process__rail-track {
+  position: relative;
+  height: 2px;
+  background: var(--color-border-strong);
+  border-radius: 2px;
+  margin-bottom: var(--space-3);
+  overflow: hidden;
+}
+.process__rail-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 120ms linear;
+}
+.process__steps {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.process__step {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.82rem;
+  color: var(--color-ink-soft);
+  transition: color var(--dur-base) var(--ease-apple);
+}
+.process__step-no {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
+.process__step-name { line-height: 1.3; }
+.process__step.is-active { color: var(--color-ink); }
+.process__step.is-done { color: var(--color-ink-muted); }
+
+/* Static default: stack the scene cards as a readable list */
+.process__stage { display: grid; gap: var(--space-3); }
+.proc-scene {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: clamp(1.5rem, 3vw, 2.4rem);
+  box-shadow: var(--glass-shadow);
+}
+.proc-scene__no {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.12em;
+  color: var(--color-accent);
+  margin-bottom: 0.6rem;
+}
+.proc-scene__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 2.6vw, 1.9rem);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: var(--lh-snug);
+  margin: 0 0 0.6rem;
+  color: var(--color-ink);
+}
+.proc-scene__text {
+  margin: 0;
+  color: var(--color-ink-muted);
+  font-size: 1.02rem;
+  line-height: 1.6;
+  max-width: 60ch;
+}
+
+/* Scroll-active upgrade */
+.process.is-live { height: 480vh; }
+.process.is-live .process__sticky {
+  position: sticky;
+  top: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  padding-block: 80px clamp(1rem, 4vh, 2.5rem);
+}
+.process.is-live .process__stage {
+  position: relative;
+  display: block;
+  min-height: clamp(220px, 34vh, 320px);
+}
+.process.is-live .proc-scene {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 420ms var(--ease-apple), transform 420ms var(--ease-apple);
+  pointer-events: none;
+}
+.process.is-live .proc-scene.is-on {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+/* Fade-in elements inside the scroll story */
+.process.is-live .proc-fx {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 480ms var(--ease-apple), transform 480ms var(--ease-apple);
+}
+.process.is-live .proc-fx.is-on { opacity: 1; transform: translateY(0); }
+
+/* ── FAQ wrapper (homepage) ───────────────────────── */
+.faq-wrap { max-width: 860px; }
+
+/* ── Responsive ───────────────────────────────────── */
+@media (max-width: 860px) {
+  .problem__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 720px) {
+  .process.is-live { height: 420vh; }
+  .process__steps { gap: 0.4rem; }
+  .process__step-name { display: none; }        /* keep the rail compact on phones */
+  .process__step-no { font-size: 0.85rem; }
+  .process.is-live .process__stage { min-height: clamp(280px, 46vh, 360px); }
+}
+@media (max-width: 560px) {
+  .problem__grid { grid-template-columns: 1fr; }
+  .vsl__play-ring { width: 68px; height: 68px; }
+  .vsl__play-ring svg { width: 24px; height: 24px; }
+}

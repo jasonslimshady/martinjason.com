@@ -12,11 +12,12 @@
     '    <span class="nav__brand-name">Martin, Jason</span>' +
     '  </a>' +
     '  <ul class="nav__links">' +
-    '    <li><a href="/#services">Leistungen</a></li>' +
-    '    <li><a href="/#work">Galerien</a></li>' +
-    '    <li><a href="/#insights">Insights</a></li>' +
-    '    <li><a href="/blog">Blog</a></li>' +
+    '    <li><a href="/#problem">Problem</a></li>' +
+    '    <li><a href="/#loesung">Lösung</a></li>' +
+    '    <li><a href="/#prozess">Prozess</a></li>' +
+    '    <li><a href="/#faq">FAQ</a></li>' +
     '    <li><a href="/#about">Über mich</a></li>' +
+    '    <li><a href="/blog">Blog</a></li>' +
     '  </ul>' +
     '  <a class="btn btn--primary glass-btn nav__cta" href="/booking" data-booking>Termin buchen</a>' +
     '</nav>';
@@ -29,11 +30,12 @@
     '    <p>AI Product Gallery Design</p>' +
     '  </div>' +
     '  <div class="footer__links">' +
-    '    <a href="/#services">Leistungen</a>' +
-    '    <a href="/#work">Galerien</a>' +
-    '    <a href="/blog">Blog</a>' +
+    '    <a href="/#problem">Problem</a>' +
+    '    <a href="/#loesung">Lösung</a>' +
+    '    <a href="/#prozess">Prozess</a>' +
+    '    <a href="/#faq">FAQ</a>' +
     '    <a href="/#about">Über mich</a>' +
-    '    <a href="/#contact">Kontakt</a>' +
+    '    <a href="/blog">Blog</a>' +
     '  </div>' +
     '  <div class="footer__legal">' +
     '    <a href="/impressum">Impressum</a>' +
