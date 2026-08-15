@@ -105,7 +105,7 @@
   align-items: center;
   justify-content: center;
   overflow: visible;
-  padding-top: clamp(88px, 11vw, 112px);
+  padding-top: clamp(112px, 13vw, 144px);
 }
 
 /* ── Heading block ──────────────────────────────────── */
@@ -152,7 +152,7 @@
   max-width: none;
   white-space: nowrap;
   line-height: 1.5;
-  margin: 0 0 var(--space-4);
+  margin: 0 0 var(--space-5);
 }
 
 /* ── Stage ──────────────────────────────────────────── */
