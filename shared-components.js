@@ -8,7 +8,7 @@
   var HEADER_HTML =
     '<nav class="nav glass" aria-label="Hauptnavigation">' +
     '  <a class="nav__brand" href="/" aria-label="Jason Martin — Startseite">' +
-    '    <img class="nav__brand-mark" src="/images/jason-martin-128x128.avif" alt="Jason Martin" width="32" height="32" />' +
+    '    <img class="nav__brand-mark" src="/images/favicon.png" alt="Jason Martin" width="32" height="32" />' +
     '    <span class="nav__brand-name">Martin, Jason</span>' +
     '  </a>' +
     '  <ul class="nav__links">' +
