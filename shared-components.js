@@ -25,7 +25,10 @@
   var FOOTER_HTML =
     '<div class="container footer__inner">' +
     '  <div class="footer__brand">' +
-    '    <img src="/images/pacific-origins-logo-256x85.avif" alt="Pacific Origins" class="footer__pacific-logo" width="256" height="85" />' +
+    '    <picture>' +
+    '      <source srcset="/images/pacific-origins-logo-256x85.avif" type="image/avif" />' +
+    '      <img src="/images/pacific-origins-logo-256x85.png" alt="Pacific Origins" class="footer__pacific-logo" width="256" height="85" />' +
+    '    </picture>' +
     '    <span class="footer__logo">Jason Martin</span>' +
     '    <p>AI Product Gallery Design</p>' +
     '  </div>' +
