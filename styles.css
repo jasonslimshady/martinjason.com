@@ -144,11 +144,18 @@
   margin: 0;
 }
 
+.ai-showcase__heading em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+}
+
 .ai-showcase__subline {
-  font-size: clamp(1.02rem, 1.5vw, 1.25rem);
+  font-size: clamp(1.15rem, 1.9vw, 1.5rem);
   font-weight: 600;
   color: var(--color-ink-muted);
-  max-width: 52ch;
+  max-width: none;
+  white-space: nowrap;
   line-height: 1.5;
   margin: 0;
 }
