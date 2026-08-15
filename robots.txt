@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /index.backup.html
+Disallow: /index.backup-2026-08-15.html
 
 Sitemap: https://martinjason.com/sitemap.xml
