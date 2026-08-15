@@ -65,13 +65,14 @@
     {
       "@context": "https://schema.org",
       "@type": "SiteNavigationElement",
-      "name": ["Leistungen", "Galerien", "Blog", "Über mich", "Termin buchen"],
+      "name": ["Problem", "Lösung", "Prozess", "FAQ", "Über mich", "Blog"],
       "url": [
-        "https://martinjason.com/#services",
-        "https://martinjason.com/#work",
-        "https://martinjason.com/blog",
+        "https://martinjason.com/#problem",
+        "https://martinjason.com/#loesung",
+        "https://martinjason.com/#prozess",
+        "https://martinjason.com/#faq",
         "https://martinjason.com/#about",
-        "https://martinjason.com/#contact"
+        "https://martinjason.com/blog"
       ]
     }
   ]
@@ -451,10 +452,535 @@
       </div><!-- /.ai-showcase__sticky -->
     </section>
 
+    <!-- ==================================================================
+         VIDEO — self-hosted, pagespeed-optimized VSL.
+         preload="none" + data-src (no bytes load until the user clicks play).
+         On click JS promotes data-src → src, loads, plays, and reveals the
+         native controls → Loom-like behaviour. Swap the files in /videos/
+         and the poster in /images/ — see /videos/README.md.
+         ================================================================== -->
+    <section id="video" class="vsl-section">
+      <div class="container vsl-wrap">
+        <figure class="vsl reveal" data-vsl>
+          <video class="vsl__video" preload="none" playsinline
+                 poster="/images/video-poster.svg" width="1280" height="720">
+            <source data-src="/videos/vsl.webm" type="video/webm">
+            <source data-src="/videos/vsl.mp4" type="video/mp4">
+          </video>
+          <button class="vsl__play" type="button" aria-label="Video abspielen">
+            <span class="vsl__play-ring">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M8 5.14v13.72a1 1 0 0 0 1.54.84l10.5-6.86a1 1 0 0 0 0-1.68L9.54 4.3A1 1 0 0 0 8 5.14Z"/>
+              </svg>
+            </span>
+            <span class="vsl__play-label">In 90 Sekunden erklärt</span>
+          </button>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         PROBLEM — "Du hast für diesen Käufer bereits bezahlt."
+         Bezahlter Traffic springt ab, weil die Galerie dekoriert statt verkauft.
+         ================================================================== -->
+    <section id="problem" class="section problem">
+      <div class="container">
+        <header class="section__head problem__head">
+          <p class="eyebrow reveal">Problem</p>
+          <h2 class="section__title reveal" style="--reveal-delay: 80ms">
+            Du hast für diesen Käufer <em>bereits bezahlt.</em>
+          </h2>
+          <p class="section__lede reveal" style="--reveal-delay: 160ms">
+            Jeder Klick auf deine Anzeige kostet dich Geld. Trotzdem verlässt die große
+            Mehrheit deine Produktseite wieder — nicht, weil dein Produkt schlecht ist,
+            sondern weil deine Galerie es nicht verkauft.
+          </p>
+        </header>
+
+        <ul class="problem__grid" role="list">
+          <li class="problem__card reveal" style="--reveal-delay: 80ms">
+            <span class="problem__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l3-4 3 2 4-6"/></svg>
+            </span>
+            <h3 class="problem__title">Bezahlter Traffic, der abspringt</h3>
+            <p class="problem__text">
+              Du zahlst für jeden einzelnen Besucher — aber 96 bis 98 von 100 gehen ohne
+              Kauf wieder. Das Leck sitzt nicht in den Ads, sondern auf der Produktseite.
+            </p>
+          </li>
+
+          <li class="problem__card reveal" style="--reveal-delay: 140ms">
+            <span class="problem__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>
+            </span>
+            <h3 class="problem__title">Galerien, die dekorieren statt verkaufen</h3>
+            <p class="problem__text">
+              Deine Bilder sehen gut aus. Aber „gut aussehen" ist kein Kaufgrund. Ohne
+              Verkaufslogik bleibt bei jedem Besucher Umsatz liegen.
+            </p>
+          </li>
+
+          <li class="problem__card reveal" style="--reveal-delay: 200ms">
+            <span class="problem__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </span>
+            <h3 class="problem__title">Kein Job pro Bild</h3>
+            <p class="problem__text">
+              Jedes Bild sollte eine Aufgabe erfüllen: Aufmerksamkeit, Nutzen, Einwand,
+              Beweis. Die meisten zeigen nur das Produkt aus fünf Blickwinkeln.
+            </p>
+          </li>
+
+          <li class="problem__card reveal" style="--reveal-delay: 140ms">
+            <span class="problem__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+            </span>
+            <h3 class="problem__title">Der falsche Hebel</h3>
+            <p class="problem__text">
+              Mehr Budget in Ads zu pumpen skaliert auch das Leck. Erst wenn die Seite
+              konvertiert, verdient jeder zusätzliche Euro Ad-Spend mehr.
+            </p>
+          </li>
+
+          <li class="problem__card reveal" style="--reveal-delay: 200ms">
+            <span class="problem__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            </span>
+            <h3 class="problem__title">Fotoshooting: teuer &amp; langsam</h3>
+            <p class="problem__text">
+              Ein professionelles Shooting kostet schnell fünfstellig — und ist Wochen
+              später noch nicht online. In der Zwischenzeit läuft dein Traffic ins Leere.
+            </p>
+          </li>
+
+          <li class="problem__card reveal" style="--reveal-delay: 260ms">
+            <span class="problem__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><path d="M4 4l16 16"/></svg>
+            </span>
+            <h3 class="problem__title">Blindflug beim Umsatz</h3>
+            <p class="problem__text">
+              Du siehst, was du für Klicks zahlst. Aber nicht, wie viel Umsatz auf der
+              Produktseite jeden Monat still verloren geht.
+            </p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         LÖSUNG — Headline + Subheadline + Termin-buchen-Button (sonst nichts).
+         ================================================================== -->
+    <section id="loesung" class="section solution">
+      <div class="container contact__inner solution__inner">
+        <p class="eyebrow reveal">Lösung</p>
+        <h2 class="contact__title reveal" style="--reveal-delay: 80ms">
+          Eine Galerie, in der jedes Bild <em>einen Job hat: verkaufen.</em>
+        </h2>
+        <p class="contact__sub reveal" style="--reveal-delay: 160ms">
+          Aufmerksamkeit, Nutzen, Einwand, Beweis — Bild für Bild, bis dein Besucher keinen
+          Grund mehr hat, nicht zu kaufen. Erstellt mit KI in Tagen statt Wochen, ohne
+          fünfstelliges Fotoshooting. Entwickelt aus über 3&nbsp;Mio.&nbsp;€ gesteuertem
+          Ad-Spend: Ich weiß, warum ein Bild verkauft — nicht nur, wie es schön aussieht.
+        </p>
+        <div class="contact__cta reveal" style="--reveal-delay: 240ms">
+          <a class="btn btn--primary btn--lg glass-btn" href="/booking" data-booking>
+            Termin buchen
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         PROZESS — scroll-driven story (same mechanic as the leverage section).
+         Tall outer section + 100vh sticky panel; scroll progress fills the rail,
+         highlights the active step, and cross-fades the step cards.
+         Falls back to a static stacked list without JS / reduced motion
+         (.is-live gates all scroll styling).
+         data-proc-at    = progress at which an element fades in
+         data-proc-range = "a,b" progress window in which a step card is visible
+         ================================================================== -->
+    <section id="prozess" class="process">
+      <div class="process__sticky">
+        <div class="container">
+          <header class="process__head">
+            <p class="eyebrow proc-fx" data-proc-at="0.01">Prozess</p>
+            <h2 class="section__title proc-fx" data-proc-at="0.03">
+              In fünf Schritten von „sieht gut aus" zu <em>„verkauft".</em>
+            </h2>
+          </header>
+
+          <div class="process__rail" aria-hidden="true">
+            <div class="process__rail-track"><span class="process__rail-fill"></span></div>
+            <ol class="process__steps">
+              <li class="process__step" data-step="0"><span class="process__step-no">01</span><span class="process__step-name">Gallery-Audit</span></li>
+              <li class="process__step" data-step="1"><span class="process__step-no">02</span><span class="process__step-name">Angebot &amp; Garantie</span></li>
+              <li class="process__step" data-step="2"><span class="process__step-no">03</span><span class="process__step-name">Galerie-Erstellung</span></li>
+              <li class="process__step" data-step="3"><span class="process__step-no">04</span><span class="process__step-name">Messung</span></li>
+              <li class="process__step" data-step="4"><span class="process__step-no">05</span><span class="process__step-name">Ergebnis &amp; weiter</span></li>
+            </ol>
+          </div>
+
+          <div class="process__stage">
+            <article class="proc-scene" data-proc-range="0,0.20">
+              <span class="proc-scene__no">01</span>
+              <h3 class="proc-scene__title">Gallery-Audit</h3>
+              <p class="proc-scene__text">
+                Kostenloser Call. Ich schaue mir deine Produktseite und deine umsatzstärksten
+                SKUs an und sage dir ehrlich, ob und wo eine neue Galerie Conversion bringt.
+                Passt es nicht, sage ich das genauso.
+              </p>
+            </article>
+
+            <article class="proc-scene" data-proc-range="0.20,0.40">
+              <span class="proc-scene__no">02</span>
+              <h3 class="proc-scene__title">Angebot &amp; Garantie</h3>
+              <p class="proc-scene__text">
+                Du bekommst einen klaren Umfang und eine klare Regel: Du zahlst nur, wenn die
+                Conversion Rate steigt. Wird sie es nicht, bekommst du dein Geld zurück. Was
+                „besser" heißt, legen wir vorher gemeinsam fest.
+              </p>
+            </article>
+
+            <article class="proc-scene" data-proc-range="0.40,0.60">
+              <span class="proc-scene__no">03</span>
+              <h3 class="proc-scene__title">Galerie-Erstellung</h3>
+              <p class="proc-scene__text">
+                Ich baue die neue Galerie für deine definierten Bestseller-SKUs — jedes Bild
+                mit einem Job: Aufmerksamkeit, Nutzen, Einwand, Beweis. In Tagen, nicht Wochen,
+                ohne Studio und ohne fünfstelliges Shooting.
+              </p>
+            </article>
+
+            <article class="proc-scene" data-proc-range="0.60,0.80">
+              <span class="proc-scene__no">04</span>
+              <h3 class="proc-scene__title">Messung — 4 bis 6 Wochen</h3>
+              <p class="proc-scene__text">
+                Wir tauschen nur die Galerie — gleiche Seite, gleicher Traffic. Gemessen wird
+                über deine bestehenden Tools (GA4 / Shopify) im sauberen Vorher/Nachher-Vergleich.
+                Kein aufwändiges A/B-Test-Projekt, sondern eine schlanke, nachvollziehbare Messung.
+              </p>
+            </article>
+
+            <article class="proc-scene" data-proc-range="0.80,1">
+              <span class="proc-scene__no">05</span>
+              <h3 class="proc-scene__title">Ergebnis &amp; weiter</h3>
+              <p class="proc-scene__text">
+                Wir schauen gemeinsam auf die Zahlen. Funktioniert es, machen wir mit den
+                nächsten SKUs weiter. Funktioniert es nicht, hast du nichts bezahlt.
+              </p>
+            </article>
+          </div>
+        </div>
+      </div><!-- /.process__sticky -->
+    </section>
+
+    <!-- ==================================================================
+         FAQ — honest answers on measurement, guarantee terms & proof scope.
+         ================================================================== -->
+    <section id="faq" class="section">
+      <div class="container faq-wrap">
+        <div class="faq-section reveal" aria-label="Häufige Fragen">
+          <p class="faq-section__eyebrow">FAQ</p>
+          <h2 class="faq-section__title">Häufige Fragen</h2>
+
+          <ul class="faq-list" role="list">
+            <li class="faq-item">
+              <button class="faq-question" aria-expanded="false" aria-controls="faq-1">
+                Wie misst du, ob die Galerie wirklich funktioniert?
+                <span class="faq-question__icon" aria-hidden="true">+</span>
+              </button>
+              <div id="faq-1" class="faq-answer" role="region">
+                Wir tauschen ausschließlich die Galerie aus — gleiche Produktseite, gleicher
+                Traffic, gleiches Angebot. Gemessen wird die Conversion Rate der Seite über
+                deine bestehenden Tools (GA4 / Shopify) im direkten Vorher/Nachher-Vergleich
+                über 4 bis 6 Wochen. Das ist bewusst kein aufwändiges A/B-Test-Projekt, sondern
+                eine schlanke, nachvollziehbare Messung mit dem, was du ohnehin schon hast.
+              </div>
+            </li>
+
+            <li class="faq-item">
+              <button class="faq-question" aria-expanded="false" aria-controls="faq-2">
+                Wie genau funktioniert die Garantie?
+                <span class="faq-question__icon" aria-hidden="true">+</span>
+              </button>
+              <div id="faq-2" class="faq-answer" role="region">
+                Einfach: Du zahlst nur, wenn die Conversion Rate deiner Produktseite nach dem
+                Galerie-Relaunch besser ist als vorher. Ist sie es nicht, bekommst du dein Geld
+                zurück. Damit das fair und eindeutig ist, legen wir vor dem Start gemeinsam fest,
+                was gemessen wird — gleiche Seite, gleicher Zeitraum, gleiche Bedingungen.
+              </div>
+            </li>
+
+            <li class="faq-item">
+              <button class="faq-question" aria-expanded="false" aria-controls="faq-3">
+                Was, wenn mein Shop zu wenig Traffic hat?
+                <span class="faq-question__icon" aria-hidden="true">+</span>
+              </button>
+              <div id="faq-3" class="faq-answer" role="region">
+                Dann ist die Garantie wenig wert — und ich sage dir das offen, bevor wir starten.
+                Für eine belastbare Vorher/Nachher-Messung braucht deine Produktseite genug
+                Besucher, damit die Zahlen nicht nur Rauschen sind. Passt das nicht, arbeiten wir
+                (noch) nicht zusammen. Genau das klären wir im Gallery-Audit.
+              </div>
+            </li>
+
+            <li class="faq-item">
+              <button class="faq-question" aria-expanded="false" aria-controls="faq-4">
+                Hast du Ergebnisse oder Case Studies?
+                <span class="faq-question__icon" aria-hidden="true">+</span>
+              </button>
+              <div id="faq-4" class="faq-answer" role="region">
+                Ja — einen dokumentierten, anonymisierten Fall: Bei einer DACH-Marke stieg die
+                Produktseiten-Conversion nach dem Galerie-Relaunch von 1,5&nbsp;% auf 2,2&nbsp;%.
+                Bei rund 60.000&nbsp;€ Ad-Spend pro Monat entspricht das etwa +31.000&nbsp;€ Umsatz
+                monatlich — ohne einen Cent mehr Werbebudget. Ich zeige bewusst nur diesen einen
+                belastbaren Case statt eines aufgeblähten Archivs; die meisten Kunden erlauben
+                keine namentliche Nennung (NDA). Im Audit mache ich dir stattdessen gerne einen
+                Live-Teardown deiner eigenen Seite.
+              </div>
+            </li>
+
+            <li class="faq-item">
+              <button class="faq-question" aria-expanded="false" aria-controls="faq-5">
+                Sehen KI-Bilder echt und professionell aus?
+                <span class="faq-question__icon" aria-hidden="true">+</span>
+              </button>
+              <div id="faq-5" class="faq-answer" role="region">
+                Richtig gemacht sieht man keinen Unterschied zu einem Studio-Shooting. KI ist für
+                mich nur das Werkzeug, das Tempo und Kosten spart — nicht der Zweck. Entscheidend
+                ist die Bildlogik dahinter. Bei Produkten, bei denen exakte Materialtreue kritisch
+                ist (z.&nbsp;B. Feinschmuck oder Uhren), bin ich ehrlich: Da ist KI der falsche
+                Weg, und das sage ich dir vorher.
+              </div>
+            </li>
+
+            <li class="faq-item">
+              <button class="faq-question" aria-expanded="false" aria-controls="faq-6">
+                Für welche Produkte eignet sich das?
+                <span class="faq-question__icon" aria-hidden="true">+</span>
+              </button>
+              <div id="faq-6" class="faq-answer" role="region">
+                Am besten für physische Produkte mit erklärungsbedürftigem Nutzen und ausreichend
+                Traffic — z.&nbsp;B. Möbel &amp; Home, Consumer-Health, Supplements, Food &amp;
+                Beverage, Apparel oder Pet. Weniger geeignet sind Produkte, die von exakter
+                Materialtreue leben (Feinschmuck, Uhren). Ob es für dich passt, klären wir im Audit.
+              </div>
+            </li>
+
+            <li class="faq-item">
+              <button class="faq-question" aria-expanded="false" aria-controls="faq-7">
+                Wie lange dauert das?
+                <span class="faq-question__icon" aria-hidden="true">+</span>
+              </button>
+              <div id="faq-7" class="faq-answer" role="region">
+                Die Galerie selbst steht in Tagen, nicht Wochen. Danach folgen 4 bis 6 Wochen
+                Messung, um das Ergebnis sauber zu belegen, bevor wir über die nächsten SKUs
+                entscheiden.
+              </div>
+            </li>
+
+            <li class="faq-item">
+              <button class="faq-question" aria-expanded="false" aria-controls="faq-8">
+                Was kostet das?
+                <span class="faq-question__icon" aria-hidden="true">+</span>
+              </button>
+              <div id="faq-8" class="faq-answer" role="region">
+                Keine Stundensätze. Ich arbeite projektbasiert und am Umsatz bzw. Ad-Spend deiner
+                wichtigsten SKUs orientiert — je größer der Hebel, desto größer das Projekt. Den
+                konkreten Umfang und Preis legen wir im Gallery-Audit fest, sobald klar ist, welche
+                Seiten den meisten Umsatz beeinflussen.
+              </div>
+            </li>
+
+            <li class="faq-item">
+              <button class="faq-question" aria-expanded="false" aria-controls="faq-9">
+                Arbeite ich mit dir oder mit einer Agentur?
+                <span class="faq-question__icon" aria-hidden="true">+</span>
+              </button>
+              <div id="faq-9" class="faq-answer" role="region">
+                Direkt mit mir. Kein Team, keine Zwischenschicht, kein Junior, der es „macht". Ich
+                bin Designer mit 12+ Jahren Erfahrung und Performance-Marketer mit über
+                3&nbsp;Mio.&nbsp;€ gesteuertem Ad-Spend — und genau diese Kombination bekommst du.
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         ÜBER MICH — copied from the previous homepage (index.backup-2026-08-15).
+         ================================================================== -->
+    <section id="about" class="section about">
+      <div class="container about__grid">
+        <div class="about__visual reveal">
+          <div class="about__portrait">
+            <img class="about__portrait-img" src="images/jason-martin-vertical-full-res.avif" alt="Jason Martin" width="610" height="800" loading="lazy" decoding="async" />
+          </div>
+        </div>
+        <div class="about__copy">
+          <p class="eyebrow reveal">Über mich</p>
+          <h2 class="section__title reveal" style="--reveal-delay: 80ms">
+            Deine Produktgalerien sehen zwar gut aus, <em>aber konvertieren schlecht?</em>
+          </h2>
+          <p class="reveal" style="--reveal-delay: 160ms">
+            Ich weiß warum! Ich bin Jason &amp; habe 7+ Jahre Erfahrung im Meta Media Buying, Ad Creative &amp; mehrere Million Euro für Brands ausgegeben. Dabei habe ich gelernt, was wirklich verkauft, und was nur schön aussieht.
+          </p>
+          <p class="reveal" style="--reveal-delay: 200ms">
+            Heute baue ich mit KI Produktgalerien für E-Commerce-Shops, die nicht nur gut aussehen – sondern Besucher auch zu Kunden machen.
+          </p>
+          <p class="reveal" style="--reveal-delay: 240ms">
+            12+ Jahre Design + KI-Tools + Blick eines Performance-Marketers + weniger Kosten = mehr Gewinn
+          </p>
+          <p class="reveal" style="--reveal-delay: 260ms">
+            Kein Studio. Kein Fotograf. Keine wochenlange Wartezeit.
+          </p>
+          <ul class="about__points reveal" style="--reveal-delay: 280ms">
+            <li>Mehr Conversions – Bildlogik, die verkauft, nicht nur beeindruckt.</li>
+            <li>Weniger Kosten – professionelle Produktbilder ohne Begrenzungen, teuren Fotograf oder Models.</li>
+            <li>Fertige Galerie in Tagen – fertig bevor dein nächster Konkurrent überhaupt bucht.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <script src="/shared-components.js" defer></script>
   <script src="script.js" defer></script>
+
+  <!-- ====================================================================
+       Video (VSL) — click-to-load facade. Nothing downloads until play:
+       preload="none" + data-src means zero video bytes on page load; only
+       the poster paints. On click we promote data-src → src, load(), play(),
+       and expose the native controls (Loom-like).
+       ==================================================================== -->
+  <script>
+  (function () {
+    var fig = document.querySelector('[data-vsl]');
+    if (!fig) return;
+    var video = fig.querySelector('.vsl__video');
+    var playBtn = fig.querySelector('.vsl__play');
+    if (!video || !playBtn) return;
+
+    var loaded = false;
+    function start() {
+      if (!loaded) {
+        // Promote data-src → src on each <source>, then load once.
+        var sources = video.querySelectorAll('source[data-src]');
+        for (var i = 0; i < sources.length; i++) {
+          sources[i].src = sources[i].getAttribute('data-src');
+        }
+        video.load();
+        video.controls = true;
+        loaded = true;
+      }
+      fig.classList.add('is-playing');
+      var p = video.play();
+      if (p && typeof p.catch === 'function') {
+        p.catch(function () {
+          // Autoplay blocked or file missing — keep controls visible so the
+          // user can start it manually / see the browser's error state.
+          fig.classList.remove('is-playing');
+        });
+      }
+    }
+    playBtn.addEventListener('click', start);
+    // If the video ends, bring the poster/play affordance back.
+    video.addEventListener('ended', function () { fig.classList.remove('is-playing'); });
+  })();
+  </script>
+
+  <!-- ====================================================================
+       Prozess — scroll-driven story. Same mechanic as the leverage section:
+       scroll progress (0→1) fills the rail, highlights the active step, and
+       cross-fades the step cards. Static stacked fallback without JS /
+       reduced motion (the .is-live class gates all scroll styling).
+       ==================================================================== -->
+  <script>
+  (function () {
+    'use strict';
+    var section = document.getElementById('prozess');
+    if (!section) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    section.classList.add('is-live');
+
+    var fx = Array.prototype.map.call(
+      section.querySelectorAll('[data-proc-at]'),
+      function (el) { return { el: el, at: parseFloat(el.getAttribute('data-proc-at')) }; }
+    );
+    var scenes = Array.prototype.map.call(
+      section.querySelectorAll('[data-proc-range]'),
+      function (el) {
+        var r = el.getAttribute('data-proc-range').split(',');
+        return { el: el, a: parseFloat(r[0]), b: parseFloat(r[1]) };
+      }
+    );
+    var steps = Array.prototype.slice.call(section.querySelectorAll('.process__step'));
+    var fill = section.querySelector('.process__rail-fill');
+
+    function c01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+    function getP() {
+      var rect = section.getBoundingClientRect();
+      var sc = section.offsetHeight - window.innerHeight;
+      return sc > 0 ? c01(-rect.top / sc) : 0;
+    }
+
+    var lastP = -1, ticking = false;
+    function update() {
+      var p = getP();
+      if (Math.abs(p - lastP) < 0.0005) return;
+      lastP = p;
+
+      var i, n, active = 0;
+      for (i = 0, n = fx.length; i < n; i++) {
+        fx[i].el.classList.toggle('is-on', p >= fx[i].at);
+      }
+      for (i = 0, n = scenes.length; i < n; i++) {
+        var on = p >= scenes[i].a && p <= scenes[i].b;
+        scenes[i].el.classList.toggle('is-on', on);
+        if (on) active = i;
+      }
+      for (i = 0, n = steps.length; i < n; i++) {
+        steps[i].classList.toggle('is-active', i === active);
+        steps[i].classList.toggle('is-done', i < active);
+      }
+      if (fill) fill.style.transform = 'scaleX(' + p.toFixed(4) + ')';
+    }
+
+    window.addEventListener('scroll', function () {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () { ticking = false; update(); });
+    }, { passive: true });
+    window.addEventListener('resize', update, { passive: true });
+    update();
+  })();
+  </script>
+
+  <!-- FAQ — single-open accordion (same behaviour as the article pages). -->
+  <script>
+  (function () {
+    var questions = document.querySelectorAll('.faq-question');
+    if (!questions.length) return;
+    questions.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var answer = document.getElementById(btn.getAttribute('aria-controls'));
+        var isOpen = btn.getAttribute('aria-expanded') === 'true';
+        questions.forEach(function (q) {
+          q.setAttribute('aria-expanded', 'false');
+          var a = document.getElementById(q.getAttribute('aria-controls'));
+          if (a) a.classList.remove('is-open');
+        });
+        if (!isOpen && answer) {
+          btn.setAttribute('aria-expanded', 'true');
+          answer.classList.add('is-open');
+        }
+      });
+    });
+  })();
+  </script>
 
   <!-- ====================================================================
        Booking popup — replace YOUR-VERCEL-URL after deploying the API.
