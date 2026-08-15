@@ -30,12 +30,11 @@
     '    <p>AI Product Gallery Design</p>' +
     '  </div>' +
     '  <div class="footer__links">' +
-    '    <a href="/#problem">Problem</a>' +
-    '    <a href="/#loesung">Lösung</a>' +
-    '    <a href="/#prozess">Prozess</a>' +
-    '    <a href="/#faq">FAQ</a>' +
-    '    <a href="/#about">Über mich</a>' +
+    '    <a href="/#services">Leistungen</a>' +
+    '    <a href="/#work">Galerien</a>' +
     '    <a href="/blog">Blog</a>' +
+    '    <a href="/#about">Über mich</a>' +
+    '    <a href="/#contact">Kontakt</a>' +
     '  </div>' +
     '  <div class="footer__legal">' +
     '    <a href="/impressum">Impressum</a>' +
