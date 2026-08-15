@@ -1028,6 +1028,7 @@
   font-size: clamp(1.05rem, 0.75rem + 1.8vw, 1.53rem); /* 1.53rem (× 1.5) at desktop, scales down on narrow screens so the longest step still fits the sticky viewport */
   line-height: 1.5;
 }
+.proc-scene__cta { margin-top: 1.25rem; }
 
 /* Scroll-active upgrade */
 .process.is-live { height: 480vh; }
