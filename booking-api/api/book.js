@@ -18,7 +18,7 @@ const HOST_EMAIL  = process.env.CALENDAR_ID || 'jasonmartinde@gmail.com';
 // ── Meeting type → event title map ───────────────────────────────────────────
 
 const MEETING_TITLES = {
-  erstgespraech: 'Kostenloses Erstgespräch - Gespräch mit Martin, Jason',
+  erstgespraech: 'Besprechung des kostenlosen Audit - Gespräch mit Martin, Jason',
   sprint:        'PDP Gallery Sprint - Gespräch mit Martin, Jason',
   launch:        'Product/Kollektion Launch System - Gespräch mit Martin, Jason',
   partner:       'Gallery Partner werden - Gespräch mit Martin, Jason',

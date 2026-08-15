@@ -17,6 +17,10 @@
   </script>
   <link rel="preload" href="cookie-consent.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="cookie-consent.css"></noscript>
+
+  <!-- Booking popup styles -->
+  <link rel="preload" href="booking-popup.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="booking-popup.css"></noscript>
 </head>
 <body>
 
@@ -114,7 +118,7 @@
           30 Minuten, kostenlos, kein Pitch — wir schauen uns deine Produktseite gemeinsam an.
         </p>
         <div class="contact__cta reveal" style="--reveal-delay: 240ms">
-          <a class="btn btn--primary btn--lg glass-btn" href="/#contact">Termin buchen</a>
+          <a class="btn btn--primary btn--lg glass-btn" href="/booking" data-booking>Audit buchen</a>
           <a class="btn btn--ghost" href="/#work">Weitere Galerien</a>
         </div>
       </div>
@@ -126,6 +130,16 @@
 
   <script src="/shared-components.js" defer></script>
   <script src="script.js" defer></script>
+
+  <!-- ====================================================================
+       Booking popup — replace YOUR-VERCEL-URL after deploying the API.
+       See booking-api/SETUP.md for instructions.
+       ==================================================================== -->
+  <script>
+    window.BOOKING_API_BASE = 'https://project-bh9tx.vercel.app';
+  </script>
+  <script src="booking-popup.js" defer></script>
+  <script src="booking-glass.js" defer></script>
   <script src="cookie-consent.js" defer></script>
 </body>
 </html>
