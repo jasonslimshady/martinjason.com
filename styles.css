@@ -146,7 +146,7 @@
 }
 
 .ai-showcase__subline {
-  font-size: clamp(1rem, 1.35vw, 1.4rem);
+  font-size: clamp(1.25rem, 1.6875vw, 1.75rem); /* 1rem/1.35vw/1.4rem × 1.25 */
   font-weight: 600;
   color: var(--color-ink-muted);
   max-width: none;
