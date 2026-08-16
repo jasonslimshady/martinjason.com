@@ -447,7 +447,7 @@
         <div class="header">
           <p class="ai-showcase__eyebrow">Performance Marketing Design</p>
           <h2 class="ai-showcase__heading">Wie du die Conversion<br class="hero-mobile-br"> deiner Produktseite steigerst</br>&amp; mehr Bestellungen bekommst<br class="hero-mobile-br"> <em>ohne weitere Kosten.</em></h2>
-          <p class="ai-showcase__subline">Erfahre wie profitable DTC-Marken den gleichen Traffic in mehr Umsatz verwandeln.</p>
+          <p class="ai-showcase__subline">Erfahre wie profitable DTC-Marken den<br class="hero-mobile-br"> gleichen Traffic in mehr Umsatz verwandeln.</p>
         </div>
       </div><!-- /.ai-showcase__sticky -->
     </section>
@@ -922,6 +922,9 @@
 
     section.classList.add('is-live');
 
+    var faq = document.getElementById('faq');
+    if (faq) faq.classList.add('faq-fade');
+
     var fx = Array.prototype.map.call(
       section.querySelectorAll('[data-proc-at]'),
       function (el) { return { el: el, at: parseFloat(el.getAttribute('data-proc-at')) }; }
@@ -963,6 +966,7 @@
         steps[i].classList.toggle('is-done', i < active);
       }
       if (fill) fill.style.transform = 'scaleX(' + p.toFixed(4) + ')';
+      if (faq) faq.classList.toggle('is-visible', p >= 0.97);
     }
 
     window.addEventListener('scroll', function () {
