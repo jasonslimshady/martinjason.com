@@ -559,7 +559,7 @@
       <span class="nav-badge" id="badge-inv" hidden>0</span>
     </button>
     <button class="nav-item" data-panel="contracts">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2.5" y="1.5" width="11" height="13" rx="1.5"/><path d="M5 4.5h6M5 7h6M5 9.5h4"/><path d="M5.5 12.5l1.4 1.4L9.5 11" stroke-width="1.4"/></svg>Vertrag
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2.5" y="1.5" width="11" height="13" rx="1.5"/><path d="M5 4.5h6M5 7h6M5 9.5h4"/><path d="M5.5 12.5l1.4 1.4L9.5 11" stroke-width="1.4"/></svg>Verträge
       <span class="nav-badge" id="badge-contracts" hidden>0</span>
     </button>
     <div class="sb-sec">Marketing</div>
@@ -772,7 +772,7 @@
     <!-- CONTRACTS PANEL -->
     <section class="panel" id="panel-contracts">
       <div class="sec-hd">
-        <span class="sec-ttl">Vertrag</span>
+        <span class="sec-ttl">Verträge</span>
         <div style="display:flex;gap:.5rem;align-items:center">
           <button class="btn btn--ghost btn--sm" id="btn-contract-settings" title="Vertragsvorlage bearbeiten"><span style="font-size:1.2em;line-height:1">⚙️</span> Einstellungen</button>
           <button class="btn btn--primary btn--sm" id="btn-new-contract">+ Neuer Vertrag</button>
@@ -4575,12 +4575,18 @@ function renderQuoteForm(){
     const qs=loadQuoteSettings();
     quoValidUntil = daysFromDate(quoDate||today(), Number(qs.validityDays)||30);
   }
-  const clientOpts = quoClients.map(c=>`<option value="${c.id}"${c.id===quoClientId?' selected':''}>${esc(c.name)}${c.company?` — ${esc(c.company)}`:''}</option>`).join('');
+  const optHtml = list => list.map(c=>`<option value="${c.id}"${c.id===quoClientId?' selected':''}>${esc(c.name)}${c.company?` — ${esc(c.company)}`:''}</option>`).join('');
+  const leadOpts = optHtml(quoClients.filter(c=>!c.is_active_client));
+  const custOpts = optHtml(quoClients.filter(c=>c.is_active_client));
   const subtotal = quoLineItems.reduce((s,i)=>s+(Number(i.qty)||0)*(Number(i.price)||0),0);
   body.innerHTML = `
-    <div class="fg"><label class="fl">Kunde *</label>
-      <select class="fi" id="quo-client-sel"><option value="">Kunde wählen…</option>${clientOpts}</select>
+    <div class="fg"><label class="fl">Lead</label>
+      <select class="fi" id="quo-lead-sel"><option value="">— kein Lead —</option>${leadOpts}</select>
     </div>
+    <div class="fg" style="margin-top:.875rem"><label class="fl">Kunde</label>
+      <select class="fi" id="quo-client-sel"><option value="">— kein Kunde —</option>${custOpts}</select>
+    </div>
+    <span style="font-size:.75rem;color:var(--ink-s);display:block;margin-top:.25rem">Genau eins der beiden Felder auswählen — Lead oder Kunde. *</span>
     <div class="fg s2" style="margin-top:.875rem" id="quo-billto-wrap" ${quoClientId?'':'hidden'}>
       <label class="fl">Für (Angebotsempfänger)</label>
       <textarea class="fi" id="quo-billto" rows="4">${esc(quoBillTo||'')}</textarea>
@@ -4607,9 +4613,16 @@ function renderQuoteForm(){
       <label class="fl">Zahlungsbedingungen</label>
       <textarea class="fi" id="quo-terms" rows="3">${esc(quoPaymentTerms||'')}</textarea>
     </div>`;
-  $('quo-client-sel').value = quoClientId||'';
+  const selectedLead = quoClients.find(c=>c.id===quoClientId && !c.is_active_client);
+  const selectedCust = quoClients.find(c=>c.id===quoClientId && c.is_active_client);
+  $('quo-lead-sel').value = selectedLead ? quoClientId : '';
+  $('quo-client-sel').value = selectedCust ? quoClientId : '';
+  $('quo-lead-sel').addEventListener('change', e=>{
+    quoClientId=e.target.value||null; quoBillTo=null;
+    renderQuoteForm();
+  });
   $('quo-client-sel').addEventListener('change', e=>{
-    quoClientId=e.target.value; quoBillTo=null;
+    quoClientId=e.target.value||null; quoBillTo=null;
     renderQuoteForm();
   });
   const btWrap=$('quo-billto-wrap'); if(btWrap) btWrap.hidden = !quoClientId;
@@ -4668,7 +4681,7 @@ function refreshQliTotals(){
 let quoSaving=false;
 async function saveQuote(){
   if(quoSaving) return;
-  if(!quoClientId){ toast('Bitte Kunden auswählen.','err'); return; }
+  if(!quoClientId){ toast('Bitte einen Lead oder einen Kunden auswählen.','err'); return; }
   const validUntil = $('quo-valid')?.value || quoValidUntil;
   if(!validUntil){ toast('Bitte ein Gültig-bis-Datum angeben.','err'); return; }
   quoSaving=true;
@@ -5160,6 +5173,11 @@ function mergeContractFields(tpl, f){
   out = sub(out, 'start_date', esc(f.start_date||''));
   out = sub(out, 'contract_number', esc(f.contract_number||''));
   out = sub(out, 'contract_date', esc(f.contract_date||''));
+  // Optional legal-currency footnote for § 7 Abs. 2 (AI-copyright wording) —
+  // rendered as " (…)" only when filled in, so the sentence still reads
+  // cleanly when it's left blank.
+  const aiNote = (f.ai_copyright_disclaimer_note||'').trim();
+  out = sub(out, 'ai_copyright_disclaimer_note', aiNote ? ` (${esc(aiNote)})` : '');
   return out;
 }
 
@@ -5218,17 +5236,17 @@ async function openContractEdit(id){
 // regenerate it — the raw scope text typed at creation time isn't kept
 // as its own column, only baked into content_html, so a second
 // auto-merge could silently drop hand-edits made to the document.
-let ctrClientId=null, ctrQuoteId=null, ctrTitle=null, ctrScope=null, ctrFee=null, ctrPaymentTerms=null, ctrStartDate=null, ctrContentHtml=null;
+let ctrClientId=null, ctrQuoteId=null, ctrTitle=null, ctrScope=null, ctrFee=null, ctrPaymentTerms=null, ctrStartDate=null, ctrContentHtml=null, ctrAiNote=null;
 let ctrClients=[], ctrQuotesForClient=[];
 let ctrEditingId=null, ctrEditingNumber=null, ctrEditingClient=null;
 
 $('btn-new-contract').addEventListener('click', async ()=>{
   ctrClientId=null; ctrQuoteId=null; ctrTitle='Dienstleistungsvertrag'; ctrScope='';
   ctrFee=null; ctrPaymentTerms=loadQuoteSettings().paymentTerms; ctrStartDate=today();
-  ctrContentHtml=null;
+  ctrContentHtml=null; ctrAiNote='';
   ctrEditingId=null; ctrEditingNumber=null; ctrEditingClient=null;
   $('ctr-modal-title').textContent='Neuer Vertrag';
-  const { data } = await sb.from('clients').select('id,name,company,email,address,vat_id').order('name');
+  const { data } = await sb.from('clients').select('id,name,company,email,address,vat_id,pipeline_stage,is_active_client').order('name');
   ctrClients = data||[];
   await renderContractForm();
   openModal('ov-contract');
@@ -5259,7 +5277,9 @@ async function renderContractForm(){
     return;
   }
 
-  const clientOpts = ctrClients.map(c=>`<option value="${c.id}"${c.id===ctrClientId?' selected':''}>${esc(c.name)}${c.company?` — ${esc(c.company)}`:''}</option>`).join('');
+  const optHtmlC = list => list.map(c=>`<option value="${c.id}"${c.id===ctrClientId?' selected':''}>${esc(c.name)}${c.company?` — ${esc(c.company)}`:''}</option>`).join('');
+  const leadOptsC = optHtmlC(ctrClients.filter(c=>!c.is_active_client));
+  const custOptsC = optHtmlC(ctrClients.filter(c=>c.is_active_client));
   let quoteOpts='';
   if(ctrClientId){
     const { data:quotesForClient } = await sb.from('quotes').select('id,quote_number,total,payment_terms,status,quote_items(description,detail)').eq('client_id',ctrClientId).order('quote_date',{ascending:false});
@@ -5270,9 +5290,13 @@ async function renderContractForm(){
   }
 
   body.innerHTML = `
-    <div class="fg"><label class="fl">Kunde *</label>
-      <select class="fi" id="ctr-client-sel"><option value="">Kunde wählen…</option>${clientOpts}</select>
+    <div class="fg"><label class="fl">Lead</label>
+      <select class="fi" id="ctr-lead-sel"><option value="">— kein Lead —</option>${leadOptsC}</select>
     </div>
+    <div class="fg" style="margin-top:.875rem"><label class="fl">Kunde</label>
+      <select class="fi" id="ctr-client-sel"><option value="">— kein Kunde —</option>${custOptsC}</select>
+    </div>
+    <span style="font-size:.75rem;color:var(--ink-s);display:block;margin-top:.25rem">Genau eins der beiden Felder auswählen — Lead oder Kunde. *</span>
     <div class="fg" style="margin-top:.875rem" id="ctr-quote-wrap" ${ctrClientId?'':'hidden'}>
       <label class="fl">Angebot verknüpfen (optional)</label>
       <select class="fi" id="ctr-quote-sel"><option value="">Kein Angebot</option>${quoteOpts}</select>
@@ -5283,11 +5307,23 @@ async function renderContractForm(){
       <div class="fg"><label class="fl">Vergütung</label><input class="fi" id="ctr-fee" type="number" min="0" step="0.01" value="${ctrFee!=null?ctrFee:''}" placeholder="0.00" /></div>
       <div class="fg"><label class="fl">Beginn</label><input class="fi" id="ctr-start" type="date" value="${esc(ctrStartDate||'')}" /></div>
     </div>
-    <div class="fg s2" style="margin-top:.875rem"><label class="fl">Zahlungsbedingungen</label><textarea class="fi" id="ctr-terms" rows="3">${esc(ctrPaymentTerms||'')}</textarea></div>`;
+    <div class="fg s2" style="margin-top:.875rem"><label class="fl">Zahlungsbedingungen</label><textarea class="fi" id="ctr-terms" rows="3">${esc(ctrPaymentTerms||'')}</textarea></div>
+    <div class="fg s2" style="margin-top:.875rem">
+      <label class="fl">KI-Urheberrecht-Hinweis, § 7 Abs. 2 (optional)</label>
+      <input class="fi" id="ctr-ai-note" value="${esc(ctrAiNote||'')}" placeholder="z. B. Stand: Januar 2026 – bitte Rechtslage vor Versand prüfen" />
+      <span style="font-size:.75rem;color:var(--ink-s)">Wird in Klammern hinter den Satz zur ungeklärten Schutzfähigkeit KI-generierter Inhalte eingefügt. Leer lassen, wenn nicht benötigt.</span>
+    </div>`;
 
-  $('ctr-client-sel').value = ctrClientId||'';
+  const selectedLeadC = ctrClients.find(c=>c.id===ctrClientId && !c.is_active_client);
+  const selectedCustC = ctrClients.find(c=>c.id===ctrClientId && c.is_active_client);
+  $('ctr-lead-sel').value = selectedLeadC ? ctrClientId : '';
+  $('ctr-client-sel').value = selectedCustC ? ctrClientId : '';
+  $('ctr-lead-sel').addEventListener('change', async e=>{
+    ctrClientId=e.target.value||null; ctrQuoteId=null;
+    await renderContractForm();
+  });
   $('ctr-client-sel').addEventListener('change', async e=>{
-    ctrClientId=e.target.value; ctrQuoteId=null;
+    ctrClientId=e.target.value||null; ctrQuoteId=null;
     await renderContractForm();
   });
   const qWrap=$('ctr-quote-wrap'); if(qWrap) qWrap.hidden = !ctrClientId;
@@ -5306,6 +5342,7 @@ async function renderContractForm(){
   $('ctr-fee').addEventListener('input', e=>{ ctrFee=e.target.value===''?null:parseFloat(e.target.value); });
   $('ctr-start').addEventListener('input', e=>{ ctrStartDate=e.target.value; });
   $('ctr-terms').addEventListener('input', e=>{ ctrPaymentTerms=e.target.value; });
+  $('ctr-ai-note')?.addEventListener('input', e=>{ ctrAiNote=e.target.value; });
 }
 
 async function nextContractNumber(excludeId){
@@ -5323,7 +5360,7 @@ let ctrSaving=false;
 async function saveContract(){
   if(ctrSaving) return;
   const isEdit = !!ctrEditingId;
-  if(!isEdit && !ctrClientId){ toast('Bitte Kunden auswählen.','err'); return; }
+  if(!isEdit && !ctrClientId){ toast('Bitte einen Lead oder einen Kunden auswählen.','err'); return; }
   if(!isEdit && !($('ctr-scope')?.value||'').trim()){ toast('Bitte eine Leistungsbeschreibung angeben.','err'); return; }
   ctrSaving=true;
   const btn=$('ctr-save-btn');
@@ -5355,6 +5392,7 @@ async function saveContract(){
         start_date: startDate ? fmtDate(startDate) : '',
         contract_number: ctrNum,
         contract_date: fmtDate(today()),
+        ai_copyright_disclaimer_note: $('ctr-ai-note')?.value || '',
       });
       ({ data:ct, error } = await sb.from('contracts').insert({
         client_id: ctrClientId, quote_id: ctrQuoteId || null, contract_number: ctrNum, title,
@@ -5635,9 +5673,12 @@ $('btn-contract-settings').addEventListener('click', openContractSettings);
 function openContractSettings(){
   const tpl=loadContractTemplate();
   $('ctr-settings-body').innerHTML=`
+    <div style="font-size:.8125rem;line-height:1.55;background:var(--orange-t,#fff3cc);color:#7a5400;border-radius:var(--r-sm);padding:.75rem 1rem;margin-bottom:1.125rem">
+      <strong>Arbeitsentwurf, keine Rechtsberatung.</strong> Vor dem ersten tatsächlichen Versand an einen Kunden anwaltlich prüfen lassen — insbesondere § 9 (Gewährleistung/kein Erfolgsversprechen) und § 10 (Haftung), weil dieser Vertrag als wiederverwendete Vorlage rechtlich als Allgemeine Geschäftsbedingungen (AGB, § 305 ff. BGB) gilt und damit strengerer Inhaltskontrolle unterliegt als eine individuell verhandelte Klausel. Enthält bewusst keine Erfolgs-, Ergebnis- oder Rückerstattungsgarantie (§ 9).
+    </div>
     <div class="fg s2">
       <label class="fl">Vertragsvorlage (HTML)</label>
-      <span style="font-size:.75rem;color:var(--ink-s);display:block;margin-bottom:.375rem">Merge-Felder: {{client_name}} {{client_address}} {{scope_description}} {{fee_amount}} {{payment_terms}} {{start_date}} {{contract_number}} {{contract_date}}</span>
+      <span style="font-size:.75rem;color:var(--ink-s);display:block;margin-bottom:.375rem">Merge-Felder: {{client_name}} {{client_address}} {{scope_description}} {{fee_amount}} {{payment_terms}} {{start_date}} {{contract_number}} {{contract_date}} {{ai_copyright_disclaimer_note}}</span>
       <textarea class="fi" id="ctr-tpl-input" rows="20" style="font-family:'SF Mono','Fira Code',monospace;font-size:.75rem">${esc(tpl)}</textarea>
     </div>
     <div class="divider"></div>
