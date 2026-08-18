@@ -1,10 +1,10 @@
-# Jason Martin — KI-Design für DTC Brands
+# Jason Martin — Performance-Marketing-Design für DTC Brands
 
-> Jason Martin erstellt KI-generierte Produktgalerien in Studioqualität für DTC-Brands im DACH-Raum. Als Freelancer mit über fünf Jahren Erfahrung im Performance-Marketing (€3 Mio.+ Ad Spend) bietet er vollständige PDP-Galerien — Hero-Shots, Detail-Ansichten, Lifestyle-Szenen und Feature-Tiles — produziert mit KI-Bildtechnologie statt klassischer Fotostudios. Ab 549 €/Produkt, Lieferzeit 5 Werktage.
+> Jason Martin hilft DTC-Marken im DACH-Raum, aus bereits bezahltem Traffic mehr Umsatz zu holen: Er baut Produktgalerien, in denen jedes Bild einen klaren Job hat — Aufmerksamkeit wecken, Nutzen zeigen, Einwände ausräumen, Beweis liefern — statt nur zu dekorieren. Mit über 7 Jahren Erfahrung im Performance-Marketing und mehr als 3 Mio. € gesteuertem Ad-Spend kombiniert er Verkaufslogik mit individuell generierten KI-Bildern in Studioqualität, die von echten Fotos nicht zu unterscheiden sind. Umsetzung in Tagen statt Wochen, Erfolg wird über 4–6 Wochen im Vorher/Nachher-Vergleich (GA4/Shopify) gemessen. Preise projektbasiert, abgestimmt auf Umsatz bzw. Ad-Spend der jeweiligen SKUs.
 
 ## Hauptseite
 
-- [Startseite](https://martinjason.com/): Leistungsübersicht, Portfolio-Auswahl, Preise, Über mich und Kontakt/Buchung
+- [Startseite](https://martinjason.com/): Problem (bezahlter Traffic, der auf der Produktseite abspringt), Lösung (Galerien mit Verkaufslogik), 90-Sekunden-Erklärvideo, 5-Schritte-Prozess (Gallery-Audit, Planung, Galerie-Erstellung, Messung, Ergebnis), FAQ, Über mich, Referenzen (100+ Brands) und Termin-Buchung für ein kostenloses Gallery-Audit
 
 ## Blog & Guides
 
