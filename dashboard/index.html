@@ -272,6 +272,48 @@
     .s2{grid-column:span 2}
     .modal-ft{display:flex;justify-content:flex-end;gap:.625rem;padding:.875rem 1.375rem;border-top:1px solid var(--border)}
 
+    /* LINKEDIN */
+    .li-subtabs{display:flex;gap:.5rem;margin-bottom:1.25rem;border-bottom:1px solid var(--border)}
+    .li-subtab{padding:.625rem .25rem;margin-right:1rem;font-size:.875rem;font-weight:500;color:var(--ink-m);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all var(--fast);background:none;border-top:none;border-left:none;border-right:none}
+    .li-subtab:hover{color:var(--ink)}
+    .li-subtab.active{color:var(--ink);border-bottom-color:var(--ink);font-weight:600}
+    .li-pane{display:none} .li-pane.active{display:block}
+    .li-range-row{display:flex;gap:.5rem;margin-bottom:1rem}
+    .li-day-group{margin-bottom:1.5rem}
+    .li-day-hd{font-size:.8125rem;font-weight:600;color:var(--ink-m);margin-bottom:.625rem;text-transform:capitalize}
+    .li-day-list{display:flex;flex-direction:column;gap:.75rem}
+    .li-row{display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:1rem;cursor:pointer;transition:all var(--fast)}
+    .li-row:hover{box-shadow:var(--shadow);border-color:var(--border-s)}
+    .li-row-meta{flex-shrink:0;width:120px;display:flex;flex-direction:column;gap:.5rem}
+    .li-row-time{font-size:.8125rem;font-weight:600;color:var(--ink)}
+    .li-row-actions{flex-shrink:0;display:flex;flex-direction:column;gap:.375rem;width:118px}
+    .li-row-body{flex:1;min-width:0}
+    /* LinkedIn-style post card */
+    .li-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+    .li-card-hd{display:flex;gap:.625rem;padding:.75rem .875rem .5rem}
+    .li-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#0A66C2,#004182);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1rem;flex-shrink:0}
+    .li-author-name{font-size:.8125rem;font-weight:600;color:#000;line-height:1.3}
+    .li-author-headline{font-size:.75rem;color:rgba(0,0,0,.6);line-height:1.3}
+    .li-author-time{font-size:.6875rem;color:rgba(0,0,0,.6);display:flex;align-items:center;gap:.25rem}
+    .li-card-body{padding:0 .875rem .625rem;font-size:.875rem;line-height:1.4;color:rgba(0,0,0,.9);white-space:pre-wrap;word-break:break-word}
+    .li-hashtag{color:#0A66C2;font-weight:600}
+    .li-card-stats{display:flex;justify-content:space-between;padding:.3rem .875rem;font-size:.6875rem;color:rgba(0,0,0,.6);border-top:1px solid rgba(0,0,0,.08)}
+    .li-card-actions{display:flex;border-top:1px solid rgba(0,0,0,.08)}
+    .li-card-actions button{flex:1;display:flex;align-items:center;justify-content:center;gap:.375rem;padding:.5rem 0;font-size:.75rem;font-weight:600;color:rgba(0,0,0,.6);background:none;border:none;cursor:default}
+    .li-status-badge{display:inline-flex;align-items:center;padding:.1875rem .5rem;border-radius:var(--r-pill);font-size:.6875rem;font-weight:600}
+    .li-editor-grid{display:grid;grid-template-columns:1fr 300px;gap:1.25rem}
+    @media (max-width:720px){ .li-editor-grid{grid-template-columns:1fr} }
+    .li-metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.75rem;padding:1rem;background:var(--surface-2);border-top:1px solid var(--border)}
+    .li-metric{display:flex;flex-direction:column;gap:.125rem}
+    .li-metric-lbl{font-size:.625rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-s)}
+    .li-metric-val{font-size:1.0625rem;font-weight:700;letter-spacing:-.02em}
+    .li-stats-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);margin-bottom:.75rem;overflow:hidden}
+    .li-stats-row-hd{display:flex;align-items:center;gap:.875rem;padding:.875rem 1.125rem;cursor:pointer}
+    .li-stats-row-title{flex:1;min-width:0;font-size:.875rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .li-stats-row-date{font-size:.75rem;color:var(--ink-s);flex-shrink:0}
+    .li-chev{transition:transform var(--fast);flex-shrink:0;color:var(--ink-s)}
+    .li-stats-row.open .li-chev{transform:rotate(180deg)}
+
     /* REVENUE CHART */
     .rev-bar-wrap{display:flex;gap:4px;align-items:flex-end;height:120px;padding-top:.75rem}
     .rev-bar-col{display:flex;flex-direction:column;align-items:center;gap:.25rem;flex:1;min-width:0}
@@ -565,6 +607,10 @@
     <div class="sb-sec">Marketing</div>
     <button class="nav-item" data-panel="klaviyo">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="3.5" width="13" height="9" rx="1.5"/><path d="M1.5 5.5l6.5 4 6.5-4"/></svg>Klaviyo
+    </button>
+    <button class="nav-item" data-panel="linkedin">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="1.5" width="13" height="13" rx="2"/><circle cx="5" cy="5.2" r=".6" fill="currentColor" stroke="none"/><path d="M5 7.2v4.3"/><path d="M8 11.5v-2.6c0-1.1.7-1.8 1.7-1.8s1.6.7 1.6 1.8v2.6M8 7.2v4.3"/></svg>LinkedIn
+      <span class="nav-badge" id="badge-linkedin" hidden>0</span>
     </button>
     <div class="sb-spacer"></div>
     <button class="nav-item" id="btn-logout" title="Abmelden">
@@ -863,6 +909,49 @@
         </div>
       </div>
     </section>
+
+    <!-- LINKEDIN PANEL -->
+    <section class="panel" id="panel-linkedin">
+      <div class="sec-hd">
+        <span class="sec-ttl">LinkedIn</span>
+        <div style="display:flex;gap:.5rem;align-items:center">
+          <button class="btn btn--primary btn--sm" id="btn-new-post">+ Neuer Entwurf</button>
+        </div>
+      </div>
+      <div class="li-subtabs">
+        <button class="li-subtab active" data-li-tab="calendar">Kalender</button>
+        <button class="li-subtab" data-li-tab="stats">Statistiken</button>
+        <button class="li-subtab" data-li-tab="rejected">Abgelehnt</button>
+      </div>
+
+      <!-- CALENDAR TAB -->
+      <div class="li-pane active" id="li-pane-calendar">
+        <div id="li-calendar-list"></div>
+      </div>
+
+      <!-- REJECTED TAB -->
+      <div class="li-pane" id="li-pane-rejected">
+        <div id="li-rejected-list"></div>
+      </div>
+
+      <!-- STATS TAB -->
+      <div class="li-pane" id="li-pane-stats">
+        <div class="li-range-row">
+          <button class="ga-range-btn active" data-li-range="30">Letzte 30 Tage</button>
+          <button class="ga-range-btn" data-li-range="90">Letzte 90 Tage</button>
+          <button class="ga-range-btn" data-li-range="0">Gesamt</button>
+        </div>
+        <div class="stat-grid" id="li-stat-grid">
+          <div class="stat-card" style="background:#D9E3F3;border-color:transparent"><div class="stat-lbl">Profilaufrufe (Content)</div><div class="stat-val" id="li-s-profileviews">—</div><div class="stat-sub">wichtigste Kennzahl für Leads</div></div>
+          <div class="stat-card" style="background:#D9E9D3;border-color:transparent"><div class="stat-lbl">Neue Follower</div><div class="stat-val" id="li-s-followers">—</div><div class="stat-sub">durch Content gewonnen</div></div>
+          <div class="stat-card"><div class="stat-lbl">Impressions</div><div class="stat-val" id="li-s-impressions">—</div><div class="stat-sub">Summe</div></div>
+          <div class="stat-card"><div class="stat-lbl">Reaktionen</div><div class="stat-val" id="li-s-reactions">—</div><div class="stat-sub">Summe</div></div>
+          <div class="stat-card"><div class="stat-lbl">Kommentare</div><div class="stat-val" id="li-s-comments">—</div><div class="stat-sub">Summe</div></div>
+          <div class="stat-card"><div class="stat-lbl">Veröffentlichte Posts</div><div class="stat-val" id="li-s-postcount">—</div><div class="stat-sub">im Zeitraum</div></div>
+        </div>
+        <div id="li-stats-list"></div>
+      </div>
+    </section>
   </main>
 </div>
 
@@ -946,6 +1035,42 @@
       <div class="modal-ft">
         <button type="button" class="btn btn--ghost btn--sm" onclick="closeModal('ov-client')">Abbrechen</button>
         <button type="submit" class="btn btn--primary btn--sm" id="mc-save">Speichern</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- LINKEDIN POST MODAL (add/edit) -->
+<div class="overlay" id="ov-post">
+  <div class="modal modal--lg">
+    <div class="modal-hd"><span class="modal-ttl" id="mpost-title">Neuer Entwurf</span><button class="modal-x" onclick="closeModal('ov-post')">✕</button></div>
+    <form id="mpost-form" onsubmit="savePost(event)">
+      <div class="modal-body">
+        <div class="li-editor-grid">
+          <div>
+            <div class="fg">
+              <label class="fl">Text</label>
+              <textarea class="fi" id="mpost-content" rows="12" placeholder="Worüber möchtest du posten?" oninput="renderPostPreview()" required></textarea>
+            </div>
+            <div class="fg">
+              <label class="fl">Geplant für</label>
+              <input class="fi" id="mpost-scheduled" type="datetime-local" oninput="renderPostPreview()" />
+            </div>
+            <div class="fg" id="mpost-status-row" style="display:none">
+              <label class="fl">Status</label>
+              <div id="mpost-status-tag"></div>
+            </div>
+          </div>
+          <div>
+            <label class="fl" style="margin-bottom:.5rem">Vorschau</label>
+            <div id="mpost-preview"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-ft">
+        <button type="button" class="btn btn--ghost btn--sm" id="mpost-reject-btn" onclick="rejectFromModal()" style="margin-right:auto">Ablehnen</button>
+        <button type="button" class="btn btn--ghost btn--sm" onclick="closeModal('ov-post')">Abbrechen</button>
+        <button type="submit" class="btn btn--primary btn--sm" id="mpost-save">Entwurf speichern</button>
       </div>
     </form>
   </div>
@@ -1373,7 +1498,7 @@ function saveCompanySettings(obj){
 let companySettings = loadCompanySettings();
 
 // Valid panel ids (titles/subs were dead code since the header bar was removed)
-const PANELS = { analytics:true, crm:true, time:true, invoices:true, quotes:true, contracts:true, klaviyo:true };
+const PANELS = { analytics:true, crm:true, time:true, invoices:true, quotes:true, contracts:true, klaviyo:true, linkedin:true };
 const STAGE_CFG = [
   { id:'new_lead',    label:'Neuer Lead',  color:'#8A8A92', tag:'tag--muted' },
   { id:'contacted',   label:'Kontaktiert', color:'#0A84FF', tag:'tag--blue' },
@@ -1417,7 +1542,7 @@ async function showApp(user){
     return;
   }
   hideAllScreens(); $('screen-app').hidden=false;
-  loadStats(); loadCRM(); loadTimeEntries(); loadProjectOverview(); loadInvoices(); loadInvReminders(); loadQuotes(); loadContracts();
+  loadStats(); loadCRM(); loadTimeEntries(); loadProjectOverview(); loadInvoices(); loadInvReminders(); loadQuotes(); loadContracts(); loadLinkedInPosts(); subscribeLinkedInRealtime();
   await loadProjects();
   restoreTimer(); // pick up a timer that survived a reload / tab close
   // Restore last active panel (persists across reloads)
@@ -6828,6 +6953,319 @@ $('klv-custom-btn').addEventListener('click', () => {
   document.querySelectorAll('.klv-range').forEach(b => b.classList.remove('active'));
   loadKlaviyo(s, e);
 });
+
+// ── LINKEDIN (Content calendar + stats) ─────────────────────────────────
+let allPostsCache = [];
+let editPostId = null;
+let liActiveTab = 'calendar';
+let liStatsRangeDays = 30;
+
+const STATUS_LBL_P = { draft:'Entwurf', approved:'Freigegeben', posted:'Veröffentlicht', rejected:'Abgelehnt' };
+const STATUS_TAG_P  = { draft:'tag--muted', approved:'tag--blue', posted:'tag--green', rejected:'tag--red' };
+
+document.querySelectorAll('.li-subtab').forEach(btn => btn.addEventListener('click', () => {
+  liActiveTab = btn.dataset.liTab;
+  document.querySelectorAll('.li-subtab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.li-pane').forEach(p=>p.classList.remove('active'));
+  $('li-pane-'+liActiveTab).classList.add('active');
+  renderLinkedInPanel();
+}));
+
+document.querySelectorAll('[data-li-range]').forEach(btn => btn.addEventListener('click', () => {
+  liStatsRangeDays = Number(btn.dataset.liRange);
+  document.querySelectorAll('[data-li-range]').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLiStats(allPostsCache);
+}));
+
+$('btn-new-post').addEventListener('click', () => openNewPost());
+
+async function loadLinkedInPosts(){
+  const { data, error } = await sb.from('posts').select('*').order('scheduled_for',{ascending:true,nullsFirst:false});
+  if(error){ toast('Fehler beim Laden der Posts: '+error.message,'err'); return; }
+  allPostsCache = data||[];
+  const draftCount = allPostsCache.filter(p=>p.status==='draft').length;
+  $('badge-linkedin').textContent = draftCount;
+  $('badge-linkedin').hidden = draftCount===0;
+  renderLinkedInPanel();
+}
+
+function renderLinkedInPanel(){
+  if(liActiveTab==='calendar') renderLiCalendar(allPostsCache);
+  else if(liActiveTab==='rejected') renderLiRejected(allPostsCache);
+  else renderLiStats(allPostsCache);
+}
+
+// Live updates: rows are also inserted directly by an external content-engine
+// automation, so the calendar can't rely on a one-time fetch on load.
+let liRealtimeSub = null;
+function subscribeLinkedInRealtime(){
+  if(liRealtimeSub) return;
+  liRealtimeSub = sb.channel('posts-changes')
+    .on('postgres_changes', { event:'*', schema:'public', table:'posts' }, () => loadLinkedInPosts())
+    .subscribe();
+}
+
+// ── Content formatting (shared by calendar cards, rejected list, modal preview) ──
+function liFormatContent(content){
+  const escaped = esc(content||'');
+  return escaped
+    .replace(/\n/g,'<br>')
+    .replace(/(^|[\s>])(#[\p{L}0-9_]+)/gu, (m,pre,tag)=>`${pre}<span class="li-hashtag">${tag}</span>`);
+}
+function liFirstLine(content){
+  const line = (content||'').split('\n').find(l=>l.trim().length) || '(leerer Entwurf)';
+  return line.length>90 ? line.slice(0,90)+'…' : line;
+}
+const LI_ICON_LIKE = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7h2v6H4a1 1 0 01-1-1V8a1 1 0 011-1zm2 0l2.8-4.7c.3-.5 1-.6 1.4-.2.3.3.5.7.4 1.1L10 6h3a1.5 1.5 0 011.4 2l-1.3 4.3a1.5 1.5 0 01-1.4 1H6"/></svg>`;
+const LI_ICON_COMMENT = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3.5h12v7H6l-3 3v-3H2z"/></svg>`;
+const LI_ICON_REPOST = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 5h7v2.5M12 11H5V8.5M2.5 5L4 3.5 5.5 5M13.5 11L12 12.5 10.5 11"/></svg>`;
+const LI_ICON_SEND = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2L7 9M14 2l-4.5 12-3-5.5L2 5.5 14 2z"/></svg>`;
+
+// Renders a LinkedIn-style post card. `content` is the raw draft text.
+function liPostCard(content, meta){
+  meta = meta || {};
+  return `<div class="li-card">
+    <div class="li-card-hd">
+      <div class="li-avatar">JM</div>
+      <div style="flex:1;min-width:0">
+        <div class="li-author-name">Jason Martin</div>
+        <div class="li-author-headline">Gründer · Pacific Origins LLC</div>
+        <div class="li-author-time">${meta.timeLabel ? esc(meta.timeLabel)+' · ' : ''}<svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm.7 7.4L11 10l-.7 1.1-2.9-1.9V4.5h1.3v3.9z"/></svg></div>
+      </div>
+    </div>
+    <div class="li-card-body">${liFormatContent(content) || '<span style="color:rgba(0,0,0,.4)">Kein Text</span>'}</div>
+    <div class="li-card-stats"><span>👍❤️ ${meta.reactions ?? ''}</span><span>${meta.comments!=null ? meta.comments+' Kommentare':''}</span></div>
+    <div class="li-card-actions">
+      <button>${LI_ICON_LIKE} Gefällt mir</button>
+      <button>${LI_ICON_COMMENT} Kommentieren</button>
+      <button>${LI_ICON_REPOST} Teilen</button>
+      <button>${LI_ICON_SEND} Senden</button>
+    </div>
+  </div>`;
+}
+
+function liDayLabel(dateStr){
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('de-DE',{timeZone:TZ,weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+}
+
+function renderLiCalendar(list){
+  const wrap = $('li-calendar-list');
+  const posts = list.filter(p=>p.status!=='rejected');
+  if(!posts.length){
+    wrap.innerHTML = `<div class="empty-st"><p class="empty-ttl">Noch keine Posts geplant</p><p class="empty-sub">Lege einen Entwurf an oder warte auf die Content-Engine.</p></div>`;
+    return;
+  }
+  const groups = {};
+  const noDate = [];
+  posts.forEach(p=>{
+    if(!p.scheduled_for){ noDate.push(p); return; }
+    const key = tzDateStr(new Date(p.scheduled_for));
+    (groups[key] ||= []).push(p);
+  });
+  const keys = Object.keys(groups).sort();
+  let html = '';
+  keys.forEach(key=>{
+    html += `<div class="li-day-group"><div class="li-day-hd">${liDayLabel(key)}</div><div class="li-day-list">`;
+    html += groups[key].map(p=>liRowHtml(p)).join('');
+    html += `</div></div>`;
+  });
+  if(noDate.length){
+    html += `<div class="li-day-group"><div class="li-day-hd">Ohne Termin</div><div class="li-day-list">`;
+    html += noDate.map(p=>liRowHtml(p)).join('');
+    html += `</div></div>`;
+  }
+  wrap.innerHTML = html;
+  wireLiRows(wrap);
+}
+
+function renderLiRejected(list){
+  const wrap = $('li-rejected-list');
+  const posts = list.filter(p=>p.status==='rejected');
+  if(!posts.length){
+    wrap.innerHTML = `<div class="empty-st"><p class="empty-ttl">Keine abgelehnten Entwürfe</p></div>`;
+    return;
+  }
+  wrap.innerHTML = `<div class="li-day-list">` + posts.map(p=>liRowHtml(p)).join('') + `</div>`;
+  wireLiRows(wrap);
+}
+
+function liRowHtml(p){
+  const time = p.scheduled_for ? fmtTimeOnly(p.scheduled_for) : '—';
+  return `<div class="li-row" data-id="${p.id}">
+    <div class="li-row-meta">
+      <div class="li-row-time">${time}</div>
+      <span class="tag ${STATUS_TAG_P[p.status]||'tag--muted'}">${STATUS_LBL_P[p.status]||p.status}</span>
+    </div>
+    <div class="li-row-body">${liPostCard(p.content)}</div>
+    <div class="li-row-actions">
+      ${liRowActionButtons(p)}
+    </div>
+  </div>`;
+}
+
+function liRowActionButtons(p){
+  const btns = [`<button type="button" class="btn btn--ghost btn--sm" data-act="edit" data-id="${p.id}">Bearbeiten</button>`];
+  if(p.status==='draft') btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="approve" data-id="${p.id}">Freigeben</button>`);
+  if(p.status==='approved') btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="posted" data-id="${p.id}">Als gepostet markieren</button>`);
+  if(p.status!=='rejected' && p.status!=='posted') btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="reject" data-id="${p.id}" style="color:var(--red)">Ablehnen</button>`);
+  if(p.status==='rejected') btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="restore" data-id="${p.id}">Zu Entwurf</button>`);
+  return btns.join('');
+}
+
+function wireLiRows(wrap){
+  wrap.querySelectorAll('.li-row').forEach(row=>row.addEventListener('click', e=>{
+    if(e.target.closest('[data-act]')) return;
+    openEditPost(row.dataset.id);
+  }));
+  wrap.querySelectorAll('[data-act]').forEach(btn=>btn.addEventListener('click', e=>{
+    e.stopPropagation();
+    const id = btn.dataset.id;
+    const act = btn.dataset.act;
+    if(act==='edit') openEditPost(id);
+    else if(act==='approve') changePostStatus(id,'approved');
+    else if(act==='posted') changePostStatus(id,'posted');
+    else if(act==='reject') changePostStatus(id,'rejected');
+    else if(act==='restore') changePostStatus(id,'draft');
+  }));
+}
+
+async function changePostStatus(id, status){
+  const patch = { status };
+  if(status==='posted'){
+    const p = allPostsCache.find(x=>x.id===id);
+    if(!p?.posted_at) patch.posted_at = new Date().toISOString();
+  }
+  const { error } = await sb.from('posts').update(patch).eq('id', id);
+  if(error){ toast('Status konnte nicht geändert werden: '+error.message,'err'); return; }
+  toast(`Status geändert: ${STATUS_LBL_P[status]||status}.`,'ok');
+  loadLinkedInPosts();
+}
+
+// ── POST MODAL (create/edit) ──────────────────────────────────────────
+function openNewPost(){
+  editPostId = null;
+  $('mpost-title').textContent = 'Neuer Entwurf';
+  $('mpost-content').value = '';
+  $('mpost-scheduled').value = '';
+  $('mpost-status-row').style.display = 'none';
+  $('mpost-reject-btn').style.display = 'none';
+  $('mpost-save').textContent = 'Entwurf speichern';
+  renderPostPreview();
+  openModal('ov-post');
+}
+
+function openEditPost(id){
+  const p = allPostsCache.find(x=>x.id===id);
+  if(!p) return;
+  editPostId = id;
+  $('mpost-title').textContent = 'Post bearbeiten';
+  $('mpost-content').value = p.content||'';
+  $('mpost-scheduled').value = p.scheduled_for ? liToLocalInputValue(p.scheduled_for) : '';
+  $('mpost-status-row').style.display = '';
+  $('mpost-status-tag').innerHTML = `<span class="tag ${STATUS_TAG_P[p.status]||'tag--muted'}">${STATUS_LBL_P[p.status]||p.status}</span>`;
+  $('mpost-reject-btn').style.display = (p.status!=='rejected' && p.status!=='posted') ? '' : 'none';
+  $('mpost-save').textContent = 'Speichern';
+  renderPostPreview();
+  openModal('ov-post');
+}
+
+function liToLocalInputValue(iso){
+  const d = new Date(iso);
+  const off = d.getTimezoneOffset();
+  const local = new Date(d.getTime()-off*60000);
+  return local.toISOString().slice(0,16);
+}
+
+function renderPostPreview(){
+  const content = $('mpost-content').value;
+  const sched = $('mpost-scheduled').value;
+  const timeLabel = sched ? new Date(sched).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : 'Entwurf';
+  $('mpost-preview').innerHTML = liPostCard(content, { timeLabel });
+}
+
+async function savePost(e){
+  e.preventDefault();
+  const content = $('mpost-content').value.trim();
+  if(!content){ toast('Bitte Text eingeben.','err'); return; }
+  const schedVal = $('mpost-scheduled').value;
+  const scheduled_for = schedVal ? new Date(schedVal).toISOString() : null;
+  if(editPostId){
+    const { error } = await sb.from('posts').update({ content, scheduled_for }).eq('id', editPostId);
+    if(error){ toast('Fehler beim Speichern: '+error.message,'err'); return; }
+  } else {
+    const { error } = await sb.from('posts').insert({ content, scheduled_for, status:'draft' });
+    if(error){ toast('Fehler beim Erstellen: '+error.message,'err'); return; }
+  }
+  toast('Gespeichert.','ok');
+  closeModal('ov-post');
+  loadLinkedInPosts();
+}
+
+function rejectFromModal(){
+  if(!editPostId) return;
+  changePostStatus(editPostId, 'rejected');
+  closeModal('ov-post');
+}
+
+// ── STATS TAB ────────────────────────────────────────────────────────
+function liNum(v){ return v==null ? 0 : v; }
+function liFmtMetric(v){ return v==null ? 'Noch keine Daten' : new Intl.NumberFormat('de-DE').format(v); }
+
+function renderLiStats(list){
+  const posted = list.filter(p=>p.status==='posted' && p.posted_at);
+  const cutoff = liStatsRangeDays>0 ? Date.now()-liStatsRangeDays*86400000 : -Infinity;
+  const inRange = posted.filter(p=>new Date(p.posted_at).getTime() >= cutoff);
+
+  const sum = key => inRange.reduce((s,p)=>s+liNum(p[key]),0);
+  const anySynced = inRange.some(p=>p.analytics_synced_at);
+
+  $('li-s-profileviews').textContent = anySynced ? sum('profile_views_from_content') : 'Noch keine Daten';
+  $('li-s-followers').textContent    = anySynced ? sum('follower_gained') : 'Noch keine Daten';
+  $('li-s-impressions').textContent  = anySynced ? sum('impressions') : 'Noch keine Daten';
+  $('li-s-reactions').textContent    = anySynced ? sum('reactions') : 'Noch keine Daten';
+  $('li-s-comments').textContent     = anySynced ? sum('comments') : 'Noch keine Daten';
+  $('li-s-postcount').textContent    = inRange.length;
+
+  const wrap = $('li-stats-list');
+  if(!inRange.length){
+    wrap.innerHTML = `<div class="empty-st"><p class="empty-ttl">Noch keine veröffentlichten Posts</p><p class="empty-sub">Sobald Posts veröffentlicht und synchronisiert wurden, erscheinen hier die Kennzahlen pro Post.</p></div>`;
+    return;
+  }
+  const sorted = [...inRange].sort((a,b)=>new Date(b.posted_at)-new Date(a.posted_at));
+  wrap.innerHTML = sorted.map(p=>liStatsRowHtml(p)).join('');
+  wrap.querySelectorAll('.li-stats-row-hd').forEach(hd=>hd.addEventListener('click', ()=>{
+    hd.closest('.li-stats-row').classList.toggle('open');
+  }));
+}
+
+function liStatsRowHtml(p){
+  const synced = !!p.analytics_synced_at;
+  const metrics = [
+    ['Profilaufrufe', p.profile_views_from_content],
+    ['Neue Follower', p.follower_gained],
+    ['Impressions', p.impressions],
+    ['Reaktionen', p.reactions],
+    ['Kommentare', p.comments],
+    ['Reichweite (Mitglieder)', p.members_reached],
+    ['Reposts', p.reshares],
+    ['Gespeichert', p.post_saves],
+    ['Link-Klicks', p.link_clicks],
+  ];
+  return `<div class="li-stats-row">
+    <div class="li-stats-row-hd">
+      <span class="li-stats-row-title">${esc(liFirstLine(p.content))}</span>
+      <span class="li-stats-row-date">${fmtDate(p.posted_at)}</span>
+      <svg class="li-chev" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6l4 4 4-4"/></svg>
+    </div>
+    <div class="li-metrics-grid">
+      ${!synced ? `<div style="grid-column:1/-1;font-size:.8125rem;color:var(--ink-s)">Noch keine Daten — Analytics-Sync läuft separat.</div>` : ''}
+      ${metrics.map(([lbl,val])=>`<div class="li-metric"><div class="li-metric-lbl">${lbl}</div><div class="li-metric-val">${liFmtMetric(val)}</div></div>`).join('')}
+    </div>
+  </div>`;
+}
 
 // ── INVOICE REMINDERS ────────────────────────────────────────────────
 let editReminderId = null;
