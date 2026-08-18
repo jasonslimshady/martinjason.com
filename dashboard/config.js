@@ -88,6 +88,20 @@ const CONFIG = {
   DEFAULT_PAYMENT_DAYS: 14,
 
   // ----------------------------------------------------------
+  //  Quote (Angebot) defaults — editable live in the dashboard
+  //  under  Angebote → Einstellungen,  which stores per-browser
+  //  overrides in localStorage.
+  // ----------------------------------------------------------
+  // How many days a quote stays valid by default (§145 BGB — an
+  // unbounded quote otherwise binds you for a court-defined
+  // "reasonable time", which this makes explicit instead).
+  QUOTE_VALIDITY_DAYS: 30,
+
+  // Default payment terms text, pre-filled into every new quote.
+  // Adjust to your actual deposit / due-date policy.
+  QUOTE_PAYMENT_TERMS: '50% Anzahlung nach Auftragsbestätigung, Restbetrag bei Fertigstellung. Zahlungsziel 14 Tage netto ab Rechnungsstellung.',
+
+  // ----------------------------------------------------------
   //  Gmail OAuth (for sending invoices from your Gmail)
   //  1. Go to console.cloud.google.com → your project → APIs & Services → Credentials
   //  2. Create OAuth 2.0 Client ID → Web application

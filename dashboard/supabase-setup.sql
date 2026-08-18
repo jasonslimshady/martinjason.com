@@ -427,6 +427,103 @@ FROM new_project;
 
 
 -- ============================================================
+--  TABLE: quotes
+--  One quote (Angebot) per client. On acceptance it can be
+--  converted into an invoice from the dashboard (see
+--  converted_invoice_id) — items are copied 1:1 so amounts on
+--  the quote and the resulting invoice always match.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS quotes (
+  id                    UUID           DEFAULT gen_random_uuid() PRIMARY KEY,
+  client_id             UUID           NOT NULL REFERENCES clients(id),
+  quote_number          TEXT           NOT NULL UNIQUE,
+  quote_date            DATE           NOT NULL DEFAULT CURRENT_DATE,
+  valid_until           DATE           NOT NULL,
+  status                TEXT           NOT NULL DEFAULT 'draft'
+                         CHECK (status IN ('draft','sent','accepted','declined','expired','converted')),
+  subtotal              DECIMAL(10,2)  NOT NULL DEFAULT 0,
+  tax_rate              DECIMAL(5,2)   NOT NULL DEFAULT 0,
+  tax_amount            DECIMAL(10,2)  NOT NULL DEFAULT 0,
+  total                 DECIMAL(10,2)  NOT NULL DEFAULT 0,
+  payment_terms         TEXT,
+  notes                 TEXT,
+  pdf_url               TEXT,
+  sent_at               TIMESTAMPTZ,
+  decided_at            TIMESTAMPTZ,
+  converted_invoice_id  UUID REFERENCES invoices(id),
+  created_at            TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+  updated_at            TIMESTAMPTZ    NOT NULL DEFAULT NOW()
+);
+
+CREATE TRIGGER quotes_updated_at
+  BEFORE UPDATE ON quotes
+  FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+
+
+-- ============================================================
+--  TABLE: quote_items
+--  Line items for each quote — same shape as invoice_items so
+--  a quote's positions convert 1:1 into invoice_items.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS quote_items (
+  id            UUID          DEFAULT gen_random_uuid() PRIMARY KEY,
+  quote_id      UUID          NOT NULL REFERENCES quotes(id) ON DELETE CASCADE,
+  description   TEXT          NOT NULL,
+  detail        TEXT,
+  quantity      DECIMAL(10,2) NOT NULL DEFAULT 1,
+  unit_price    DECIMAL(10,2) NOT NULL DEFAULT 0,
+  total         DECIMAL(10,2) NOT NULL DEFAULT 0,
+  sort_order    INTEGER       NOT NULL DEFAULT 0
+);
+
+ALTER TABLE quotes       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE quote_items  ENABLE ROW LEVEL SECURITY;
+
+-- Owner-only lockdown, same pattern as every other table (see the
+-- "OWNER LOCKDOWN" block above) — added here as its own idempotent
+-- statement so this segment can be run standalone against an existing DB.
+DROP POLICY IF EXISTS "Authenticated full access" ON quotes;
+DROP POLICY IF EXISTS "Owner only" ON quotes;
+CREATE POLICY "Owner only" ON quotes FOR ALL TO authenticated
+  USING ((auth.jwt() ->> 'email') = 'jasonmartinde@gmail.com')
+  WITH CHECK ((auth.jwt() ->> 'email') = 'jasonmartinde@gmail.com');
+
+DROP POLICY IF EXISTS "Authenticated full access" ON quote_items;
+DROP POLICY IF EXISTS "Owner only" ON quote_items;
+CREATE POLICY "Owner only" ON quote_items FOR ALL TO authenticated
+  USING ((auth.jwt() ->> 'email') = 'jasonmartinde@gmail.com')
+  WITH CHECK ((auth.jwt() ->> 'email') = 'jasonmartinde@gmail.com');
+
+-- Storage bucket for manually attached quote PDFs (same pattern as
+-- invoice-pdfs — run once).
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('quote-pdfs', 'quote-pdfs', false)
+ON CONFLICT (id) DO NOTHING;
+
+DROP POLICY IF EXISTS "Owner upload quote PDFs" ON storage.objects;
+DROP POLICY IF EXISTS "Owner read quote PDFs"   ON storage.objects;
+DROP POLICY IF EXISTS "Owner update quote PDFs" ON storage.objects;
+DROP POLICY IF EXISTS "Owner delete quote PDFs" ON storage.objects;
+
+CREATE POLICY "Owner upload quote PDFs"
+  ON storage.objects FOR INSERT TO authenticated
+  WITH CHECK (bucket_id = 'quote-pdfs' AND (auth.jwt() ->> 'email') = 'jasonmartinde@gmail.com');
+
+CREATE POLICY "Owner read quote PDFs"
+  ON storage.objects FOR SELECT TO authenticated
+  USING (bucket_id = 'quote-pdfs' AND (auth.jwt() ->> 'email') = 'jasonmartinde@gmail.com');
+
+CREATE POLICY "Owner update quote PDFs"
+  ON storage.objects FOR UPDATE TO authenticated
+  USING (bucket_id = 'quote-pdfs' AND (auth.jwt() ->> 'email') = 'jasonmartinde@gmail.com')
+  WITH CHECK (bucket_id = 'quote-pdfs' AND (auth.jwt() ->> 'email') = 'jasonmartinde@gmail.com');
+
+CREATE POLICY "Owner delete quote PDFs"
+  ON storage.objects FOR DELETE TO authenticated
+  USING (bucket_id = 'quote-pdfs' AND (auth.jwt() ->> 'email') = 'jasonmartinde@gmail.com');
+
+
+-- ============================================================
 --  DONE.
 --  Next: copy your Supabase Project URL and anon key from
 --  Settings → API and keep them ready for the dashboard config.
