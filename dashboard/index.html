@@ -5160,6 +5160,11 @@ function mergeContractFields(tpl, f){
   out = sub(out, 'start_date', esc(f.start_date||''));
   out = sub(out, 'contract_number', esc(f.contract_number||''));
   out = sub(out, 'contract_date', esc(f.contract_date||''));
+  // Optional legal-currency footnote for § 7 Abs. 2 (AI-copyright wording) —
+  // rendered as " (…)" only when filled in, so the sentence still reads
+  // cleanly when it's left blank.
+  const aiNote = (f.ai_copyright_disclaimer_note||'').trim();
+  out = sub(out, 'ai_copyright_disclaimer_note', aiNote ? ` (${esc(aiNote)})` : '');
   return out;
 }
 
@@ -5218,14 +5223,14 @@ async function openContractEdit(id){
 // regenerate it — the raw scope text typed at creation time isn't kept
 // as its own column, only baked into content_html, so a second
 // auto-merge could silently drop hand-edits made to the document.
-let ctrClientId=null, ctrQuoteId=null, ctrTitle=null, ctrScope=null, ctrFee=null, ctrPaymentTerms=null, ctrStartDate=null, ctrContentHtml=null;
+let ctrClientId=null, ctrQuoteId=null, ctrTitle=null, ctrScope=null, ctrFee=null, ctrPaymentTerms=null, ctrStartDate=null, ctrContentHtml=null, ctrAiNote=null;
 let ctrClients=[], ctrQuotesForClient=[];
 let ctrEditingId=null, ctrEditingNumber=null, ctrEditingClient=null;
 
 $('btn-new-contract').addEventListener('click', async ()=>{
   ctrClientId=null; ctrQuoteId=null; ctrTitle='Dienstleistungsvertrag'; ctrScope='';
   ctrFee=null; ctrPaymentTerms=loadQuoteSettings().paymentTerms; ctrStartDate=today();
-  ctrContentHtml=null;
+  ctrContentHtml=null; ctrAiNote='';
   ctrEditingId=null; ctrEditingNumber=null; ctrEditingClient=null;
   $('ctr-modal-title').textContent='Neuer Vertrag';
   const { data } = await sb.from('clients').select('id,name,company,email,address,vat_id').order('name');
@@ -5283,7 +5288,12 @@ async function renderContractForm(){
       <div class="fg"><label class="fl">Vergütung</label><input class="fi" id="ctr-fee" type="number" min="0" step="0.01" value="${ctrFee!=null?ctrFee:''}" placeholder="0.00" /></div>
       <div class="fg"><label class="fl">Beginn</label><input class="fi" id="ctr-start" type="date" value="${esc(ctrStartDate||'')}" /></div>
     </div>
-    <div class="fg s2" style="margin-top:.875rem"><label class="fl">Zahlungsbedingungen</label><textarea class="fi" id="ctr-terms" rows="3">${esc(ctrPaymentTerms||'')}</textarea></div>`;
+    <div class="fg s2" style="margin-top:.875rem"><label class="fl">Zahlungsbedingungen</label><textarea class="fi" id="ctr-terms" rows="3">${esc(ctrPaymentTerms||'')}</textarea></div>
+    <div class="fg s2" style="margin-top:.875rem">
+      <label class="fl">KI-Urheberrecht-Hinweis, § 7 Abs. 2 (optional)</label>
+      <input class="fi" id="ctr-ai-note" value="${esc(ctrAiNote||'')}" placeholder="z. B. Stand: Januar 2026 – bitte Rechtslage vor Versand prüfen" />
+      <span style="font-size:.75rem;color:var(--ink-s)">Wird in Klammern hinter den Satz zur ungeklärten Schutzfähigkeit KI-generierter Inhalte eingefügt. Leer lassen, wenn nicht benötigt.</span>
+    </div>`;
 
   $('ctr-client-sel').value = ctrClientId||'';
   $('ctr-client-sel').addEventListener('change', async e=>{
@@ -5306,6 +5316,7 @@ async function renderContractForm(){
   $('ctr-fee').addEventListener('input', e=>{ ctrFee=e.target.value===''?null:parseFloat(e.target.value); });
   $('ctr-start').addEventListener('input', e=>{ ctrStartDate=e.target.value; });
   $('ctr-terms').addEventListener('input', e=>{ ctrPaymentTerms=e.target.value; });
+  $('ctr-ai-note')?.addEventListener('input', e=>{ ctrAiNote=e.target.value; });
 }
 
 async function nextContractNumber(excludeId){
@@ -5355,6 +5366,7 @@ async function saveContract(){
         start_date: startDate ? fmtDate(startDate) : '',
         contract_number: ctrNum,
         contract_date: fmtDate(today()),
+        ai_copyright_disclaimer_note: $('ctr-ai-note')?.value || '',
       });
       ({ data:ct, error } = await sb.from('contracts').insert({
         client_id: ctrClientId, quote_id: ctrQuoteId || null, contract_number: ctrNum, title,
@@ -5635,9 +5647,12 @@ $('btn-contract-settings').addEventListener('click', openContractSettings);
 function openContractSettings(){
   const tpl=loadContractTemplate();
   $('ctr-settings-body').innerHTML=`
+    <div style="font-size:.8125rem;line-height:1.55;background:var(--orange-t,#fff3cc);color:#7a5400;border-radius:var(--r-sm);padding:.75rem 1rem;margin-bottom:1.125rem">
+      <strong>Arbeitsentwurf, keine Rechtsberatung.</strong> Vor dem ersten tatsächlichen Versand an einen Kunden anwaltlich prüfen lassen — insbesondere § 9 (Gewährleistung/kein Erfolgsversprechen) und § 10 (Haftung), weil dieser Vertrag als wiederverwendete Vorlage rechtlich als Allgemeine Geschäftsbedingungen (AGB, § 305 ff. BGB) gilt und damit strengerer Inhaltskontrolle unterliegt als eine individuell verhandelte Klausel. Enthält bewusst keine Erfolgs-, Ergebnis- oder Rückerstattungsgarantie (§ 9).
+    </div>
     <div class="fg s2">
       <label class="fl">Vertragsvorlage (HTML)</label>
-      <span style="font-size:.75rem;color:var(--ink-s);display:block;margin-bottom:.375rem">Merge-Felder: {{client_name}} {{client_address}} {{scope_description}} {{fee_amount}} {{payment_terms}} {{start_date}} {{contract_number}} {{contract_date}}</span>
+      <span style="font-size:.75rem;color:var(--ink-s);display:block;margin-bottom:.375rem">Merge-Felder: {{client_name}} {{client_address}} {{scope_description}} {{fee_amount}} {{payment_terms}} {{start_date}} {{contract_number}} {{contract_date}} {{ai_copyright_disclaimer_note}}</span>
       <textarea class="fi" id="ctr-tpl-input" rows="20" style="font-family:'SF Mono','Fira Code',monospace;font-size:.75rem">${esc(tpl)}</textarea>
     </div>
     <div class="divider"></div>
