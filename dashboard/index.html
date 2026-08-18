@@ -4713,8 +4713,9 @@ async function openQuotePreviewModal(quo){
         <button class="btn btn--ghost btn--sm" onclick="closeModal('${id}')">Schließen</button>
         <button class="btn btn--ghost btn--sm" id="quo-edit-draft-btn" title="Diesen Angebotsentwurf erneut bearbeiten" hidden>✎ Entwurf bearbeiten</button>
         <button class="btn btn--danger btn--sm" id="quo-delete-btn" title="Dieses Angebot löschen" hidden>🗑 Löschen</button>
-        <button class="btn btn--ghost btn--sm" id="quo-accept-btn" title="Als angenommen markieren (Kunde hat per Mail/Anruf zugesagt)" hidden>✓ Angenommen</button>
-        <button class="btn btn--ghost btn--sm" id="quo-decline-btn" title="Als abgelehnt markieren" hidden>✕ Abgelehnt</button>
+        <button class="btn btn--ghost btn--sm" id="quo-upload-signed-btn" title="Vom Kunden unterschriebenes Angebot als PDF hochladen — markiert das Angebot als angenommen" hidden>📎 Unterschriebenes Angebot hochladen</button>
+        <input type="file" id="quo-signed-file-input" accept="application/pdf" hidden />
+        <button class="btn btn--ghost btn--sm" id="quo-decline-btn" title="Als abgelehnt markieren" hidden>✕ Angebot ablehnen</button>
         <button class="btn btn--accent btn--sm" id="quo-convert-btn" hidden>→ In Rechnung umwandeln</button>
         <button class="btn btn--ghost btn--sm" id="quo-print-btn" onclick="printQuote()">🖨 PDF drucken</button>
         <button class="btn btn--accent btn--sm" id="quo-send-gmail-btn">Per Gmail senden</button>
@@ -4726,19 +4727,79 @@ async function openQuotePreviewModal(quo){
   currentPreviewQuo = quo;
 
   const isDraft = !quo.status || quo.status==='draft';
-  const edBtn=$('quo-edit-draft-btn'), delBtn=$('quo-delete-btn'), accBtn=$('quo-accept-btn'), decBtn=$('quo-decline-btn'), convBtn=$('quo-convert-btn');
+  const edBtn=$('quo-edit-draft-btn'), delBtn=$('quo-delete-btn'), convBtn=$('quo-convert-btn');
+  const upBtn=$('quo-upload-signed-btn'), fileInp=$('quo-signed-file-input'), decBtn=$('quo-decline-btn');
   if(edBtn){ edBtn.hidden = !isDraft; edBtn.onclick = ()=>editQuoteDraft(quo); }
   if(delBtn){ delBtn.hidden = false; delBtn.onclick = ()=>deleteQuote(quo.id, quo.quote_number); }
-  if(accBtn){ accBtn.hidden = quo.status!=='sent'; accBtn.onclick = ()=>{ changeQuoteStatus(quo.id,'accepted'); closeModal(id); }; }
+  // Acceptance is now recorded by uploading the client's signed-and-scanned
+  // PDF, not a one-click status flip — see uploadSignedQuote(). Declining
+  // still needs no proof, so that stays a plain status change.
+  if(upBtn){ upBtn.hidden = quo.status!=='sent'; upBtn.onclick = ()=>fileInp?.click(); }
+  if(fileInp){ fileInp.onchange = ()=>{ const f=fileInp.files[0]; fileInp.value=''; if(f) uploadSignedQuote(quo, f); }; }
   if(decBtn){ decBtn.hidden = quo.status!=='sent'; decBtn.onclick = ()=>{ changeQuoteStatus(quo.id,'declined'); closeModal(id); }; }
   if(convBtn){ convBtn.hidden = quo.status!=='accepted'; convBtn.onclick = ()=>convertQuoteToInvoice(quo); }
 
-  const html=buildQuoteHTML(quo,true);
-  document.getElementById('quoprev-body').innerHTML=`<div style="padding:0">${html}</div>`;
-  $('print-area').innerHTML=html;
-  openModal(id);
+  const oldPdfBtn = document.getElementById('quoprev-pdf-btn');
+  if(oldPdfBtn) oldPdfBtn.remove();
+  const printBtn = $('quo-print-btn');
+
+  if(quo.pdf_url){
+    // The client's signed PDF was uploaded — show that exact file (it's the
+    // proof of acceptance) instead of the system-built, unsigned layout.
+    if(printBtn) printBtn.hidden = true;
+    $('print-area').innerHTML = '';
+    document.getElementById('quoprev-body').innerHTML = `<div class="ga-auth-wrap" style="min-height:240px"><div class="spin"></div><p style="color:var(--ink-m);margin:0">PDF wird geladen…</p></div>`;
+    openModal(id);
+    const url = await getQuotePdfUrl(quo.pdf_url);
+    if(url){
+      document.getElementById('quoprev-body').innerHTML = `<iframe src="${esc(url)}" style="width:100%;height:70vh;border:none;display:block" title="Angebot ${esc(quo.quote_number||'')}"></iframe>`;
+      const pdfBtn = document.createElement('button');
+      pdfBtn.className = 'btn btn--ghost btn--sm';
+      pdfBtn.id = 'quoprev-pdf-btn';
+      pdfBtn.textContent = '↗ In neuem Tab öffnen';
+      pdfBtn.onclick = () => window.open(url, '_blank');
+      $('quoprev-ft').insertBefore(pdfBtn, $('quo-send-gmail-btn'));
+    } else {
+      document.getElementById('quoprev-body').innerHTML = `<div class="empty-st" style="padding:2rem"><p class="empty-ttl">PDF konnte nicht geladen werden.</p></div>`;
+    }
+  } else {
+    if(printBtn) printBtn.hidden = false;
+    const html=buildQuoteHTML(quo,true);
+    document.getElementById('quoprev-body').innerHTML=`<div style="padding:0">${html}</div>`;
+    $('print-area').innerHTML=html;
+    openModal(id);
+  }
 
   document.getElementById('quo-send-gmail-btn').onclick=()=>sendQuoteViaGmail(quo);
+}
+
+async function uploadQuotePdf(quoteId, file){
+  const path = `${quoteId}/${file.name}`;
+  const { error } = await sb.storage.from('quote-pdfs').upload(path, file, { upsert:true });
+  if(error) throw error;
+  return path;
+}
+
+// Records acceptance by attaching the client's signed-and-scanned quote PDF
+// — no e-signature flow, no public link, just a file upload the account
+// owner does after receiving it by mail/in person.
+async function uploadSignedQuote(quo, file){
+  const btn=$('quo-upload-signed-btn');
+  const prevLabel = btn?btn.textContent:'';
+  if(btn){ btn.disabled=true; btn.textContent='Wird hochgeladen…'; }
+  try{
+    const path = await uploadQuotePdf(quo.id, file);
+    const { error } = await sb.from('quotes').update({ pdf_url:path, status:'accepted', decided_at:new Date().toISOString() }).eq('id', quo.id);
+    if(error) throw error;
+    toast('Unterschriebenes Angebot hochgeladen — als angenommen markiert.','ok');
+    loadQuotes();
+    const { data:full } = await sb.from('quotes').select('*,clients(*),quote_items(*)').eq('id',quo.id).single();
+    if(full) openQuotePreviewModal(full);
+  } catch(e){
+    toast('Fehler beim Hochladen: '+(e.message||'Unbekannter Fehler'),'err');
+  } finally {
+    if(btn){ btn.disabled=false; btn.textContent=prevLabel; }
+  }
 }
 
 async function nextQuoteNumber(excludeId){
