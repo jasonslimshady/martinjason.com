@@ -310,6 +310,12 @@
     .inv-sum-row{display:flex;justify-content:space-between;font-size:.875rem;padding:.25rem 0}
     .inv-sum-row.total{font-weight:700;font-size:1rem;border-top:1px solid var(--border-s);padding-top:.625rem;margin-top:.25rem}
 
+    /* QUOTE LINE-ITEM EDITOR (desc + qty + unit price + total) */
+    .qli-row{display:grid;grid-template-columns:22px 1fr 64px 110px 110px 28px;gap:.5rem;align-items:start;padding:.5rem 0;border-bottom:1px solid var(--border)}
+    .qli-row:last-child{border-bottom:none}
+    .qli-hd{font-size:.6875rem;font-weight:600;color:var(--ink-s);text-transform:uppercase;letter-spacing:.04em}
+    .qli-total{font-size:.8125rem;font-weight:600;text-align:right;padding:.375rem 0}
+
     /* ============================================================
        INVOICE DOCUMENT  (English, matches the print/PDF layout)
        ============================================================ */
@@ -345,6 +351,21 @@
     .invd-acc-line{display:flex;gap:6px}
     .invd-acc-k{width:90px;flex-shrink:0}
     .invd-legal{font-size:13px;line-height:1.6;text-align:justify;border-top:1px solid #b9b9b9;padding-top:18px}
+
+    /* Quote-only additions to the shared .inv-doc/.invd-* layout */
+    .invd-items th.c-qty,.invd-items td.c-qty{text-align:right;white-space:nowrap;width:60px}
+    .invd-items th.c-unit,.invd-items td.c-unit{text-align:right;white-space:nowrap;width:110px}
+    .invd-payment{margin-bottom:22px;font-size:13px;line-height:1.55}
+    .invd-accept{display:flex;gap:48px;margin:6px 0 22px}
+    .invd-accept-col{flex:1}
+    .invd-accept-line{margin-top:34px;border-top:1px solid #333;padding-top:6px;font-size:11px;color:#555}
+
+    /* Contract body — the merged template HTML renders inside this block */
+    .invd-contract-body{font-size:13px;line-height:1.65;margin:22px 0}
+    .invd-contract-body h3{font-size:14px;margin:22px 0 8px;font-weight:700}
+    .invd-contract-body p{margin:0 0 10px}
+    .invd-contract-body .sig-block{display:flex;gap:48px;margin-top:34px}
+    .invd-contract-body .sig-line{margin-top:34px;border-top:1px solid #333;padding-top:6px;font-size:11px;color:#555}
 
     @media print{
       html,body{height:auto!important;overflow:visible!important;background:#fff!important}
@@ -526,12 +547,20 @@
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6" cy="5" r="2.5"/><path d="M1 13.5c0-2.76 2.24-5 5-5"/><circle cx="12" cy="10" r="2.5"/><path d="M12 7.5v2.5l1.5 1.5"/></svg>CRM
       <span class="nav-badge" id="badge-crm" hidden>0</span>
     </button>
+    <button class="nav-item" data-panel="quotes">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 2h7l3 3v9a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1z"/><path d="M10 2v3h3M5 8.5h6M5 11h4"/></svg>Angebote
+      <span class="nav-badge" id="badge-quotes" hidden>0</span>
+    </button>
     <button class="nav-item" data-panel="time">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5V8l2.5 2.5"/></svg>Zeiterfassung
     </button>
     <button class="nav-item" data-panel="invoices">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2.5" y="1.5" width="11" height="13" rx="1.5"/><path d="M5 5.5h6M5 8h6M5 10.5h3.5"/></svg>Rechnungen
       <span class="nav-badge" id="badge-inv" hidden>0</span>
+    </button>
+    <button class="nav-item" data-panel="contracts">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2.5" y="1.5" width="11" height="13" rx="1.5"/><path d="M5 4.5h6M5 7h6M5 9.5h4"/><path d="M5.5 12.5l1.4 1.4L9.5 11" stroke-width="1.4"/></svg>Vertrag
+      <span class="nav-badge" id="badge-contracts" hidden>0</span>
     </button>
     <div class="sb-sec">Marketing</div>
     <button class="nav-item" data-panel="klaviyo">
@@ -717,6 +746,47 @@
         <th class="inv-th-sort" data-col="status" style="cursor:pointer;user-select:none" title="Nach Status sortieren">Status <span class="inv-sort-arrow" data-arrow="status"></span></th>
         <th style="width:28px"></th><th style="width:36px"></th>
       </tr></thead><tbody id="inv-body"></tbody></table></div>
+    </section>
+
+    <!-- QUOTES PANEL -->
+    <section class="panel" id="panel-quotes">
+      <div class="sec-hd">
+        <span class="sec-ttl">Angebote</span>
+        <div style="display:flex;gap:.5rem;align-items:center">
+          <button class="btn btn--ghost btn--sm" id="btn-quote-settings" title="Standard-Gültigkeitsdauer & Zahlungsbedingungen"><span style="font-size:1.2em;line-height:1">⚙️</span> Einstellungen</button>
+          <button class="btn btn--ghost btn--sm" id="btn-all-quotes">Alle Angebote</button>
+          <button class="btn btn--primary btn--sm" id="btn-new-quote">+ Neues Angebot</button>
+        </div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-lbl">Entwürfe</div><div class="stat-val" id="q-draft">—</div></div>
+        <div class="stat-card"><div class="stat-lbl">Gesendet</div><div class="stat-val" id="q-sent">—</div></div>
+        <div class="stat-card"><div class="stat-lbl">Angenommen</div><div class="stat-val" id="q-accepted">—</div></div>
+        <div class="stat-card"><div class="stat-lbl">Abgelaufen</div><div class="stat-val" id="q-expired" style="color:var(--orange,#b87000)">—</div></div>
+      </div>
+      <div class="card"><table class="dtable"><thead><tr>
+        <th>Nr.</th><th>Kunde</th><th>Datum</th><th>Gültig bis</th><th>Betrag</th><th>Status</th><th style="width:36px"></th>
+      </tr></thead><tbody id="quo-body"></tbody></table></div>
+    </section>
+
+    <!-- CONTRACTS PANEL -->
+    <section class="panel" id="panel-contracts">
+      <div class="sec-hd">
+        <span class="sec-ttl">Vertrag</span>
+        <div style="display:flex;gap:.5rem;align-items:center">
+          <button class="btn btn--ghost btn--sm" id="btn-contract-settings" title="Vertragsvorlage bearbeiten"><span style="font-size:1.2em;line-height:1">⚙️</span> Einstellungen</button>
+          <button class="btn btn--primary btn--sm" id="btn-new-contract">+ Neuer Vertrag</button>
+        </div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-lbl">Entwürfe</div><div class="stat-val" id="c-draft">—</div></div>
+        <div class="stat-card"><div class="stat-lbl">Gesendet</div><div class="stat-val" id="c-sent">—</div></div>
+        <div class="stat-card"><div class="stat-lbl">Signiert</div><div class="stat-val" id="c-signed">—</div></div>
+        <div class="stat-card"><div class="stat-lbl">Abgelehnt</div><div class="stat-val" id="c-declined">—</div></div>
+      </div>
+      <div class="card"><table class="dtable"><thead><tr>
+        <th>Nr.</th><th>Kunde</th><th>Titel</th><th>Status</th><th>Versendet am</th><th>Signiert am</th><th style="width:36px"></th>
+      </tr></thead><tbody id="ctr-body"></tbody></table></div>
     </section>
 
     <!-- KLAVIYO PANEL -->
@@ -1149,6 +1219,100 @@
   </div>
 </div>
 
+<!-- NEW/EDIT QUOTE MODAL -->
+<div class="overlay" id="ov-quote">
+  <div class="modal modal--lg" style="display:flex;flex-direction:column;max-height:92vh">
+    <div class="modal-hd" style="flex-shrink:0">
+      <span class="modal-ttl" id="quo-modal-title">Neues Angebot</span>
+      <button class="modal-x" onclick="closeModal('ov-quote')">✕</button>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:1.375rem" id="quo-form-body"></div>
+    <div class="modal-ft" style="flex-shrink:0">
+      <button class="btn btn--ghost btn--sm" onclick="closeModal('ov-quote')">Abbrechen</button>
+      <button class="btn btn--primary btn--sm" id="quo-save-btn">Als Entwurf speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ALL QUOTES MODAL -->
+<div class="overlay" id="ov-all-quotes">
+  <div class="modal" style="max-width:860px;width:95vw;display:flex;flex-direction:column;max-height:92vh">
+    <div class="modal-hd" style="flex-shrink:0">
+      <span class="modal-ttl">Alle Angebote</span>
+      <button class="modal-x" onclick="closeModal('ov-all-quotes')">✕</button>
+    </div>
+    <div style="padding:1rem 1.375rem;border-bottom:1px solid var(--border);flex-shrink:0">
+      <div class="inv-filter-bar">
+        <input class="fi" id="allquo-search" placeholder="Suche nach Kunde, Nr. …" style="flex:1;min-width:160px;max-width:240px;font-size:.8125rem;padding:.375rem .625rem" />
+        <select class="fi" id="allquo-status" style="width:140px;font-size:.8125rem;padding:.375rem .5rem">
+          <option value="">Alle Status</option>
+          <option value="draft">Entwurf</option>
+          <option value="sent">Gesendet</option>
+          <option value="accepted">Angenommen</option>
+          <option value="declined">Abgelehnt</option>
+          <option value="converted">Umgewandelt</option>
+        </select>
+        <select class="fi" id="allquo-year" style="width:100px;font-size:.8125rem;padding:.375rem .5rem">
+          <option value="">Alle Jahre</option>
+        </select>
+        <span style="font-size:.8125rem;color:var(--ink-s);margin-left:auto" id="allquo-count"></span>
+      </div>
+    </div>
+    <div style="flex:1;overflow-y:auto">
+      <table class="dtable">
+        <thead><tr><th>Nr.</th><th>Kunde</th><th>Datum</th><th>Gültig bis</th><th>Betrag</th><th>Status</th></tr></thead>
+        <tbody id="allquo-body"></tbody>
+      </table>
+    </div>
+    <div class="modal-ft" style="flex-shrink:0;justify-content:flex-end">
+      <button class="btn btn--ghost btn--sm" onclick="closeModal('ov-all-quotes')">Schließen</button>
+    </div>
+  </div>
+</div>
+
+<!-- QUOTE SETTINGS MODAL -->
+<div class="overlay" id="ov-quote-settings">
+  <div class="modal">
+    <div class="modal-hd"><span class="modal-ttl">Angebotseinstellungen</span><button class="modal-x" onclick="closeModal('ov-quote-settings')">✕</button></div>
+    <div class="modal-body" id="quo-settings-body"></div>
+    <div class="modal-ft">
+      <button class="btn btn--ghost btn--sm" onclick="closeModal('ov-quote-settings')">Abbrechen</button>
+      <button class="btn btn--primary btn--sm" id="quo-settings-save-btn">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- NEW/EDIT CONTRACT MODAL -->
+<div class="overlay" id="ov-contract">
+  <div class="modal modal--lg" style="display:flex;flex-direction:column;max-height:92vh">
+    <div class="modal-hd" style="flex-shrink:0">
+      <span class="modal-ttl" id="ctr-modal-title">Neuer Vertrag</span>
+      <button class="modal-x" onclick="closeModal('ov-contract')">✕</button>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:1.375rem" id="ctr-form-body"></div>
+    <div class="modal-ft" style="flex-shrink:0">
+      <button class="btn btn--ghost btn--sm" onclick="closeModal('ov-contract')">Abbrechen</button>
+      <button class="btn btn--primary btn--sm" id="ctr-save-btn">Als Entwurf speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONTRACT SETTINGS MODAL (template + reused company profile) -->
+<div class="overlay" id="ov-contract-settings">
+  <div class="modal modal--lg" style="display:flex;flex-direction:column;max-height:92vh">
+    <div class="modal-hd" style="flex-shrink:0">
+      <span class="modal-ttl">Vertragseinstellungen</span>
+      <button class="modal-x" onclick="closeModal('ov-contract-settings')">✕</button>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:1.375rem" id="ctr-settings-body"></div>
+    <div class="modal-ft" style="flex-shrink:0">
+      <button class="btn btn--ghost btn--sm" id="ctr-settings-reset-btn" style="margin-right:auto">Auf Standard zurücksetzen</button>
+      <button class="btn btn--ghost btn--sm" onclick="closeModal('ov-contract-settings')">Abbrechen</button>
+      <button class="btn btn--primary btn--sm" id="ctr-settings-save-btn">Speichern</button>
+    </div>
+  </div>
+</div>
+
 <div id="toasts"></div>
 
 <!-- SCRIPTS -->
@@ -1209,7 +1373,7 @@ function saveCompanySettings(obj){
 let companySettings = loadCompanySettings();
 
 // Valid panel ids (titles/subs were dead code since the header bar was removed)
-const PANELS = { analytics:true, crm:true, time:true, invoices:true, klaviyo:true };
+const PANELS = { analytics:true, crm:true, time:true, invoices:true, quotes:true, contracts:true, klaviyo:true };
 const STAGE_CFG = [
   { id:'new_lead',    label:'Neuer Lead',  color:'#8A8A92', tag:'tag--muted' },
   { id:'contacted',   label:'Kontaktiert', color:'#0A84FF', tag:'tag--blue' },
@@ -1253,7 +1417,7 @@ async function showApp(user){
     return;
   }
   hideAllScreens(); $('screen-app').hidden=false;
-  loadStats(); loadCRM(); loadTimeEntries(); loadProjectOverview(); loadInvoices(); loadInvReminders();
+  loadStats(); loadCRM(); loadTimeEntries(); loadProjectOverview(); loadInvoices(); loadInvReminders(); loadQuotes(); loadContracts();
   await loadProjects();
   restoreTimer(); // pick up a timer that survived a reload / tab close
   // Restore last active panel (persists across reloads)
@@ -4244,6 +4408,1257 @@ function printInvoice(){
   window.print();
   $('print-area').style.display='none';
 }
+
+// ── QUOTES (Angebote) ──────────────────────────────────────────────────
+// Mirrors the invoice builder/preview/PDF pipeline above, but for quotes:
+// same companySettings (logo, Pay-to, legal note), same html2pdf/print-area
+// plumbing, same "notes holds a JSON snapshot" trick for the billed-to
+// address. Key differences: a required Gültig-bis date (§145 BGB), no bank
+// account block (not relevant before an order is placed), and a one-click
+// "In Rechnung umwandeln" once a quote is accepted.
+const STATUS_LBL_Q = { draft:'Entwurf', sent:'Gesendet', accepted:'Angenommen', declined:'Abgelehnt', expired:'Abgelaufen', converted:'Umgewandelt' };
+const STATUS_TAG_Q = { draft:'tag--muted', sent:'tag--blue', accepted:'tag--green', declined:'tag--red', expired:'tag--orange', converted:'tag--teal' };
+
+// Quick-insert text blocks for common quote positions (scope-flat-fee
+// pricing, not per-product) — just prefill a new line item, still editable.
+const QUOTE_PRESETS = [
+  { label:'Gallery Audit', desc:'Gallery Audit', detail:'Analyse der bestehenden Produktbild-Galerien inkl. Handlungsempfehlungen.' },
+  { label:'PDP-Galerie Redesign', desc:'PDP-Galerie Redesign — [Kategorie]', detail:'' },
+];
+
+const QUOTE_SETTINGS_KEY = 'jm_quote_settings';
+function loadQuoteSettings(){
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem(QUOTE_SETTINGS_KEY) || '{}') || {}; } catch(e){}
+  return {
+    validityDays: saved.validityDays!=null ? saved.validityDays : CONFIG.QUOTE_VALIDITY_DAYS,
+    paymentTerms: saved.paymentTerms!=null ? saved.paymentTerms : CONFIG.QUOTE_PAYMENT_TERMS,
+  };
+}
+function saveQuoteSettingsObj(obj){ localStorage.setItem(QUOTE_SETTINGS_KEY, JSON.stringify(obj)); }
+
+function daysFromDate(dateStr, n){
+  const [y,m,d] = (dateStr||today()).split('-').map(Number);
+  return new Date(Date.UTC(y,m-1,d+n)).toISOString().split('T')[0];
+}
+
+// Per-quote extras (Prepared-for snapshot) stored as JSON in quotes.notes —
+// same pattern as invoices.notes, no extra column needed.
+function parseQuoMeta(q){
+  const raw = q && typeof q.notes==='string' ? q.notes.trim() : '';
+  if(raw.startsWith('{')){
+    try{ const o=JSON.parse(raw); return { bill_to:o.bill_to||'' }; }catch(e){}
+  }
+  return { bill_to:'' };
+}
+function quoMetaToNotes(meta){ return JSON.stringify({ bill_to:(meta.bill_to||'').trim() }); }
+
+let allQuotesCache = [];
+
+// A "sent" quote past its valid_until is shown as "Abgelaufen" — computed
+// on the fly, never written back to the DB (no cron dependency for what's
+// purely a display nicety).
+function quoteDisplayStatus(q){
+  if(q.status==='sent' && q.valid_until && q.valid_until<today()) return 'expired';
+  return q.status;
+}
+
+async function loadQuotes(){
+  const { data, error } = await sb.from('quotes').select('*,clients(name,company,id)').order('created_at',{ascending:false});
+  if(error) toast('Fehler beim Laden der Angebote: '+error.message,'err');
+  const list = data||[];
+  allQuotesCache = list;
+  $('q-draft').textContent = list.filter(q=>q.status==='draft').length;
+  $('q-sent').textContent  = list.filter(q=>q.status==='sent').length;
+  $('q-accepted').textContent = list.filter(q=>q.status==='accepted').length;
+  $('q-expired').textContent  = list.filter(q=>quoteDisplayStatus(q)==='expired').length;
+  const sentCount = list.filter(q=>q.status==='sent').length;
+  $('badge-quotes').textContent = sentCount;
+  $('badge-quotes').hidden = !(sentCount>0);
+  renderQuoteTable(list);
+}
+
+function quoteStatusCell(q){
+  const disp = quoteDisplayStatus(q);
+  if(disp==='expired') return `<span class="tag tag--orange">Abgelaufen</span>`;
+  if(q.status==='converted') return `<span class="tag tag--teal">Umgewandelt</span>`;
+  const opts=['draft','sent','accepted','declined']
+    .map(st=>`<option value="${st}" ${q.status===st?'selected':''}>${STATUS_LBL_Q[st]}</option>`).join('');
+  return `<select class="quo-status-sel tag ${STATUS_TAG_Q[q.status]||'tag--muted'}" data-id="${q.id}" title="Status ändern">${opts}</select>`;
+}
+
+function renderQuoteTable(list){
+  const tbody=$('quo-body');
+  if(!list.length){ tbody.innerHTML=`<tr><td colspan="7"><div class="empty-st"><p class="empty-ttl">Noch keine Angebote</p><p class="empty-sub">Erstelle dein erstes Angebot.</p></div></td></tr>`; return; }
+  const sorted=[...list].sort((a,b)=>(b.quote_date||'').localeCompare(a.quote_date||''));
+  tbody.innerHTML=sorted.map(q=>`<tr data-id="${q.id}">
+    <td class="mono">${esc(q.quote_number)}</td><td class="fw6">${esc(clientCompanyLabel(q.clients))}</td>
+    <td class="muted">${fmtDate(q.quote_date)}</td><td class="muted">${fmtDate(q.valid_until)}</td>
+    <td class="fw6">${fmtEur(q.total)}</td><td>${quoteStatusCell(q)}</td>
+    <td style="width:36px;padding:.5rem .625rem"><button class="btn btn--icon btn--ghost quo-edit-btn" data-id="${q.id}" title="Bearbeiten" style="width:28px;height:28px">${PENCIL_SVG}</button></td>
+  </tr>`).join('');
+  document.querySelectorAll('#quo-body tr[data-id]').forEach(row=>row.addEventListener('click', e=>{
+    if(e.target.closest('.quo-edit-btn')) return;
+    if(e.target.closest('.quo-status-sel')) return;
+    viewQuote(row.dataset.id);
+  }));
+  document.querySelectorAll('#quo-body .quo-edit-btn').forEach(btn=>btn.addEventListener('click', e=>{ e.stopPropagation(); openQuoteEdit(btn.dataset.id); }));
+  document.querySelectorAll('#quo-body .quo-status-sel').forEach(sel=>{
+    sel.addEventListener('click', e=>e.stopPropagation());
+    sel.addEventListener('change', e=>{ e.stopPropagation(); changeQuoteStatus(sel.dataset.id, sel.value); });
+  });
+}
+
+async function changeQuoteStatus(id, status){
+  const q = allQuotesCache.find(x=>x.id===id)||{};
+  const prevStatus = q.status;
+  if(status===prevStatus) return;
+  const patch={ status };
+  if(['accepted','declined'].includes(status)) patch.decided_at=new Date().toISOString();
+  if(status==='sent' && !q.sent_at) patch.sent_at=new Date().toISOString();
+  const { error } = await sb.from('quotes').update(patch).eq('id', id);
+  if(error){ toast('Status konnte nicht geändert werden: '+error.message,'err'); loadQuotes(); return; }
+  toast(`Status geändert: ${STATUS_LBL_Q[status]||status}.`,'ok');
+  loadQuotes();
+}
+
+async function viewQuote(id){
+  const { data:quo } = await sb.from('quotes').select('*,clients(*),quote_items(*)').eq('id',id).single();
+  if(!quo) return;
+  openQuotePreviewModal(quo);
+}
+
+async function openQuoteEdit(id){
+  const { data:quo } = await sb.from('quotes').select('*,clients(*),quote_items(*)').eq('id',id).single();
+  if(!quo){ toast('Angebot nicht gefunden.','err'); return; }
+  if(quo.status!=='draft'){ toast('Nur Entwürfe können bearbeitet werden.','err'); return; }
+  await editQuoteDraft(quo);
+}
+
+// ── QUOTE BUILDER (single form) ─────────────────────────────────────────
+const QUOTE_PRIORITY_STAGES = ['new_lead','contacted','proposal'];
+// Leads/prospects (who quotes are usually for) sort above active clients.
+function sortQuoteClients(list){
+  return [...list].sort((a,b)=>{
+    const pa = QUOTE_PRIORITY_STAGES.includes(a.pipeline_stage) ? 0 : 1;
+    const pb = QUOTE_PRIORITY_STAGES.includes(b.pipeline_stage) ? 0 : 1;
+    if(pa!==pb) return pa-pb;
+    return (a.name||'').localeCompare(b.name||'');
+  });
+}
+function quoBillToKey(id){ return 'jm_quo_billto_'+id; }
+
+let quoClientId=null, quoDate=null, quoValidUntil=null, quoBillTo=null, quoPaymentTerms=null, quoLineItems=[];
+let quoClients=[];
+let quoEditingId=null, quoEditingNumber=null, quoEditingDate=null;
+
+$('btn-new-quote').addEventListener('click', async ()=>{
+  const qs=loadQuoteSettings();
+  quoClientId=null; quoDate=today(); quoValidUntil=null; quoBillTo=null;
+  quoPaymentTerms=qs.paymentTerms; quoLineItems=[{desc:'',detail:'',qty:1,price:0}];
+  quoEditingId=null; quoEditingNumber=null; quoEditingDate=null;
+  $('quo-modal-title').textContent='Neues Angebot';
+  const { data } = await sb.from('clients').select('id,name,company,email,address,vat_id,pipeline_stage,is_active_client').order('name');
+  quoClients = sortQuoteClients(data||[]);
+  renderQuoteForm();
+  openModal('ov-quote');
+});
+
+function renderQuoteForm(){
+  const body=$('quo-form-body');
+  if(quoBillTo===null && quoClientId){
+    const c=quoClients.find(x=>x.id===quoClientId);
+    let saved=''; try{ saved=localStorage.getItem(quoBillToKey(quoClientId))||''; }catch(e){}
+    quoBillTo = saved || defaultBillTo(c||{});
+  }
+  if(quoValidUntil===null){
+    const qs=loadQuoteSettings();
+    quoValidUntil = daysFromDate(quoDate||today(), Number(qs.validityDays)||30);
+  }
+  const clientOpts = quoClients.map(c=>`<option value="${c.id}"${c.id===quoClientId?' selected':''}>${esc(c.name)}${c.company?` — ${esc(c.company)}`:''}</option>`).join('');
+  const subtotal = quoLineItems.reduce((s,i)=>s+(Number(i.qty)||0)*(Number(i.price)||0),0);
+  body.innerHTML = `
+    <div class="fg"><label class="fl">Kunde *</label>
+      <select class="fi" id="quo-client-sel"><option value="">Kunde wählen…</option>${clientOpts}</select>
+    </div>
+    <div class="fg s2" style="margin-top:.875rem" id="quo-billto-wrap" ${quoClientId?'':'hidden'}>
+      <label class="fl">Für (Angebotsempfänger)</label>
+      <textarea class="fi" id="quo-billto" rows="4">${esc(quoBillTo||'')}</textarea>
+    </div>
+    <div class="g2" style="margin-top:.875rem">
+      <div class="fg"><label class="fl">Angebotsdatum</label><input class="fi" id="quo-date" type="date" value="${esc(quoDate||today())}" /></div>
+      <div class="fg"><label class="fl">Gültig bis *</label><input class="fi" id="quo-valid" type="date" value="${esc(quoValidUntil)}" required /></div>
+    </div>
+    <div style="margin-top:1.125rem">
+      <label class="fl">Positionen</label>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin:.375rem 0 .625rem">
+        ${QUOTE_PRESETS.map((p,i)=>`<button type="button" class="btn btn--ghost btn--sm" data-preset="${i}">+ ${esc(p.label)}</button>`).join('')}
+      </div>
+      <div style="display:grid;grid-template-columns:22px 1fr 64px 110px 110px 28px;gap:.5rem;padding:.375rem 0" class="qli-row">
+        <span></span><span class="qli-hd">Titel &amp; Beschreibung</span><span class="qli-hd" style="text-align:right">Menge</span><span class="qli-hd" style="text-align:right">Einzelpreis</span><span class="qli-hd" style="text-align:right">Summe</span><span></span>
+      </div>
+      <div id="qli-rows">${quoLineItems.map((li,i)=>qliRowHTML(li,i)).join('')}</div>
+      <button type="button" class="btn btn--ghost btn--sm" style="margin-top:.75rem" id="quo-add-li-btn">+ Position hinzufügen</button>
+    </div>
+    <div class="inv-summary">
+      <div class="inv-sum-row total"><span>Gesamtbetrag</span><span id="qli-subtotal">${fmtInvAmount(subtotal)}</span></div>
+    </div>
+    <div class="fg s2" style="margin-top:1.125rem">
+      <label class="fl">Zahlungsbedingungen</label>
+      <textarea class="fi" id="quo-terms" rows="3">${esc(quoPaymentTerms||'')}</textarea>
+    </div>`;
+  $('quo-client-sel').value = quoClientId||'';
+  $('quo-client-sel').addEventListener('change', e=>{
+    quoClientId=e.target.value; quoBillTo=null;
+    renderQuoteForm();
+  });
+  const btWrap=$('quo-billto-wrap'); if(btWrap) btWrap.hidden = !quoClientId;
+  $('quo-billto')?.addEventListener('input', e=>{ quoBillTo=e.target.value; });
+  $('quo-date').addEventListener('input', e=>{ quoDate=e.target.value; });
+  $('quo-valid').addEventListener('input', e=>{ quoValidUntil=e.target.value; });
+  $('quo-terms').addEventListener('input', e=>{ quoPaymentTerms=e.target.value; });
+  document.querySelectorAll('#quo-form-body [data-preset]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const p=QUOTE_PRESETS[parseInt(btn.dataset.preset)];
+      quoLineItems.push({ desc:p.desc, detail:p.detail||'', qty:1, price:0 });
+      renderQuoteForm();
+    });
+  });
+  $('quo-add-li-btn').addEventListener('click', ()=>{ quoLineItems.push({desc:'',detail:'',qty:1,price:0}); renderQuoteForm(); });
+  attachQliListeners();
+}
+
+function qliRowHTML(li,i){
+  const total=(Number(li.qty)||0)*(Number(li.price)||0);
+  return `<div class="qli-row" data-li="${i}">
+    <div style="align-self:center;color:var(--ink-s);font-size:.75rem">${i+1}</div>
+    <div style="display:flex;flex-direction:column;gap:.375rem">
+      <textarea class="fi qli-desc" rows="1" style="padding:.375rem .5rem;font-size:.8125rem;resize:vertical" placeholder="Titel">${esc(li.desc||'')}</textarea>
+      <textarea class="fi qli-detail" rows="2" style="padding:.375rem .5rem;font-size:.75rem;resize:vertical;color:var(--ink-m)" placeholder="Beschreibung (optional)">${esc(li.detail||'')}</textarea>
+    </div>
+    <input class="fi qli-qty" style="padding:.375rem .5rem;font-size:.8125rem;text-align:right" type="number" min="0" step="0.01" value="${li.qty!=null?li.qty:1}" />
+    <input class="fi qli-price" style="padding:.375rem .5rem;font-size:.8125rem;text-align:right" type="number" min="0" step="0.01" value="${li.price!=null?li.price:''}" placeholder="0.00" />
+    <div class="qli-total">${fmtInvAmount(total)}</div>
+    <button type="button" class="btn--icon btn--ghost qli-del" style="color:var(--ink-s)">✕</button>
+  </div>`;
+}
+
+function attachQliListeners(){
+  document.querySelectorAll('.qli-desc').forEach((inp,i)=>inp.addEventListener('input',()=>{ quoLineItems[i].desc=inp.value; }));
+  document.querySelectorAll('.qli-detail').forEach((inp,i)=>inp.addEventListener('input',()=>{ quoLineItems[i].detail=inp.value; }));
+  document.querySelectorAll('.qli-qty').forEach((inp,i)=>inp.addEventListener('input',()=>{ quoLineItems[i].qty=parseFloat(inp.value)||0; refreshQliTotals(); }));
+  document.querySelectorAll('.qli-price').forEach((inp,i)=>inp.addEventListener('input',()=>{ quoLineItems[i].price=parseFloat(inp.value)||0; refreshQliTotals(); }));
+  document.querySelectorAll('.qli-del').forEach((btn,i)=>btn.addEventListener('click',()=>{
+    quoLineItems.splice(i,1);
+    if(!quoLineItems.length) quoLineItems=[{desc:'',detail:'',qty:1,price:0}];
+    renderQuoteForm();
+  }));
+}
+
+function refreshQliTotals(){
+  document.querySelectorAll('#qli-rows .qli-row').forEach((row,i)=>{
+    const li=quoLineItems[i]; if(!li) return;
+    const totalEl=row.querySelector('.qli-total');
+    if(totalEl) totalEl.textContent=fmtInvAmount((Number(li.qty)||0)*(Number(li.price)||0));
+  });
+  const sub=quoLineItems.reduce((s,i)=>s+(Number(i.qty)||0)*(Number(i.price)||0),0);
+  const el=$('qli-subtotal'); if(el) el.textContent=fmtInvAmount(sub);
+}
+
+let quoSaving=false;
+async function saveQuote(){
+  if(quoSaving) return;
+  if(!quoClientId){ toast('Bitte Kunden auswählen.','err'); return; }
+  const validUntil = $('quo-valid')?.value || quoValidUntil;
+  if(!validUntil){ toast('Bitte ein Gültig-bis-Datum angeben.','err'); return; }
+  quoSaving=true;
+  const btn=$('quo-save-btn');
+  const prevLabel=btn?btn.textContent:'';
+  if(btn){ btn.disabled=true; btn.textContent='Speichern…'; }
+  try {
+    const client=quoClients.find(c=>c.id===quoClientId)||{};
+    const date = $('quo-date')?.value || quoDate || today();
+    let quoNum = quoEditingId ? (quoEditingNumber || await nextQuoteNumber(quoEditingId)) : await nextQuoteNumber();
+    const subtotal = quoLineItems.reduce((s,i)=>s+(Number(i.qty)||0)*(Number(i.price)||0),0);
+    const total = subtotal;
+    const notes = quoMetaToNotes({ bill_to: $('quo-billto')?.value ?? quoBillTo });
+    const paymentTerms = $('quo-terms')?.value ?? (quoPaymentTerms||'');
+    const isEdit = !!quoEditingId;
+
+    let quo, error;
+    if(isEdit){
+      ({ data:quo, error } = await sb.from('quotes')
+        .update({ client_id:quoClientId, quote_number:quoNum, quote_date:date, valid_until:validUntil, subtotal, tax_rate:0, tax_amount:0, total, payment_terms:paymentTerms, notes })
+        .eq('id', quoEditingId).select().single());
+      if(!error) await sb.from('quote_items').delete().eq('quote_id', quoEditingId);
+    } else {
+      for(let attempt=0; attempt<4; attempt++){
+        ({ data:quo, error } = await sb.from('quotes').insert({
+          client_id:quoClientId, quote_number:quoNum, quote_date:date, valid_until:validUntil,
+          status:'draft', subtotal, tax_rate:0, tax_amount:0, total, payment_terms:paymentTerms, notes,
+        }).select().single());
+        if(error && /duplicate key|unique|23505/i.test(error.message||'') && attempt<3){
+          quoNum = await nextQuoteNumber();
+          continue;
+        }
+        break;
+      }
+    }
+    if(error){ toast('Fehler: '+error.message,'err'); return; }
+
+    const liPayload = quoLineItems
+      .filter(li=>(li.desc&&li.desc.trim()) || Number(li.price))
+      .map((li,i)=>({ quote_id:quo.id, description:li.desc||'', detail:(li.detail&&li.detail.trim())?li.detail.trim():null, quantity:Number(li.qty)||0, unit_price:Number(li.price)||0, total:(Number(li.qty)||0)*(Number(li.price)||0), sort_order:i }));
+    if(liPayload.length){
+      const { error:liErr } = await sb.from('quote_items').insert(liPayload);
+      if(liErr) toast('Fehler beim Speichern der Positionen: '+liErr.message,'err');
+    }
+    if(quoClientId && quoBillTo){ try{ localStorage.setItem(quoBillToKey(quoClientId), quoBillTo); }catch(e){} }
+    quoEditingId=null; quoEditingNumber=null; quoEditingDate=null;
+    closeModal('ov-quote');
+    toast(isEdit ? 'Angebot aktualisiert.' : 'Angebot als Entwurf gespeichert.','ok');
+    loadQuotes();
+    openQuotePreviewModal({...quo, clients:client, quote_items:liPayload});
+  } finally {
+    quoSaving=false;
+    if(btn){ btn.disabled=false; btn.textContent=prevLabel; }
+  }
+}
+$('quo-save-btn').addEventListener('click', saveQuote);
+
+// Reopens the quote builder for an existing draft — "Speichern" then
+// updates this quote in place instead of creating a new one.
+async function editQuoteDraft(quo){
+  if(!quo?.id || (quo.status && quo.status!=='draft')){ toast('Nur Entwürfe können erneut bearbeitet werden.','err'); return; }
+  const { data:clientsData } = await sb.from('clients').select('id,name,company,email,address,vat_id,pipeline_stage,is_active_client').order('name');
+  quoClients = sortQuoteClients(clientsData||[]);
+  if(quo.client_id && !quoClients.some(c=>c.id===quo.client_id) && quo.clients){ quoClients=[...quoClients, quo.clients]; }
+
+  quoEditingId = quo.id; quoEditingNumber = quo.quote_number; quoEditingDate = quo.quote_date;
+  quoClientId = quo.client_id;
+  const meta = parseQuoMeta(quo);
+  quoBillTo = meta.bill_to || defaultBillTo(quo.clients||{});
+  quoDate = quo.quote_date; quoValidUntil = quo.valid_until;
+  quoPaymentTerms = quo.payment_terms||'';
+  const items = (quo.quote_items||[]).slice().sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+  quoLineItems = items.length
+    ? items.map(it=>({ desc:it.description||'', detail:it.detail||'', qty:Number(it.quantity)||1, price:Number(it.unit_price)||0 }))
+    : [{desc:'',detail:'',qty:1,price:0}];
+
+  closeModal('ov-quopreview');
+  $('quo-modal-title').textContent = `Entwurf bearbeiten — ${quo.quote_number||''}`;
+  renderQuoteForm();
+  openModal('ov-quote');
+}
+
+async function deleteQuote(id, num){
+  if(!confirm(`Angebot ${num||''} wirklich löschen?`)) return;
+  const { error } = await sb.from('quotes').delete().eq('id', id);
+  if(error){ toast('Fehler: '+error.message,'err'); return; }
+  closeModal('ov-quopreview');
+  if(currentPreviewQuo && currentPreviewQuo.id===id) currentPreviewQuo=null;
+  toast('Angebot gelöscht.','ok');
+  loadQuotes();
+}
+
+// ── QUOTE PREVIEW / PDF / PRINT ─────────────────────────────────────────
+let currentPreviewQuo = null;
+
+async function openQuotePreviewModal(quo){
+  const id='ov-quopreview';
+  let ov=document.getElementById(id);
+  if(!ov){
+    ov=document.createElement('div'); ov.className='overlay'; ov.id=id;
+    ov.innerHTML=`<div class="modal modal--lg"><div class="modal-hd"><span class="modal-ttl">Angebot</span><button class="modal-x" onclick="closeModal('${id}')">✕</button></div>
+      <div id="quoprev-body" style="padding:0;max-height:70vh;overflow-y:auto"></div>
+      <div class="modal-ft" id="quoprev-ft" style="flex-wrap:wrap">
+        <button class="btn btn--ghost btn--sm" onclick="closeModal('${id}')">Schließen</button>
+        <button class="btn btn--ghost btn--sm" id="quo-edit-draft-btn" title="Diesen Angebotsentwurf erneut bearbeiten" hidden>✎ Entwurf bearbeiten</button>
+        <button class="btn btn--danger btn--sm" id="quo-delete-btn" title="Dieses Angebot löschen" hidden>🗑 Löschen</button>
+        <button class="btn btn--ghost btn--sm" id="quo-upload-signed-btn" title="Vom Kunden unterschriebenes Angebot als PDF hochladen — markiert das Angebot als angenommen" hidden>📎 Unterschriebenes Angebot hochladen</button>
+        <input type="file" id="quo-signed-file-input" accept="application/pdf" hidden />
+        <button class="btn btn--ghost btn--sm" id="quo-decline-btn" title="Als abgelehnt markieren" hidden>✕ Angebot ablehnen</button>
+        <button class="btn btn--accent btn--sm" id="quo-convert-btn" hidden>→ In Rechnung umwandeln</button>
+        <button class="btn btn--ghost btn--sm" id="quo-print-btn" onclick="printQuote()">🖨 PDF drucken</button>
+        <button class="btn btn--accent btn--sm" id="quo-send-gmail-btn">Per Gmail senden</button>
+      </div></div>`;
+    document.body.appendChild(ov);
+    ov.addEventListener('click',e=>{ if(e.target===ov) closeModal(id); });
+  }
+  ov.querySelector('.modal-ttl').textContent = `Angebot ${quo.quote_number||''}`;
+  currentPreviewQuo = quo;
+
+  const isDraft = !quo.status || quo.status==='draft';
+  const edBtn=$('quo-edit-draft-btn'), delBtn=$('quo-delete-btn'), convBtn=$('quo-convert-btn');
+  const upBtn=$('quo-upload-signed-btn'), fileInp=$('quo-signed-file-input'), decBtn=$('quo-decline-btn');
+  if(edBtn){ edBtn.hidden = !isDraft; edBtn.onclick = ()=>editQuoteDraft(quo); }
+  if(delBtn){ delBtn.hidden = false; delBtn.onclick = ()=>deleteQuote(quo.id, quo.quote_number); }
+  // Acceptance is now recorded by uploading the client's signed-and-scanned
+  // PDF, not a one-click status flip — see uploadSignedQuote(). Declining
+  // still needs no proof, so that stays a plain status change.
+  if(upBtn){ upBtn.hidden = quo.status!=='sent'; upBtn.onclick = ()=>fileInp?.click(); }
+  if(fileInp){ fileInp.onchange = ()=>{ const f=fileInp.files[0]; fileInp.value=''; if(f) uploadSignedQuote(quo, f); }; }
+  if(decBtn){ decBtn.hidden = quo.status!=='sent'; decBtn.onclick = ()=>{ changeQuoteStatus(quo.id,'declined'); closeModal(id); }; }
+  if(convBtn){ convBtn.hidden = quo.status!=='accepted'; convBtn.onclick = ()=>convertQuoteToInvoice(quo); }
+
+  const oldPdfBtn = document.getElementById('quoprev-pdf-btn');
+  if(oldPdfBtn) oldPdfBtn.remove();
+  const printBtn = $('quo-print-btn');
+
+  if(quo.pdf_url){
+    // The client's signed PDF was uploaded — show that exact file (it's the
+    // proof of acceptance) instead of the system-built, unsigned layout.
+    if(printBtn) printBtn.hidden = true;
+    $('print-area').innerHTML = '';
+    document.getElementById('quoprev-body').innerHTML = `<div class="ga-auth-wrap" style="min-height:240px"><div class="spin"></div><p style="color:var(--ink-m);margin:0">PDF wird geladen…</p></div>`;
+    openModal(id);
+    const url = await getQuotePdfUrl(quo.pdf_url);
+    if(url){
+      document.getElementById('quoprev-body').innerHTML = `<iframe src="${esc(url)}" style="width:100%;height:70vh;border:none;display:block" title="Angebot ${esc(quo.quote_number||'')}"></iframe>`;
+      const pdfBtn = document.createElement('button');
+      pdfBtn.className = 'btn btn--ghost btn--sm';
+      pdfBtn.id = 'quoprev-pdf-btn';
+      pdfBtn.textContent = '↗ In neuem Tab öffnen';
+      pdfBtn.onclick = () => window.open(url, '_blank');
+      $('quoprev-ft').insertBefore(pdfBtn, $('quo-send-gmail-btn'));
+    } else {
+      document.getElementById('quoprev-body').innerHTML = `<div class="empty-st" style="padding:2rem"><p class="empty-ttl">PDF konnte nicht geladen werden.</p></div>`;
+    }
+  } else {
+    if(printBtn) printBtn.hidden = false;
+    const html=buildQuoteHTML(quo,true);
+    document.getElementById('quoprev-body').innerHTML=`<div style="padding:0">${html}</div>`;
+    $('print-area').innerHTML=html;
+    openModal(id);
+  }
+
+  document.getElementById('quo-send-gmail-btn').onclick=()=>sendQuoteViaGmail(quo);
+}
+
+async function uploadQuotePdf(quoteId, file){
+  const path = `${quoteId}/${file.name}`;
+  const { error } = await sb.storage.from('quote-pdfs').upload(path, file, { upsert:true });
+  if(error) throw error;
+  return path;
+}
+
+// Records acceptance by attaching the client's signed-and-scanned quote PDF
+// — no e-signature flow, no public link, just a file upload the account
+// owner does after receiving it by mail/in person.
+async function uploadSignedQuote(quo, file){
+  const btn=$('quo-upload-signed-btn');
+  const prevLabel = btn?btn.textContent:'';
+  if(btn){ btn.disabled=true; btn.textContent='Wird hochgeladen…'; }
+  try{
+    const path = await uploadQuotePdf(quo.id, file);
+    const { error } = await sb.from('quotes').update({ pdf_url:path, status:'accepted', decided_at:new Date().toISOString() }).eq('id', quo.id);
+    if(error) throw error;
+    toast('Unterschriebenes Angebot hochgeladen — als angenommen markiert.','ok');
+    loadQuotes();
+    const { data:full } = await sb.from('quotes').select('*,clients(*),quote_items(*)').eq('id',quo.id).single();
+    if(full) openQuotePreviewModal(full);
+  } catch(e){
+    toast('Fehler beim Hochladen: '+(e.message||'Unbekannter Fehler'),'err');
+  } finally {
+    if(btn){ btn.disabled=false; btn.textContent=prevLabel; }
+  }
+}
+
+async function nextQuoteNumber(excludeId){
+  // "ANG-DD-MM-YYYY" — same style as invoice numbers, different prefix.
+  const d=new Date();
+  const base=`ANG-${pad(d.getDate())}-${pad(d.getMonth()+1)}-${d.getFullYear()}`;
+  const { data }=await sb.from('quotes').select('id,quote_number').like('quote_number',`${base}%`);
+  const existing=new Set((data||[]).filter(r=>r.id!==excludeId).map(r=>r.quote_number));
+  if(!existing.has(base)) return base;
+  let n=2; while(existing.has(`${base}-${n}`)) n++;
+  return `${base}-${n}`;
+}
+
+function buildQuoteHTML(quo, forModal=false){
+  const s = companySettings;
+  const safeLogo = /^data:image\//.test(s.logo||'') ? s.logo : '';
+  const meta = parseQuoMeta(quo);
+  const items = (quo.quote_items||[]).slice().sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+  const itemQty  = i => Number(i.quantity!=null ? i.quantity : 1);
+  const itemUnit = i => Number(i.unit_price!=null ? i.unit_price : (i.price||0));
+  const itemAmount = i => (i.total!=null ? Number(i.total) : itemQty(i)*itemUnit(i));
+  const rows = items.map((i,idx)=>`<tr>
+      <td class="c-pos">${idx+1}</td>
+      <td class="c-desc">${invMultiline(i.description||'')}${i.detail?`<div class="c-desc-detail">${invMultiline(i.detail)}</div>`:''}</td>
+      <td class="c-qty">${itemQty(i)}</td>
+      <td class="c-unit">${fmtInvAmount(itemUnit(i))}</td>
+      <td class="c-amt">${fmtInvAmount(itemAmount(i))}</td>
+    </tr>`).join('');
+
+  const subtotal = quo.subtotal!=null ? Number(quo.subtotal) : items.reduce((a,i)=>a+itemAmount(i),0);
+  const total    = quo.total!=null ? Number(quo.total) : subtotal;
+  const vatAmount = (Number(total)-Number(subtotal)) || 0;
+  const num = quo.quote_number||'';
+
+  const preparedFor = invAddrBlock(meta.bill_to || defaultBillTo(quo.clients||{}), []);
+  const payToFull = `${s.issuerName?`<div class="invd-name">${esc(s.issuerName)}</div>`:''}${invMultiline(s.issuerAddress||'')}`;
+
+  return `<div class="inv-doc">
+    <div class="invd-top">
+      <div>
+        <h1 class="invd-title">ANGEBOT</h1>
+        <div class="invd-sub">#${esc(num)}</div>
+      </div>
+      ${safeLogo?`<img class="invd-logo" src="${safeLogo}" alt="Logo" />`:''}
+    </div>
+
+    <table class="invd-meta">
+      <tr><td class="invd-meta-k">Date</td><td>${fmtDate(quo.quote_date)}</td></tr>
+      <tr><td class="invd-meta-k">Number</td><td>#${esc(num)}</td></tr>
+      <tr><td class="invd-meta-k">Valid until</td><td>${fmtDate(quo.valid_until)}</td></tr>
+    </table>
+
+    <div class="invd-parties">
+      <div class="invd-party">
+        <div class="invd-h">Prepared for</div>
+        ${preparedFor||'<div class="invd-name">—</div>'}
+      </div>
+      <div class="invd-party">
+        <div class="invd-h">Pay to</div>
+        ${payToFull}
+      </div>
+    </div>
+
+    <table class="invd-items">
+      <thead><tr><th class="c-pos">Position</th><th class="c-desc">Description</th><th class="c-qty">Qty</th><th class="c-unit">Unit price</th><th class="c-amt">Amount</th></tr></thead>
+      <tbody>${rows||''}</tbody>
+    </table>
+
+    <div class="invd-totals">
+      <div class="invd-tot-row b"><span>Subtotal (net):</span><span>${fmtInvAmount(subtotal)}</span></div>
+      <div class="invd-tot-row"><span>${esc(s.vatLabel||'VAT')}:</span><span>${fmtInvAmount(vatAmount)}</span></div>
+      <div class="invd-tot-row b"><span>Total amount:</span><span>${fmtInvAmount(total)}</span></div>
+    </div>
+
+    ${quo.payment_terms?`<div class="invd-payment"><div class="invd-h">Payment terms</div>${invMultiline(quo.payment_terms)}</div>`:''}
+
+    <div class="invd-accept">
+      <div class="invd-accept-col"><div class="invd-accept-line">Place, date</div></div>
+      <div class="invd-accept-col"><div class="invd-accept-line">Signature</div></div>
+    </div>
+
+    ${s.legal?`<div class="invd-legal">${invMultiline(s.legal)}</div>`:''}
+  </div>`;
+}
+
+async function generateQuotePdfBlob(quoId){
+  const { data:full } = await sb.from('quotes').select('*,clients(*),quote_items(*)').eq('id',quoId).single();
+  if(!full) return null;
+  if(typeof html2pdf==='undefined') await loadScript(LIB_HTML2PDF).catch(()=>{});
+  if(typeof html2pdf==='undefined') return null;
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'position:fixed;left:0;top:0;z-index:-1;opacity:0;pointer-events:none';
+  const container = document.createElement('div');
+  container.style.cssText = 'width:820px;background:#fff';
+  container.innerHTML = buildQuoteHTML(full, true);
+  wrap.appendChild(container);
+  document.body.appendChild(wrap);
+  await Promise.all(Array.from(container.querySelectorAll('img')).map(img =>
+    img.complete ? Promise.resolve() : new Promise(res => { img.onload = img.onerror = res; })
+  ));
+  try {
+    return await html2pdf().set({
+      margin: [36, 0, 36, 0],
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+      jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', 'thead', '.invd-parties', '.invd-totals', '.invd-payment', '.invd-top', '.invd-accept'] },
+    }).from(container).outputPdf('blob');
+  } finally {
+    wrap.remove();
+  }
+}
+
+function printQuote(){
+  $('print-area').style.display='block';
+  window.print();
+  $('print-area').style.display='none';
+}
+
+function getQuotePdfUrl(path){
+  return sb.storage.from('quote-pdfs').createSignedUrl(path, 3600).then(({data,error})=> error?null:data.signedUrl);
+}
+
+async function sendQuoteViaGmail(quo){
+  if(!CONFIG.GMAIL_CLIENT_ID||CONFIG.GMAIL_CLIENT_ID==='YOUR_GOOGLE_OAUTH_CLIENT_ID'){
+    toast('Bitte zuerst GMAIL_CLIENT_ID in config.js eintragen.','err'); return;
+  }
+  const clientEmail=quo.clients?.email;
+  if(!clientEmail){ toast('Dieser Kunde hat keine E-Mail-Adresse.','err'); return; }
+  const draftTab=window.open('', '_blank');
+  if(draftTab){ try{ draftTab.document.write('<title>Gmail-Entwurf…</title><p style="font:15px system-ui;padding:2rem">Gmail-Entwurf wird erstellt…</p>'); }catch(e){} }
+  const btn=$('quo-send-gmail-btn');
+  if(btn){ btn.disabled=true; btn.textContent='Entwurf wird erstellt…'; }
+  try {
+    await ensureGmailAuth();
+    let pdfBlob=null;
+    if(quo.pdf_url){
+      const url=await getQuotePdfUrl(quo.pdf_url);
+      if(url){ const r=await fetch(url); if(r.ok) pdfBlob=await r.blob(); }
+    }
+    if(!pdfBlob && quo.id) pdfBlob=await generateQuotePdfBlob(quo.id);
+    if(!pdfBlob) throw new Error('Angebots-PDF konnte nicht erstellt werden.');
+    const pdfName=`Angebot-${String(quo.quote_number||quo.id||'').replace(/[^\w.\-]+/g,'-')||'Angebot'}.pdf`;
+
+    const firstName=(quo.clients?.name||'').trim().split(/\s+/)[0] || quo.clients?.company || '';
+    const subject=`Angebot ${quo.quote_number||''} von ${CONFIG.INVOICE_FROM.name}`;
+    const body=`Hallo ${firstName},\n\nim Anhang findest du das Angebot ${quo.quote_number||''} über ${fmtEur(quo.total)}.\n\nDas Angebot ist gültig bis ${fmtDate(quo.valid_until)}.\n\nMit freundlichen Grüßen,\n${CONFIG.INVOICE_FROM.name}`;
+    const draftMsgId=await gmailCreateDraft(clientEmail, subject, body, pdfBlob, pdfName);
+
+    // Move the quote out of "Entwurf" once a send draft exists for it, and
+    // nudge the CRM stage forward — but only from an earlier stage, never
+    // overriding a stage set manually since.
+    if(quo.status==='draft'){
+      const { error } = await sb.from('quotes').update({ status:'sent', sent_at:new Date().toISOString() }).eq('id', quo.id);
+      if(!error){
+        quo.status='sent'; quo.sent_at=new Date().toISOString();
+        if(quo.client_id && quo.clients && ['new_lead','contacted'].includes(quo.clients.pipeline_stage)){
+          await sb.from('clients').update({ pipeline_stage:'proposal' }).eq('id', quo.client_id);
+        }
+        loadQuotes(); loadCRM();
+      }
+    }
+    toast(`Entwurf für ${clientEmail} in Gmail erstellt – bitte prüfen und senden.`,'ok');
+    const composeUrl=draftMsgId
+      ? `https://mail.google.com/mail/u/0/#drafts?compose=${encodeURIComponent(draftMsgId)}`
+      : 'https://mail.google.com/mail/u/0/#drafts';
+    if(draftTab){ draftTab.location.href=composeUrl; } else { window.open(composeUrl,'_blank','noopener'); }
+  } catch(e){
+    if(draftTab) draftTab.close();
+    toast('Fehler beim Erstellen des Entwurfs: '+e.message,'err');
+  }
+  finally { if(btn){ btn.disabled=false; btn.textContent='Per Gmail senden'; } }
+}
+
+// ── QUOTE → INVOICE CONVERSION ──────────────────────────────────────────
+async function convertQuoteToInvoice(quo){
+  if(quo.status!=='accepted'){ toast('Nur angenommene Angebote können umgewandelt werden.','err'); return; }
+  if(!confirm(`Angebot ${quo.quote_number||''} in eine Rechnung umwandeln?`)) return;
+  const btn=$('quo-convert-btn');
+  if(btn){ btn.disabled=true; btn.textContent='Wird umgewandelt…'; }
+  try {
+    const { data:full } = await sb.from('quotes').select('*,clients(*),quote_items(*)').eq('id',quo.id).single();
+    if(!full){ toast('Angebot nicht gefunden.','err'); return; }
+    const meta = parseQuoMeta(full);
+    const billTo = meta.bill_to || defaultBillTo(full.clients||{});
+    const invNum = await nextInvoiceNumber();
+    const notes = invMetaToNotes({ bill_to: billTo });
+    const { data:inv, error } = await sb.from('invoices').insert({
+      client_id: full.client_id, invoice_number: invNum, invoice_date: today(),
+      due_date: daysFromNow(CONFIG.DEFAULT_PAYMENT_DAYS), status:'draft',
+      subtotal: full.subtotal, tax_rate: full.tax_rate, tax_amount: full.tax_amount, total: full.total,
+      notes,
+    }).select().single();
+    if(error){ toast('Fehler: '+error.message,'err'); return; }
+    const items = (full.quote_items||[]).slice().sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+    let liPayload=[];
+    if(items.length){
+      liPayload = items.map(it=>({ invoice_id:inv.id, description:it.description, detail:it.detail||null, quantity:it.quantity, unit_price:it.unit_price, total:it.total, sort_order:it.sort_order }));
+      const { error:liErr } = await sb.from('invoice_items').insert(liPayload);
+      if(liErr) toast('Fehler beim Kopieren der Positionen: '+liErr.message,'err');
+    }
+    await sb.from('quotes').update({ status:'converted', converted_invoice_id:inv.id }).eq('id', full.id);
+    closeModal('ov-quopreview');
+    toast('Angebot in Rechnung umgewandelt.','ok');
+    loadQuotes(); loadInvoices(); loadStats();
+    openInvoicePreviewModal({ ...inv, clients: full.clients, invoice_items: liPayload });
+  } finally {
+    if(btn){ btn.disabled=false; btn.textContent='→ In Rechnung umwandeln'; }
+  }
+}
+
+// ── ALL QUOTES MODAL ─────────────────────────────────────────────────
+$('btn-all-quotes').addEventListener('click', openAllQuotesModal);
+function openAllQuotesModal(){
+  const years=[...new Set(allQuotesCache.filter(q=>q.quote_date).map(q=>new Date(q.quote_date).getFullYear()))].sort((a,b)=>b-a);
+  $('allquo-year').innerHTML = `<option value="">Alle Jahre</option>` + years.map(y=>`<option value="${y}">${y}</option>`).join('');
+  renderAllQuotesTable();
+  openModal('ov-all-quotes');
+}
+function getFilteredAllQuotes(){
+  const search=($('allquo-search')?.value||'').toLowerCase().trim();
+  const status=$('allquo-status')?.value||'';
+  const year=$('allquo-year')?.value||'';
+  return allQuotesCache.filter(q=>{
+    if(status && q.status!==status) return false;
+    if(year && (!q.quote_date || new Date(q.quote_date).getFullYear()!==parseInt(year))) return false;
+    if(search){
+      const hay=`${q.quote_number||''} ${clientCompanyLabel(q.clients)}`.toLowerCase();
+      if(!hay.includes(search)) return false;
+    }
+    return true;
+  });
+}
+function renderAllQuotesTable(){
+  const list=getFilteredAllQuotes().sort((a,b)=>(b.quote_date||'').localeCompare(a.quote_date||''));
+  $('allquo-count').textContent = `${list.length} Angebot${list.length!==1?'e':''}`;
+  const tbody=$('allquo-body');
+  if(!list.length){ tbody.innerHTML=`<tr><td colspan="6"><div class="empty-st"><p class="empty-ttl">Keine Angebote gefunden</p></div></td></tr>`; return; }
+  tbody.innerHTML=list.map(q=>{
+    const disp=quoteDisplayStatus(q);
+    return `<tr data-id="${q.id}" style="cursor:pointer">
+    <td class="mono">${esc(q.quote_number)}</td><td class="fw6">${esc(clientCompanyLabel(q.clients))}</td>
+    <td class="muted">${fmtDate(q.quote_date)}</td><td class="muted">${fmtDate(q.valid_until)}</td>
+    <td class="fw6">${fmtEur(q.total)}</td><td><span class="tag ${STATUS_TAG_Q[disp]||'tag--muted'}">${STATUS_LBL_Q[disp]||q.status}</span></td>
+  </tr>`;
+  }).join('');
+  document.querySelectorAll('#allquo-body tr[data-id]').forEach(row=>row.addEventListener('click', ()=>{ closeModal('ov-all-quotes'); viewQuote(row.dataset.id); }));
+}
+$('allquo-search').addEventListener('input', renderAllQuotesTable);
+$('allquo-status').addEventListener('change', renderAllQuotesTable);
+$('allquo-year').addEventListener('change', renderAllQuotesTable);
+
+// ── QUOTE SETTINGS (validity days + default payment terms) ─────────────
+$('btn-quote-settings').addEventListener('click', openQuoteSettings);
+function openQuoteSettings(){
+  const qs=loadQuoteSettings();
+  $('quo-settings-body').innerHTML=`
+    <div class="fg"><label class="fl">Standard-Gültigkeitsdauer (Tage)</label><input class="fi" id="qset-validity" type="number" min="1" value="${esc(qs.validityDays)}" /></div>
+    <div class="fg s2" style="margin-top:.875rem"><label class="fl">Standard-Zahlungsbedingungen</label><textarea class="fi" id="qset-terms" rows="4">${esc(qs.paymentTerms)}</textarea></div>`;
+  openModal('ov-quote-settings');
+}
+$('quo-settings-save-btn').addEventListener('click', ()=>{
+  const validityDays = parseInt($('qset-validity')?.value)||CONFIG.QUOTE_VALIDITY_DAYS;
+  const paymentTerms = $('qset-terms')?.value || '';
+  saveQuoteSettingsObj({ validityDays, paymentTerms });
+  closeModal('ov-quote-settings');
+  toast('Angebotseinstellungen gespeichert.','ok');
+});
+
+// ── CONTRACTS (Vertrag) ──────────────────────────────────────────────────
+// Signing is manual and offline by design: a PDF is generated and sent,
+// the client prints/signs/scans it (or signs it in any PDF viewer) and
+// sends it back, and the signed copy is uploaded here. No e-signature
+// flow, no public link, no token, no serverless function — just a
+// private storage bucket, same as invoice-pdfs / quote-pdfs.
+const STATUS_LBL_C = { draft:'Entwurf', sent:'Gesendet', signed:'Signiert', declined:'Abgelehnt', void:'Ungültig' };
+const STATUS_TAG_C = { draft:'tag--muted', sent:'tag--blue', signed:'tag--green', declined:'tag--red', void:'tag--muted' };
+
+const CONTRACT_TEMPLATE_KEY = 'jm_contract_template';
+function loadContractTemplate(){
+  try{ const saved=localStorage.getItem(CONTRACT_TEMPLATE_KEY); if(saved!=null && saved!=='') return saved; }catch(e){}
+  return CONFIG.CONTRACT_TEMPLATE_HTML;
+}
+function saveContractTemplateObj(html){ localStorage.setItem(CONTRACT_TEMPLATE_KEY, html); }
+
+// Merge-field substitution — plain split/join (not String.replace) so a
+// "$" inside a client name or address can never be misread as a
+// replacement-pattern token.
+function mergeContractFields(tpl, f){
+  const sub = (t, key, val) => t.split(`{{${key}}}`).join(val);
+  let out = String(tpl||'');
+  out = sub(out, 'client_name', esc(f.client_name||''));
+  out = sub(out, 'client_address', invMultiline(f.client_address||''));
+  out = sub(out, 'scope_description', invMultiline(f.scope_description||''));
+  out = sub(out, 'fee_amount', esc(f.fee_amount||''));
+  out = sub(out, 'payment_terms', invMultiline(f.payment_terms||''));
+  out = sub(out, 'start_date', esc(f.start_date||''));
+  out = sub(out, 'contract_number', esc(f.contract_number||''));
+  out = sub(out, 'contract_date', esc(f.contract_date||''));
+  return out;
+}
+
+let allContractsCache = [];
+
+async function loadContracts(){
+  const { data, error } = await sb.from('contracts').select('*,clients(name,company,id)').order('created_at',{ascending:false});
+  if(error) toast('Fehler beim Laden der Verträge: '+error.message,'err');
+  const list = data||[];
+  allContractsCache = list;
+  $('c-draft').textContent = list.filter(c=>c.status==='draft').length;
+  $('c-sent').textContent  = list.filter(c=>c.status==='sent').length;
+  $('c-signed').textContent = list.filter(c=>c.status==='signed').length;
+  $('c-declined').textContent = list.filter(c=>c.status==='declined').length;
+  const sentCount = list.filter(c=>c.status==='sent').length;
+  $('badge-contracts').textContent = sentCount;
+  $('badge-contracts').hidden = !(sentCount>0);
+  renderContractTable(list);
+}
+
+function renderContractTable(list){
+  const tbody=$('ctr-body');
+  if(!list.length){ tbody.innerHTML=`<tr><td colspan="7"><div class="empty-st"><p class="empty-ttl">Noch keine Verträge</p><p class="empty-sub">Erstelle deinen ersten Vertrag.</p></div></td></tr>`; return; }
+  const sorted=[...list].sort((a,b)=>(b.created_at||'').localeCompare(a.created_at||''));
+  tbody.innerHTML=sorted.map(c=>`<tr data-id="${c.id}">
+    <td class="mono">${esc(c.contract_number)}</td><td class="fw6">${esc(clientCompanyLabel(c.clients))}</td>
+    <td class="muted">${esc(c.title||'')}</td><td><span class="tag ${STATUS_TAG_C[c.status]||'tag--muted'}">${STATUS_LBL_C[c.status]||c.status}</span></td>
+    <td class="muted">${c.sent_at?fmtDate(c.sent_at):'—'}</td><td class="muted">${c.signed_at?fmtDate(c.signed_at):'—'}</td>
+    <td style="width:36px;padding:.5rem .625rem"><button class="btn btn--icon btn--ghost ctr-edit-btn" data-id="${c.id}" title="Bearbeiten" style="width:28px;height:28px">${PENCIL_SVG}</button></td>
+  </tr>`).join('');
+  document.querySelectorAll('#ctr-body tr[data-id]').forEach(row=>row.addEventListener('click', e=>{
+    if(e.target.closest('.ctr-edit-btn')) return;
+    viewContract(row.dataset.id);
+  }));
+  document.querySelectorAll('#ctr-body .ctr-edit-btn').forEach(btn=>btn.addEventListener('click', e=>{ e.stopPropagation(); openContractEdit(btn.dataset.id); }));
+}
+
+async function viewContract(id){
+  const { data:ct } = await sb.from('contracts').select('*,clients(*)').eq('id',id).single();
+  if(!ct) return;
+  openContractPreviewModal(ct);
+}
+
+async function openContractEdit(id){
+  const { data:ct } = await sb.from('contracts').select('*,clients(*)').eq('id',id).single();
+  if(!ct){ toast('Vertrag nicht gefunden.','err'); return; }
+  if(ct.status!=='draft'){ toast('Nur Entwürfe können bearbeitet werden.','err'); return; }
+  await editContractDraft(ct);
+}
+
+// ── CONTRACT BUILDER ─────────────────────────────────────────────────
+// New contract: pick a client (+ optional quote to prefill from), fill in
+// the merge fields, save → the template is rendered into content_html
+// once. Editing a draft afterwards edits that rendered HTML directly
+// (plus the recoverable metadata columns) rather than trying to
+// regenerate it — the raw scope text typed at creation time isn't kept
+// as its own column, only baked into content_html, so a second
+// auto-merge could silently drop hand-edits made to the document.
+let ctrClientId=null, ctrQuoteId=null, ctrTitle=null, ctrScope=null, ctrFee=null, ctrPaymentTerms=null, ctrStartDate=null, ctrContentHtml=null;
+let ctrClients=[], ctrQuotesForClient=[];
+let ctrEditingId=null, ctrEditingNumber=null, ctrEditingClient=null;
+
+$('btn-new-contract').addEventListener('click', async ()=>{
+  ctrClientId=null; ctrQuoteId=null; ctrTitle='Dienstleistungsvertrag'; ctrScope='';
+  ctrFee=null; ctrPaymentTerms=loadQuoteSettings().paymentTerms; ctrStartDate=today();
+  ctrContentHtml=null;
+  ctrEditingId=null; ctrEditingNumber=null; ctrEditingClient=null;
+  $('ctr-modal-title').textContent='Neuer Vertrag';
+  const { data } = await sb.from('clients').select('id,name,company,email,address,vat_id').order('name');
+  ctrClients = data||[];
+  await renderContractForm();
+  openModal('ov-contract');
+});
+
+async function renderContractForm(){
+  const body=$('ctr-form-body');
+
+  if(ctrEditingId){
+    body.innerHTML = `
+      <div class="fg"><label class="fl">Kunde</label><div style="padding:.375rem 0;font-size:.875rem;color:var(--ink-m)">${esc(ctrEditingClient||'')}</div></div>
+      <div class="fg" style="margin-top:.875rem"><label class="fl">Titel</label><input class="fi" id="ctr-title" value="${esc(ctrTitle||'')}" /></div>
+      <div class="g2" style="margin-top:.875rem">
+        <div class="fg"><label class="fl">Vergütung</label><input class="fi" id="ctr-fee" type="number" min="0" step="0.01" value="${ctrFee!=null?ctrFee:''}" placeholder="0.00" /></div>
+        <div class="fg"><label class="fl">Beginn</label><input class="fi" id="ctr-start" type="date" value="${esc(ctrStartDate||'')}" /></div>
+      </div>
+      <div class="fg s2" style="margin-top:.875rem"><label class="fl">Zahlungsbedingungen</label><textarea class="fi" id="ctr-terms" rows="3">${esc(ctrPaymentTerms||'')}</textarea></div>
+      <div class="fg s2" style="margin-top:.875rem">
+        <label class="fl">Vertragstext (HTML)</label>
+        <span style="font-size:.75rem;color:var(--ink-s);display:block;margin-bottom:.375rem">Wurde beim Erstellen aus der Vorlage erzeugt. Änderungen an Vergütung/Zahlungsbedingungen oben werden NICHT automatisch in den Text übernommen — bei Bedarf hier direkt anpassen.</span>
+        <textarea class="fi" id="ctr-content" rows="14" style="font-family:'SF Mono','Fira Code',monospace;font-size:.75rem">${esc(ctrContentHtml||'')}</textarea>
+      </div>`;
+    $('ctr-title').addEventListener('input', e=>{ ctrTitle=e.target.value; });
+    $('ctr-fee').addEventListener('input', e=>{ ctrFee=e.target.value===''?null:parseFloat(e.target.value); });
+    $('ctr-start').addEventListener('input', e=>{ ctrStartDate=e.target.value; });
+    $('ctr-terms').addEventListener('input', e=>{ ctrPaymentTerms=e.target.value; });
+    $('ctr-content').addEventListener('input', e=>{ ctrContentHtml=e.target.value; });
+    return;
+  }
+
+  const clientOpts = ctrClients.map(c=>`<option value="${c.id}"${c.id===ctrClientId?' selected':''}>${esc(c.name)}${c.company?` — ${esc(c.company)}`:''}</option>`).join('');
+  let quoteOpts='';
+  if(ctrClientId){
+    const { data:quotesForClient } = await sb.from('quotes').select('id,quote_number,total,payment_terms,status,quote_items(description,detail)').eq('client_id',ctrClientId).order('quote_date',{ascending:false});
+    ctrQuotesForClient = quotesForClient||[];
+    quoteOpts = ctrQuotesForClient.map(q=>`<option value="${q.id}"${q.id===ctrQuoteId?' selected':''}>${esc(q.quote_number)} — ${fmtEur(q.total)} (${STATUS_LBL_Q[q.status]||q.status})</option>`).join('');
+  } else {
+    ctrQuotesForClient = [];
+  }
+
+  body.innerHTML = `
+    <div class="fg"><label class="fl">Kunde *</label>
+      <select class="fi" id="ctr-client-sel"><option value="">Kunde wählen…</option>${clientOpts}</select>
+    </div>
+    <div class="fg" style="margin-top:.875rem" id="ctr-quote-wrap" ${ctrClientId?'':'hidden'}>
+      <label class="fl">Angebot verknüpfen (optional)</label>
+      <select class="fi" id="ctr-quote-sel"><option value="">Kein Angebot</option>${quoteOpts}</select>
+    </div>
+    <div class="fg" style="margin-top:.875rem"><label class="fl">Titel</label><input class="fi" id="ctr-title" value="${esc(ctrTitle||'')}" /></div>
+    <div class="fg s2" style="margin-top:.875rem"><label class="fl">Leistungsbeschreibung (§ 1) *</label><textarea class="fi" id="ctr-scope" rows="5" placeholder="Was wird geliefert / erbracht?">${esc(ctrScope||'')}</textarea></div>
+    <div class="g2" style="margin-top:.875rem">
+      <div class="fg"><label class="fl">Vergütung</label><input class="fi" id="ctr-fee" type="number" min="0" step="0.01" value="${ctrFee!=null?ctrFee:''}" placeholder="0.00" /></div>
+      <div class="fg"><label class="fl">Beginn</label><input class="fi" id="ctr-start" type="date" value="${esc(ctrStartDate||'')}" /></div>
+    </div>
+    <div class="fg s2" style="margin-top:.875rem"><label class="fl">Zahlungsbedingungen</label><textarea class="fi" id="ctr-terms" rows="3">${esc(ctrPaymentTerms||'')}</textarea></div>`;
+
+  $('ctr-client-sel').value = ctrClientId||'';
+  $('ctr-client-sel').addEventListener('change', async e=>{
+    ctrClientId=e.target.value; ctrQuoteId=null;
+    await renderContractForm();
+  });
+  const qWrap=$('ctr-quote-wrap'); if(qWrap) qWrap.hidden = !ctrClientId;
+  $('ctr-quote-sel')?.addEventListener('change', e=>{
+    ctrQuoteId=e.target.value||null;
+    const q=ctrQuotesForClient.find(x=>x.id===ctrQuoteId);
+    if(q){
+      ctrScope = (q.quote_items||[]).slice().map(it=>it.detail?`${it.description} — ${it.detail}`:it.description).join('\n');
+      ctrFee = Number(q.total)||0;
+      if(q.payment_terms) ctrPaymentTerms = q.payment_terms;
+    }
+    renderContractForm();
+  });
+  $('ctr-title').addEventListener('input', e=>{ ctrTitle=e.target.value; });
+  $('ctr-scope')?.addEventListener('input', e=>{ ctrScope=e.target.value; });
+  $('ctr-fee').addEventListener('input', e=>{ ctrFee=e.target.value===''?null:parseFloat(e.target.value); });
+  $('ctr-start').addEventListener('input', e=>{ ctrStartDate=e.target.value; });
+  $('ctr-terms').addEventListener('input', e=>{ ctrPaymentTerms=e.target.value; });
+}
+
+async function nextContractNumber(excludeId){
+  // "VTR-DD-MM-YYYY" — same style as invoice/quote numbers.
+  const d=new Date();
+  const base=`VTR-${pad(d.getDate())}-${pad(d.getMonth()+1)}-${d.getFullYear()}`;
+  const { data }=await sb.from('contracts').select('id,contract_number').like('contract_number',`${base}%`);
+  const existing=new Set((data||[]).filter(r=>r.id!==excludeId).map(r=>r.contract_number));
+  if(!existing.has(base)) return base;
+  let n=2; while(existing.has(`${base}-${n}`)) n++;
+  return `${base}-${n}`;
+}
+
+let ctrSaving=false;
+async function saveContract(){
+  if(ctrSaving) return;
+  const isEdit = !!ctrEditingId;
+  if(!isEdit && !ctrClientId){ toast('Bitte Kunden auswählen.','err'); return; }
+  if(!isEdit && !($('ctr-scope')?.value||'').trim()){ toast('Bitte eine Leistungsbeschreibung angeben.','err'); return; }
+  ctrSaving=true;
+  const btn=$('ctr-save-btn');
+  const prevLabel=btn?btn.textContent:'';
+  if(btn){ btn.disabled=true; btn.textContent='Speichern…'; }
+  try {
+    const title = $('ctr-title')?.value.trim() || 'Dienstleistungsvertrag';
+    const feeStr = $('ctr-fee')?.value;
+    const fee = (feeStr===''||feeStr==null) ? null : parseFloat(feeStr);
+    const paymentTerms = $('ctr-terms')?.value || null;
+    const startDate = $('ctr-start')?.value || null;
+
+    let ct, error;
+    if(isEdit){
+      const contentHtml = $('ctr-content')?.value ?? ctrContentHtml ?? '';
+      ({ data:ct, error } = await sb.from('contracts')
+        .update({ title, fee_amount:fee, payment_terms:paymentTerms, start_date:startDate, content_html:contentHtml })
+        .eq('id', ctrEditingId).select('*,clients(*)').single());
+    } else {
+      const client = ctrClients.find(c=>c.id===ctrClientId)||{};
+      const ctrNum = await nextContractNumber();
+      const scope = $('ctr-scope')?.value || '';
+      const contentHtml = mergeContractFields(loadContractTemplate(), {
+        client_name: client.company || client.name || '',
+        client_address: defaultBillTo(client),
+        scope_description: scope,
+        fee_amount: fee!=null ? fmtInvAmount(fee) : '',
+        payment_terms: paymentTerms || '',
+        start_date: startDate ? fmtDate(startDate) : '',
+        contract_number: ctrNum,
+        contract_date: fmtDate(today()),
+      });
+      ({ data:ct, error } = await sb.from('contracts').insert({
+        client_id: ctrClientId, quote_id: ctrQuoteId || null, contract_number: ctrNum, title,
+        content_html: contentHtml, fee_amount: fee, payment_terms: paymentTerms, start_date: startDate,
+        status:'draft',
+      }).select('*,clients(*)').single());
+    }
+    if(error){ toast('Fehler: '+error.message,'err'); return; }
+    ctrEditingId=null; ctrEditingNumber=null; ctrEditingClient=null;
+    closeModal('ov-contract');
+    toast(isEdit ? 'Vertrag aktualisiert.' : 'Vertrag als Entwurf gespeichert.','ok');
+    loadContracts();
+    openContractPreviewModal(ct);
+  } finally {
+    ctrSaving=false;
+    if(btn){ btn.disabled=false; btn.textContent=prevLabel; }
+  }
+}
+$('ctr-save-btn').addEventListener('click', saveContract);
+
+async function editContractDraft(ct){
+  if(!ct?.id || ct.status!=='draft'){ toast('Nur Entwürfe können bearbeitet werden.','err'); return; }
+  ctrEditingId = ct.id;
+  ctrEditingNumber = ct.contract_number;
+  ctrEditingClient = clientCompanyLabel(ct.clients);
+  ctrTitle = ct.title || 'Dienstleistungsvertrag';
+  ctrFee = ct.fee_amount!=null ? Number(ct.fee_amount) : null;
+  ctrPaymentTerms = ct.payment_terms || '';
+  ctrStartDate = ct.start_date || '';
+  ctrContentHtml = ct.content_html || '';
+  closeModal('ov-ctrpreview');
+  $('ctr-modal-title').textContent = `Entwurf bearbeiten — ${ct.contract_number||''}`;
+  await renderContractForm();
+  openModal('ov-contract');
+}
+
+async function deleteContract(id, num){
+  if(!confirm(`Vertrag ${num||''} wirklich löschen?`)) return;
+  const { error } = await sb.from('contracts').delete().eq('id', id);
+  if(error){ toast('Fehler: '+error.message,'err'); return; }
+  closeModal('ov-ctrpreview');
+  if(currentPreviewContract && currentPreviewContract.id===id) currentPreviewContract=null;
+  toast('Vertrag gelöscht.','ok');
+  loadContracts();
+}
+
+// ── CONTRACT PREVIEW / PDF / PRINT ──────────────────────────────────────
+let currentPreviewContract = null;
+
+function buildContractHTML(ct, forModal=false){
+  const s = companySettings;
+  const safeLogo = /^data:image\//.test(s.logo||'') ? s.logo : '';
+  const payToFull = `${s.issuerName?`<div class="invd-name">${esc(s.issuerName)}</div>`:''}${invMultiline(s.issuerAddress||'')}`;
+  return `<div class="inv-doc">
+    <div class="invd-top">
+      <div>
+        <h1 class="invd-title">${esc((ct.title||'VERTRAG').toUpperCase())}</h1>
+        <div class="invd-sub">#${esc(ct.contract_number||'')}</div>
+      </div>
+      ${safeLogo?`<img class="invd-logo" src="${safeLogo}" alt="Logo" />`:''}
+    </div>
+    <div class="invd-party" style="margin-bottom:18px">
+      <div class="invd-h">Absender</div>
+      ${payToFull}
+    </div>
+    <div class="invd-contract-body">${ct.content_html||''}</div>
+  </div>`;
+}
+
+async function generateContractPdfBlob(ctrId){
+  const { data:full } = await sb.from('contracts').select('*').eq('id',ctrId).single();
+  if(!full) return null;
+  if(typeof html2pdf==='undefined') await loadScript(LIB_HTML2PDF).catch(()=>{});
+  if(typeof html2pdf==='undefined') return null;
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'position:fixed;left:0;top:0;z-index:-1;opacity:0;pointer-events:none';
+  const container = document.createElement('div');
+  container.style.cssText = 'width:820px;background:#fff';
+  container.innerHTML = buildContractHTML(full, true);
+  wrap.appendChild(container);
+  document.body.appendChild(wrap);
+  await Promise.all(Array.from(container.querySelectorAll('img')).map(img =>
+    img.complete ? Promise.resolve() : new Promise(res => { img.onload = img.onerror = res; })
+  ));
+  try {
+    return await html2pdf().set({
+      margin: [36, 0, 36, 0],
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+      jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['css', 'legacy'], avoid: ['h3', '.sig-block', '.invd-top'] },
+    }).from(container).outputPdf('blob');
+  } finally {
+    wrap.remove();
+  }
+}
+
+function printContract(){
+  $('print-area').style.display='block';
+  window.print();
+  $('print-area').style.display='none';
+}
+
+function getContractPdfUrl(path){
+  return sb.storage.from('contract-pdfs').createSignedUrl(path, 3600).then(({data,error})=> error?null:data.signedUrl);
+}
+
+async function uploadContractPdf(contractId, file){
+  const path = `${contractId}/${file.name}`;
+  const { error } = await sb.storage.from('contract-pdfs').upload(path, file, { upsert:true });
+  if(error) throw error;
+  return path;
+}
+
+async function openContractPreviewModal(ct){
+  const id='ov-ctrpreview';
+  let ov=document.getElementById(id);
+  if(!ov){
+    ov=document.createElement('div'); ov.className='overlay'; ov.id=id;
+    ov.innerHTML=`<div class="modal modal--lg"><div class="modal-hd"><span class="modal-ttl">Vertrag</span><button class="modal-x" onclick="closeModal('${id}')">✕</button></div>
+      <div id="ctrprev-body" style="padding:0;max-height:64vh;overflow-y:auto"></div>
+      <div id="ctrprev-signer" style="padding:.75rem 1.375rem;border-top:1px solid var(--border);display:none;gap:.625rem;flex-wrap:wrap;align-items:flex-end">
+        <div class="fg" style="flex:1;min-width:160px;margin:0"><label class="fl">Unterzeichner Name</label><input class="fi" id="ctr-signer-name" placeholder="optional" /></div>
+        <div class="fg" style="flex:1;min-width:160px;margin:0"><label class="fl">Unterzeichner E-Mail</label><input class="fi" id="ctr-signer-email" placeholder="optional" /></div>
+        <button class="btn btn--ghost btn--sm" id="ctr-signer-save-btn">Angaben speichern</button>
+      </div>
+      <div class="modal-ft" id="ctrprev-ft" style="flex-wrap:wrap">
+        <button class="btn btn--ghost btn--sm" onclick="closeModal('${id}')">Schließen</button>
+        <button class="btn btn--ghost btn--sm" id="ctr-edit-draft-btn" title="Diesen Vertragsentwurf erneut bearbeiten" hidden>✎ Entwurf bearbeiten</button>
+        <button class="btn btn--danger btn--sm" id="ctr-delete-btn" title="Diesen Vertrag löschen" hidden>🗑 Löschen</button>
+        <button class="btn btn--ghost btn--sm" id="ctr-upload-signed-btn" title="Vom Kunden unterschriebenes Dokument als PDF hochladen — markiert den Vertrag als signiert" hidden>📎 Unterschriebenes Dokument hochladen</button>
+        <input type="file" id="ctr-signed-file-input" accept="application/pdf" hidden />
+        <button class="btn btn--ghost btn--sm" id="ctr-decline-btn" title="Als abgelehnt markieren" hidden>✕ Vertrag ablehnen</button>
+        <button class="btn btn--ghost btn--sm" id="ctr-print-btn" onclick="printContract()">🖨 PDF drucken</button>
+        <button class="btn btn--accent btn--sm" id="ctr-send-gmail-btn">Vertrag als PDF per Gmail senden</button>
+      </div></div>`;
+    document.body.appendChild(ov);
+    ov.addEventListener('click',e=>{ if(e.target===ov) closeModal(id); });
+  }
+  ov.querySelector('.modal-ttl').textContent = `Vertrag ${ct.contract_number||''}`;
+  currentPreviewContract = ct;
+
+  const isDraft = ct.status==='draft';
+  const edBtn=$('ctr-edit-draft-btn'), delBtn=$('ctr-delete-btn');
+  const upBtn=$('ctr-upload-signed-btn'), fileInp=$('ctr-signed-file-input'), decBtn=$('ctr-decline-btn');
+  const sendBtn=$('ctr-send-gmail-btn'), signerWrap=$('ctrprev-signer');
+  if(edBtn){ edBtn.hidden = !isDraft; edBtn.onclick = ()=>editContractDraft(ct); }
+  if(delBtn){ delBtn.hidden = false; delBtn.onclick = ()=>deleteContract(ct.id, ct.contract_number); }
+  // Signing = uploading the client's scanned, signed copy — no one-click
+  // status flip. Declining still needs no proof, so that stays simple.
+  if(upBtn){ upBtn.hidden = ct.status!=='sent'; upBtn.onclick = ()=>fileInp?.click(); }
+  if(fileInp){ fileInp.onchange = ()=>{ const f=fileInp.files[0]; fileInp.value=''; if(f) uploadSignedContract(ct, f); }; }
+  if(decBtn){ decBtn.hidden = ct.status!=='sent'; decBtn.onclick = ()=>{ declineContract(ct.id); closeModal(id); }; }
+  if(sendBtn){ sendBtn.hidden = ['signed','declined','void'].includes(ct.status); sendBtn.onclick = ()=>sendContractViaGmail(ct); }
+
+  if(signerWrap){
+    const showSigner = ct.status==='sent' || ct.status==='signed';
+    signerWrap.style.display = showSigner ? 'flex' : 'none';
+    if(showSigner){
+      $('ctr-signer-name').value = ct.signer_name||'';
+      $('ctr-signer-email').value = ct.signer_email||'';
+      $('ctr-signer-save-btn').onclick = async ()=>{
+        const signerName = $('ctr-signer-name').value.trim()||null;
+        const signerEmail = $('ctr-signer-email').value.trim()||null;
+        const { error } = await sb.from('contracts').update({ signer_name:signerName, signer_email:signerEmail }).eq('id', ct.id);
+        if(error){ toast('Fehler: '+error.message,'err'); return; }
+        ct.signer_name=signerName; ct.signer_email=signerEmail;
+        toast('Unterzeichner-Angaben gespeichert.','ok');
+        loadContracts();
+      };
+    }
+  }
+
+  const oldPdfBtn = document.getElementById('ctrprev-pdf-btn');
+  if(oldPdfBtn) oldPdfBtn.remove();
+  const printBtn = $('ctr-print-btn');
+
+  if(ct.pdf_url){
+    // The client's signed PDF was uploaded — show that exact file (it's
+    // the proof of signature) instead of the system-built, unsigned copy.
+    if(printBtn) printBtn.hidden = true;
+    $('print-area').innerHTML = '';
+    document.getElementById('ctrprev-body').innerHTML = `<div class="ga-auth-wrap" style="min-height:240px"><div class="spin"></div><p style="color:var(--ink-m);margin:0">PDF wird geladen…</p></div>`;
+    openModal(id);
+    const url = await getContractPdfUrl(ct.pdf_url);
+    if(url){
+      document.getElementById('ctrprev-body').innerHTML = `<iframe src="${esc(url)}" style="width:100%;height:64vh;border:none;display:block" title="Vertrag ${esc(ct.contract_number||'')}"></iframe>`;
+      const pdfBtn = document.createElement('button');
+      pdfBtn.className = 'btn btn--ghost btn--sm';
+      pdfBtn.id = 'ctrprev-pdf-btn';
+      pdfBtn.textContent = '↗ In neuem Tab öffnen';
+      pdfBtn.onclick = () => window.open(url, '_blank');
+      $('ctrprev-ft').insertBefore(pdfBtn, $('ctr-send-gmail-btn'));
+    } else {
+      document.getElementById('ctrprev-body').innerHTML = `<div class="empty-st" style="padding:2rem"><p class="empty-ttl">PDF konnte nicht geladen werden.</p></div>`;
+    }
+  } else {
+    if(printBtn) printBtn.hidden = false;
+    const html=buildContractHTML(ct,true);
+    document.getElementById('ctrprev-body').innerHTML=`<div style="padding:0">${html}</div>`;
+    $('print-area').innerHTML=html;
+    openModal(id);
+  }
+}
+
+// Records signature by attaching the client's signed-and-scanned contract
+// PDF — mirrors the quote acceptance flow exactly.
+async function uploadSignedContract(ct, file){
+  const btn=$('ctr-upload-signed-btn');
+  const prevLabel = btn?btn.textContent:'';
+  if(btn){ btn.disabled=true; btn.textContent='Wird hochgeladen…'; }
+  try {
+    const path = await uploadContractPdf(ct.id, file);
+    const signerName = $('ctr-signer-name')?.value.trim()||null;
+    const signerEmail = $('ctr-signer-email')?.value.trim()||null;
+    const { error } = await sb.from('contracts').update({ pdf_url:path, status:'signed', signed_at:new Date().toISOString(), signer_name:signerName, signer_email:signerEmail }).eq('id', ct.id);
+    if(error) throw error;
+    toast('Unterschriebenes Dokument hochgeladen — Vertrag als signiert markiert.','ok');
+    loadContracts();
+    const { data:full } = await sb.from('contracts').select('*,clients(*)').eq('id',ct.id).single();
+    if(full) openContractPreviewModal(full);
+  } catch(e){
+    toast('Fehler beim Hochladen: '+(e.message||'Unbekannter Fehler'),'err');
+  } finally {
+    if(btn){ btn.disabled=false; btn.textContent=prevLabel; }
+  }
+}
+
+async function declineContract(id){
+  const { error } = await sb.from('contracts').update({ status:'declined', declined_at:new Date().toISOString() }).eq('id', id);
+  if(error){ toast('Fehler: '+error.message,'err'); return; }
+  toast('Vertrag als abgelehnt markiert.','ok');
+  loadContracts();
+}
+
+async function sendContractViaGmail(ct){
+  if(!CONFIG.GMAIL_CLIENT_ID||CONFIG.GMAIL_CLIENT_ID==='YOUR_GOOGLE_OAUTH_CLIENT_ID'){
+    toast('Bitte zuerst GMAIL_CLIENT_ID in config.js eintragen.','err'); return;
+  }
+  const clientEmail=ct.clients?.email;
+  if(!clientEmail){ toast('Dieser Kunde hat keine E-Mail-Adresse.','err'); return; }
+  const draftTab=window.open('', '_blank');
+  if(draftTab){ try{ draftTab.document.write('<title>Gmail-Entwurf…</title><p style="font:15px system-ui;padding:2rem">Gmail-Entwurf wird erstellt…</p>'); }catch(e){} }
+  const btn=$('ctr-send-gmail-btn');
+  const prevLabel = btn?btn.textContent:'';
+  if(btn){ btn.disabled=true; btn.textContent='Entwurf wird erstellt…'; }
+  try {
+    await ensureGmailAuth();
+    // Rendered client-side with html2pdf.js — same method as
+    // printInvoice()/generateInvoicePdfBlob() — so the draft actually
+    // carries a real PDF, not just the claim of one in the email text.
+    const pdfBlob = await generateContractPdfBlob(ct.id);
+    if(!pdfBlob) throw new Error('Vertrags-PDF konnte nicht erstellt werden.');
+    const pdfName=`Vertrag-${String(ct.contract_number||ct.id||'').replace(/[^\w.\-]+/g,'-')||'Vertrag'}.pdf`;
+
+    const firstName=(ct.clients?.name||'').trim().split(/\s+/)[0] || ct.clients?.company || '';
+    const subject=`Vertrag ${ct.contract_number||''} von ${CONFIG.INVOICE_FROM.name}`;
+    const body=`Hallo ${firstName},\n\nim Anhang findest du den Vertrag ${ct.contract_number||''} zur Unterschrift.\n\nBitte unterschrieben (Foto oder Scan reicht) zurücksenden.\n\nMit freundlichen Grüßen,\n${CONFIG.INVOICE_FROM.name}`;
+    const draftMsgId=await gmailCreateDraft(clientEmail, subject, body, pdfBlob, pdfName);
+
+    if(ct.status==='draft'){
+      const { error } = await sb.from('contracts').update({ status:'sent', sent_at:new Date().toISOString() }).eq('id', ct.id);
+      if(!error){ ct.status='sent'; ct.sent_at=new Date().toISOString(); loadContracts(); }
+    }
+    toast(`Entwurf für ${clientEmail} in Gmail erstellt – bitte prüfen und senden.`,'ok');
+    const composeUrl=draftMsgId
+      ? `https://mail.google.com/mail/u/0/#drafts?compose=${encodeURIComponent(draftMsgId)}`
+      : 'https://mail.google.com/mail/u/0/#drafts';
+    if(draftTab){ draftTab.location.href=composeUrl; } else { window.open(composeUrl,'_blank','noopener'); }
+  } catch(e){
+    if(draftTab) draftTab.close();
+    toast('Fehler beim Erstellen des Entwurfs: '+e.message,'err');
+  }
+  finally { if(btn){ btn.disabled=false; btn.textContent=prevLabel; } }
+}
+
+// ── CONTRACT SETTINGS (template — logo/Pay-to reuse Rechnungseinstellungen) ─
+$('btn-contract-settings').addEventListener('click', openContractSettings);
+function openContractSettings(){
+  const tpl=loadContractTemplate();
+  $('ctr-settings-body').innerHTML=`
+    <div class="fg s2">
+      <label class="fl">Vertragsvorlage (HTML)</label>
+      <span style="font-size:.75rem;color:var(--ink-s);display:block;margin-bottom:.375rem">Merge-Felder: {{client_name}} {{client_address}} {{scope_description}} {{fee_amount}} {{payment_terms}} {{start_date}} {{contract_number}} {{contract_date}}</span>
+      <textarea class="fi" id="ctr-tpl-input" rows="20" style="font-family:'SF Mono','Fira Code',monospace;font-size:.75rem">${esc(tpl)}</textarea>
+    </div>
+    <div class="divider"></div>
+    <div style="font-size:.8125rem;color:var(--ink-m)">
+      Logo &amp; Pay-to-Adresse werden aus den Rechnungseinstellungen übernommen (kein Duplikat).
+      <button type="button" class="btn btn--ghost btn--sm" id="ctr-open-inv-settings-btn" style="margin-left:.5rem">Rechnungseinstellungen öffnen</button>
+    </div>`;
+  $('ctr-open-inv-settings-btn').addEventListener('click', ()=>{ closeModal('ov-contract-settings'); openInvSettings(); });
+  openModal('ov-contract-settings');
+}
+$('ctr-settings-save-btn').addEventListener('click', ()=>{
+  const html=$('ctr-tpl-input')?.value||'';
+  saveContractTemplateObj(html);
+  closeModal('ov-contract-settings');
+  toast('Vertragsvorlage gespeichert.','ok');
+});
+$('ctr-settings-reset-btn').addEventListener('click', ()=>{
+  localStorage.removeItem(CONTRACT_TEMPLATE_KEY);
+  toast('Vorlage auf Standard zurückgesetzt.','ok');
+  openContractSettings();
+});
 
 // ── INVOICE SETTINGS (logo + company profile) ─────────────────────────
 let pendingLogo = null;  // staged logo (data URL) while the modal is open
