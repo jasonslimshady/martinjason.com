@@ -10,13 +10,23 @@ Die Video-Section auf der Startseite (`index.html`, `#video`) hat zwei
   Play-Button wird die Datei geladen und abgespielt (Loom-artiges Verhalten
   mit nativen Steuerelementen: Play/Pause, Scrubbing, Lautstärke, Vollbild).
   Die Wiedergabegeschwindigkeit wird automatisch auf den im Speed-Widget
-  hinterlegten Wert (`data-speed`, aktuell `1.2`) gesetzt.
+  hinterlegten Wert (`data-speed`, aktuell `1.25`) gesetzt.
 
 Aktuell zeigen **beide** testweise auf dieselbe Datei (`vsl.mp4`) — das
 hochgeladene Video ohne Ton. Sobald das echte VSL fertig ist, ersetze
 einfach `vsl.mp4` (und optional `vsl.webm`) durch die finale Version; der
 Loop-Hintergrund kann weiterhin ein kurzer Ausschnitt oder eine eigene
-kleine Datei sein.
+kleine Datei sein. Der Loop läuft dabei immer mit normaler Geschwindigkeit
+(1×) — nur das eigentliche VSL läuft mit dem hinterlegten `data-speed`.
+
+**Download-Schutz:** Der native „Herunterladen"-Button in den Video-Controls
+ist deaktiviert (`controlsList="nodownload"`) und Rechtsklick → „Video
+speichern unter…" ist blockiert. Das verhindert die bequemen Wege für
+normale Besucher, ist aber **kein echter Kopierschutz** — technisch versierte
+Besucher (Entwicklertools, Netzwerk-Tab, `curl`) können die Datei weiterhin
+laden, da der Browser sie zum Abspielen sowieso herunterladen muss. Echter
+Schutz bräuchte einen Streaming-Dienst mit DRM/signierten URLs (z. B. Vimeo
+privat, Mux, Cloudflare Stream).
 
 ## So bindest du dein Video ein
 
@@ -38,8 +48,8 @@ kleine Datei sein.
 3. **Länge im Speed-Widget:** Passe im `<section id="video">`-Block das
    `data-vsl-original-min`-Attribut auf `<span class="vsl__speed-original">`
    auf die echte Original-Länge (in Minuten) an — die angezeigte
-   „sped-up"-Länge (`25 min`) wird daraus automatisch berechnet
-   (`Original ÷ data-speed`, aktuell `1.2`).
+   „sped-up"-Länge (`24 min`) wird daraus automatisch berechnet
+   (`Original ÷ data-speed`, aktuell `1.25`).
 
 ## Empfehlungen für kleine Dateigröße
 - Auflösung: 1080p reicht; bei reinem Sprechervideo genügt oft 720p.
