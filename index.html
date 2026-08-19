@@ -462,6 +462,10 @@
     <section id="video" class="vsl-section">
       <div class="container vsl-wrap">
         <figure class="vsl reveal" data-vsl>
+          <video class="vsl__bg" autoplay muted loop playsinline preload="auto"
+                 aria-hidden="true" tabindex="-1" width="1280" height="720">
+            <source src="/videos/vsl.mp4" type="video/mp4">
+          </video>
           <video class="vsl__video" preload="none" playsinline
                  poster="/images/video-poster.svg" width="1280" height="720">
             <source data-src="/videos/vsl.webm" type="video/webm">
@@ -469,11 +473,28 @@
           </video>
           <button class="vsl__play" type="button" aria-label="Video abspielen">
             <span class="vsl__play-ring">
-              <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <svg width="38" height="38" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M8 5.14v13.72a1 1 0 0 0 1.54.84l10.5-6.86a1 1 0 0 0 0-1.68L9.54 4.3A1 1 0 0 0 8 5.14Z"/>
               </svg>
             </span>
-            <span class="vsl__play-label">In 90 Sekunden erklärt</span>
+            <div class="vsl__speed" data-vsl-speed data-speed="1.2">
+              <div class="vsl__speed-top">
+                <svg class="vsl__speed-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+                  <path d="m13.5 10.5 3-3"/>
+                  <path d="M4.6 15a9 9 0 1 1 14.8 0"/>
+                </svg>
+                <span class="vsl__speed-value">1.2×</span>
+              </div>
+              <div class="vsl__speed-divider" aria-hidden="true"></div>
+              <div class="vsl__speed-bottom">
+                <span class="vsl__speed-original" data-vsl-original-min="30">30 min</span>
+                <svg class="vsl__speed-bolt" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"/>
+                </svg>
+                <span class="vsl__speed-fast" data-vsl-fast-min>25 min</span>
+              </div>
+            </div>
           </button>
         </figure>
       </div>
@@ -876,8 +897,43 @@
     var fig = document.querySelector('[data-vsl]');
     if (!fig) return;
     var video = fig.querySelector('.vsl__video');
+    var bgVideo = fig.querySelector('.vsl__bg');
     var playBtn = fig.querySelector('.vsl__play');
     if (!video || !playBtn) return;
+
+    // Belt-and-suspenders: the native `autoplay` attribute usually starts
+    // the muted background loop on its own, but some browsers only honour
+    // autoplay once the element is actually in view / after a JS nudge.
+    if (bgVideo) {
+      var kick = function () {
+        var p = bgVideo.play();
+        if (p && typeof p.catch === 'function') p.catch(function () {});
+      };
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) kick();
+          });
+        }, { threshold: 0.1 });
+        io.observe(bgVideo);
+      } else {
+        kick();
+      }
+    }
+
+    // Speed widget: "1.2×" label + auto-computed sped-up length. Only the
+    // original length ever needs editing — the sped-up minutes follow it.
+    var speedWidget = fig.querySelector('[data-vsl-speed]');
+    var rate = parseFloat((speedWidget && speedWidget.getAttribute('data-speed')) || '1') || 1;
+    var originalEl = fig.querySelector('[data-vsl-original-min]');
+    var fastEl = fig.querySelector('[data-vsl-fast-min]');
+    if (originalEl && fastEl) {
+      var originalMin = parseFloat(originalEl.getAttribute('data-vsl-original-min'));
+      if (originalMin) {
+        fastEl.textContent = Math.round(originalMin / rate) + ' min';
+      }
+    }
+    video.playbackRate = rate;
 
     var loaded = false;
     function start() {
@@ -889,6 +945,7 @@
         }
         video.load();
         video.controls = true;
+        video.playbackRate = rate;
         loaded = true;
       }
       fig.classList.add('is-playing');
@@ -902,8 +959,17 @@
       }
     }
     playBtn.addEventListener('click', start);
+    // Re-assert the rate once real playback starts (some browsers reset it
+    // on load()) and cross-fade the poster/background loop out.
+    video.addEventListener('playing', function () {
+      video.playbackRate = rate;
+      fig.classList.add('is-active');
+    });
     // If the video ends, bring the poster/play affordance back.
-    video.addEventListener('ended', function () { fig.classList.remove('is-playing'); });
+    video.addEventListener('ended', function () {
+      fig.classList.remove('is-playing');
+      fig.classList.remove('is-active');
+    });
   })();
   </script>
 

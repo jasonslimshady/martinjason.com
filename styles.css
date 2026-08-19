@@ -829,6 +829,19 @@
   box-shadow: var(--glass-shadow-strong);
   border: 1px solid var(--color-border);
 }
+/* Silent, looping autoplay clip shown behind the play button — the "live"
+   thumbnail. Sits below .vsl__video and fades out once real playback starts. */
+.vsl__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+  z-index: 0;
+  transition: opacity var(--dur-base) var(--ease-apple);
+}
+.vsl.is-active .vsl__bg { opacity: 0; }
 .vsl__video {
   position: absolute;
   inset: 0;
@@ -836,7 +849,11 @@
   height: 100%;
   object-fit: cover;
   background: #000;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-apple);
 }
+.vsl.is-active .vsl__video { opacity: 1; }
 /* Play affordance — poster overlay (button fills the frame so the whole
    thumbnail is clickable, Loom-style) */
 .vsl__play {
@@ -844,6 +861,7 @@
   inset: 0;
   width: 100%;
   height: 100%;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -865,23 +883,59 @@
   transition: transform var(--dur-base) var(--ease-back),
               background var(--dur-fast) var(--ease-apple);
 }
-.vsl__play-ring svg { margin-left: 4px; } /* optically centre the triangle */
+.vsl__play-ring svg { transform: translateX(2px); } /* optically centre the triangle */
 .vsl__play:hover .vsl__play-ring {
   transform: scale(1.08);
   background: var(--color-accent);
 }
-.vsl__play-label {
-  font-size: 0.95rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--color-ink);
-  background: var(--glass-bg-strong);
-  -webkit-backdrop-filter: blur(10px);
-          backdrop-filter: blur(10px);
-  padding: 0.4rem 0.9rem;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--glass-border);
+/* Speed widget — replaces the old "In 90 Sekunden erklärt" pill: a dark
+   two-row card with the playback speed on top and original vs. sped-up
+   length underneath. */
+.vsl__speed {
+  display: flex;
+  flex-direction: column;
+  min-width: 190px;
+  background: rgba(10, 10, 10, 0.9);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 30px rgba(10, 10, 10, 0.28);
+  overflow: hidden;
 }
+.vsl__speed-top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  color: #fff;
+}
+.vsl__speed-icon { width: 20px; height: 20px; flex-shrink: 0; }
+.vsl__speed-value {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+.vsl__speed-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.16);
+}
+.vsl__speed-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.vsl__speed-original {
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 500;
+  text-decoration: line-through;
+}
+.vsl__speed-bolt { width: 13px; height: 13px; color: #ffce54; flex-shrink: 0; }
+.vsl__speed-fast { color: #fff; }
 /* Once playing: hide the overlay and let the native controls take over */
 .vsl.is-playing .vsl__play {
   opacity: 0;
@@ -1132,7 +1186,11 @@
 @media (max-width: 560px) {
   .problem__grid { grid-template-columns: 1fr; }
   .vsl__play-ring { width: 68px; height: 68px; }
-  .vsl__play-ring svg { width: 24px; height: 24px; }
+  .vsl__play-ring svg { width: 30px; height: 30px; transform: translateX(1.5px); }
+  .vsl__speed { min-width: 165px; }
+  .vsl__speed-top { padding: 0.5rem 0.85rem; gap: 0.4rem; }
+  .vsl__speed-value { font-size: 1.1rem; }
+  .vsl__speed-bottom { padding: 0.4rem 0.85rem; font-size: 0.78rem; gap: 0.35rem; }
 }
 
 /* ── Referenzen / logo bar CTA ────────────────────── */
