@@ -463,10 +463,12 @@
       <div class="container vsl-wrap">
         <figure class="vsl reveal" data-vsl>
           <video class="vsl__bg" autoplay muted loop playsinline preload="auto"
+                 disablePictureInPicture disableRemotePlayback controlsList="nodownload noremoteplayback nofullscreen"
                  aria-hidden="true" tabindex="-1" width="1280" height="720">
             <source src="/videos/vsl.mp4" type="video/mp4">
           </video>
           <video class="vsl__video" preload="none" playsinline
+                 disablePictureInPicture disableRemotePlayback controlsList="nodownload noremoteplayback"
                  poster="/images/video-poster.svg" width="1280" height="720">
             <source data-src="/videos/vsl.webm" type="video/webm">
             <source data-src="/videos/vsl.mp4" type="video/mp4">
@@ -477,14 +479,13 @@
                 <path d="M8 5.14v13.72a1 1 0 0 0 1.54.84l10.5-6.86a1 1 0 0 0 0-1.68L9.54 4.3A1 1 0 0 0 8 5.14Z"/>
               </svg>
             </span>
-            <div class="vsl__speed" data-vsl-speed data-speed="1.2">
+            <div class="vsl__speed" data-vsl-speed data-speed="1.25">
               <div class="vsl__speed-top">
-                <svg class="vsl__speed-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
-                  <path d="m13.5 10.5 3-3"/>
-                  <path d="M4.6 15a9 9 0 1 1 14.8 0"/>
+                <svg class="vsl__speed-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="m12 14 4-4"/>
+                  <path d="M3.34 19a10 10 0 1 1 17.32 0"/>
                 </svg>
-                <span class="vsl__speed-value">1.2×</span>
+                <span class="vsl__speed-value">1.25×</span>
               </div>
               <div class="vsl__speed-divider" aria-hidden="true"></div>
               <div class="vsl__speed-bottom">
@@ -492,7 +493,7 @@
                 <svg class="vsl__speed-bolt" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"/>
                 </svg>
-                <span class="vsl__speed-fast" data-vsl-fast-min>25 min</span>
+                <span class="vsl__speed-fast" data-vsl-fast-min>24 min</span>
               </div>
             </div>
           </button>
@@ -904,8 +905,11 @@
     // Belt-and-suspenders: the native `autoplay` attribute usually starts
     // the muted background loop on its own, but some browsers only honour
     // autoplay once the element is actually in view / after a JS nudge.
+    // Always plain 1x — only the real VSL plays at the sped-up rate.
     if (bgVideo) {
+      bgVideo.playbackRate = 1;
       var kick = function () {
+        bgVideo.playbackRate = 1;
         var p = bgVideo.play();
         if (p && typeof p.catch === 'function') p.catch(function () {});
       };
@@ -921,7 +925,15 @@
       }
     }
 
-    // Speed widget: "1.2×" label + auto-computed sped-up length. Only the
+    // No first-party download path: the controls' download button is
+    // hidden via controlsList, and this blocks the right-click "save
+    // video as" menu too. (A visitor with devtools can still reach the
+    // raw file — that's inherent to any self-hosted <video>.)
+    [video, bgVideo].forEach(function (v) {
+      if (v) v.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+    });
+
+    // Speed widget: speed label + auto-computed sped-up length. Only the
     // original length ever needs editing — the sped-up minutes follow it.
     var speedWidget = fig.querySelector('[data-vsl-speed]');
     var rate = parseFloat((speedWidget && speedWidget.getAttribute('data-speed')) || '1') || 1;
@@ -965,11 +977,9 @@
       video.playbackRate = rate;
       fig.classList.add('is-active');
     });
-    // If the video ends, bring the poster/play affordance back.
-    video.addEventListener('ended', function () {
-      fig.classList.remove('is-playing');
-      fig.classList.remove('is-active');
-    });
+    // When the video ends, just leave it on its last frame with the
+    // native controls still visible — do not bring the play affordance
+    // (or the background loop) back.
   })();
   </script>
 
