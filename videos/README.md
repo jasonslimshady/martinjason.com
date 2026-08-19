@@ -1,23 +1,37 @@
-# Video-Ordner — selbst-gehostetes VSL
+# Video-Ordner — VSL (Hintergrund-Loop lokal, volles Video via Cloudflare R2)
 
 Die Video-Section auf der Startseite (`index.html`, `#video`) hat zwei
 `<video>`-Elemente übereinander:
 
-- **`.vsl__bg`** — stummer, endlos loopender Clip, der sofort autoplayt und
-  als „lebendiges" Thumbnail hinter dem Play-Button liegt.
-- **`.vsl__video`** — das eigentliche VSL. **Pagespeed-optimiert**: Beim
+- **`.vsl__bg`** — stummer, endlos loopender Clip aus **diesem Ordner**
+  (`/videos/vsl.mp4`), der sofort autoplayt und als „lebendiges" Thumbnail
+  hinter dem Play-Button liegt. Läuft immer mit normaler Geschwindigkeit
+  (1×), egal welchen `data-speed` das eigentliche VSL nutzt.
+- **`.vsl__video`** — das eigentliche VSL, eingebunden per **externer URL**
+  (aktuell ein Cloudflare-R2-Bucket, siehe unten) statt einer lokalen Datei —
+  die volle Datei war zu groß fürs Repo. **Pagespeed-optimiert**: Beim
   Seitenaufruf wird **kein** Byte davon geladen. Erst beim Klick auf den
   Play-Button wird die Datei geladen und abgespielt (Loom-artiges Verhalten
   mit nativen Steuerelementen: Play/Pause, Scrubbing, Lautstärke, Vollbild).
   Die Wiedergabegeschwindigkeit wird automatisch auf den im Speed-Widget
   hinterlegten Wert (`data-speed`, aktuell `1.25`) gesetzt.
 
-Aktuell zeigen **beide** testweise auf dieselbe Datei (`vsl.mp4`) — das
-hochgeladene Video ohne Ton. Sobald das echte VSL fertig ist, ersetze
-einfach `vsl.mp4` (und optional `vsl.webm`) durch die finale Version; der
-Loop-Hintergrund kann weiterhin ein kurzer Ausschnitt oder eine eigene
-kleine Datei sein. Der Loop läuft dabei immer mit normaler Geschwindigkeit
-(1×) — nur das eigentliche VSL läuft mit dem hinterlegten `data-speed`.
+## Externes Hosting (Cloudflare R2)
+
+Das volle VSL liegt in einem öffentlichen R2-Bucket:
+`https://pub-091972a94ee1449e9ff66fd286474ac0.r2.dev/vsl-full.mp4`
+
+Referenziert wird das direkt im `data-src` der `<source>` in
+`<video class="vsl__video">` in `index.html` — beim Klick auf Play
+promotet das Player-Skript `data-src` → `src` genau wie bei einer lokalen
+Datei, nur zeigt die URL jetzt auf R2 statt auf `/videos/`.
+
+**Neue Datei hochladen:** Lade die neue Version in denselben (oder einen
+neuen) R2-Bucket hoch und aktualisiere die URL im `data-src`-Attribut.
+Achte darauf, dass der Bucket weiterhin öffentlich lesbar ist und
+Byte-Range-Requests unterstützt (nötig fürs Scrubbing/Seeking — R2 kann das
+nativ). Ein Video-Objekt-Wechsel braucht keinen Code-Change im JS, nur die
+neue URL im HTML.
 
 **Download-Schutz:** Der native „Herunterladen"-Button in den Video-Controls
 ist deaktiviert (`controlsList="nodownload"`) und Rechtsklick → „Video
@@ -30,22 +44,24 @@ privat, Mux, Cloudflare Stream).
 
 ## So bindest du dein Video ein
 
-1. Lege deine Videodatei(en) in **diesen Ordner** (`/videos/`):
-   - `vsl.mp4`  — Pflicht (H.264/AAC, breite Kompatibilität)
-   - `vsl.webm` — optional, empfohlen (VP9/AV1, kleiner → schneller). Wird
-     bevorzugt, falls vorhanden; sonst fällt der Player automatisch auf `.mp4` zurück.
+1. **Hintergrund-Loop (`.vsl__bg`):** Lege die Datei als `/videos/vsl.mp4`
+   in diesen Ordner. Behalte den Dateinamen bei, dann musst du **nichts im
+   Code ändern**. Kurz halten (paar Sekunden reichen, sie loopt) — sie lädt
+   sofort beim Seitenaufruf.
 
-   Behalte die Dateinamen bei, dann musst du **nichts im Code ändern**.
-   Andernfalls passe die `src`- bzw. `data-src`-Attribute im
-   `<section id="video">`-Block in `index.html` an.
+2. **Volles VSL (`.vsl__video`):** Liegt aktuell auf Cloudflare R2 (siehe
+   oben) statt lokal, weil die Datei fürs Repo zu groß ist. Neue Version →
+   R2-URL im `data-src` in `index.html` aktualisieren (siehe „Externes
+   Hosting" oben). Passt die Datei doch mal ins Repo, kannst du stattdessen
+   wieder `/videos/vsl.mp4` (+ optional `vsl.webm`) referenzieren.
 
-2. **Poster (Thumbnail):** `/images/video-poster.svg` wird nur gezeigt, falls
+3. **Poster (Thumbnail):** `/images/video-poster.svg` wird nur gezeigt, falls
    der Autoplay-Loop (`.vsl__bg`) aus irgendeinem Grund nicht startet (z. B.
    sehr restriktive Browser-Einstellungen). Willst du trotzdem ein Standbild
    pflegen, ersetze es durch ein echtes Bild (JPG/AVIF/WebP, 1280×720) und
    passe das `poster="..."`-Attribut im `<video class="vsl__video">`-Tag an.
 
-3. **Länge im Speed-Widget:** Passe im `<section id="video">`-Block das
+4. **Länge im Speed-Widget:** Passe im `<section id="video">`-Block das
    `data-vsl-original-min`-Attribut auf `<span class="vsl__speed-original">`
    auf die echte Original-Länge (in Minuten) an — die angezeigte
    „sped-up"-Länge (`24 min`) wird daraus automatisch berechnet
