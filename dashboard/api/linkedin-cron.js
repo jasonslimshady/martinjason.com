@@ -68,7 +68,8 @@ export default async function handler(req, res) {
         const anyOk = results.some(r => r.ok);
         if (anyOk) {
           const firstUrn = results.find(r => r.ok && r.urn)?.urn;
-          const patch = { status: 'posted', posted_at: post.posted_at || nowIso, last_publish_error: null };
+          const fcErrors = results.filter(r => r.firstCommentError).map(r => `${r.target}: ${r.firstCommentError}`).join(' | ');
+          const patch = { status: 'posted', posted_at: post.posted_at || nowIso, last_publish_error: fcErrors || null };
           if (firstUrn) patch.linkedin_post_urn = firstUrn;
           let patchRes = await fetch(`${SUPABASE_URL}/rest/v1/posts?id=eq.${encodeURIComponent(post.id)}`, {
             method: 'PATCH',
