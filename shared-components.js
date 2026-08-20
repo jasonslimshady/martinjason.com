@@ -5,6 +5,12 @@
    ===================================================================== */
 (function () {
 
+  // NOTE: HEADER_HTML / FOOTER_HTML below are also baked statically into
+  // every page's <header class="nav-wrap"> and <footer class="footer">
+  // markup (server-rendered, no JS required) so crawlers that don't execute
+  // JavaScript (Bing, LinkedIn, most LLM bots) still see real nav/footer
+  // links. Keep the two copies in sync when editing links here — see
+  // /work on the homepage (id="work") and /#loesung, /booking as targets.
   var HEADER_HTML =
     '<nav class="nav glass" aria-label="Hauptnavigation">' +
     '  <a class="nav__brand" href="/" aria-label="Jason Martin — Startseite">' +
@@ -14,7 +20,7 @@
     '  <ul class="nav__links">' +
     '    <li><a href="/#problem">Problem</a></li>' +
     '    <li><a href="/#loesung">Lösung</a></li>' +
-    '    <li><a href="/#prozess">Prozess</a></li>' +
+    '    <li><a href="/#work">Galerien</a></li>' +
     '    <li><a href="/#faq">FAQ</a></li>' +
     '    <li><a href="/#about">Über mich</a></li>' +
     '    <li><a href="/blog">Blog</a></li>' +
@@ -33,11 +39,11 @@
     '    <p>AI Product Gallery Design</p>' +
     '  </div>' +
     '  <div class="footer__links">' +
-    '    <a href="/#services">Leistungen</a>' +
+    '    <a href="/#loesung">Leistungen</a>' +
     '    <a href="/#work">Galerien</a>' +
     '    <a href="/blog">Blog</a>' +
     '    <a href="/#about">Über mich</a>' +
-    '    <a href="/#contact">Kontakt</a>' +
+    '    <a href="/booking">Kontakt</a>' +
     '  </div>' +
     '  <div class="footer__legal">' +
     '    <a href="/impressum">Impressum</a>' +
@@ -46,11 +52,14 @@
     '  </div>' +
     '</div>';
 
+  // Guard: header/footer markup is now server-rendered statically in the
+  // HTML (see comment above), so only inject here if that markup is
+  // somehow missing — avoids double-rendering the nav/footer.
   var header = document.querySelector('header.nav-wrap');
-  if (header) header.innerHTML = HEADER_HTML;
+  if (header && !header.innerHTML.trim()) header.innerHTML = HEADER_HTML;
 
   var footer = document.querySelector('footer.footer');
-  if (footer) footer.innerHTML = FOOTER_HTML;
+  if (footer && !footer.innerHTML.trim()) footer.innerHTML = FOOTER_HTML;
 
   // ── Global article sections ──────────────────────────────────────────
   // Injected into every blog article page via slot divs.
