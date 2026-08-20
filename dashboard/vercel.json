@@ -12,6 +12,6 @@
     }
   ],
   "crons": [
-    { "path": "/api/linkedin-cron", "schedule": "*/15 * * * *" }
+    { "path": "/api/linkedin-cron", "schedule": "0 3 * * *" }
   ]
 }

@@ -23,10 +23,13 @@
 //       so the dashboard can surface it, instead of retrying forever
 //       silently
 //
-//  NOTE: Vercel's Hobby plan only runs cron jobs once per day; scheduled
-//  posts will publish up to ~24h late on that plan. Pro plan allows
-//  per-minute schedules — adjust vercel.json → crons[].schedule to match
-//  whatever plan this project is on.
+//  NOTE: Vercel's Hobby (free) plan only runs cron jobs once per day, so
+//  vercel.json's own "crons" entry (0 3 * * *) is just a once-daily safety
+//  net. Real scheduling precision comes from an external pinger — e.g. a
+//  free cron-job.org job hitting this same URL every 5-15 minutes with
+//  header "Authorization: Bearer <CRON_SECRET>". Both can run at once:
+//  this endpoint is idempotent (a post only publishes once, since it's
+//  no longer status='approved' after the first successful run).
 // ============================================================
 
 import { SUPABASE_URL, sbHeaders, publishToLinkedIn, nextOccurrence } from './_lib/linkedin.js';
