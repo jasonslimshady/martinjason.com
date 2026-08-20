@@ -638,6 +638,31 @@ CREATE POLICY "Owner delete contract PDFs"
 
 
 -- ============================================================
+--  TABLE: seo_dismissed_opportunities
+--  Dismissed SEO opportunity cards from the SEO panel (Search
+--  Console) — a card's dismissed state is keyed by a deterministic
+--  string like "quickwin:shopify conversion optimization" so it
+--  reliably stays hidden across reloads/devices. Same owner-only
+--  RLS pattern as every other table — run standalone, safe to
+--  re-run.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS seo_dismissed_opportunities (
+  id               UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
+  opportunity_key  TEXT        NOT NULL UNIQUE,
+  dismissed_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_seo_dismissed_opportunities_key ON seo_dismissed_opportunities(opportunity_key);
+
+ALTER TABLE seo_dismissed_opportunities ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Owner only" ON seo_dismissed_opportunities;
+CREATE POLICY "Owner only" ON seo_dismissed_opportunities FOR ALL TO authenticated
+  USING ((auth.jwt() ->> 'email') = 'jasonmartinde@gmail.com')
+  WITH CHECK ((auth.jwt() ->> 'email') = 'jasonmartinde@gmail.com');
+
+
+-- ============================================================
 --  DONE.
 --  Next: copy your Supabase Project URL and anon key from
 --  Settings → API and keep them ready for the dashboard config.

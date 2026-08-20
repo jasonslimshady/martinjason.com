@@ -130,6 +130,21 @@
     .tag--red{background:var(--red-t);color:var(--red)} .tag--blue{background:var(--accent-t);color:var(--accent)}
     .tag--purple{background:var(--purple-t);color:var(--purple)} .tag--muted{background:var(--surface-2);color:var(--ink-m)}
     .tag--teal{background:rgba(0,184,169,.14);color:#0a8f83}
+    /* ── SEO panel ── */
+    .seo-kpi-delta{display:inline-flex;align-items:center;gap:.1875rem;font-size:.75rem;font-weight:600}
+    .seo-kpi-delta.up{color:#1a8c3a} .seo-kpi-delta.down{color:var(--red)} .seo-kpi-delta.flat{color:var(--ink-s)}
+    .seo-metric-btn{padding:.375rem .875rem;border-radius:var(--r-pill);font-size:.8125rem;font-weight:500;background:var(--glass);color:var(--ink-m);border:1px solid var(--glass-b);cursor:pointer;transition:all var(--fast)}
+    .seo-metric-btn.active{background:rgba(10,10,10,.72);color:#fff;border-color:rgba(255,255,255,.14)}
+    .seo-opp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:.75rem}
+    .seo-opp-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:1rem 1.125rem;display:flex;flex-direction:column;gap:.5rem}
+    .seo-opp-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin:.25rem 0}
+    .seo-opp-metrics div{text-align:center}
+    .seo-opp-metrics .v{font-size:.9375rem;font-weight:700;letter-spacing:-.01em}
+    .seo-opp-metrics .l{font-size:.625rem;color:var(--ink-s);text-transform:uppercase;letter-spacing:.04em}
+    .seo-filter-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.875rem}
+    .seo-link{color:var(--accent);text-decoration:none} .seo-link:hover{text-decoration:underline}
+    .seo-clickable-row{cursor:pointer}
+    .seo-clickable-row:hover{background:var(--surface-2)}
     /* Inline, editable status pill in the invoice list — looks like a .tag but
        is a real <select> so the status can be changed straight from the list. */
     .inv-status-sel{-webkit-appearance:none;appearance:none;border:none;outline:none;cursor:pointer;line-height:1.2;padding-right:1.15rem;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'><path d='M1 2.5L4 5.5L7 2.5' fill='none' stroke='%23888' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'/></svg>");background-repeat:no-repeat;background-position:right .4rem center}
@@ -658,6 +673,9 @@
     <button class="nav-item" data-panel="klaviyo">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="3.5" width="13" height="9" rx="1.5"/><path d="M1.5 5.5l6.5 4 6.5-4"/></svg>Klaviyo
     </button>
+    <button class="nav-item" data-panel="seo">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="5.5"/><path d="M11 11l3.5 3.5"/></svg>SEO
+    </button>
     <div class="sb-spacer"></div>
     <button class="nav-item" id="btn-logout" title="Abmelden">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2H3.5A1.5 1.5 0 0 0 2 3.5v9A1.5 1.5 0 0 0 3.5 14H6"/><path d="M10.5 11.5 14 8l-3.5-3.5M14 8H6"/></svg>Abmelden
@@ -1019,7 +1037,55 @@
         <div id="li-stats-list"></div>
       </div>
     </section>
+
+    <!-- SEO PANEL (Google Search Console) -->
+    <section class="panel" id="panel-seo">
+      <div class="sec-hd" style="align-items:flex-start;flex-wrap:wrap;gap:.75rem">
+        <div>
+          <span class="sec-ttl">SEO</span>
+          <p style="margin:.25rem 0 0;font-size:.8125rem;color:var(--ink-m);max-width:520px">Organische Suchperformance und Chancen aus der Google Search Console.</p>
+        </div>
+        <div id="seo-toolbar" style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap" hidden>
+          <select class="fi" id="seo-property-sel" style="width:220px;padding:.375rem .625rem;font-size:.8125rem"></select>
+          <div class="seo-filter-row" style="margin:0">
+            <button class="ga-range-btn" data-seo-range="7">Letzte 7 Tage</button>
+            <button class="ga-range-btn active" data-seo-range="28">Letzte 28 Tage</button>
+            <button class="ga-range-btn" data-seo-range="3m">Letzte 3 Monate</button>
+            <button class="ga-range-btn" data-seo-range="6m">Letzte 6 Monate</button>
+          </div>
+          <input type="date" class="fi" id="seo-from" style="width:140px;font-size:.8125rem;padding:.375rem .625rem" />
+          <span style="color:var(--ink-s);font-size:.875rem">–</span>
+          <input type="date" class="fi" id="seo-to" style="width:140px;font-size:.8125rem;padding:.375rem .625rem" />
+          <button class="btn btn--ghost btn--sm" id="seo-custom-btn">Anwenden</button>
+        </div>
+      </div>
+      <p id="seo-range-lbl" style="margin:0 0 1rem;font-size:.75rem;color:var(--ink-s)" hidden></p>
+
+      <div id="seo-content">
+        <div class="ga-auth-wrap">
+          <div style="font-size:2.5rem;line-height:1">🔎</div>
+          <p style="font-weight:700;font-size:1.125rem;margin:0;letter-spacing:-.02em">Google Search Console verbinden</p>
+          <p style="color:var(--ink-m);margin:0;font-size:.9375rem;text-align:center;max-width:360px;line-height:1.5">Verbinde dein Google Search Console Konto, um organische Suchperformance, Keywords, Seiten und SEO-Chancen zu sehen.</p>
+          <button class="ga-connect-btn" id="seo-connect-btn">
+            <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#4285F4" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.4-.4-3.5z"/><path fill="#34A853" d="M6.3 14.7l6.6 4.8C14.5 16 19 12 24 12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 16.2 4 9.6 8.3 6.3 14.7z"/><path fill="#FBBC05" d="M24 44c5.2 0 9.9-1.9 13.5-5l-6.2-5.2C29.4 35.6 26.8 36 24 36c-5.2 0-9.6-3.3-11.3-8H6.2C9.5 35.6 16.2 44 24 44z"/><path fill="#EA4335" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.8l6.2 5.2C40.6 36.4 44 30.7 44 24c0-1.2-.1-2.4-.4-3.5z"/></svg>
+            Google Search Console verbinden
+          </button>
+          <p style="font-size:.75rem;color:var(--ink-s)">Nur du siehst diese Daten — kein Dritter hat Zugriff.</p>
+        </div>
+      </div>
+    </section>
   </main>
+</div>
+
+<!-- SEO QUERY/PAGE DETAIL MODAL -->
+<div class="overlay" id="ov-seo-detail">
+  <div class="modal modal--lg" style="max-height:88vh;display:flex;flex-direction:column">
+    <div class="modal-hd" style="flex-shrink:0">
+      <span class="modal-ttl" id="seo-detail-title">Detail</span>
+      <button class="modal-x" onclick="closeModal('ov-seo-detail')">✕</button>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:1.375rem" id="seo-detail-body"></div>
+  </div>
 </div>
 
 <!-- CLIENT DETAIL DRAWER -->
@@ -1616,7 +1682,7 @@ function saveCompanySettings(obj){
 let companySettings = loadCompanySettings();
 
 // Valid panel ids (titles/subs were dead code since the header bar was removed)
-const PANELS = { analytics:true, crm:true, time:true, invoices:true, quotes:true, contracts:true, klaviyo:true, linkedin:true };
+const PANELS = { analytics:true, crm:true, time:true, invoices:true, quotes:true, contracts:true, klaviyo:true, linkedin:true, seo:true };
 const STAGE_CFG = [
   { id:'new_lead',    label:'Neuer Lead',  color:'#8A8A92', tag:'tag--muted' },
   { id:'contacted',   label:'Kontaktiert', color:'#0A84FF', tag:'tag--blue' },
@@ -1762,6 +1828,10 @@ function switchPanel(id) {
     $('klv-from').value = start;
     $('klv-to').value   = end;
     loadKlaviyo(start, end);
+  }
+  if (id === 'seo' && !seoLoaded) {
+    seoLoaded = true;
+    seoInit();
   }
 }
 
@@ -7028,7 +7098,7 @@ async function gscApiFetch(url, init = {}) {
   if (res.status === 401) {
     try { await gscFreshToken(); res = await call(); } catch(_) {}
   }
-  if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.error?.message || res.statusText); }
+  if (!res.ok) { const e = await res.json().catch(()=>({})); const err = new Error(e.error?.message || res.statusText); err.status = res.status; throw err; }
   return res.json();
 }
 
@@ -7041,10 +7111,703 @@ async function gscListSites() {
   return sites;
 }
 
-// Exposed for manual console testing — no dashboard UI wired up yet.
+// Exposed for manual console testing.
 window.gscConnect = gscConnect;
 window.gscListSites = gscListSites;
 window.gscFreshToken = gscFreshToken;
+
+// ── SEO DASHBOARD (Google Search Console UI) ────────────────────────────
+// Built entirely on top of the gsc* auth helpers above — no OAuth logic
+// lives below this point. One fetch per property/date-range change is
+// cached in `seoData`; every UI interaction (sort, filter, chart metric,
+// opportunity filters) re-renders from that cache without calling the
+// Search Console API again.
+let seoLoaded = false;
+let seoProperties = [];
+let seoProperty = localStorage.getItem('seo_property') || '';
+let seoRangeKey = localStorage.getItem('seo_range') || '28';
+let seoCustomFrom = '', seoCustomTo = '';
+let seoData = null;
+let seoOpportunities = [];
+let seoChartMetric = 'clicks';
+let seoDismissed = new Set();
+let seoLastSync = null;
+let seoSort = { queries:{col:'clicks',dir:'desc'}, pages:{col:'clicks',dir:'desc'} };
+let seoFilterText = { queries:'', pages:'' };
+let seoShowAll = { queries:false, pages:false };
+let seoOppTypeFilter = 'all';
+let seoOppPriorityFilter = 'all';
+
+function fmtInt(v){ return new Intl.NumberFormat('de-DE').format(Math.round(v||0)); }
+function fmtPct(v){ return ((v||0)*100).toFixed(2)+'%'; }
+function fmtPos(v){ return (v||0).toFixed(1); }
+
+function seoISORange(days){
+  // Search Console reporting typically lags 1–3 days behind real time —
+  // anchor "today" 3 days back so the requested range doesn't hit the gap.
+  const lagDays = 3;
+  const end = new Date(Date.now() - lagDays*86400000);
+  const start = new Date(end.getTime() - (days-1)*86400000);
+  return { start: start.toISOString().slice(0,10), end: end.toISOString().slice(0,10) };
+}
+function seoPrevRange(start,end){
+  const s=new Date(start), e=new Date(end);
+  const days = Math.round((e-s)/86400000)+1;
+  const prevEnd = new Date(s.getTime()-86400000);
+  const prevStart = new Date(prevEnd.getTime()-(days-1)*86400000);
+  return { start: prevStart.toISOString().slice(0,10), end: prevEnd.toISOString().slice(0,10) };
+}
+function seoCurrentRange(){
+  if(seoRangeKey==='custom' && seoCustomFrom && seoCustomTo) return { start:seoCustomFrom, end:seoCustomTo };
+  const days = {'7':7,'28':28,'3m':90,'6m':182}[seoRangeKey] || 28;
+  return seoISORange(days);
+}
+function seoRangeLabel(){
+  const {start,end} = seoCurrentRange();
+  const {start:ps,end:pe} = seoPrevRange(start,end);
+  const days = Math.round((new Date(end)-new Date(start))/86400000)+1;
+  let lbl = `${fmtDate(start)} – ${fmtDate(end)} (${days} Tage) · Vergleich: vorherige ${days} Tage (${fmtDate(ps)} – ${fmtDate(pe)})`;
+  if(seoLastSync) lbl += ` · Zuletzt aktualisiert: ${seoLastSync.toLocaleTimeString('de-DE',{timeZone:TZ,hour:'2-digit',minute:'2-digit'})} — Search-Console-Daten sind nicht in Echtzeit, i.d.R. 1–3 Tage verzögert.`;
+  return lbl;
+}
+function seoShortenUrl(url){ try{ const u=new URL(url); return (u.pathname||'/')+(u.search||''); }catch(_){ return url; } }
+function seoPropLabel(p){ return String(p||'').replace(/^sc-domain:/,'').replace(/^https?:\/\//,'').replace(/\/$/,''); }
+
+const SEO_CONNECT_SVG = `<svg width="18" height="18" viewBox="0 0 48 48"><path fill="#4285F4" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.4-.4-3.5z"/><path fill="#34A853" d="M6.3 14.7l6.6 4.8C14.5 16 19 12 24 12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 16.2 4 9.6 8.3 6.3 14.7z"/><path fill="#FBBC05" d="M24 44c5.2 0 9.9-1.9 13.5-5l-6.2-5.2C29.4 35.6 26.8 36 24 36c-5.2 0-9.6-3.3-11.3-8H6.2C9.5 35.6 16.2 44 24 44z"/><path fill="#EA4335" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.8l6.2 5.2C40.6 36.4 44 30.7 44 24c0-1.2-.1-2.4-.4-3.5z"/></svg>`;
+
+function seoConnectHTML(msg){
+  return `<div class="ga-auth-wrap">
+    <div style="font-size:2.5rem;line-height:1">🔎</div>
+    <p style="font-weight:700;font-size:1.125rem;margin:0;letter-spacing:-.02em">Google Search Console verbinden</p>
+    <p style="color:var(--ink-m);margin:0;font-size:.9375rem;text-align:center;max-width:360px;line-height:1.5">${esc(msg||'Verbinde dein Google Search Console Konto, um organische Suchperformance, Keywords, Seiten und SEO-Chancen zu sehen.')}</p>
+    <button class="ga-connect-btn" id="seo-connect-btn2">${SEO_CONNECT_SVG}Google Search Console verbinden</button>
+    <p style="font-size:.75rem;color:var(--ink-s)">Nur du siehst diese Daten — kein Dritter hat Zugriff.</p>
+  </div>`;
+}
+function seoSetContentLoading(msg){
+  $('seo-content').innerHTML = `<div class="ga-auth-wrap"><div class="spin"></div><p style="color:var(--ink-m);margin:0">${esc(msg)}</p></div>`;
+}
+function seoShowConnect(){
+  $('seo-toolbar').hidden = true; $('seo-range-lbl').hidden = true;
+  $('seo-content').innerHTML = seoConnectHTML();
+  $('seo-connect-btn2').addEventListener('click', seoDoConnect);
+}
+function seoShowReauth(){
+  $('seo-toolbar').hidden = true; $('seo-range-lbl').hidden = true;
+  $('seo-content').innerHTML = seoConnectHTML('Die Google Search Console Verbindung ist abgelaufen. Bitte einmal neu verbinden.');
+  $('seo-connect-btn2').addEventListener('click', seoDoConnect);
+}
+function seoShowNoProperties(){
+  $('seo-toolbar').hidden = true; $('seo-range-lbl').hidden = true;
+  $('seo-content').innerHTML = `<div class="ga-auth-wrap">
+    <p style="font-weight:700;font-size:1.0625rem">Keine Search Console Properties gefunden</p>
+    <p style="color:var(--ink-m);text-align:center;max-width:380px">Das verbundene Google-Konto hat noch keinen Zugriff auf eine Search Console Property. Property in der <a href="https://search.google.com/search-console" target="_blank" rel="noopener" class="seo-link">Google Search Console</a> hinzufügen und danach neu laden.</p>
+  </div>`;
+}
+
+async function seoDoConnect(){
+  try{
+    await gscConnect();
+    toast('Google Search Console verbunden.','ok');
+    await seoAfterConnect();
+  }catch(e){ toast('Verbindung fehlgeschlagen: '+e.message,'err'); }
+}
+$('seo-connect-btn').addEventListener('click', seoDoConnect);
+
+async function seoInit(){
+  try{
+    await gscFreshToken();
+    await seoAfterConnect();
+  }catch(_){
+    seoShowConnect();
+  }
+}
+
+async function seoAfterConnect(){
+  $('seo-toolbar').hidden = false;
+  $('seo-range-lbl').hidden = false;
+  await seoLoadDismissed();
+  await seoLoadProperties();
+}
+
+async function seoLoadProperties(){
+  seoSetContentLoading('Search Console Properties werden geladen…');
+  try{
+    const sites = await gscListSites();
+    seoProperties = sites.map(s=>s.siteUrl);
+    if(!seoProperties.length){ seoShowNoProperties(); return; }
+    if(!seoProperty || !seoProperties.includes(seoProperty)) seoProperty = seoProperties[0];
+    localStorage.setItem('seo_property', seoProperty);
+    $('seo-property-sel').innerHTML = seoProperties.map(p=>`<option value="${esc(p)}" ${p===seoProperty?'selected':''}>${esc(seoPropLabel(p))}</option>`).join('');
+    seoSyncRangeButtons();
+    await seoLoadData();
+  }catch(e){ seoHandleLoadError(e); }
+}
+
+function seoSyncRangeButtons(){
+  document.querySelectorAll('#seo-toolbar .ga-range-btn[data-seo-range]').forEach(b=>{
+    b.classList.toggle('active', b.dataset.seoRange===seoRangeKey);
+  });
+}
+
+$('seo-property-sel').addEventListener('change', async e=>{
+  seoProperty = e.target.value;
+  localStorage.setItem('seo_property', seoProperty);
+  await seoLoadData();
+});
+document.querySelectorAll('#seo-toolbar .ga-range-btn[data-seo-range]').forEach(btn=>{
+  btn.addEventListener('click', async ()=>{
+    document.querySelectorAll('#seo-toolbar .ga-range-btn[data-seo-range]').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    seoRangeKey = btn.dataset.seoRange;
+    localStorage.setItem('seo_range', seoRangeKey);
+    if(seoProperty) await seoLoadData();
+  });
+});
+$('seo-custom-btn').addEventListener('click', async ()=>{
+  const from=$('seo-from').value, to=$('seo-to').value;
+  if(!from||!to){ toast('Bitte beide Daten auswählen.','err'); return; }
+  if(from>to){ toast('Von-Datum muss vor Bis-Datum liegen.','err'); return; }
+  document.querySelectorAll('#seo-toolbar .ga-range-btn[data-seo-range]').forEach(b=>b.classList.remove('active'));
+  seoRangeKey='custom'; seoCustomFrom=from; seoCustomTo=to;
+  localStorage.setItem('seo_range','custom');
+  if(seoProperty) await seoLoadData();
+});
+
+function seoQuery(params){
+  const body = { startDate:params.start, endDate:params.end, dimensions:params.dimensions, rowLimit:params.rowLimit||1000 };
+  if(params.filters) body.dimensionFilterGroups = [{ filters: params.filters }];
+  return gscApiFetch(`https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(seoProperty)}/searchAnalytics/query`, {
+    method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
+  });
+}
+function seoRow(r, key){ return { [key]: r.keys[0], clicks:r.clicks||0, impressions:r.impressions||0, ctr:r.ctr||0, position:r.position||0 }; }
+
+async function seoLoadData(){
+  if(!seoProperty) return;
+  seoSetContentLoading('Search-Console-Daten werden geladen…');
+  const {start,end} = seoCurrentRange();
+  const {start:pStart,end:pEnd} = seoPrevRange(start,end);
+  $('seo-from').value = start; $('seo-to').value = end;
+  try{
+    const [totalsCur, totalsPrev, dateSeries, queriesCur, queriesPrev, pagesCur, pagesPrev, devices, countries, queryPage] = await Promise.all([
+      seoQuery({start,end,dimensions:[]}),
+      seoQuery({start:pStart,end:pEnd,dimensions:[]}),
+      seoQuery({start,end,dimensions:['date'],rowLimit:1000}),
+      seoQuery({start,end,dimensions:['query'],rowLimit:1000}),
+      seoQuery({start:pStart,end:pEnd,dimensions:['query'],rowLimit:1000}),
+      seoQuery({start,end,dimensions:['page'],rowLimit:1000}),
+      seoQuery({start:pStart,end:pEnd,dimensions:['page'],rowLimit:1000}),
+      seoQuery({start,end,dimensions:['device'],rowLimit:10}),
+      seoQuery({start,end,dimensions:['country'],rowLimit:250}),
+      seoQuery({start,end,dimensions:['query','page'],rowLimit:5000}),
+    ]);
+    seoData = {
+      range:{start,end}, prevRange:{start:pStart,end:pEnd},
+      totalsCur: (totalsCur.rows||[])[0] || null,
+      totalsPrev: (totalsPrev.rows||[])[0] || null,
+      dateSeries: (dateSeries.rows||[]).map(r=>seoRow(r,'date')),
+      queriesCur: (queriesCur.rows||[]).map(r=>seoRow(r,'query')),
+      queriesPrev: (queriesPrev.rows||[]).map(r=>seoRow(r,'query')),
+      pagesCur: (pagesCur.rows||[]).map(r=>seoRow(r,'page')),
+      pagesPrev: (pagesPrev.rows||[]).map(r=>seoRow(r,'page')),
+      devices: (devices.rows||[]).map(r=>seoRow(r,'device')).sort((a,b)=>b.clicks-a.clicks),
+      countries: (countries.rows||[]).map(r=>seoRow(r,'country')).sort((a,b)=>b.clicks-a.clicks),
+      queryPage: (queryPage.rows||[]).map(r=>({ query:r.keys[0], page:r.keys[1], clicks:r.clicks||0, impressions:r.impressions||0, ctr:r.ctr||0, position:r.position||0 })),
+    };
+    seoLastSync = new Date();
+    seoRenderAll();
+  }catch(e){ seoHandleLoadError(e); }
+}
+
+function seoHandleLoadError(e){
+  console.error('SEO load error:', e);
+  if(e.code==='reauth_required' || e.status===409 || e.status===401){ seoShowReauth(); return; }
+  if(e.code==='not_connected'){ seoShowConnect(); return; }
+  $('seo-content').innerHTML = `<div class="ga-auth-wrap">
+    <p style="font-weight:700;color:var(--red)">Fehler beim Laden</p>
+    <p style="color:var(--ink-m);text-align:center;max-width:400px">${esc(e.message||'Unbekannter Fehler — Details in der Konsole.')}</p>
+    <button class="btn btn--ghost btn--sm" onclick="seoLoadData()">Erneut versuchen</button>
+  </div>`;
+}
+
+// ── Rendering ────────────────────────────────────────────────────────
+const DEVICE_LABELS = { DESKTOP:'Desktop', MOBILE:'Mobil', TABLET:'Tablet' };
+const COUNTRY_NAMES = {
+  usa:'USA', deu:'Deutschland', gbr:'Vereinigtes Königreich', fra:'Frankreich', can:'Kanada', aus:'Australien',
+  ind:'Indien', bra:'Brasilien', esp:'Spanien', ita:'Italien', nld:'Niederlande', che:'Schweiz', aut:'Österreich',
+  swe:'Schweden', nor:'Norwegen', dnk:'Dänemark', fin:'Finnland', pol:'Polen', bel:'Belgien', prt:'Portugal',
+  irl:'Irland', mex:'Mexiko', jpn:'Japan', chn:'China', kor:'Südkorea', rus:'Russland', tur:'Türkei',
+  are:'Vereinigte Arabische Emirate', sau:'Saudi-Arabien', zaf:'Südafrika', sgp:'Singapur', nzl:'Neuseeland',
+  arg:'Argentinien', chl:'Chile', col:'Kolumbien', idn:'Indonesien', phl:'Philippinen', tha:'Thailand',
+  vnm:'Vietnam', mys:'Malaysia', isr:'Israel', egy:'Ägypten', ukr:'Ukraine', cze:'Tschechien', hun:'Ungarn',
+  rou:'Rumänien', grc:'Griechenland', hrv:'Kroatien', svk:'Slowakei', svn:'Slowenien', bgr:'Bulgarien',
+  lux:'Luxemburg', isl:'Island', hkg:'Hongkong', twn:'Taiwan', pak:'Pakistan', bgd:'Bangladesch', nga:'Nigeria',
+  ken:'Kenia', per:'Peru', ury:'Uruguay', ecu:'Ecuador', mar:'Marokko', qat:'Katar', kwt:'Kuwait',
+};
+function countryName(code){ return COUNTRY_NAMES[code] || String(code||'').toUpperCase(); }
+
+function seoConnInfoHTML(){
+  return `<div class="card" style="margin-bottom:1rem;padding:.875rem 1.125rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+    <span class="tag tag--green">Verbunden</span>
+    <span style="font-size:.8125rem;color:var(--ink-m)">Property: <strong>${esc(seoPropLabel(seoProperty))}</strong></span>
+    <span style="font-size:.8125rem;color:var(--ink-s)">Letzter Sync: ${seoLastSync?seoLastSync.toLocaleTimeString('de-DE',{timeZone:TZ,hour:'2-digit',minute:'2-digit'}):'—'}</span>
+    <button class="btn btn--ghost btn--sm" id="seo-reconnect-btn" style="margin-left:auto">Neu verbinden</button>
+  </div>`;
+}
+
+function seoKpiDelta(metric, cur, prev){
+  if(prev==null || prev===0){
+    if(!cur) return { text:'–', cls:'flat' };
+    return { text:'neu', cls:'up' };
+  }
+  const pct = ((cur-prev)/prev)*100;
+  const good = metric==='position' ? cur < prev : cur > prev; // lower position number = better
+  const arrow = Math.round(pct*10)===0 ? '→' : (pct>0 ? '↑' : '↓');
+  const cls = Math.round(pct*10)===0 ? 'flat' : (good ? 'up' : 'down');
+  return { text:`${arrow} ${Math.abs(pct).toFixed(1)}%`, cls };
+}
+
+function seoKpiHTML(){
+  const cur = seoData.totalsCur || {clicks:0,impressions:0,ctr:0,position:0};
+  const prev = seoData.totalsPrev;
+  const cards = [
+    { lbl:'Organische Klicks', val:fmtInt(cur.clicks), d:seoKpiDelta('clicks',cur.clicks, prev?.clicks) },
+    { lbl:'Impressionen',      val:fmtInt(cur.impressions), d:seoKpiDelta('impressions',cur.impressions, prev?.impressions) },
+    { lbl:'Ø CTR',             val:fmtPct(cur.ctr), d:seoKpiDelta('ctr',cur.ctr, prev?.ctr) },
+    { lbl:'Ø Position',        val:fmtPos(cur.position), d:seoKpiDelta('position',cur.position, prev?.position) },
+  ];
+  return `<div class="sec-hd" style="margin-top:0"><span class="sec-ttl">Search Performance</span></div>
+  <div class="stat-grid">${cards.map(c=>`
+    <div class="stat-card">
+      <div class="stat-lbl">${c.lbl}</div>
+      <div class="stat-val">${c.val}</div>
+      <div class="stat-sub"><span class="seo-kpi-delta ${c.d.cls}">${c.d.text}</span> vs. Vorperiode</div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function seoChartCardHTML(){
+  const metrics = [['clicks','Klicks'],['impressions','Impressionen'],['ctr','CTR'],['position','Position']];
+  return `<div class="ga-chart-wrap">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem">
+      <span class="ga-chart-ttl" style="margin:0">Performance im Zeitverlauf</span>
+      <div style="display:flex;gap:.375rem;flex-wrap:wrap">
+        ${metrics.map(([k,l])=>`<button class="seo-metric-btn${k===seoChartMetric?' active':''}" data-metric="${k}">${l}</button>`).join('')}
+      </div>
+    </div>
+    <div id="seo-chart-wrap" style="min-height:140px"></div>
+  </div>`;
+}
+function seoFmtMetric(metric,v){ return metric==='ctr' ? fmtPct(v) : metric==='position' ? fmtPos(v) : fmtInt(v); }
+function seoRenderChart(){
+  const series = seoData.dateSeries;
+  const wrap = $('seo-chart-wrap');
+  if(!series.length){ wrap.innerHTML = `<div class="empty-st"><p class="empty-ttl">Keine Daten für diesen Zeitraum</p></div>`; return; }
+  const metric = seoChartMetric;
+  const vals = series.map(r=>r[metric]||0);
+  const maxVal = Math.max(...vals, metric==='ctr'?0.01:1);
+  const minVal = metric==='position' ? Math.min(...vals) : 0;
+  const range = metric==='position' ? Math.max(maxVal-minVal,0.1) : maxVal;
+  const W=700,H=140,PAD=6;
+  const yFor = v => metric==='position' ? PAD + ((v-minVal)/range)*(H-PAD*2) : H - (v/range)*(H-PAD*2);
+  const pts = series.map((r,i)=>{ const x = PAD + (i/Math.max(series.length-1,1))*(W-PAD*2); return `${x},${yFor(r[metric]||0)}`; });
+  const line = pts.map((p,i)=> i===0?`M${p}`:`L${p}`).join(' ');
+  const area = line + ` L${W-PAD},${H} L${PAD},${H} Z`;
+  const dots = series.map((r,i)=>{
+    const [x,y]=pts[i].split(',');
+    return `<circle cx="${x}" cy="${y}" r="2.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="1"><title>${fmtDate(r.date)}: ${seoFmtMetric(metric,r[metric])}</title></circle>`;
+  }).join('');
+  wrap.innerHTML = `<svg viewBox="0 0 ${W} ${H+4}" style="width:100%;overflow:visible">
+    <defs><linearGradient id="seoGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="var(--accent)" stop-opacity=".16"/><stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/>
+    </linearGradient></defs>
+    <path d="${area}" fill="url(#seoGrad)"/>
+    <path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>
+    ${dots}
+  </svg>
+  <div style="display:flex;justify-content:space-between;margin-top:.25rem;font-size:.625rem;color:var(--ink-s)"><span>${fmtDate(series[0].date)}</span><span>${fmtDate(series[series.length-1].date)}</span></div>`;
+}
+function seoWireChartEvents(){
+  document.querySelectorAll('#panel-seo .seo-metric-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      seoChartMetric = btn.dataset.metric;
+      document.querySelectorAll('#panel-seo .seo-metric-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      seoRenderChart();
+    });
+  });
+}
+
+function seoTableCardHTML(kind){
+  const key = kind==='queries' ? 'query' : 'page';
+  const label = kind==='queries' ? 'Suchanfrage' : 'Seite';
+  const title = kind==='queries' ? 'Top Suchanfragen' : 'Top Seiten';
+  const cols = [[key,label],['clicks','Klicks'],['impressions','Impressionen'],['ctr','CTR'],['position','Position']];
+  return `<div class="card">
+    <div class="card-hd" style="flex-wrap:wrap;gap:.5rem">
+      <span class="card-ttl">${title}</span>
+      <input class="fi" id="seo-${kind}-search" placeholder="${label} filtern…" style="width:200px;font-size:.8125rem;padding:.375rem .625rem" />
+    </div>
+    <div class="scroll-x" style="overflow-x:auto">
+      <table class="dtable" style="min-width:640px">
+        <thead><tr>${cols.map(([c,l])=>`<th class="seo-th-sort" data-kind="${kind}" data-col="${c}" style="cursor:pointer;user-select:none">${l} <span class="seo-sort-arrow" data-kind="${kind}" data-col="${c}"></span></th>`).join('')}</tr></thead>
+        <tbody id="seo-${kind}-body"></tbody>
+      </table>
+    </div>
+    <div style="padding:.75rem 1.125rem" id="seo-${kind}-more-wrap"></div>
+  </div>`;
+}
+function updateSeoSortIndicators(kind){
+  document.querySelectorAll(`.seo-sort-arrow[data-kind="${kind}"]`).forEach(el=>{
+    el.textContent = el.dataset.col===seoSort[kind].col ? (seoSort[kind].dir==='asc'?'▲':'▼') : '';
+  });
+}
+function seoRenderTable(kind){
+  const key = kind==='queries' ? 'query' : 'page';
+  const rows0 = kind==='queries' ? seoData.queriesCur : seoData.pagesCur;
+  const filterVal = (seoFilterText[kind]||'').toLowerCase();
+  let rows = rows0.filter(r=>!filterVal || r[key].toLowerCase().includes(filterVal));
+  const {col,dir} = seoSort[kind];
+  rows = [...rows].sort((a,b)=>{
+    const va=a[col], vb=b[col];
+    const cmp = typeof va==='string' ? va.localeCompare(vb) : va-vb;
+    return dir==='asc' ? cmp : -cmp;
+  });
+  const total = rows.length;
+  const shown = rows.slice(0, seoShowAll[kind] ? 500 : 10);
+  const tbody = $(`seo-${kind}-body`);
+  tbody.innerHTML = !total
+    ? `<tr><td colspan="5"><div class="empty-st"><p class="empty-ttl">Keine Daten für diesen Zeitraum</p></div></td></tr>`
+    : shown.map(r=>{
+        const label = key==='page'
+          ? `<a href="${esc(r.page)}" target="_blank" rel="noopener" class="seo-link" onclick="event.stopPropagation()">${esc(seoShortenUrl(r.page))}</a>`
+          : esc(r.query);
+        return `<tr class="seo-clickable-row" data-${key}="${esc(r[key])}">
+          <td>${label}</td><td>${fmtInt(r.clicks)}</td><td>${fmtInt(r.impressions)}</td><td>${fmtPct(r.ctr)}</td><td>${fmtPos(r.position)}</td>
+        </tr>`;
+      }).join('');
+  $(`seo-${kind}-more-wrap`).innerHTML = total>10 ? `<button class="btn btn--ghost btn--sm" id="seo-${kind}-more-btn">${seoShowAll[kind]?'Weniger anzeigen':`Alle anzeigen (${fmtInt(total)})`}</button>` : '';
+  document.querySelectorAll(`#seo-${kind}-body tr[data-${key}]`).forEach(tr=>tr.addEventListener('click', ()=>seoOpenDetail(key, tr.dataset[key])));
+  if(total>10) $(`seo-${kind}-more-btn`).addEventListener('click', ()=>{ seoShowAll[kind]=!seoShowAll[kind]; seoRenderTable(kind); });
+  updateSeoSortIndicators(kind);
+}
+function seoWireTableEvents(){
+  ['queries','pages'].forEach(kind=>{
+    document.querySelectorAll(`#panel-seo th.seo-th-sort[data-kind="${kind}"]`).forEach(th=>{
+      th.addEventListener('click', ()=>{
+        const col = th.dataset.col;
+        if(seoSort[kind].col===col) seoSort[kind].dir = seoSort[kind].dir==='asc'?'desc':'asc';
+        else { seoSort[kind].col=col; seoSort[kind].dir = (col==='query'||col==='page') ? 'asc' : 'desc'; }
+        seoRenderTable(kind);
+      });
+    });
+    const inp = $(`seo-${kind}-search`);
+    inp.value = seoFilterText[kind]||'';
+    inp.addEventListener('input', ()=>{ seoFilterText[kind]=inp.value; seoRenderTable(kind); });
+  });
+}
+
+function seoDeviceCardHTML(){
+  const rows = seoData.devices;
+  const body = rows.length ? rows.map(r=>`
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.625rem 1.125rem;border-bottom:1px solid var(--border);flex-wrap:wrap">
+      <span style="flex:1;min-width:80px;font-size:.8125rem;font-weight:600">${DEVICE_LABELS[r.device]||esc(r.device)}</span>
+      <span style="font-size:.75rem;color:var(--ink-s)">${fmtInt(r.clicks)} Klicks</span>
+      <span style="font-size:.75rem;color:var(--ink-s)">${fmtInt(r.impressions)} Impr.</span>
+      <span style="font-size:.75rem;color:var(--ink-s)">${fmtPct(r.ctr)} CTR</span>
+      <span style="font-size:.75rem;color:var(--ink-s)">Pos. ${fmtPos(r.position)}</span>
+    </div>`).join('') : `<div class="empty-st"><p class="empty-ttl">Keine Gerätedaten</p></div>`;
+  return `<div class="card"><div class="card-hd"><span class="card-ttl">Geräte</span></div>${body}</div>`;
+}
+function seoCountryCardHTML(){
+  const rows = seoData.countries;
+  const top = rows.slice(0,20);
+  const body = top.length ? `<div class="scroll-x" style="overflow-x:auto"><table class="dtable"><thead><tr><th>Land</th><th>Klicks</th><th>Impressionen</th><th>CTR</th><th>Position</th></tr></thead><tbody>${
+    top.map(r=>`<tr><td>${esc(countryName(r.country))}</td><td>${fmtInt(r.clicks)}</td><td>${fmtInt(r.impressions)}</td><td>${fmtPct(r.ctr)}</td><td>${fmtPos(r.position)}</td></tr>`).join('')
+  }</tbody></table></div>` : `<div class="empty-st"><p class="empty-ttl">Keine Länderdaten</p></div>`;
+  return `<div class="card"><div class="card-hd"><span class="card-ttl">Länder</span>${rows.length>20?`<span style="font-size:.75rem;color:var(--ink-s)">Top 20 von ${rows.length}</span>`:''}</div>${body}</div>`;
+}
+
+// ── SEO Opportunities engine ─────────────────────────────────────────
+// expectedCtrForPosition(): a rough organic CTR benchmark curve by average
+// ranking position (industry rule-of-thumb, NOT Search-Console-provided
+// data) — used only to flag when a query's actual CTR is unusually low or
+// high for where it ranks.
+function expectedCtrForPosition(pos){
+  const curve = [[1,0.28],[2,0.15],[3,0.11],[4,0.08],[5,0.06],[6,0.05],[7,0.04],[8,0.035],[9,0.03],[10,0.025],[15,0.015],[20,0.01],[30,0.006],[50,0.003]];
+  if(pos<=1) return curve[0][1];
+  for(let i=0;i<curve.length-1;i++){
+    const [p1,c1]=curve[i], [p2,c2]=curve[i+1];
+    if(pos>=p1 && pos<=p2) return c1 + (c2-c1)*((pos-p1)/(p2-p1));
+  }
+  return curve[curve.length-1][1];
+}
+const COMMERCIAL_TERMS = /\b(best|top|pricing|price|cost|buy|service|agency|consultant|consulting|software|optimization|vs|review|near me|deal|discount|quote|hire|freelancer|anbieter|preis|preise|kosten|kaufen|agentur|beratung|dienstleistung|dienstleister|angebot|günstig)\b/i;
+
+const OPP_TYPE_LABELS = { quickwin:'Quick Win', page2:'Page 2 Opportunity', ctr:'CTR Opportunity', content:'Content Opportunity', newcontent:'New Content Opportunity', declining:'Declining' };
+const OPP_TYPE_TAGCLASS = { quickwin:'tag--green', page2:'tag--blue', ctr:'tag--orange', content:'tag--teal', newcontent:'tag--purple', declining:'tag--red' };
+const PRIORITY_LABELS = { high:'Hohe Priorität', medium:'Mittlere Priorität', low:'Niedrige Priorität' };
+const PRIORITY_TAGCLASS = { high:'tag--red', medium:'tag--orange', low:'tag--muted' };
+
+/*
+ * Opportunity score (0–100), documented weighting:
+ *   25% Search demand      — log-scaled impressions relative to the dataset max
+ *   25% Ranking potential  — how realistically the position can still be improved
+ *   20% CTR opportunity    — gap between actual and expected CTR for the position
+ *   20% Traffic upside     — estimated additional clicks if CTR matched the benchmark
+ *   10% Trend/relevance    — boosted for "declining" (urgency) and for content items
+ *                            with an existing related page (higher confidence)
+ */
+function seoScoreOpportunity(o, maxImpr, maxUpside){
+  const demand = Math.min(Math.log10((o.impressions||0)+1)/Math.log10(maxImpr+1), 1)*100;
+  const pos = o.position||99;
+  const rankPotential = pos<=3 ? 40 : pos<=10 ? 90 : pos<=20 ? 70 : 40;
+  const expCtr = expectedCtrForPosition(pos);
+  const ctrGap = expCtr>0 ? Math.max(1-(o.ctr||0)/expCtr,0) : 0;
+  const ctrScore = Math.min(ctrGap,1)*100;
+  const potentialClicks = Math.max((o.impressions||0)*(expCtr-(o.ctr||0)),0);
+  const upside = Math.min(Math.log10(potentialClicks+1)/Math.log10(maxUpside+1),1)*100;
+  const trend = o.type==='declining' ? 90 : o.type==='content' ? 65 : o.type==='newcontent' ? 40 : 50;
+  const score = demand*0.25 + rankPotential*0.25 + ctrScore*0.20 + upside*0.20 + trend*0.10;
+  return { score: Math.round(Math.min(Math.max(score,0),100)), potentialClicks: Math.round(potentialClicks) };
+}
+
+function seoComputeOpportunities(){
+  if(!seoData) return [];
+  const queries = seoData.queriesCur;
+  const prevByQuery = new Map(seoData.queriesPrev.map(r=>[r.query,r]));
+  const pagesPrevByPage = new Map(seoData.pagesPrev.map(r=>[r.page,r]));
+  const queryPageBest = new Map();
+  seoData.queryPage.forEach(r=>{
+    const existing = queryPageBest.get(r.query);
+    if(!existing || r.clicks > existing.clicks) queryPageBest.set(r.query, r);
+  });
+
+  const out = []; const seen = new Set();
+  function push(type, item){
+    const k = `${type}:${item.query||item.page}`;
+    if(seen.has(k)) return;
+    seen.add(k);
+    out.push({ key:k, type, ...item });
+  }
+
+  queries.forEach(q=>{
+    if(q.impressions < 10) return;
+    const expCtr = expectedCtrForPosition(q.position);
+    const ctrRatio = expCtr>0 ? q.ctr/expCtr : 1;
+    const bestPage = queryPageBest.get(q.query);
+    const isCommercial = COMMERCIAL_TERMS.test(q.query);
+    const base = { query:q.query, page:bestPage?.page||null, position:q.position, impressions:q.impressions, clicks:q.clicks, ctr:q.ctr, isCommercial };
+
+    if(q.position>=4 && q.position<=15 && q.impressions>=50 && ctrRatio<0.7){
+      push('quickwin', { ...base, recommendation:`Du rankst bereits auf Seite 1/2 (Position ${fmtPos(q.position)}), aber die CTR ist im Verhältnis niedrig. Teste einen stärkeren Title-Tag und eine prägnantere Meta-Description.` });
+    } else if(q.position>=11 && q.position<=20 && q.impressions>=30){
+      push('page2', { ...base, recommendation:`Rankt auf Seite 2 (Position ${fmtPos(q.position)}). Inhalte der rankenden Seite ausbauen, thematische Tiefe erhöhen, interne Links und Title/H1 verbessern.` });
+    } else if(q.impressions>=200 && ctrRatio<0.6){
+      push('ctr', { ...base, recommendation:`Hohe Sichtbarkeit (${fmtInt(q.impressions)} Impressionen), aber unterdurchschnittliche CTR für Position ${fmtPos(q.position)}. Title/Meta-Description optimieren, Suchintention prüfen, Rich-Result-Eignung prüfen.` });
+    } else if(q.position>=11 && q.position<=30 && q.impressions>=30 && bestPage && bestPage.clicks>0){
+      push('content', { ...base, recommendation:`Es gibt bereits eine rankende Seite (${esc(seoShortenUrl(bestPage.page))}). Inhalt erweitern, thematische Abdeckung verbessern, interne Links ergänzen.` });
+    } else if(q.position>=11 && q.position<=30 && q.impressions>=30){
+      push('newcontent', { ...base, recommendation:`Keine klar zugeordnete, gut performende Seite gefunden. Eine dedizierte Seite für diese Suchintention in Betracht ziehen — nur falls keine bestehende Seite bereits thematisch passt.` });
+    }
+  });
+
+  queries.forEach(q=>{
+    const prev = prevByQuery.get(q.query);
+    if(!prev || prev.impressions<20) return;
+    const clicksChange = prev.clicks>0 ? (q.clicks-prev.clicks)/prev.clicks : (q.clicks>0?1:0);
+    const positionWorse = q.position - prev.position;
+    if(clicksChange<=-0.25 || positionWorse>=3){
+      push('declining', { query:q.query, page:null, position:q.position, impressions:q.impressions, clicks:q.clicks, ctr:q.ctr, isCommercial:COMMERCIAL_TERMS.test(q.query),
+        prevClicks:prev.clicks, prevPosition:prev.position, prevImpressions:prev.impressions,
+        recommendation:`Organische Klicks für diese Suchanfrage ${clicksChange<=-0.25?`um ${Math.abs(Math.round(clicksChange*100))}% gesunken`:'weitgehend stabil'}${positionWorse>=3?`, Position von ${fmtPos(prev.position)} auf ${fmtPos(q.position)} verschlechtert`:''}. Ranking- und CTR-Veränderungen prüfen.` });
+    }
+  });
+  seoData.pagesCur.forEach(p=>{
+    const prev = pagesPrevByPage.get(p.page);
+    if(!prev || prev.impressions<20) return;
+    const clicksChange = prev.clicks>0 ? (p.clicks-prev.clicks)/prev.clicks : (p.clicks>0?1:0);
+    if(clicksChange<=-0.25){
+      push('declining', { query:null, page:p.page, position:p.position, impressions:p.impressions, clicks:p.clicks, ctr:p.ctr, isCommercial:false,
+        prevClicks:prev.clicks, prevPosition:prev.position, prevImpressions:prev.impressions,
+        recommendation:`Organische Klicks für diese Seite um ${Math.abs(Math.round(clicksChange*100))}% gesunken, während die Impressionen relativ ${Math.abs(((p.impressions-prev.impressions)/Math.max(prev.impressions,1))*100)<20?'stabil blieben':'sich ebenfalls verändert haben'}. Ranking und CTR prüfen.` });
+    }
+  });
+
+  const maxImpr = Math.max(...queries.map(q=>q.impressions), 1);
+  const maxUpside = Math.max(...out.map(o=>Math.max((o.impressions||0)*(expectedCtrForPosition(o.position)-(o.ctr||0)),0)), 1);
+  out.forEach(o=>{
+    const scored = seoScoreOpportunity(o, maxImpr, maxUpside);
+    o.score = scored.score; o.potentialClicks = scored.potentialClicks;
+    o.priority = scored.score>=70 ? 'high' : scored.score>=40 ? 'medium' : 'low';
+  });
+  out.sort((a,b)=> b.score-a.score || b.potentialClicks-a.potentialClicks || b.impressions-a.impressions);
+  return out.filter(o=>!seoDismissed.has(o.key));
+}
+
+function seoOpportunitiesSectionHTML(){
+  return `<div class="sec-hd" style="margin-top:1.5rem"><span class="sec-ttl">SEO-Chancen</span></div>
+  <div class="card" style="margin-bottom:.875rem;padding:1rem 1.125rem" id="seo-opp-summary"></div>
+  <div class="seo-filter-row" id="seo-opp-type-filters"></div>
+  <div class="seo-filter-row" id="seo-opp-priority-filters"></div>
+  <div class="seo-opp-grid" id="seo-opp-grid"></div>`;
+}
+function seoOppCardHTML(o){
+  const subject = o.query || seoShortenUrl(o.page);
+  return `<div class="seo-opp-card">
+    <div style="display:flex;gap:.375rem;flex-wrap:wrap;align-items:center">
+      <span class="tag ${PRIORITY_TAGCLASS[o.priority]}">${PRIORITY_LABELS[o.priority]}</span>
+      <span class="tag ${OPP_TYPE_TAGCLASS[o.type]}">${OPP_TYPE_LABELS[o.type]}</span>
+      ${o.isCommercial ? `<span class="tag tag--purple">Potential Commercial Opportunity</span>` : ''}
+    </div>
+    <div style="font-weight:700;font-size:.9375rem;line-height:1.3">${esc(subject)}</div>
+    <div class="seo-opp-metrics">
+      <div><div class="v">${fmtPos(o.position)}</div><div class="l">Position</div></div>
+      <div><div class="v">${fmtInt(o.impressions)}</div><div class="l">Impr.</div></div>
+      <div><div class="v">${fmtPct(o.ctr)}</div><div class="l">CTR</div></div>
+      <div><div class="v">${fmtInt(o.clicks)}</div><div class="l">Klicks</div></div>
+    </div>
+    ${o.type==='declining' ? `<div style="font-size:.75rem;color:var(--ink-s)">Vorher: ${fmtInt(o.prevClicks)} Klicks · Position ${fmtPos(o.prevPosition)}</div>` : ''}
+    <div style="font-size:.75rem;color:var(--ink-s);background:var(--surface-2);border-radius:var(--r-sm);padding:.5rem .625rem;line-height:1.4">
+      <strong style="color:var(--ink-m)">Empfehlung</strong> <span style="opacity:.75">(heuristisch abgeleitet, keine Search-Console-Rohdaten)</span>: ${esc(o.recommendation)}
+    </div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.25rem">
+      ${o.query ? `<button class="btn btn--ghost btn--sm" data-view-query="${esc(o.query)}">Suchanfrage ansehen</button>` : ''}
+      ${o.page ? `<button class="btn btn--ghost btn--sm" data-view-page="${esc(o.page)}">Seite ansehen</button>` : ''}
+      <button class="btn btn--ghost btn--sm" data-dismiss="${esc(o.key)}" style="margin-left:auto;color:var(--ink-s)">Verwerfen</button>
+    </div>
+  </div>`;
+}
+function seoRenderOpportunities(){
+  seoOpportunities = seoComputeOpportunities();
+  const counts = { high:0, medium:0, low:0 };
+  seoOpportunities.forEach(o=>counts[o.priority]++);
+  const quickWins = seoOpportunities.filter(o=>o.type==='quickwin').length;
+  const pagesAttention = new Set(seoOpportunities.filter(o=>(o.type==='declining'||o.type==='page2') && o.page).map(o=>o.page)).size;
+  const contentOpp = seoOpportunities.filter(o=>o.type==='content'||o.type==='newcontent').length;
+
+  $('seo-opp-summary').innerHTML = !seoOpportunities.length
+    ? `<div class="empty-st" style="padding:.5rem"><p class="empty-ttl">Keine SEO-Chancen erkannt</p><p class="empty-sub">Für den gewählten Zeitraum wurden keine auffälligen Muster gefunden.</p></div>`
+    : `<div style="display:flex;gap:1.5rem;flex-wrap:wrap;font-size:.8125rem">
+        <span><strong>${counts.high}</strong> Hohe Priorität</span><span><strong>${counts.medium}</strong> Mittlere Priorität</span><span><strong>${counts.low}</strong> Niedrige Priorität</span>
+        <span style="color:var(--ink-s)">·</span>
+        <span>Quick Wins: <strong>${quickWins}</strong></span><span>Seiten mit Handlungsbedarf: <strong>${pagesAttention}</strong></span><span>Content-Chancen: <strong>${contentOpp}</strong></span>
+      </div>`;
+
+  const types = ['all','quickwin','page2','ctr','content','newcontent','declining','commercial'];
+  const typeLbl = {all:'Alle', quickwin:'Quick Wins', page2:'Page 2', ctr:'CTR', content:'Content', newcontent:'Neuer Content', declining:'Declining', commercial:'Commercial'};
+  $('seo-opp-type-filters').innerHTML = types.map(t=>`<button class="ga-range-btn${seoOppTypeFilter===t?' active':''}" data-opp-type="${t}">${typeLbl[t]}</button>`).join('');
+  const prios = ['all','high','medium','low'];
+  const prioLbl = {all:'Alle Prioritäten', high:'Hoch', medium:'Mittel', low:'Niedrig'};
+  $('seo-opp-priority-filters').innerHTML = prios.map(p=>`<button class="ga-range-btn${seoOppPriorityFilter===p?' active':''}" data-opp-prio="${p}">${prioLbl[p]}</button>`).join('');
+
+  let filtered = seoOpportunities;
+  if(seoOppTypeFilter==='commercial') filtered = filtered.filter(o=>o.isCommercial);
+  else if(seoOppTypeFilter!=='all') filtered = filtered.filter(o=>o.type===seoOppTypeFilter);
+  if(seoOppPriorityFilter!=='all') filtered = filtered.filter(o=>o.priority===seoOppPriorityFilter);
+
+  $('seo-opp-grid').innerHTML = !filtered.length
+    ? `<div class="empty-st" style="grid-column:1/-1"><p class="empty-ttl">Keine Chancen in dieser Filterauswahl</p></div>`
+    : filtered.slice(0,60).map(seoOppCardHTML).join('');
+
+  document.querySelectorAll('#seo-opp-type-filters [data-opp-type]').forEach(btn=>btn.addEventListener('click', ()=>{ seoOppTypeFilter=btn.dataset.oppType; seoRenderOpportunities(); }));
+  document.querySelectorAll('#seo-opp-priority-filters [data-opp-prio]').forEach(btn=>btn.addEventListener('click', ()=>{ seoOppPriorityFilter=btn.dataset.oppPrio; seoRenderOpportunities(); }));
+  document.querySelectorAll('#seo-opp-grid [data-dismiss]').forEach(btn=>btn.addEventListener('click', e=>{ e.stopPropagation(); seoDismissOpportunity(btn.dataset.dismiss); }));
+  document.querySelectorAll('#seo-opp-grid [data-view-query]').forEach(btn=>btn.addEventListener('click', e=>{ e.stopPropagation(); seoOpenDetail('query', btn.dataset.viewQuery); }));
+  document.querySelectorAll('#seo-opp-grid [data-view-page]').forEach(btn=>btn.addEventListener('click', e=>{ e.stopPropagation(); seoOpenDetail('page', btn.dataset.viewPage); }));
+}
+
+async function seoLoadDismissed(){
+  try{
+    const { data, error } = await sb.from('seo_dismissed_opportunities').select('opportunity_key');
+    if(!error && data) seoDismissed = new Set(data.map(r=>r.opportunity_key));
+  }catch(_){ /* table not created yet — dismiss just won't persist until supabase-setup.sql is run */ }
+}
+async function seoDismissOpportunity(key){
+  seoDismissed.add(key);
+  seoRenderOpportunities();
+  const { error } = await sb.from('seo_dismissed_opportunities').insert({ opportunity_key: key });
+  if(error) toast('Verworfen (nur lokal) — Speichern fehlgeschlagen: '+error.message, 'err');
+}
+
+// ── Query / page detail modal ────────────────────────────────────────
+async function seoOpenDetail(kind, value){
+  openModal('ov-seo-detail');
+  $('seo-detail-title').textContent = kind==='query' ? value : seoShortenUrl(value);
+  $('seo-detail-body').innerHTML = `<div class="ga-auth-wrap" style="padding:2rem 0"><div class="spin"></div></div>`;
+  try{
+    const relatedDim = kind==='query' ? 'page' : 'query';
+    const {start,end} = seoData.range;
+    const [trend, related] = await Promise.all([
+      seoQuery({ start,end, dimensions:['date'], filters:[{dimension:kind, operator:'equals', expression:value}] }),
+      seoQuery({ start,end, dimensions:[relatedDim], rowLimit:10, filters:[{dimension:kind, operator:'equals', expression:value}] }),
+    ]);
+    const own = kind==='query' ? seoData.queriesCur.find(q=>q.query===value) : seoData.pagesCur.find(p=>p.page===value);
+    const trendRows = (trend.rows||[]).map(r=>seoRow(r,'date'));
+    const relatedRows = (related.rows||[]).map(r=>seoRow(r, relatedDim)).sort((a,b)=>b.clicks-a.clicks);
+
+    const kpis = own ? `<div class="seo-opp-metrics" style="margin-bottom:1rem">
+      <div><div class="v">${fmtInt(own.clicks)}</div><div class="l">Klicks</div></div>
+      <div><div class="v">${fmtInt(own.impressions)}</div><div class="l">Impr.</div></div>
+      <div><div class="v">${fmtPct(own.ctr)}</div><div class="l">CTR</div></div>
+      <div><div class="v">${fmtPos(own.position)}</div><div class="l">Position</div></div>
+    </div>` : '';
+    const relatedTitle = kind==='query' ? 'Top Seiten für diese Suchanfrage' : 'Top Suchanfragen für diese Seite';
+    const relatedBody = relatedRows.length
+      ? `<div class="scroll-x" style="overflow-x:auto"><table class="dtable"><thead><tr><th>${relatedDim==='page'?'Seite':'Suchanfrage'}</th><th>Klicks</th><th>Impressionen</th><th>CTR</th><th>Position</th></tr></thead><tbody>${
+          relatedRows.map(r=>`<tr><td>${relatedDim==='page'?`<a href="${esc(r.page)}" target="_blank" rel="noopener" class="seo-link">${esc(seoShortenUrl(r.page))}</a>`:esc(r.query)}</td><td>${fmtInt(r.clicks)}</td><td>${fmtInt(r.impressions)}</td><td>${fmtPct(r.ctr)}</td><td>${fmtPos(r.position)}</td></tr>`).join('')
+        }</tbody></table></div>`
+      : `<div class="empty-st"><p class="empty-ttl">Keine Daten</p></div>`;
+
+    $('seo-detail-body').innerHTML = `${kpis}
+      <div style="font-size:.8125rem;font-weight:600;margin-bottom:.5rem">Klicks im Zeitverlauf</div>
+      <div id="seo-detail-chart" style="min-height:100px;margin-bottom:1.25rem"></div>
+      <div style="font-size:.8125rem;font-weight:600;margin-bottom:.5rem">${relatedTitle}</div>
+      ${relatedBody}`;
+    seoRenderDetailChart(trendRows);
+  }catch(e){
+    $('seo-detail-body').innerHTML = `<p style="color:var(--red)">Fehler beim Laden: ${esc(e.message)}</p>`;
+  }
+}
+function seoRenderDetailChart(rows){
+  const wrap = $('seo-detail-chart');
+  if(!rows.length){ wrap.innerHTML = `<div class="empty-st" style="padding:1rem 0"><p class="empty-ttl">Keine Verlaufsdaten</p></div>`; return; }
+  const maxVal = Math.max(...rows.map(r=>r.clicks), 1);
+  const W=600,H=100,PAD=4;
+  const pts = rows.map((r,i)=>{ const x=PAD+(i/Math.max(rows.length-1,1))*(W-PAD*2); const y=H-(r.clicks/maxVal)*(H-PAD*2); return `${x},${y}`; });
+  const line = pts.map((p,i)=>i===0?`M${p}`:`L${p}`).join(' ');
+  wrap.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;overflow:visible"><path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2"/></svg>`;
+}
+
+function seoRenderAll(){
+  $('seo-toolbar').hidden = false;
+  $('seo-range-lbl').hidden = false;
+  $('seo-range-lbl').textContent = seoRangeLabel();
+  seoSyncRangeButtons();
+
+  $('seo-content').innerHTML = `
+    ${seoConnInfoHTML()}
+    ${seoKpiHTML()}
+    ${seoChartCardHTML()}
+    ${seoOpportunitiesSectionHTML()}
+    <div style="display:flex;flex-direction:column;gap:1rem;margin-top:1rem">
+      ${seoTableCardHTML('queries')}
+      ${seoTableCardHTML('pages')}
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1rem;margin-top:1rem">
+      ${seoDeviceCardHTML()}
+      ${seoCountryCardHTML()}
+    </div>`;
+
+  document.getElementById('seo-reconnect-btn')?.addEventListener('click', seoDoConnect);
+  seoRenderChart();
+  seoWireChartEvents();
+  seoRenderTable('queries');
+  seoRenderTable('pages');
+  seoWireTableEvents();
+  seoRenderOpportunities();
+}
 
 // ── KLAVIYO ──────────────────────────────────────────────────────────
 let klvDays = 30;
