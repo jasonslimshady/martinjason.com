@@ -279,15 +279,45 @@
     .li-subtab.active{color:var(--ink);border-bottom-color:var(--ink);font-weight:600}
     .li-pane{display:none} .li-pane.active{display:block}
     .li-range-row{display:flex;gap:.5rem;margin-bottom:1rem}
+    .li-view-toggle{display:flex;gap:.375rem;margin-bottom:1.25rem}
+    .li-view-btn{padding:.375rem .875rem;font-size:.8125rem;font-weight:600;color:var(--ink-m);background:var(--surface-2);border:1px solid transparent;border-radius:99px;cursor:pointer;transition:all var(--fast)}
+    .li-view-btn:hover{color:var(--ink)}
+    .li-view-btn.active{background:var(--ink);color:#fff}
+    .li-grid-nav{display:flex;align-items:center;gap:.75rem;margin-bottom:1rem}
+    .li-grid-month-lbl{font-size:.9375rem;font-weight:700;letter-spacing:-.01em;min-width:150px;text-align:center;text-transform:capitalize}
+    .li-grid-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:.5rem;margin-bottom:.5rem}
+    .li-grid-weekdays span{font-size:.6875rem;font-weight:600;color:var(--ink-s);text-transform:uppercase;letter-spacing:.04em;text-align:center}
+    .li-grid-body{display:grid;grid-template-columns:repeat(7,1fr);gap:.5rem}
+    .li-grid-cell{min-height:104px;border:1px solid var(--border);border-radius:var(--r-sm);padding:.375rem;display:flex;flex-direction:column;gap:.25rem;background:var(--surface)}
+    .li-grid-cell.li-grid-outside{background:var(--surface-2);opacity:.5}
+    .li-grid-cell.li-grid-today{border-color:var(--ink);border-width:1.5px}
+    .li-grid-daynum{font-size:.75rem;font-weight:600;color:var(--ink-m);flex-shrink:0}
+    .li-grid-today .li-grid-daynum{color:var(--ink)}
+    .li-grid-posts{display:flex;flex-direction:column;gap:.25rem;overflow:hidden}
+    .li-grid-post{display:flex;align-items:center;gap:.3rem;font-size:.6875rem;padding:.2rem .375rem;border-radius:5px;background:var(--surface-2);cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;transition:background var(--fast)}
+    .li-grid-post:hover{background:var(--accent-t)}
+    .li-grid-post-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+    .li-grid-post-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .li-grid-more{font-size:.6875rem;color:var(--ink-s);padding:.2rem .375rem;cursor:pointer}
+    @media (max-width:760px){
+      .li-grid-cell{min-height:64px}
+      .li-grid-post-txt{display:none}
+      .li-grid-post{justify-content:center}
+    }
     .li-day-group{margin-bottom:1.5rem}
     .li-day-hd{font-size:.8125rem;font-weight:600;color:var(--ink-m);margin-bottom:.625rem;text-transform:capitalize}
     .li-day-list{display:flex;flex-direction:column;gap:.75rem}
-    .li-row{display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:1rem;cursor:pointer;transition:all var(--fast)}
-    .li-row:hover{box-shadow:var(--shadow);border-color:var(--border-s)}
-    .li-row-meta{flex-shrink:0;width:120px;display:flex;flex-direction:column;gap:.5rem}
-    .li-row-time{font-size:.8125rem;font-weight:600;color:var(--ink)}
-    .li-row-actions{flex-shrink:0;display:flex;flex-direction:column;gap:.375rem;width:118px}
-    .li-row-body{flex:1;min-width:0}
+    .lipost-row{display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:1rem;cursor:pointer;transition:all var(--fast)}
+    .lipost-row:hover{box-shadow:var(--shadow);border-color:var(--border-s)}
+    .lipost-row-meta{flex-shrink:0;width:110px;display:flex;flex-direction:column;gap:.5rem}
+    .lipost-row-time{font-size:.8125rem;font-weight:600;color:var(--ink)}
+    .lipost-row-actions{flex-shrink:0;display:flex;flex-direction:column;gap:.375rem;width:168px}
+    .lipost-row-body{flex:1;min-width:0}
+    @media (max-width:760px){
+      .lipost-row{flex-direction:column}
+      .lipost-row-meta{width:auto;flex-direction:row;align-items:center}
+      .lipost-row-actions{width:auto;flex-direction:row;flex-wrap:wrap}
+    }
     /* LinkedIn-style post card */
     .li-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
     .li-card-hd{display:flex;gap:.625rem;padding:.75rem .875rem .5rem}
@@ -928,7 +958,26 @@
 
       <!-- CALENDAR TAB -->
       <div class="li-pane active" id="li-pane-calendar">
-        <div id="li-calendar-list"></div>
+        <div class="li-view-toggle">
+          <button class="li-view-btn active" id="li-view-btn-list" data-view="list">Liste</button>
+          <button class="li-view-btn" id="li-view-btn-grid" data-view="grid">Kalender</button>
+        </div>
+        <div id="li-view-list">
+          <div id="li-calendar-list"></div>
+        </div>
+        <div id="li-view-grid" style="display:none">
+          <div class="li-grid-nav">
+            <button class="btn btn--ghost btn--sm" id="li-grid-prev">‹</button>
+            <span id="li-grid-month-lbl" class="li-grid-month-lbl"></span>
+            <button class="btn btn--ghost btn--sm" id="li-grid-next">›</button>
+            <button class="btn btn--ghost btn--sm" id="li-grid-today">Heute</button>
+          </div>
+          <div class="li-grid-weekdays">
+            <span>Mo</span><span>Di</span><span>Mi</span><span>Do</span><span>Fr</span><span>Sa</span><span>So</span>
+          </div>
+          <div id="li-grid-body" class="li-grid-body"></div>
+          <div id="li-grid-nodate" style="margin-top:1rem"></div>
+        </div>
       </div>
 
       <!-- REJECTED TAB -->
@@ -6994,9 +7043,86 @@ async function loadLinkedInPosts(){
 }
 
 function renderLinkedInPanel(){
-  if(liActiveTab==='calendar') renderLiCalendar(allPostsCache);
+  if(liActiveTab==='calendar'){ renderLiCalendar(allPostsCache); renderLiCalendarGrid(allPostsCache); }
   else if(liActiveTab==='rejected') renderLiRejected(allPostsCache);
   else renderLiStats(allPostsCache);
+}
+
+// ── Calendar view toggle (Liste ↔ Kalenderkacheln) ──────────────────────
+let liCalendarView = 'list';
+document.querySelectorAll('.li-view-btn').forEach(btn=>btn.addEventListener('click', ()=>{
+  liCalendarView = btn.dataset.view;
+  document.querySelectorAll('.li-view-btn').forEach(b=>b.classList.toggle('active', b===btn));
+  $('li-view-list').style.display = liCalendarView==='list' ? '' : 'none';
+  $('li-view-grid').style.display = liCalendarView==='grid' ? '' : 'none';
+  if(liCalendarView==='grid') renderLiCalendarGrid(allPostsCache);
+}));
+
+// ── Calendar tile (month grid) view ──────────────────────────────────────
+let liGridRefDate = new Date();
+let liGridExpanded = new Set();
+const STATUS_DOT_P = { draft:'var(--ink-s)', approved:'var(--blue,#0A84FF)', posted:'var(--green,#30D158)', rejected:'var(--red,#FF453A)' };
+
+$('li-grid-prev').addEventListener('click', ()=>{ liGridRefDate.setMonth(liGridRefDate.getMonth()-1); liGridExpanded.clear(); renderLiCalendarGrid(allPostsCache); });
+$('li-grid-next').addEventListener('click', ()=>{ liGridRefDate.setMonth(liGridRefDate.getMonth()+1); liGridExpanded.clear(); renderLiCalendarGrid(allPostsCache); });
+$('li-grid-today').addEventListener('click', ()=>{ liGridRefDate = new Date(); liGridExpanded.clear(); renderLiCalendarGrid(allPostsCache); });
+
+function renderLiCalendarGrid(list){
+  if(!$('li-grid-body')) return;
+  const ref = liGridRefDate;
+  $('li-grid-month-lbl').textContent = ref.toLocaleDateString('de-DE',{month:'long',year:'numeric'});
+
+  const posts = list.filter(p=>p.status!=='rejected' && p.scheduled_for);
+  const byDate = {};
+  posts.forEach(p=>{ const key = tzDateStr(new Date(p.scheduled_for)); (byDate[key] ||= []).push(p); });
+
+  const firstOfMonth = new Date(ref.getFullYear(), ref.getMonth(), 1);
+  const startOffset = (firstOfMonth.getDay()+6)%7; // Monday=0
+  const gridStart = new Date(firstOfMonth);
+  gridStart.setDate(gridStart.getDate()-startOffset);
+  const todayKey = tzDateStr(new Date());
+
+  let html = '';
+  for(let i=0;i<42;i++){
+    const d = new Date(gridStart);
+    d.setDate(d.getDate()+i);
+    const key = tzDateStr(d);
+    const outside = d.getMonth()!==ref.getMonth();
+    const isToday = key===todayKey;
+    const dayPosts = (byDate[key]||[]).sort((a,b)=>new Date(a.scheduled_for)-new Date(b.scheduled_for));
+    const expanded = liGridExpanded.has(key);
+    const shown = expanded ? dayPosts : dayPosts.slice(0,3);
+    const pills = shown.map(p=>`<div class="li-grid-post" data-id="${p.id}" title="${esc(liFirstLine(p.content))}">
+        <span class="li-grid-post-dot" style="background:${STATUS_DOT_P[p.status]||'var(--ink-s)'}"></span>
+        <span class="li-grid-post-txt">${esc(liFirstLine(p.content))}</span>
+      </div>`).join('');
+    const more = !expanded && dayPosts.length>3 ? `<div class="li-grid-more" data-more="${key}">+${dayPosts.length-3} mehr</div>` : '';
+    html += `<div class="li-grid-cell${outside?' li-grid-outside':''}${isToday?' li-grid-today':''}">
+      <div class="li-grid-daynum">${d.getDate()}</div>
+      <div class="li-grid-posts">${pills}${more}</div>
+    </div>`;
+  }
+  $('li-grid-body').innerHTML = html;
+
+  $('li-grid-body').querySelectorAll('.li-grid-post').forEach(el=>el.addEventListener('click', ()=>openEditPost(el.dataset.id)));
+  $('li-grid-body').querySelectorAll('.li-grid-more').forEach(el=>el.addEventListener('click', ()=>{
+    liGridExpanded.add(el.dataset.more);
+    renderLiCalendarGrid(allPostsCache);
+  }));
+
+  // Posts without a scheduled date can't sit in the grid — list them below
+  const noDate = list.filter(p=>p.status!=='rejected' && !p.scheduled_for);
+  const nodateEl = $('li-grid-nodate');
+  if(noDate.length){
+    nodateEl.innerHTML = `<div class="li-day-hd">Ohne Termin</div><div style="display:flex;flex-wrap:wrap;gap:.5rem">` +
+      noDate.map(p=>`<div class="li-grid-post" data-id="${p.id}" style="max-width:220px" title="${esc(liFirstLine(p.content))}">
+        <span class="li-grid-post-dot" style="background:${STATUS_DOT_P[p.status]||'var(--ink-s)'}"></span>
+        <span class="li-grid-post-txt">${esc(liFirstLine(p.content))}</span>
+      </div>`).join('') + `</div>`;
+    nodateEl.querySelectorAll('.li-grid-post').forEach(el=>el.addEventListener('click', ()=>openEditPost(el.dataset.id)));
+  } else {
+    nodateEl.innerHTML = '';
+  }
 }
 
 // Live updates: rows are also inserted directly by an external content-engine
@@ -7096,13 +7222,13 @@ function renderLiRejected(list){
 
 function liRowHtml(p){
   const time = p.scheduled_for ? fmtTimeOnly(p.scheduled_for) : '—';
-  return `<div class="li-row" data-id="${p.id}">
-    <div class="li-row-meta">
-      <div class="li-row-time">${time}</div>
+  return `<div class="lipost-row" data-id="${p.id}">
+    <div class="lipost-row-meta">
+      <div class="lipost-row-time">${time}</div>
       <span class="tag ${STATUS_TAG_P[p.status]||'tag--muted'}">${STATUS_LBL_P[p.status]||p.status}</span>
     </div>
-    <div class="li-row-body">${liPostCard(p.content)}</div>
-    <div class="li-row-actions">
+    <div class="lipost-row-body">${liPostCard(p.content)}</div>
+    <div class="lipost-row-actions">
       ${liRowActionButtons(p)}
     </div>
   </div>`;
@@ -7121,7 +7247,7 @@ function liRowActionButtons(p){
 }
 
 function wireLiRows(wrap){
-  wrap.querySelectorAll('.li-row').forEach(row=>row.addEventListener('click', e=>{
+  wrap.querySelectorAll('.lipost-row').forEach(row=>row.addEventListener('click', e=>{
     if(e.target.closest('[data-act]')) return;
     openEditPost(row.dataset.id);
   }));
