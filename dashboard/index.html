@@ -263,6 +263,7 @@
     .modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-s);width:90vw;max-width:560px;max-height:90vh;overflow-y:auto;transform:translateY(8px) scale(.98);transition:transform var(--base) var(--ease)}
     .overlay.open .modal{transform:translateY(0) scale(1)}
     .modal.modal--lg{max-width:680px}
+    .modal.modal--post{max-width:1020px}
     .modal-hd{display:flex;align-items:center;justify-content:space-between;padding:1.125rem 1.375rem;border-bottom:1px solid var(--border)}
     .modal-ttl{font-size:1rem;font-weight:600;letter-spacing:-.02em}
     .modal-x{width:28px;height:28px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;color:var(--ink-s);font-size:1.1rem;transition:all var(--fast)}
@@ -288,16 +289,16 @@
     .li-grid-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:.5rem;margin-bottom:.5rem}
     .li-grid-weekdays span{font-size:.6875rem;font-weight:600;color:var(--ink-s);text-transform:uppercase;letter-spacing:.04em;text-align:center}
     .li-grid-body{display:grid;grid-template-columns:repeat(7,1fr);gap:.5rem}
-    .li-grid-cell{min-height:104px;border:1px solid var(--border);border-radius:var(--r-sm);padding:.375rem;display:flex;flex-direction:column;gap:.25rem;background:var(--surface)}
+    .li-grid-cell{min-height:104px;min-width:0;border:1px solid var(--border);border-radius:var(--r-sm);padding:.375rem;display:flex;flex-direction:column;gap:.25rem;background:var(--surface)}
     .li-grid-cell.li-grid-outside{background:var(--surface-2);opacity:.5}
     .li-grid-cell.li-grid-today{border-color:var(--ink);border-width:1.5px}
     .li-grid-daynum{font-size:.75rem;font-weight:600;color:var(--ink-m);flex-shrink:0}
     .li-grid-today .li-grid-daynum{color:var(--ink)}
-    .li-grid-posts{display:flex;flex-direction:column;gap:.25rem;overflow:hidden}
-    .li-grid-post{display:flex;align-items:center;gap:.3rem;font-size:.6875rem;padding:.2rem .375rem;border-radius:5px;background:var(--surface-2);cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;transition:background var(--fast)}
+    .li-grid-posts{display:flex;flex-direction:column;gap:.25rem;overflow:hidden;min-width:0}
+    .li-grid-post{display:flex;align-items:center;gap:.3rem;font-size:.6875rem;padding:.2rem .375rem;border-radius:5px;background:var(--surface-2);cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;transition:background var(--fast);min-width:0}
     .li-grid-post:hover{background:var(--accent-t)}
     .li-grid-post-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-    .li-grid-post-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .li-grid-post-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
     .li-grid-more{font-size:.6875rem;color:var(--ink-s);padding:.2rem .375rem;cursor:pointer}
     @media (max-width:760px){
       .li-grid-cell{min-height:64px}
@@ -327,8 +328,8 @@
     .li-author-time{font-size:.6875rem;color:rgba(0,0,0,.6);display:flex;align-items:center;gap:.25rem}
     .li-card-body{padding:0 .875rem .625rem;font-size:.875rem;line-height:1.4;color:rgba(0,0,0,.9);white-space:pre-wrap;word-break:break-word}
     .li-hashtag{color:#0A66C2;font-weight:600}
-    .li-card-media{border-top:1px solid rgba(0,0,0,.08);background:#000;display:flex;align-items:center;justify-content:center;max-height:280px;overflow:hidden}
-    .li-card-media img,.li-card-media video{width:100%;max-height:280px;object-fit:contain;display:block}
+    .li-card-media{border-top:1px solid rgba(0,0,0,.08);overflow:hidden}
+    .li-card-media img,.li-card-media video{width:100%;height:auto;max-height:600px;object-fit:contain;display:block}
     .li-card-stats{display:flex;justify-content:space-between;padding:.3rem .875rem;font-size:.6875rem;color:rgba(0,0,0,.6);border-top:1px solid rgba(0,0,0,.08)}
     .li-card-actions{display:flex;border-top:1px solid rgba(0,0,0,.08)}
     .li-card-actions button{flex:1;display:flex;align-items:center;justify-content:center;gap:.375rem;padding:.5rem 0;font-size:.75rem;font-weight:600;color:rgba(0,0,0,.6);background:none;border:none;cursor:default}
@@ -1108,7 +1109,7 @@
 
 <!-- LINKEDIN POST MODAL (add/edit) -->
 <div class="overlay" id="ov-post">
-  <div class="modal modal--lg">
+  <div class="modal modal--lg modal--post">
     <div class="modal-hd"><span class="modal-ttl" id="mpost-title">Neuer Entwurf</span><button class="modal-x" onclick="closeModal('ov-post')">✕</button></div>
     <form id="mpost-form" onsubmit="savePost(event)">
       <div class="modal-body">
@@ -7339,8 +7340,8 @@ function liMediaPreviewMeta(media){
 
 function liRowActionButtons(p){
   const btns = [];
-  if(p.status!=='posted') btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="edit" data-id="${p.id}">Bearbeiten</button>`);
   if(p.status==='draft') btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="approve" data-id="${p.id}">Freigeben</button>`);
+  if(p.status!=='posted') btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="edit" data-id="${p.id}">Bearbeiten</button>`);
   if(p.status==='approved'){
     btns.push(`<button type="button" class="btn btn--primary btn--sm" data-act="publish" data-id="${p.id}">Jetzt auf LinkedIn posten</button>`);
     btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="posted" data-id="${p.id}" title="Nur verwenden, falls der Post bereits woanders veröffentlicht wurde">Nur Status setzen</button>`);
