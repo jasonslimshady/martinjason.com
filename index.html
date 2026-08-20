@@ -1158,10 +1158,17 @@
     // (or the background loop) back.
 
     // Deep-link autoplay: pages linking here with ?playvsl=1 (the blog's
-    // VSL promo card) land with the video centred in the viewport and
-    // already playing, instead of just landing on the section.
+    // VSL promo card) land with the video already playing, positioned just
+    // below the fixed nav (not viewport-centred, which let the fixed header
+    // cover the top of the frame and pushed the section below it into view
+    // instead — e.g. the logos "Audit buchen" CTA showing where the video
+    // should be).
     if (/[?&]playvsl=1\b/.test(window.location.search)) {
-      fig.scrollIntoView({ behavior: 'auto', block: 'center' });
+      var navEl = document.querySelector('.nav-wrap');
+      var navH = navEl ? navEl.getBoundingClientRect().height : 0;
+      var margin = 24;
+      var rect = fig.getBoundingClientRect();
+      window.scrollTo({ top: window.scrollY + rect.top - navH - margin, behavior: 'auto' });
       start();
     }
   })();
