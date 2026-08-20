@@ -263,6 +263,7 @@
     .modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-s);width:90vw;max-width:560px;max-height:90vh;overflow-y:auto;transform:translateY(8px) scale(.98);transition:transform var(--base) var(--ease)}
     .overlay.open .modal{transform:translateY(0) scale(1)}
     .modal.modal--lg{max-width:680px}
+    .modal.modal--post{max-width:1020px}
     .modal-hd{display:flex;align-items:center;justify-content:space-between;padding:1.125rem 1.375rem;border-bottom:1px solid var(--border)}
     .modal-ttl{font-size:1rem;font-weight:600;letter-spacing:-.02em}
     .modal-x{width:28px;height:28px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;color:var(--ink-s);font-size:1.1rem;transition:all var(--fast)}
@@ -1108,7 +1109,7 @@
 
 <!-- LINKEDIN POST MODAL (add/edit) -->
 <div class="overlay" id="ov-post">
-  <div class="modal modal--lg">
+  <div class="modal modal--lg modal--post">
     <div class="modal-hd"><span class="modal-ttl" id="mpost-title">Neuer Entwurf</span><button class="modal-x" onclick="closeModal('ov-post')">✕</button></div>
     <form id="mpost-form" onsubmit="savePost(event)">
       <div class="modal-body">
