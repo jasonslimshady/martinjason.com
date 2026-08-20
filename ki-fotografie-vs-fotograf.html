@@ -13,6 +13,9 @@
   <meta property="og:title" content="KI Fotografie vs. Fotograf: Was lohnt sich 2026?" />
   <meta property="og:description" content="KI Fotografie oder professioneller Fotograf? Ehrlicher Kostenvergleich, Qualitätscheck und klare Empfehlung – wann KI ausreicht und wann nicht." />
   <meta property="og:url" content="https://martinjason.com/ki-fotografie-vs-fotograf" />
+  <meta property="og:image" content="https://martinjason.com/images/og/og-ki-fotografie-vs-fotograf.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
   <meta property="og:locale" content="de_DE" />
   <meta property="og:site_name" content="Jason Martin" />
   <meta property="article:author" content="Jason Martin" />
@@ -23,11 +26,20 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="KI Fotografie vs. Fotograf: Was lohnt sich 2026?" />
   <meta name="twitter:description" content="Ehrlicher Kostenvergleich und klare Empfehlung – wann KI ausreicht und wann nicht." />
+  <meta name="twitter:image" content="https://martinjason.com/images/og/og-ki-fotografie-vs-fotograf.jpg" />
 
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Startseite", "item": "https://martinjason.com/" },
+          { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://martinjason.com/blog" },
+          { "@type": "ListItem", "position": 3, "name": "KI Fotografie vs. Fotograf: Was lohnt sich 2026?", "item": "https://martinjason.com/ki-fotografie-vs-fotograf" }
+        ]
+      },
       {
         "@type": "Article",
         "headline": "KI Fotografie vs. Fotograf: Was lohnt sich 2026?",
@@ -93,7 +105,21 @@
     <div class="bg-grain"></div>
   </div>
 
-  <header class="nav-wrap"></header>
+  <header class="nav-wrap"><nav class="nav glass" aria-label="Hauptnavigation">
+      <a class="nav__brand" href="/" aria-label="Jason Martin — Startseite">
+        <img class="nav__brand-mark" src="/images/favicon.png" alt="Jason Martin" width="32" height="32" />
+        <span class="nav__brand-name">Martin, Jason</span>
+      </a>
+      <ul class="nav__links">
+        <li><a href="/#problem">Problem</a></li>
+        <li><a href="/#loesung">Lösung</a></li>
+        <li><a href="/#work">Galerien</a></li>
+        <li><a href="/#faq">FAQ</a></li>
+        <li><a href="/#about">Über mich</a></li>
+        <li><a href="/blog">Blog</a></li>
+      </ul>
+      <a class="btn btn--primary glass-btn nav__cta" href="/booking" data-booking>Audit buchen</a>
+    </nav></header>
 
   <main>
     <div class="article-wrap">
@@ -392,7 +418,28 @@
     </div>
   </main>
 
-  <footer class="footer"></footer>
+  <footer class="footer"><div class="container footer__inner">
+      <div class="footer__brand">
+        <picture>
+          <source srcset="/images/pacific-origins-logo-256x85.avif" type="image/avif" />
+          <img src="/images/pacific-origins-logo-256x85.png" alt="Pacific Origins" class="footer__pacific-logo" width="256" height="85" />
+        </picture>
+        <span class="footer__logo">Jason Martin</span>
+        <p>AI Product Gallery Design</p>
+      </div>
+      <div class="footer__links">
+        <a href="/#loesung">Leistungen</a>
+        <a href="/#work">Galerien</a>
+        <a href="/blog">Blog</a>
+        <a href="/#about">Über mich</a>
+        <a href="/booking">Kontakt</a>
+      </div>
+      <div class="footer__legal">
+        <a href="/impressum">Impressum</a>
+        <a href="/datenschutz">Datenschutz</a>
+        <span>© <span id="year"></span> Jason Martin</span>
+      </div>
+    </div></footer>
 
   <script src="/shared-components.js" defer></script>
   <script src="script.js" defer></script>

@@ -11,6 +11,7 @@
   <meta name="description" content="Audit buchen mit Jason Martin — sichere dir direkt deinen Wunschtermin für die Besprechung des kostenlosen Audit." />
   <meta name="theme-color" content="#F7F5F1" />
   <meta name="robots" content="noindex" />
+  <link rel="canonical" href="https://martinjason.com/booking" />
 
   <!-- Booking inline mode — must be set before booking-popup.js runs -->
   <script>
@@ -282,7 +283,21 @@
   </div>
 
   <!-- Nav (injected by shared-components.js) -->
-  <header class="nav-wrap"></header>
+  <header class="nav-wrap"><nav class="nav glass" aria-label="Hauptnavigation">
+      <a class="nav__brand" href="/" aria-label="Jason Martin — Startseite">
+        <img class="nav__brand-mark" src="/images/favicon.png" alt="Jason Martin" width="32" height="32" />
+        <span class="nav__brand-name">Martin, Jason</span>
+      </a>
+      <ul class="nav__links">
+        <li><a href="/#problem">Problem</a></li>
+        <li><a href="/#loesung">Lösung</a></li>
+        <li><a href="/#work">Galerien</a></li>
+        <li><a href="/#faq">FAQ</a></li>
+        <li><a href="/#about">Über mich</a></li>
+        <li><a href="/blog">Blog</a></li>
+      </ul>
+      <a class="btn btn--primary glass-btn nav__cta" href="/booking" data-booking>Audit buchen</a>
+    </nav></header>
 
   <main class="booking-page-main">
     <div class="booking-page-wrap">

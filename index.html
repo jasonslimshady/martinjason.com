@@ -10,12 +10,24 @@
   <title>Martin, Jason — Performance-Marketing-Design für DTC Brands</title>
   <meta name="description" content="Ich erstelle KI-generierte Produktgalerien in Studioqualität – für DACH-DTC-Marken, die mehr aus ihren Produktseiten herausholen wollen. Ab 599 €/Produkt." />
   <meta name="theme-color" content="#F7F5F1" />
+  <link rel="canonical" href="https://martinjason.com/" />
 
   <!-- Open Graph -->
   <meta property="og:title" content="Jason Martin — Produktgrafiken für DTC Brands" />
   <meta property="og:description" content="Produktgrafiken für DTC Brands in Studioqualität – erstellt mit KI, nicht mit Kameras." />
   <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://martinjason.com/" />
+  <meta property="og:image" content="https://martinjason.com/images/og/og-default.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
   <meta property="og:locale" content="de_DE" />
+  <meta property="og:site_name" content="Jason Martin" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Jason Martin — Produktgrafiken für DTC Brands" />
+  <meta name="twitter:description" content="Produktgrafiken für DTC Brands in Studioqualität – erstellt mit KI, nicht mit Kameras." />
+  <meta name="twitter:image" content="https://martinjason.com/images/og/og-default.jpg" />
 
   <!-- Structured Data — WebSite + Organization + SiteNavigationElement -->
   <script type="application/ld+json">
@@ -65,15 +77,31 @@
     {
       "@context": "https://schema.org",
       "@type": "SiteNavigationElement",
-      "name": ["Problem", "Lösung", "Prozess", "FAQ", "Über mich", "Blog"],
+      "name": ["Problem", "Lösung", "Galerien", "FAQ", "Über mich", "Blog"],
       "url": [
         "https://martinjason.com/#problem",
         "https://martinjason.com/#loesung",
-        "https://martinjason.com/#prozess",
+        "https://martinjason.com/#work",
         "https://martinjason.com/#faq",
         "https://martinjason.com/#about",
         "https://martinjason.com/blog"
       ]
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "KI-Produktgalerien für DTC Brands",
+      "provider": { "@id": "https://martinjason.com/#organization" },
+      "areaServed": { "@type": "Country", "name": "Germany" },
+      "description": "KI-generierte Produktgalerien in Studioqualität für DTC-Marken im DACH-Raum — Hero-Shots, Detail-Ansichten, Lifestyle-Szenen und Feature-Tiles.",
+      "offers": {
+        "@type": "AggregateOffer",
+        "priceCurrency": "EUR",
+        "lowPrice": "599",
+        "highPrice": "849",
+        "offerCount": "2",
+        "url": "https://martinjason.com/#loesung"
+      }
     }
   ]
   </script>
@@ -431,7 +459,21 @@
   <!-- ====================================================================
        Glass nav (sticky)
        ==================================================================== -->
-  <header class="nav-wrap"></header>
+  <header class="nav-wrap"><nav class="nav glass" aria-label="Hauptnavigation">
+      <a class="nav__brand" href="/" aria-label="Jason Martin — Startseite">
+        <img class="nav__brand-mark" src="/images/favicon.png" alt="Jason Martin" width="32" height="32" />
+        <span class="nav__brand-name">Martin, Jason</span>
+      </a>
+      <ul class="nav__links">
+        <li><a href="/#problem">Problem</a></li>
+        <li><a href="/#loesung">Lösung</a></li>
+        <li><a href="/#work">Galerien</a></li>
+        <li><a href="/#faq">FAQ</a></li>
+        <li><a href="/#about">Über mich</a></li>
+        <li><a href="/blog">Blog</a></li>
+      </ul>
+      <a class="btn btn--primary glass-btn nav__cta" href="/booking" data-booking>Audit buchen</a>
+    </nav></header>
 
   <main id="top">
 
@@ -446,7 +488,7 @@
         <!-- Centered heading -->
         <div class="header">
           <p class="ai-showcase__eyebrow">Performance Marketing Design</p>
-          <h2 class="ai-showcase__heading">Wie du die Conversion<br class="hero-mobile-br"> deiner Produktseite steigerst</br>&amp; mehr Bestellungen bekommst<br class="hero-mobile-br"> <em>ohne weitere Kosten.</em></h2>
+          <h1 class="ai-showcase__heading">Wie du die Conversion<br class="hero-mobile-br"> deiner Produktseite steigerst</br>&amp; mehr Bestellungen bekommst<br class="hero-mobile-br"> <em>ohne weitere Kosten.</em></h1>
           <p class="ai-showcase__subline">Erfahre wie profitable DTC-Marken den<br class="hero-mobile-br"> gleichen Traffic in mehr Umsatz verwandeln.</p>
         </div>
       </div><!-- /.ai-showcase__sticky -->
@@ -469,7 +511,7 @@
           </video>
           <video class="vsl__video" preload="none" playsinline
                  disablePictureInPicture disableRemotePlayback controlsList="nodownload noremoteplayback"
-                 poster="/images/video-poster.svg" width="1280" height="720">
+                 poster="/images/video-poster.avif" width="1280" height="720" fetchpriority="high"
             <source data-src="https://pub-091972a94ee1449e9ff66fd286474ac0.r2.dev/vsl-full.mp4" type="video/mp4">
           </video>
           <button class="vsl__play" type="button" aria-label="Video abspielen">
@@ -517,6 +559,118 @@
         </div>
         <div class="logos__cta">
           <a class="btn btn--primary glass-btn" href="/booking" data-booking>Audit buchen</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         GALERIEN — portfolio grid linking to all case-study gallery pages.
+         ================================================================== -->
+    <section id="work" class="section work">
+      <div class="container">
+        <header class="section__head">
+          <p class="eyebrow reveal">Galerien</p>
+          <h2 class="section__title reveal" style="--reveal-delay: 80ms">
+            Ausgewählte Arbeiten.
+          </h2>
+          <p class="section__lede reveal" style="--reveal-delay: 160ms">
+            Eine Auswahl meiner Produktgalerien. Manche Marken sind unter NDA – die Bilder sind anonymisiert, aber die Bildlogik bleibt sichtbar.
+          </p>
+        </header>
+
+        <div class="gallery-grid">
+          <a class="gallery-card reveal" href="/galerie-hyaluron-serum" data-tone="sand">
+            <div class="gallery-card__image-wrap">
+              <img class="gallery-card__image" src="/images/Ausgewaehlte%20Arbeiten/showcase-clarity-labs-1.avif" width="720" height="720" loading="lazy" decoding="async" alt="Hyaluron-Serum PDP-Galerie" />
+            </div>
+            <div class="gallery-card__meta">
+              <span class="gallery-card__cat">Skincare · DACH</span>
+              <h3 class="gallery-card__title">Hyaluron-Serum Relaunch</h3>
+              <p class="gallery-card__note">1 Galerie, 2 Tage, -58% Fotokosten</p>
+            </div>
+          </a>
+          <a class="gallery-card reveal" href="/galerie-verse-fragrances" data-tone="warm" style="--reveal-delay: 80ms">
+            <div class="gallery-card__image-wrap">
+              <img class="gallery-card__image" src="/images/Ausgewaehlte%20Arbeiten/Verse%20Fragrances/7-verse-fragrances-diffuser.avif" srcset="/images/Ausgewaehlte%20Arbeiten/Verse%20Fragrances/7-verse-fragrances-diffuser-750w.avif 750w, /images/Ausgewaehlte%20Arbeiten/Verse%20Fragrances/7-verse-fragrances-diffuser.avif 1500w" sizes="(max-width: 560px) 82vw, (max-width: 980px) 50vw, 370px" width="1500" height="1500" loading="lazy" decoding="async" alt="Verse Fragrances Duftgalerie">
+              <img class="gallery-card__image--hover" src="/images/Ausgewaehlte%20Arbeiten/Verse%20Fragrances/6-verse-fragrances-diffuser.avif" srcset="/images/Ausgewaehlte%20Arbeiten/Verse%20Fragrances/6-verse-fragrances-diffuser-750w.avif 750w, /images/Ausgewaehlte%20Arbeiten/Verse%20Fragrances/6-verse-fragrances-diffuser.avif 1500w" sizes="(max-width: 560px) 82vw, (max-width: 980px) 50vw, 370px" width="1500" height="1500" loading="lazy" decoding="async" alt="" aria-hidden="true">
+            </div>
+            <div class="gallery-card__meta">
+              <span class="gallery-card__cat">Fragrance · International</span>
+              <h3 class="gallery-card__title">Verse Fragrances</h3>
+              <p class="gallery-card__note">3 Galerien, 2 Wochen, -58% Foto-Kosten</p>
+            </div>
+          </a>
+          <a class="gallery-card reveal" href="/galerie-aurum-collective" data-tone="cool" style="--reveal-delay: 160ms">
+            <div class="gallery-card__image-wrap">
+              <img class="gallery-card__image" src="/images/Ausgewaehlte%20Arbeiten/Aurum%20Collective/showcase-aurum-collective-3.avif" srcset="/images/Ausgewaehlte%20Arbeiten/Aurum%20Collective/showcase-aurum-collective-3-750w.avif 750w, /images/Ausgewaehlte%20Arbeiten/Aurum%20Collective/showcase-aurum-collective-3.avif 1500w" sizes="(max-width: 560px) 82vw, (max-width: 980px) 50vw, 370px" width="1500" height="1500" loading="lazy" decoding="async" alt="Aurum Collective Schmuckgalerie">
+              <img class="gallery-card__image--hover" src="/images/Ausgewaehlte%20Arbeiten/Aurum%20Collective/showcase-aurum-collective-1.avif" srcset="/images/Ausgewaehlte%20Arbeiten/Aurum%20Collective/showcase-aurum-collective-1-750w.avif 750w, /images/Ausgewaehlte%20Arbeiten/Aurum%20Collective/showcase-aurum-collective-1.avif 1500w" sizes="(max-width: 560px) 82vw, (max-width: 980px) 50vw, 370px" width="1500" height="1500" loading="lazy" decoding="async" alt="" aria-hidden="true">
+            </div>
+            <div class="gallery-card__meta">
+              <span class="gallery-card__cat">Jewellery · DACH</span>
+              <h3 class="gallery-card__title">Aurum Collective</h3>
+              <p class="gallery-card__note">3 Products, 1 Woche, -62% Foto-Kosten</p>
+            </div>
+          </a>
+          <a class="gallery-card reveal" href="/galerie-pulse-wearables" data-tone="midnight" style="--reveal-delay: 240ms">
+            <div class="gallery-card__image-wrap">
+              <img class="gallery-card__image" src="/images/Ausgewaehlte%20Arbeiten/Pulse%20Wearables/2-pulse-wearables-smart-watch.avif" srcset="/images/Ausgewaehlte%20Arbeiten/Pulse%20Wearables/2-pulse-wearables-smart-watch-750w.avif 750w, /images/Ausgewaehlte%20Arbeiten/Pulse%20Wearables/2-pulse-wearables-smart-watch.avif 1500w" sizes="(max-width: 560px) 82vw, (max-width: 980px) 50vw, 370px" width="1500" height="1500" loading="lazy" decoding="async" alt="Pulse Wearables Produktgalerie">
+              <img class="gallery-card__image--hover" src="/images/Ausgewaehlte%20Arbeiten/Pulse%20Wearables/3-pulse-wearables-smart-watch.avif" srcset="/images/Ausgewaehlte%20Arbeiten/Pulse%20Wearables/3-pulse-wearables-smart-watch-750w.avif 750w, /images/Ausgewaehlte%20Arbeiten/Pulse%20Wearables/3-pulse-wearables-smart-watch.avif 1500w" sizes="(max-width: 560px) 82vw, (max-width: 980px) 50vw, 370px" width="1500" height="1500" loading="lazy" decoding="async" alt="" aria-hidden="true">
+            </div>
+            <div class="gallery-card__meta">
+              <span class="gallery-card__cat">Wearables · Europe</span>
+              <h3 class="gallery-card__title">Pulse Wearables</h3>
+              <p class="gallery-card__note">2 Produkte, 2 Wochen, -67% Foto-Kosten</p>
+            </div>
+          </a>
+          <a class="gallery-card reveal" href="/galerie-capsule-drop" data-tone="sand" style="--reveal-delay: 80ms">
+            <div class="gallery-card__image" aria-hidden="true"></div>
+            <div class="gallery-card__meta">
+              <span class="gallery-card__cat">Fashion · SS26</span>
+              <h3 class="gallery-card__title">Capsule Drop SS26</h3>
+              <p class="gallery-card__note">6 SKUs · Lookbook + PDPs</p>
+            </div>
+          </a>
+          <a class="gallery-card reveal" href="/galerie-keramik-serie" data-tone="warm" style="--reveal-delay: 160ms">
+            <div class="gallery-card__image" aria-hidden="true"></div>
+            <div class="gallery-card__meta">
+              <span class="gallery-card__cat">Home · AT</span>
+              <h3 class="gallery-card__title">Keramik-Serie</h3>
+              <p class="gallery-card__note">8 Produkte, vollständige PDP-Galerien</p>
+            </div>
+          </a>
+          <a class="gallery-card reveal" href="/galerie-lipcare-launch" data-tone="rose" style="--reveal-delay: 240ms">
+            <div class="gallery-card__image" aria-hidden="true"></div>
+            <div class="gallery-card__meta">
+              <span class="gallery-card__cat">Beauty · CH</span>
+              <h3 class="gallery-card__title">Lipcare Launch</h3>
+              <p class="gallery-card__note">3 Farben, 24 Bilder gesamt</p>
+            </div>
+          </a>
+          <a class="gallery-card reveal" href="/galerie-supplement-reihe" data-tone="fog" style="--reveal-delay: 320ms">
+            <div class="gallery-card__image" aria-hidden="true"></div>
+            <div class="gallery-card__meta">
+              <span class="gallery-card__cat">Wellness · DE</span>
+              <h3 class="gallery-card__title">Supplement Reihe</h3>
+              <p class="gallery-card__note">Galerien + Feature-Tiles für 5 SKUs</p>
+            </div>
+          </a>
+          <a class="gallery-card reveal" href="/galerie-audio-accessory" data-tone="midnight" style="--reveal-delay: 400ms">
+            <div class="gallery-card__image" aria-hidden="true"></div>
+            <div class="gallery-card__meta">
+              <span class="gallery-card__cat">Tech · DACH</span>
+              <h3 class="gallery-card__title">Audio-Accessory</h3>
+              <p class="gallery-card__note">Studio-Hero + Lifestyle</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="gallery-dots" aria-hidden="true">
+          <button class="gallery-dot is-active" aria-label="Galerie 1"></button>
+          <button class="gallery-dot" aria-label="Galerie 2"></button>
+          <button class="gallery-dot" aria-label="Galerie 3"></button>
+          <button class="gallery-dot" aria-label="Galerie 4"></button>
+          <button class="gallery-dot" aria-label="Galerie 5"></button>
+          <button class="gallery-dot" aria-label="Galerie 6"></button>
         </div>
       </div>
     </section>
@@ -881,7 +1035,28 @@
 
   </main>
 
-  <footer class="footer"></footer>
+  <footer class="footer"><div class="container footer__inner">
+      <div class="footer__brand">
+        <picture>
+          <source srcset="/images/pacific-origins-logo-256x85.avif" type="image/avif" />
+          <img src="/images/pacific-origins-logo-256x85.png" alt="Pacific Origins" class="footer__pacific-logo" width="256" height="85" />
+        </picture>
+        <span class="footer__logo">Jason Martin</span>
+        <p>AI Product Gallery Design</p>
+      </div>
+      <div class="footer__links">
+        <a href="/#loesung">Leistungen</a>
+        <a href="/#work">Galerien</a>
+        <a href="/blog">Blog</a>
+        <a href="/#about">Über mich</a>
+        <a href="/booking">Kontakt</a>
+      </div>
+      <div class="footer__legal">
+        <a href="/impressum">Impressum</a>
+        <a href="/datenschutz">Datenschutz</a>
+        <span>© <span id="year"></span> Jason Martin</span>
+      </div>
+    </div></footer>
 
   <script src="/shared-components.js" defer></script>
   <script src="script.js" defer></script>
