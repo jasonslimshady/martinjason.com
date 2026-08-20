@@ -236,6 +236,6 @@ Datum: {{contract_date}}</p>
   //  4. Paste the Client ID below. The Client Secret goes server-side
   //     only, as LINKEDIN_CLIENT_SECRET in Vercel — see api/linkedin-token.js.
   // ----------------------------------------------------------
-  LINKEDIN_CLIENT_ID: '',
+  LINKEDIN_CLIENT_ID: '77j7fnwt382p9k',
 
 };
