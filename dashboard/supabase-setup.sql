@@ -378,10 +378,12 @@ END $$;
 -- ============================================================
 --  TABLE: app_tokens
 --  Server-side secrets (e.g. the Google Analytics OAuth refresh
---  token used by /api/ga-token). RLS is enabled with NO policies
---  on purpose: neither anon nor authenticated clients can read
---  this table — only the service role key used by the Vercel
---  API functions has access.
+--  token used by /api/ga-token, and the LinkedIn token used by
+--  /api/linkedin-token + /api/linkedin-publish, stored as JSON
+--  under id='linkedin'). RLS is enabled with NO policies on
+--  purpose: neither anon nor authenticated clients can read this
+--  table — only the service role key used by the Vercel API
+--  functions has access.
 -- ============================================================
 CREATE TABLE IF NOT EXISTS app_tokens (
   id         TEXT        PRIMARY KEY,
@@ -391,6 +393,12 @@ CREATE TABLE IF NOT EXISTS app_tokens (
 
 ALTER TABLE app_tokens ENABLE ROW LEVEL SECURITY;
 -- no CREATE POLICY here — service-role access only
+
+-- The "posts" table itself is provisioned outside this file (by the
+-- external content-engine automation that inserts drafts). This only
+-- adds the column /api/linkedin-publish needs to record which LinkedIn
+-- post a row maps to — safe to run even if it already exists.
+ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS linkedin_post_urn TEXT;
 
 
 -- ============================================================

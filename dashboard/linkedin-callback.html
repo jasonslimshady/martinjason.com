@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>LinkedIn verbinden…</title>
+</head>
+<body style="font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;color:#333">
+<p id="msg">Verbinde…</p>
+<script>
+  // Popup-only callback for the LinkedIn OAuth redirect. Grabs the
+  // authorization code from the URL and hands it back to the dashboard
+  // window that opened this popup, then closes itself.
+  (function () {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    const state = params.get('state');
+    const error = params.get('error');
+    const errorDescription = params.get('error_description');
+
+    if (window.opener) {
+      window.opener.postMessage(
+        { source: 'linkedin-oauth', code, state, error, errorDescription },
+        window.location.origin
+      );
+      document.getElementById('msg').textContent = 'Verbunden — dieses Fenster kann geschlossen werden.';
+      setTimeout(() => window.close(), 500);
+    } else {
+      document.getElementById('msg').textContent = error
+        ? 'LinkedIn-Anmeldung fehlgeschlagen: ' + (errorDescription || error)
+        : 'Kein Opener-Fenster gefunden — bitte den Vorgang erneut im Dashboard starten.';
+    }
+  })();
+</script>
+</body>
+</html>

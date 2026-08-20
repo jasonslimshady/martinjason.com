@@ -915,6 +915,8 @@
       <div class="sec-hd">
         <span class="sec-ttl">LinkedIn</span>
         <div style="display:flex;gap:.5rem;align-items:center">
+          <span id="li-conn-status" style="font-size:.75rem;color:var(--ink-s)"></span>
+          <button class="btn btn--ghost btn--sm" id="btn-li-connect">LinkedIn verbinden</button>
           <button class="btn btn--primary btn--sm" id="btn-new-post">+ Neuer Entwurf</button>
         </div>
       </div>
@@ -1542,7 +1544,7 @@ async function showApp(user){
     return;
   }
   hideAllScreens(); $('screen-app').hidden=false;
-  loadStats(); loadCRM(); loadTimeEntries(); loadProjectOverview(); loadInvoices(); loadInvReminders(); loadQuotes(); loadContracts(); loadLinkedInPosts(); subscribeLinkedInRealtime();
+  loadStats(); loadCRM(); loadTimeEntries(); loadProjectOverview(); loadInvoices(); loadInvReminders(); loadQuotes(); loadContracts(); loadLinkedInPosts(); subscribeLinkedInRealtime(); liCheckConnection();
   await loadProjects();
   restoreTimer(); // pick up a timer that survived a reload / tab close
   // Restore last active panel (persists across reloads)
@@ -7109,7 +7111,10 @@ function liRowHtml(p){
 function liRowActionButtons(p){
   const btns = [`<button type="button" class="btn btn--ghost btn--sm" data-act="edit" data-id="${p.id}">Bearbeiten</button>`];
   if(p.status==='draft') btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="approve" data-id="${p.id}">Freigeben</button>`);
-  if(p.status==='approved') btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="posted" data-id="${p.id}">Als gepostet markieren</button>`);
+  if(p.status==='approved'){
+    btns.push(`<button type="button" class="btn btn--primary btn--sm" data-act="publish" data-id="${p.id}">Jetzt auf LinkedIn posten</button>`);
+    btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="posted" data-id="${p.id}" title="Nur verwenden, falls der Post bereits woanders veröffentlicht wurde">Nur Status setzen</button>`);
+  }
   if(p.status!=='rejected' && p.status!=='posted') btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="reject" data-id="${p.id}" style="color:var(--red)">Ablehnen</button>`);
   if(p.status==='rejected') btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="restore" data-id="${p.id}">Zu Entwurf</button>`);
   return btns.join('');
@@ -7126,10 +7131,136 @@ function wireLiRows(wrap){
     const act = btn.dataset.act;
     if(act==='edit') openEditPost(id);
     else if(act==='approve') changePostStatus(id,'approved');
+    else if(act==='publish') publishPostToLinkedIn(id, btn);
     else if(act==='posted') changePostStatus(id,'posted');
     else if(act==='reject') changePostStatus(id,'rejected');
     else if(act==='restore') changePostStatus(id,'draft');
   }));
+}
+
+// ── Real LinkedIn publish (calls /api/linkedin-publish, which calls the
+// actual LinkedIn Posts API) — this is what "Als gepostet markieren" used
+// to fake by only updating Supabase. ──
+async function publishPostToLinkedIn(id, btnEl){
+  const { data:{ session } } = await sb.auth.getSession();
+  if(!session){ toast('Bitte neu anmelden.','err'); return; }
+  if(btnEl){ btnEl.disabled = true; btnEl.textContent = 'Wird veröffentlicht…'; }
+  try{
+    const res = await fetch('/api/linkedin-publish', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer '+session.access_token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
+    const data = await res.json().catch(()=>({}));
+    if(data.code === 'not_connected'){
+      toast('LinkedIn ist noch nicht verbunden — oben auf "LinkedIn verbinden" klicken.','err');
+      return;
+    }
+    if(data.code === 'reauth_required'){
+      toast('LinkedIn-Verbindung abgelaufen — bitte neu verbinden.','err');
+      liUpdateConnStatus();
+      return;
+    }
+    if(!res.ok && !data.results){
+      toast('Veröffentlichen fehlgeschlagen: '+(data.error||res.statusText),'err');
+      return;
+    }
+    const results = data.results||[];
+    const okList = results.filter(r=>r.ok).map(r=>r.target);
+    const failList = results.filter(r=>!r.ok);
+    if(okList.length) toast('Veröffentlicht auf: '+okList.join(', '),'ok');
+    failList.forEach(r=>toast(`${r.target}: ${r.error}`,'err'));
+    if(okList.length) loadLinkedInPosts();
+  }catch(e){
+    toast('Veröffentlichen fehlgeschlagen: '+e.message,'err');
+  }finally{
+    if(btnEl){ btnEl.disabled = false; btnEl.textContent = 'Jetzt auf LinkedIn posten'; }
+  }
+}
+
+// ── LinkedIn OAuth connect (one-time; see api/linkedin-token.js) ──
+// Requesting only the personal-profile scope by default. Once LinkedIn
+// approves the "Community Management API" product for company-page
+// posting, add ' w_organization_social' to LI_OAUTH_SCOPE below.
+const LI_OAUTH_SCOPE = 'openid profile w_member_social';
+
+function liUpdateConnStatus(){
+  const el = $('li-conn-status');
+  if(!el) return;
+  if(!CONFIG.LINKEDIN_CLIENT_ID){
+    el.textContent = 'LinkedIn nicht konfiguriert';
+    return;
+  }
+  el.textContent = liConnected ? 'LinkedIn verbunden ✓' : '';
+}
+
+let liConnected = false;
+
+async function liCheckConnection(){
+  try{
+    const { data:{ session } } = await sb.auth.getSession();
+    if(!session) return;
+    const res = await fetch('/api/linkedin-token', {
+      headers: { 'Authorization': 'Bearer '+session.access_token },
+    });
+    liConnected = res.ok;
+  }catch(e){ liConnected = false; }
+  liUpdateConnStatus();
+}
+
+$('btn-li-connect').addEventListener('click', liConnect);
+
+async function liConnect(){
+  if(!CONFIG.LINKEDIN_CLIENT_ID){
+    toast('LINKEDIN_CLIENT_ID fehlt in config.js — siehe Kommentar dort für die Einrichtung.','err');
+    return;
+  }
+  const { data:{ session } } = await sb.auth.getSession();
+  if(!session){ toast('Bitte neu anmelden.','err'); return; }
+
+  const redirectUri = window.location.origin + '/linkedin-callback.html';
+  const state = Math.random().toString(36).slice(2);
+  const authUrl = 'https://www.linkedin.com/oauth/v2/authorization?' + new URLSearchParams({
+    response_type: 'code',
+    client_id: CONFIG.LINKEDIN_CLIENT_ID,
+    redirect_uri: redirectUri,
+    scope: LI_OAUTH_SCOPE,
+    state,
+  });
+
+  const popup = window.open(authUrl, 'linkedin-oauth', 'width=520,height=650');
+  if(!popup){ toast('Popup wurde blockiert — bitte Popups für diese Seite erlauben.','err'); return; }
+
+  try{
+    const { code } = await new Promise((resolve, reject) => {
+      const timer = setInterval(() => { if(popup.closed){ clearInterval(timer); reject(new Error('Fenster geschlossen')); } }, 500);
+      window.addEventListener('message', function onMsg(e){
+        if(e.origin !== window.location.origin || e.data?.source !== 'linkedin-oauth') return;
+        window.removeEventListener('message', onMsg);
+        clearInterval(timer);
+        if(e.data.error){ reject(new Error(e.data.errorDescription || e.data.error)); return; }
+        if(e.data.state !== state){ reject(new Error('State stimmt nicht überein')); return; }
+        resolve(e.data);
+      });
+    });
+
+    const res = await fetch('/api/linkedin-token', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer '+session.access_token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, redirect_uri: redirectUri }),
+    });
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok) throw new Error(data.error||res.statusText);
+
+    liConnected = true;
+    liUpdateConnStatus();
+    toast('LinkedIn verbunden — Profil-Posts sind jetzt live möglich.','ok');
+    if(data.has_refresh_token === false){
+      toast('Hinweis: LinkedIn hat keinen Refresh-Token geliefert — die Verbindung hält dann nur ~60 Tage und muss danach neu hergestellt werden.','err');
+    }
+  }catch(e){
+    toast('LinkedIn-Anmeldung fehlgeschlagen: '+e.message,'err');
+  }
 }
 
 async function changePostStatus(id, status){

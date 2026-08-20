@@ -222,4 +222,20 @@ Datum: {{contract_date}}</p>
   // ----------------------------------------------------------
   GMAIL_CLIENT_ID: '672383429326-fve9t1ak2haf7ll2he2r54rkvohtqugt.apps.googleusercontent.com',
 
+  // ----------------------------------------------------------
+  //  LinkedIn OAuth (publishing drafts from the dashboard)
+  //  1. www.linkedin.com/developers/apps → create an app.
+  //  2. Products tab → request "Sign In with LinkedIn using OpenID
+  //     Connect" and "Share on LinkedIn" (both self-serve, instant).
+  //     For company-page posting also request "Community Management
+  //     API" (needs LinkedIn review) and set LINKEDIN_ORGANIZATION_ID
+  //     in Vercel to your page's numeric ID.
+  //  3. Auth tab → add this exact redirect URL:
+  //       https://dashboard.martinjason.com/linkedin-callback.html
+  //     (and http://localhost:8080/linkedin-callback.html for local dev)
+  //  4. Paste the Client ID below. The Client Secret goes server-side
+  //     only, as LINKEDIN_CLIENT_SECRET in Vercel — see api/linkedin-token.js.
+  // ----------------------------------------------------------
+  LINKEDIN_CLIENT_ID: '',
+
 };
