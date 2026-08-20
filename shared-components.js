@@ -66,7 +66,7 @@
 
   var ARTICLE_FEATURED_PROMO_HTML =
     '<div class="article-featured-promo">' +
-    '  <a class="blog-featured reveal" href="/?playvsl=1#video">' +
+    '  <a class="blog-featured blog-featured--vsl reveal" href="/?playvsl=1#video">' +
     '    <div class="blog-featured__copy">' +
     '      <div class="blog-featured__meta">' +
     '        <span class="blog-card__tag">Training</span>' +
