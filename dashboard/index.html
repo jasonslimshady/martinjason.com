@@ -7339,8 +7339,8 @@ function liMediaPreviewMeta(media){
 
 function liRowActionButtons(p){
   const btns = [];
-  if(p.status!=='posted') btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="edit" data-id="${p.id}">Bearbeiten</button>`);
   if(p.status==='draft') btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="approve" data-id="${p.id}">Freigeben</button>`);
+  if(p.status!=='posted') btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="edit" data-id="${p.id}">Bearbeiten</button>`);
   if(p.status==='approved'){
     btns.push(`<button type="button" class="btn btn--primary btn--sm" data-act="publish" data-id="${p.id}">Jetzt auf LinkedIn posten</button>`);
     btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="posted" data-id="${p.id}" title="Nur verwenden, falls der Post bereits woanders veröffentlicht wurde">Nur Status setzen</button>`);
