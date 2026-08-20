@@ -229,12 +229,16 @@ export async function publishToLinkedIn(serviceKey, post) {
       }
       const urn = r.headers.get('x-restli-id') || r.headers.get('x-linkedin-id') || null;
 
+      let firstCommentError = null;
       if (urn && post.first_comment && post.first_comment.trim()) {
         try { await postFirstComment(access_token, t.author, urn, post.first_comment.trim()); }
-        catch (e) { console.warn('linkedin first_comment failed:', e.message); }
+        catch (e) {
+          console.warn('linkedin first_comment failed:', e.message);
+          firstCommentError = e.message;
+        }
       }
 
-      results.push({ target: t.label, ok: true, urn });
+      results.push({ target: t.label, ok: true, urn, firstCommentError });
     } catch (e) {
       results.push({ target: t.label, ok: false, error: e.message });
     }
@@ -242,6 +246,12 @@ export async function publishToLinkedIn(serviceKey, post) {
   return results;
 }
 
+// Comments API — technically part of LinkedIn's "Community Management API"
+// product family (learn.microsoft.com/.../community-management/shares/comments-api),
+// the same gated product that company-page posting needs. If this keeps
+// failing with a 403/PERMISSION-type error even though the post itself
+// published fine, the app most likely only has "Share on LinkedIn"
+// approved and needs Community Management API review for commenting too.
 async function postFirstComment(accessToken, actor, shareUrn, text) {
   const r = await fetch(`https://api.linkedin.com/rest/socialActions/${encodeURIComponent(shareUrn)}/comments`, {
     method: 'POST',
@@ -253,7 +263,10 @@ async function postFirstComment(accessToken, actor, shareUrn, text) {
     },
     body: JSON.stringify({ actor, object: shareUrn, message: { text } }),
   });
-  if (!r.ok) throw new Error('Erster Kommentar fehlgeschlagen: ' + (await r.text()));
+  if (!r.ok) {
+    const bodyText = await r.text();
+    throw new Error(`Erster Kommentar fehlgeschlagen (${r.status}): ${bodyText}`);
+  }
 }
 
 // ── Recurring posts: compute the next occurrence's scheduled_for from a

@@ -306,21 +306,18 @@
     }
     .li-day-group{margin-bottom:1.5rem}
     .li-day-hd{font-size:.8125rem;font-weight:600;color:var(--ink-m);margin-bottom:.625rem;text-transform:capitalize}
-    .li-day-list{display:flex;flex-direction:column;gap:.75rem}
-    .lipost-row{display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:1rem;cursor:pointer;transition:all var(--fast)}
+    .li-day-list{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;align-items:start}
+    @media (max-width:1180px){ .li-day-list{grid-template-columns:repeat(2,1fr)} }
+    @media (max-width:680px){ .li-day-list{grid-template-columns:1fr} }
+    .lipost-row{display:flex;flex-direction:column;gap:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:1rem;cursor:pointer;transition:all var(--fast)}
     .lipost-row:hover{box-shadow:var(--shadow);border-color:var(--border-s)}
-    .lipost-row-body{flex:1;min-width:0}
-    .lipost-row-side{flex-shrink:0;width:180px;display:flex;flex-direction:column;align-items:flex-end;gap:.625rem}
-    .lipost-row-meta{display:flex;align-items:center;gap:.5rem}
+    .lipost-row-body{min-width:0}
+    .lipost-row-side{display:flex;flex-direction:column;gap:.625rem}
+    .lipost-row-meta{display:flex;align-items:center;justify-content:space-between;gap:.5rem}
     .lipost-row-time{font-size:.8125rem;font-weight:600;color:var(--ink);cursor:pointer;border-bottom:1px dashed var(--border-s);padding:0 .125rem}
     .lipost-row-time:hover{color:var(--accent)}
-    .lipost-row-actions{display:flex;flex-direction:column;gap:.375rem;width:100%}
-    @media (max-width:760px){
-      .lipost-row{flex-direction:column}
-      .lipost-row-side{width:auto;align-items:stretch}
-      .lipost-row-meta{justify-content:space-between}
-      .lipost-row-actions{flex-direction:row;flex-wrap:wrap}
-    }
+    .lipost-row-actions{display:grid;grid-template-columns:1fr 1fr;gap:.375rem}
+    .lipost-row-actions .btn{width:100%}
     /* LinkedIn-style post card */
     .li-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
     .li-card-hd{display:flex;gap:.625rem;padding:.75rem .875rem .5rem}
@@ -653,12 +650,12 @@
       <span class="nav-badge" id="badge-contracts" hidden>0</span>
     </button>
     <div class="sb-sec">Marketing</div>
-    <button class="nav-item" data-panel="klaviyo">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="3.5" width="13" height="9" rx="1.5"/><path d="M1.5 5.5l6.5 4 6.5-4"/></svg>Klaviyo
-    </button>
     <button class="nav-item" data-panel="linkedin">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="1.5" width="13" height="13" rx="2"/><circle cx="5" cy="5.2" r=".6" fill="currentColor" stroke="none"/><path d="M5 7.2v4.3"/><path d="M8 11.5v-2.6c0-1.1.7-1.8 1.7-1.8s1.6.7 1.6 1.8v2.6M8 7.2v4.3"/></svg>LinkedIn
       <span class="nav-badge" id="badge-linkedin" hidden>0</span>
+    </button>
+    <button class="nav-item" data-panel="klaviyo">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="3.5" width="13" height="9" rx="1.5"/><path d="M1.5 5.5l6.5 4 6.5-4"/></svg>Klaviyo
     </button>
     <div class="sb-spacer"></div>
     <button class="nav-item" id="btn-logout" title="Abmelden">
@@ -7452,6 +7449,7 @@ async function publishPostToLinkedIn(id, btnEl){
     const failList = results.filter(r=>!r.ok);
     if(okList.length) toast('Veröffentlicht auf: '+okList.join(', '),'ok');
     failList.forEach(r=>toast(`${r.target}: ${r.error}`,'err'));
+    results.filter(r=>r.firstCommentError).forEach(r=>toast(`Erster Kommentar (${r.target}) fehlgeschlagen: ${r.firstCommentError}`,'err'));
     if(okList.length) loadLinkedInPosts();
   }catch(e){
     toast('Veröffentlichen fehlgeschlagen: '+e.message,'err');
