@@ -6,26 +6,24 @@
 //  it never called LinkedIn. This endpoint makes the real API calls.
 //
 //  POST { id }  (id = row id in the "posts" table)
-//    → publishes post.content to the personal profile (always) and,
-//      if LINKEDIN_ORGANIZATION_ID is configured, to the company page
-//      too. Requires a prior one-time connect via /api/linkedin-token.
+//    → publishes post.content (+ media + first_comment) to the personal
+//      profile (always) and, if LINKEDIN_ORGANIZATION_ID is configured,
+//      to the company page too. Requires a prior one-time connect via
+//      /api/linkedin-token.
 //    → on success (of at least one target) the post row is updated:
-//      status='posted', posted_at=now().
+//      status='posted', posted_at=now(); if the post has a recurring_rule,
+//      the next occurrence is inserted as a new draft row.
 //    → returns { results: [{ target, ok, urn|error }] } so the caller
 //      can show exactly what happened per target.
 //
+//  Manual trigger only — /api/linkedin-cron.js is what makes this happen
+//  automatically at each post's scheduled_for time.
 //  See /api/linkedin-token.js for the one-time setup steps.
 // ============================================================
 
-const SUPABASE_URL       = process.env.SUPABASE_URL || 'https://blibykmyvkdtdvgzuwyr.supabase.co';
-const ALLOWED_EMAIL      = process.env.DASHBOARD_ALLOWED_EMAIL || 'jasonmartinde@gmail.com';
-const LINKEDIN_ORG_ID    = process.env.LINKEDIN_ORGANIZATION_ID || '';
-// LinkedIn cuts a new API version every month (format YYYYMM) and only keeps
-// each one active for ~12-24 months — an old hardcoded value WILL eventually
-// start failing with "Requested version ... is not active". If that happens
-// again, either bump the fallback below or set LINKEDIN_API_VERSION in Vercel
-// without a redeploy. Current versions: https://learn.microsoft.com/en-us/linkedin/marketing/versioning
-const LINKEDIN_API_VERSION = process.env.LINKEDIN_API_VERSION || '202601';
+import { SUPABASE_URL, sbHeaders, publishToLinkedIn, nextOccurrence } from './_lib/linkedin.js';
+
+const ALLOWED_EMAIL = process.env.DASHBOARD_ALLOWED_EMAIL || 'jasonmartinde@gmail.com';
 
 export default async function handler(req, res) {
   const origin = req.headers.origin || '';
@@ -62,88 +60,23 @@ export default async function handler(req, res) {
   const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
   if (!body.id) return res.status(400).json({ error: 'id fehlt' });
 
-  const sbHeaders = {
-    apikey: serviceKey,
-    Authorization: `Bearer ${serviceKey}`,
-    'Content-Type': 'application/json',
-  };
+  const headers = sbHeaders(serviceKey);
 
   try {
-    // ── Load the post ──
-    const postRes = await fetch(`${SUPABASE_URL}/rest/v1/posts?id=eq.${encodeURIComponent(body.id)}&select=*`, { headers: sbHeaders });
+    const postRes = await fetch(`${SUPABASE_URL}/rest/v1/posts?id=eq.${encodeURIComponent(body.id)}&select=*`, { headers });
     if (!postRes.ok) throw new Error('Post konnte nicht geladen werden');
     const post = (await postRes.json())[0];
     if (!post) return res.status(404).json({ error: 'Post nicht gefunden' });
     if (!post.content || !post.content.trim()) return res.status(400).json({ error: 'Post hat keinen Text' });
 
-    // ── Load the stored LinkedIn access token (mint/refresh via linkedin-token's own logic) ──
-    const tokenRes = await fetch(`${SUPABASE_URL}/rest/v1/app_tokens?id=eq.linkedin&select=token`, { headers: sbHeaders });
-    const rawToken = tokenRes.ok ? (await tokenRes.json())[0]?.token : null;
-    if (!rawToken) return res.status(409).json({ error: 'LinkedIn ist nicht verbunden', code: 'not_connected' });
-    let stored;
-    try { stored = JSON.parse(rawToken); } catch { stored = null; }
-    if (!stored?.access_token) return res.status(409).json({ error: 'LinkedIn ist nicht verbunden', code: 'not_connected' });
-
-    let accessToken = stored.access_token;
-    if (stored.expires_at && Date.now() >= stored.expires_at - 60 * 1000) {
-      // Ask /api/linkedin-token to refresh it (keeps the refresh logic in one place)
-      const refreshRes = await fetch(`${req.headers['x-forwarded-proto'] || 'https'}://${req.headers.host}/api/linkedin-token`, {
-        headers: { Authorization: `Bearer ${jwt}` },
-      });
-      const refreshed = await refreshRes.json().catch(() => ({}));
-      if (!refreshRes.ok) {
-        return res.status(refreshRes.status).json(refreshed);
+    let results;
+    try {
+      results = await publishToLinkedIn(serviceKey, post);
+    } catch (e) {
+      if (e.code === 'not_connected' || e.code === 'reauth_required') {
+        return res.status(409).json({ error: e.message, code: e.code });
       }
-      accessToken = refreshed.access_token;
-    }
-
-    // ── Build the list of publish targets ──
-    const targets = [{ label: 'Profil', author: stored.person_urn }];
-    if (LINKEDIN_ORG_ID) {
-      targets.push({ label: 'Unternehmensseite', author: `urn:li:organization:${LINKEDIN_ORG_ID}` });
-    }
-
-    async function publishTo(author) {
-      const r = await fetch('https://api.linkedin.com/rest/posts', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-          'LinkedIn-Version': LINKEDIN_API_VERSION,
-          'X-Restli-Protocol-Version': '2.0.0',
-        },
-        body: JSON.stringify({
-          author,
-          commentary: post.content,
-          visibility: 'PUBLIC',
-          distribution: {
-            feedDistribution: 'MAIN_FEED',
-            targetEntities: [],
-            thirdPartyDistributionChannels: [],
-          },
-          lifecycleState: 'PUBLISHED',
-          isReshareDisabledByAuthor: false,
-        }),
-      });
-      if (!r.ok) {
-        const errBody = await r.json().catch(() => ({}));
-        throw new Error(errBody.message || `LinkedIn ${r.status} ${r.statusText}`);
-      }
-      return r.headers.get('x-restli-id') || r.headers.get('x-linkedin-id') || null;
-    }
-
-    const results = [];
-    for (const t of targets) {
-      if (!t.author) {
-        results.push({ target: t.label, ok: false, error: 'Kein Ziel-URN vorhanden' });
-        continue;
-      }
-      try {
-        const urn = await publishTo(t.author);
-        results.push({ target: t.label, ok: true, urn });
-      } catch (e) {
-        results.push({ target: t.label, ok: false, error: e.message });
-      }
+      throw e;
     }
 
     const anyOk = results.some(r => r.ok);
@@ -154,17 +87,35 @@ export default async function handler(req, res) {
       if (firstUrn) patch.linkedin_post_urn = firstUrn;
       let patchRes = await fetch(`${SUPABASE_URL}/rest/v1/posts?id=eq.${encodeURIComponent(body.id)}`, {
         method: 'PATCH',
-        headers: { ...sbHeaders, Prefer: 'return=minimal' },
+        headers: { ...headers, Prefer: 'return=minimal' },
         body: JSON.stringify(patch),
       });
       if (!patchRes.ok && firstUrn) {
-        // linkedin_post_urn column may not exist yet (migration not run) — retry without it
         delete patch.linkedin_post_urn;
         await fetch(`${SUPABASE_URL}/rest/v1/posts?id=eq.${encodeURIComponent(body.id)}`, {
           method: 'PATCH',
-          headers: { ...sbHeaders, Prefer: 'return=minimal' },
+          headers: { ...headers, Prefer: 'return=minimal' },
           body: JSON.stringify(patch),
         }).catch(() => {});
+      }
+
+      if (post.recurring_rule && post.scheduled_for) {
+        const next = nextOccurrence(post.scheduled_for, post.recurring_rule);
+        if (next) {
+          await fetch(`${SUPABASE_URL}/rest/v1/posts`, {
+            method: 'POST',
+            headers: { ...headers, Prefer: 'return=minimal' },
+            body: JSON.stringify({
+              content: post.content,
+              media: post.media || [],
+              first_comment: post.first_comment || null,
+              scheduled_for: next,
+              status: 'approved',
+              recurring_rule: post.recurring_rule,
+              recurring_parent_id: post.recurring_parent_id || post.id,
+            }),
+          }).catch(() => {});
+        }
       }
     }
 

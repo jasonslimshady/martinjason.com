@@ -10,5 +10,8 @@
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
       ]
     }
+  ],
+  "crons": [
+    { "path": "/api/linkedin-cron", "schedule": "*/15 * * * *" }
   ]
 }

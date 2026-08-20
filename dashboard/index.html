@@ -309,27 +309,45 @@
     .li-day-list{display:flex;flex-direction:column;gap:.75rem}
     .lipost-row{display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:1rem;cursor:pointer;transition:all var(--fast)}
     .lipost-row:hover{box-shadow:var(--shadow);border-color:var(--border-s)}
-    .lipost-row-meta{flex-shrink:0;width:110px;display:flex;flex-direction:column;gap:.5rem}
-    .lipost-row-time{font-size:.8125rem;font-weight:600;color:var(--ink)}
-    .lipost-row-actions{flex-shrink:0;display:flex;flex-direction:column;gap:.375rem;width:168px}
     .lipost-row-body{flex:1;min-width:0}
+    .lipost-row-side{flex-shrink:0;width:180px;display:flex;flex-direction:column;align-items:flex-end;gap:.625rem}
+    .lipost-row-meta{display:flex;align-items:center;gap:.5rem}
+    .lipost-row-time{font-size:.8125rem;font-weight:600;color:var(--ink);cursor:pointer;border-bottom:1px dashed var(--border-s);padding:0 .125rem}
+    .lipost-row-time:hover{color:var(--accent)}
+    .lipost-row-actions{display:flex;flex-direction:column;gap:.375rem;width:100%}
     @media (max-width:760px){
       .lipost-row{flex-direction:column}
-      .lipost-row-meta{width:auto;flex-direction:row;align-items:center}
-      .lipost-row-actions{width:auto;flex-direction:row;flex-wrap:wrap}
+      .lipost-row-side{width:auto;align-items:stretch}
+      .lipost-row-meta{justify-content:space-between}
+      .lipost-row-actions{flex-direction:row;flex-wrap:wrap}
     }
     /* LinkedIn-style post card */
     .li-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
     .li-card-hd{display:flex;gap:.625rem;padding:.75rem .875rem .5rem}
-    .li-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#0A66C2,#004182);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1rem;flex-shrink:0}
+    .li-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#0A66C2,#004182);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1rem;flex-shrink:0;object-fit:cover}
     .li-author-name{font-size:.8125rem;font-weight:600;color:#000;line-height:1.3}
     .li-author-headline{font-size:.75rem;color:rgba(0,0,0,.6);line-height:1.3}
     .li-author-time{font-size:.6875rem;color:rgba(0,0,0,.6);display:flex;align-items:center;gap:.25rem}
     .li-card-body{padding:0 .875rem .625rem;font-size:.875rem;line-height:1.4;color:rgba(0,0,0,.9);white-space:pre-wrap;word-break:break-word}
     .li-hashtag{color:#0A66C2;font-weight:600}
+    .li-card-media{border-top:1px solid rgba(0,0,0,.08);background:#000;display:flex;align-items:center;justify-content:center;max-height:280px;overflow:hidden}
+    .li-card-media img,.li-card-media video{width:100%;max-height:280px;object-fit:contain;display:block}
     .li-card-stats{display:flex;justify-content:space-between;padding:.3rem .875rem;font-size:.6875rem;color:rgba(0,0,0,.6);border-top:1px solid rgba(0,0,0,.08)}
     .li-card-actions{display:flex;border-top:1px solid rgba(0,0,0,.08)}
     .li-card-actions button{flex:1;display:flex;align-items:center;justify-content:center;gap:.375rem;padding:.5rem 0;font-size:.75rem;font-weight:600;color:rgba(0,0,0,.6);background:none;border:none;cursor:default}
+    /* Post editor: media picker, recurring, first comment */
+    .li-media-picker{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.5rem}
+    .li-media-thumb{position:relative;width:64px;height:64px;border-radius:var(--r-sm);overflow:hidden;border:1px solid var(--border);background:var(--surface-2)}
+    .li-media-thumb img,.li-media-thumb video{width:100%;height:100%;object-fit:cover}
+    .li-media-thumb .li-media-del{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;border:none;font-size:11px;line-height:18px;text-align:center;cursor:pointer;padding:0}
+    .li-media-add{width:64px;height:64px;border-radius:var(--r-sm);border:1.5px dashed var(--border-s);display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:var(--ink-s);cursor:pointer;background:none}
+    .li-media-add:hover{border-color:var(--accent);color:var(--accent)}
+    .li-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+    .li-recurring-box,.li-fc-box{margin-top:.625rem;padding:.75rem;background:var(--surface-2);border-radius:var(--r-sm);display:flex;flex-direction:column;gap:.625rem}
+    .li-weekday-picker{display:flex;gap:.25rem;flex-wrap:wrap}
+    .li-weekday-btn{width:32px;height:32px;border-radius:50%;border:1px solid var(--border-s);background:var(--surface);font-size:.6875rem;font-weight:600;color:var(--ink-m);cursor:pointer}
+    .li-weekday-btn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+    .lipost-time-input{font-size:.8125rem;font-weight:600;color:var(--ink);border:1px solid var(--border-s);border-radius:6px;padding:.125rem .25rem;background:var(--surface);width:80px}
     .li-status-badge{display:inline-flex;align-items:center;padding:.1875rem .5rem;border-radius:var(--r-pill);font-size:.6875rem;font-weight:600}
     .li-editor-grid{display:grid;grid-template-columns:1fr 300px;gap:1.25rem}
     @media (max-width:720px){ .li-editor-grid{grid-template-columns:1fr} }
@@ -1107,6 +1125,56 @@
               <label class="fl">Geplant für</label>
               <input class="fi" id="mpost-scheduled" type="datetime-local" oninput="renderPostPreview()" />
             </div>
+
+            <div class="fg">
+              <label class="fl">Medien</label>
+              <div class="li-media-picker" id="mpost-media-picker"></div>
+              <input type="file" id="mpost-media-input" accept="image/*,video/*" multiple hidden />
+            </div>
+
+            <div class="fg">
+              <div class="li-toggle-row">
+                <label class="fl" style="margin:0">Wiederkehrend posten</label>
+                <label style="display:flex;align-items:center;gap:.375rem;font-size:.8125rem;cursor:pointer"><input type="checkbox" id="mpost-recurring-toggle" onchange="toggleRecurringBox()"> An</label>
+              </div>
+              <div class="li-recurring-box" id="mpost-recurring-box" style="display:none">
+                <div class="g2">
+                  <div class="fg"><label class="fl">Frequenz</label>
+                    <select class="fi" id="mpost-rec-freq" onchange="renderRecWeekdayVisibility()">
+                      <option value="daily">Täglich</option>
+                      <option value="weekly" selected>Wöchentlich</option>
+                      <option value="monthly">Monatlich</option>
+                    </select>
+                  </div>
+                  <div class="fg"><label class="fl">Alle X Perioden</label><input class="fi" id="mpost-rec-interval" type="number" min="1" value="1" /></div>
+                </div>
+                <div class="fg" id="mpost-rec-weekday-row">
+                  <label class="fl">Wochentage</label>
+                  <div class="li-weekday-picker" id="mpost-rec-weekdays">
+                    <button type="button" class="li-weekday-btn" data-d="0">Mo</button>
+                    <button type="button" class="li-weekday-btn" data-d="1">Di</button>
+                    <button type="button" class="li-weekday-btn" data-d="2">Mi</button>
+                    <button type="button" class="li-weekday-btn" data-d="3">Do</button>
+                    <button type="button" class="li-weekday-btn" data-d="4">Fr</button>
+                    <button type="button" class="li-weekday-btn" data-d="5">Sa</button>
+                    <button type="button" class="li-weekday-btn" data-d="6">So</button>
+                  </div>
+                </div>
+                <div class="fg"><label class="fl">Endet am (optional)</label><input class="fi" id="mpost-rec-until" type="date" /></div>
+                <p style="font-size:.75rem;color:var(--ink-s);margin:0">Die Uhrzeit des Feldes „Geplant für“ oben gilt für jede Wiederholung. Nach jeder Veröffentlichung wird automatisch der nächste Termin als neuer Entwurf angelegt.</p>
+              </div>
+            </div>
+
+            <div class="fg">
+              <div class="li-toggle-row">
+                <label class="fl" style="margin:0">Ersten Kommentar setzen</label>
+                <button type="button" class="btn btn--ghost btn--sm" id="mpost-fc-toggle-btn" onclick="toggleFirstCommentBox()">+ Hinzufügen</button>
+              </div>
+              <div class="li-fc-box" id="mpost-fc-box" style="display:none">
+                <textarea class="fi" id="mpost-first-comment" rows="2" placeholder="Wird direkt nach dem Post als erster Kommentar veröffentlicht…" oninput="renderPostPreview()"></textarea>
+              </div>
+            </div>
+
             <div class="fg" id="mpost-status-row" style="display:none">
               <label class="fl">Status</label>
               <div id="mpost-status-tag"></div>
@@ -1119,7 +1187,8 @@
         </div>
       </div>
       <div class="modal-ft">
-        <button type="button" class="btn btn--ghost btn--sm" id="mpost-reject-btn" onclick="rejectFromModal()" style="margin-right:auto">Ablehnen</button>
+        <button type="button" class="btn btn--ghost btn--sm" id="mpost-delete-btn" onclick="deletePostFromModal()" style="margin-right:auto;color:var(--red)">Löschen</button>
+        <button type="button" class="btn btn--ghost btn--sm" id="mpost-reject-btn" onclick="rejectFromModal()">Ablehnen</button>
         <button type="button" class="btn btn--ghost btn--sm" onclick="closeModal('ov-post')">Abbrechen</button>
         <button type="submit" class="btn btn--primary btn--sm" id="mpost-save">Entwurf speichern</button>
       </div>
@@ -7032,6 +7101,20 @@ document.querySelectorAll('[data-li-range]').forEach(btn => btn.addEventListener
 
 $('btn-new-post').addEventListener('click', () => openNewPost());
 
+let liMediaUrlCache = {};
+async function liResolveMediaUrls(posts){
+  const paths = new Set();
+  posts.forEach(p=>(p.media||[]).forEach(m=>{ if(m.path && !liMediaUrlCache[m.path]) paths.add(m.path); }));
+  if(!paths.size) return;
+  const results = await Promise.all([...paths].map(async path=>{
+    const { data } = await sb.storage.from('post-media').createSignedUrl(path, 3600);
+    return [path, data?.signedUrl || null];
+  }));
+  let changed = false;
+  results.forEach(([path,url])=>{ if(url){ liMediaUrlCache[path]=url; changed = true; } });
+  if(changed) renderLinkedInPanel();
+}
+
 async function loadLinkedInPosts(){
   const { data, error } = await sb.from('posts').select('*').order('scheduled_for',{ascending:true,nullsFirst:false});
   if(error){ toast('Fehler beim Laden der Posts: '+error.message,'err'); return; }
@@ -7040,6 +7123,7 @@ async function loadLinkedInPosts(){
   $('badge-linkedin').textContent = draftCount;
   $('badge-linkedin').hidden = draftCount===0;
   renderLinkedInPanel();
+  liResolveMediaUrls(allPostsCache);
 }
 
 function renderLinkedInPanel(){
@@ -7151,12 +7235,24 @@ const LI_ICON_COMMENT = `<svg width="14" height="14" viewBox="0 0 16 16" fill="n
 const LI_ICON_REPOST = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 5h7v2.5M12 11H5V8.5M2.5 5L4 3.5 5.5 5M13.5 11L12 12.5 10.5 11"/></svg>`;
 const LI_ICON_SEND = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2L7 9M14 2l-4.5 12-3-5.5L2 5.5 14 2z"/></svg>`;
 
+const LI_PROFILE_PIC = 'https://martinjason.com/images/jason-martin-128x128.avif';
+
 // Renders a LinkedIn-style post card. `content` is the raw draft text.
+// `meta.media` is the post's media array ({type,path,name,previewUrl}).
 function liPostCard(content, meta){
   meta = meta || {};
+  const media = meta.media || [];
+  const img = media.find(m=>m.type==='image');
+  const vid = media.find(m=>m.type==='video');
+  let mediaHtml = '';
+  if(vid && vid.previewUrl){
+    mediaHtml = `<div class="li-card-media"><video src="${esc(vid.previewUrl)}" controls></video></div>`;
+  } else if(img && img.previewUrl){
+    mediaHtml = `<div class="li-card-media"><img src="${esc(img.previewUrl)}" alt=""></div>`;
+  }
   return `<div class="li-card">
     <div class="li-card-hd">
-      <div class="li-avatar">JM</div>
+      <img class="li-avatar" src="${LI_PROFILE_PIC}" alt="Jason Martin">
       <div style="flex:1;min-width:0">
         <div class="li-author-name">Jason Martin</div>
         <div class="li-author-headline">Gründer · Pacific Origins LLC</div>
@@ -7164,12 +7260,13 @@ function liPostCard(content, meta){
       </div>
     </div>
     <div class="li-card-body">${liFormatContent(content) || '<span style="color:rgba(0,0,0,.4)">Kein Text</span>'}</div>
+    ${mediaHtml}
     <div class="li-card-stats"><span>👍❤️ ${meta.reactions ?? ''}</span><span>${meta.comments!=null ? meta.comments+' Kommentare':''}</span></div>
     <div class="li-card-actions">
-      <button>${LI_ICON_LIKE} Gefällt mir</button>
-      <button>${LI_ICON_COMMENT} Kommentieren</button>
-      <button>${LI_ICON_REPOST} Teilen</button>
-      <button>${LI_ICON_SEND} Senden</button>
+      <button title="Gefällt mir" aria-label="Gefällt mir">${LI_ICON_LIKE}</button>
+      <button title="Kommentieren" aria-label="Kommentieren">${LI_ICON_COMMENT}</button>
+      <button title="Teilen" aria-label="Teilen">${LI_ICON_REPOST}</button>
+      <button title="Senden" aria-label="Senden">${LI_ICON_SEND}</button>
     </div>
   </div>`;
 }
@@ -7223,19 +7320,29 @@ function renderLiRejected(list){
 function liRowHtml(p){
   const time = p.scheduled_for ? fmtTimeOnly(p.scheduled_for) : '—';
   return `<div class="lipost-row" data-id="${p.id}">
-    <div class="lipost-row-meta">
-      <div class="lipost-row-time">${time}</div>
-      <span class="tag ${STATUS_TAG_P[p.status]||'tag--muted'}">${STATUS_LBL_P[p.status]||p.status}</span>
-    </div>
-    <div class="lipost-row-body">${liPostCard(p.content)}</div>
-    <div class="lipost-row-actions">
-      ${liRowActionButtons(p)}
+    <div class="lipost-row-body">${liPostCard(p.content, { media: liMediaPreviewMeta(p.media) })}</div>
+    <div class="lipost-row-side">
+      <div class="lipost-row-meta">
+        <span class="lipost-row-time" data-id="${p.id}" data-iso="${p.scheduled_for||''}" title="${p.scheduled_for?'Klicken zum Bearbeiten':'Kein Termin gesetzt'}">${time}</span>
+        <span class="tag ${STATUS_TAG_P[p.status]||'tag--muted'}">${STATUS_LBL_P[p.status]||p.status}</span>
+      </div>
+      <div class="lipost-row-actions">
+        ${liRowActionButtons(p)}
+      </div>
     </div>
   </div>`;
 }
 
+// Media rows only carry {type,path,name} — resolve a signed preview URL
+// lazily so the calendar list doesn't need to await anything to render.
+function liMediaPreviewMeta(media){
+  if(!media || !media.length) return [];
+  return media.map(m=>({ ...m, previewUrl: liMediaUrlCache[m.path] || null }));
+}
+
 function liRowActionButtons(p){
-  const btns = [`<button type="button" class="btn btn--ghost btn--sm" data-act="edit" data-id="${p.id}">Bearbeiten</button>`];
+  const btns = [];
+  if(p.status!=='posted') btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="edit" data-id="${p.id}">Bearbeiten</button>`);
   if(p.status==='draft') btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="approve" data-id="${p.id}">Freigeben</button>`);
   if(p.status==='approved'){
     btns.push(`<button type="button" class="btn btn--primary btn--sm" data-act="publish" data-id="${p.id}">Jetzt auf LinkedIn posten</button>`);
@@ -7243,13 +7350,18 @@ function liRowActionButtons(p){
   }
   if(p.status!=='rejected' && p.status!=='posted') btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="reject" data-id="${p.id}" style="color:var(--red)">Ablehnen</button>`);
   if(p.status==='rejected') btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="restore" data-id="${p.id}">Zu Entwurf</button>`);
+  btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="delete" data-id="${p.id}" style="color:var(--red)">Löschen</button>`);
   return btns.join('');
 }
 
 function wireLiRows(wrap){
   wrap.querySelectorAll('.lipost-row').forEach(row=>row.addEventListener('click', e=>{
-    if(e.target.closest('[data-act]')) return;
+    if(e.target.closest('[data-act]') || e.target.closest('.lipost-row-time')) return;
     openEditPost(row.dataset.id);
+  }));
+  wrap.querySelectorAll('.lipost-row-time').forEach(el=>el.addEventListener('click', e=>{
+    e.stopPropagation();
+    liEditTimeInline(el);
   }));
   wrap.querySelectorAll('[data-act]').forEach(btn=>btn.addEventListener('click', e=>{
     e.stopPropagation();
@@ -7261,7 +7373,51 @@ function wireLiRows(wrap){
     else if(act==='posted') changePostStatus(id,'posted');
     else if(act==='reject') changePostStatus(id,'rejected');
     else if(act==='restore') changePostStatus(id,'draft');
+    else if(act==='delete') deletePostRow(id);
   }));
+}
+
+// Turns the time label into an <input type="time"> in place; on change,
+// patches just the time-of-day portion of scheduled_for (kept in the
+// Asia/Singapore timezone the rest of the calendar renders in — that zone
+// has no DST, so a fixed +08:00 offset is always correct).
+function liEditTimeInline(el){
+  if(el.querySelector('input')) return;
+  const iso = el.dataset.iso;
+  if(!iso){ toast('Für diesen Post ist noch kein Termin gesetzt — im Bearbeiten-Dialog Datum + Uhrzeit festlegen.','err'); return; }
+  const id = el.dataset.id;
+  const dateStr = tzDateStr(new Date(iso));
+  const curTime = new Date(iso).toLocaleTimeString('de-DE',{timeZone:TZ,hour:'2-digit',minute:'2-digit',hour12:false});
+  const input = document.createElement('input');
+  input.type = 'time';
+  input.value = curTime;
+  input.className = 'lipost-time-input';
+  input.addEventListener('click', e=>e.stopPropagation());
+  input.addEventListener('blur', async ()=>{
+    const val = input.value;
+    if(val && val!==curTime){
+      const newIso = new Date(`${dateStr}T${val}:00+08:00`).toISOString();
+      const { error } = await sb.from('posts').update({ scheduled_for: newIso }).eq('id', id);
+      if(error){ toast('Uhrzeit konnte nicht geändert werden: '+error.message,'err'); return; }
+      toast('Uhrzeit aktualisiert.','ok');
+      loadLinkedInPosts();
+    } else {
+      el.textContent = fmtTimeOnly(iso);
+    }
+  });
+  input.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); input.blur(); } });
+  el.textContent = '';
+  el.appendChild(input);
+  input.focus();
+}
+
+async function deletePostRow(id){
+  if(!confirm('Diesen Post unwiderruflich löschen?')) return;
+  const { error } = await sb.from('posts').delete().eq('id', id);
+  if(error){ toast('Löschen fehlgeschlagen: '+error.message,'err'); return; }
+  toast('Post gelöscht.','ok');
+  if(editPostId===id) closeModal('ov-post');
+  loadLinkedInPosts();
 }
 
 // ── Real LinkedIn publish (calls /api/linkedin-publish, which calls the
@@ -7402,6 +7558,80 @@ async function changePostStatus(id, status){
 }
 
 // ── POST MODAL (create/edit) ──────────────────────────────────────────
+let editMediaList = [];
+let editRecWeekdays = new Set();
+
+document.querySelectorAll('.li-weekday-btn').forEach(btn=>btn.addEventListener('click', ()=>{
+  const d = Number(btn.dataset.d);
+  if(editRecWeekdays.has(d)) editRecWeekdays.delete(d); else editRecWeekdays.add(d);
+  btn.classList.toggle('active');
+}));
+
+function toggleRecurringBox(){
+  $('mpost-recurring-box').style.display = $('mpost-recurring-toggle').checked ? '' : 'none';
+}
+function renderRecWeekdayVisibility(){
+  $('mpost-rec-weekday-row').style.display = $('mpost-rec-freq').value==='weekly' ? '' : 'none';
+}
+function toggleFirstCommentBox(){
+  const box = $('mpost-fc-box');
+  const show = box.style.display==='none';
+  box.style.display = show ? '' : 'none';
+  $('mpost-fc-toggle-btn').textContent = show ? 'Entfernen' : '+ Hinzufügen';
+  if(!show){ $('mpost-first-comment').value=''; }
+  renderPostPreview();
+}
+
+function renderMediaPicker(){
+  const wrap = $('mpost-media-picker');
+  wrap.innerHTML = editMediaList.map((m,i)=>{
+    const inner = m.previewUrl
+      ? (m.type==='video' ? `<video src="${esc(m.previewUrl)}"></video>` : `<img src="${esc(m.previewUrl)}" alt="">`)
+      : '';
+    return `<div class="li-media-thumb">${inner}<button type="button" class="li-media-del" data-i="${i}" title="Entfernen">✕</button></div>`;
+  }).join('') + `<button type="button" class="li-media-add" id="mpost-media-add-btn" title="Medien hinzufügen">+</button>`;
+  wrap.querySelectorAll('.li-media-del').forEach(btn=>btn.addEventListener('click', e=>{
+    e.preventDefault();
+    editMediaList.splice(Number(btn.dataset.i),1);
+    renderMediaPicker();
+    renderPostPreview();
+  }));
+  $('mpost-media-add-btn').addEventListener('click', ()=>$('mpost-media-input').click());
+}
+
+$('mpost-media-input').addEventListener('change', async (e)=>{
+  const files = [...e.target.files];
+  e.target.value = '';
+  for(const file of files){
+    const type = file.type.startsWith('video') ? 'video' : 'image';
+    const path = `${crypto.randomUUID()}-${file.name}`.replace(/[^a-zA-Z0-9._-]/g,'_');
+    toast('Lade '+file.name+' hoch…','ok');
+    const { error } = await sb.storage.from('post-media').upload(path, file, { upsert:false });
+    if(error){ toast('Upload fehlgeschlagen: '+error.message,'err'); continue; }
+    const { data } = await sb.storage.from('post-media').createSignedUrl(path, 3600);
+    editMediaList.push({ type, path, name: file.name, previewUrl: data?.signedUrl||null });
+    if(data?.signedUrl) liMediaUrlCache[path] = data.signedUrl;
+  }
+  renderMediaPicker();
+  renderPostPreview();
+});
+
+function resetPostEditor(){
+  editMediaList = [];
+  editRecWeekdays = new Set();
+  document.querySelectorAll('.li-weekday-btn').forEach(b=>b.classList.remove('active'));
+  $('mpost-recurring-toggle').checked = false;
+  $('mpost-rec-freq').value = 'weekly';
+  $('mpost-rec-interval').value = 1;
+  $('mpost-rec-until').value = '';
+  toggleRecurringBox();
+  renderRecWeekdayVisibility();
+  $('mpost-first-comment').value = '';
+  $('mpost-fc-box').style.display = 'none';
+  $('mpost-fc-toggle-btn').textContent = '+ Hinzufügen';
+  renderMediaPicker();
+}
+
 function openNewPost(){
   editPostId = null;
   $('mpost-title').textContent = 'Neuer Entwurf';
@@ -7409,7 +7639,9 @@ function openNewPost(){
   $('mpost-scheduled').value = '';
   $('mpost-status-row').style.display = 'none';
   $('mpost-reject-btn').style.display = 'none';
+  $('mpost-delete-btn').style.display = 'none';
   $('mpost-save').textContent = 'Entwurf speichern';
+  resetPostEditor();
   renderPostPreview();
   openModal('ov-post');
 }
@@ -7424,7 +7656,30 @@ function openEditPost(id){
   $('mpost-status-row').style.display = '';
   $('mpost-status-tag').innerHTML = `<span class="tag ${STATUS_TAG_P[p.status]||'tag--muted'}">${STATUS_LBL_P[p.status]||p.status}</span>`;
   $('mpost-reject-btn').style.display = (p.status!=='rejected' && p.status!=='posted') ? '' : 'none';
+  $('mpost-delete-btn').style.display = '';
   $('mpost-save').textContent = 'Speichern';
+
+  resetPostEditor();
+  editMediaList = (p.media||[]).map(m=>({ ...m, previewUrl: liMediaUrlCache[m.path]||null }));
+  renderMediaPicker();
+
+  if(p.recurring_rule){
+    $('mpost-recurring-toggle').checked = true;
+    $('mpost-rec-freq').value = p.recurring_rule.freq || 'weekly';
+    $('mpost-rec-interval').value = p.recurring_rule.interval || 1;
+    $('mpost-rec-until').value = p.recurring_rule.until || '';
+    editRecWeekdays = new Set(p.recurring_rule.weekdays || []);
+    document.querySelectorAll('.li-weekday-btn').forEach(b=>b.classList.toggle('active', editRecWeekdays.has(Number(b.dataset.d))));
+    toggleRecurringBox();
+    renderRecWeekdayVisibility();
+  }
+
+  if(p.first_comment){
+    $('mpost-first-comment').value = p.first_comment;
+    $('mpost-fc-box').style.display = '';
+    $('mpost-fc-toggle-btn').textContent = 'Entfernen';
+  }
+
   renderPostPreview();
   openModal('ov-post');
 }
@@ -7440,7 +7695,23 @@ function renderPostPreview(){
   const content = $('mpost-content').value;
   const sched = $('mpost-scheduled').value;
   const timeLabel = sched ? new Date(sched).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : 'Entwurf';
-  $('mpost-preview').innerHTML = liPostCard(content, { timeLabel });
+  let html = liPostCard(content, { timeLabel, media: editMediaList });
+  const fcVisible = $('mpost-fc-box').style.display !== 'none';
+  const fc = fcVisible ? $('mpost-first-comment').value.trim() : '';
+  if(fc){
+    html += `<div class="li-card" style="margin-top:.5rem;padding:.625rem .875rem;font-size:.8125rem;color:rgba(0,0,0,.75)"><strong>Erster Kommentar</strong><br>${liFormatContent(fc)}</div>`;
+  }
+  $('mpost-preview').innerHTML = html;
+}
+
+function collectRecurringRule(){
+  if(!$('mpost-recurring-toggle').checked) return null;
+  const freq = $('mpost-rec-freq').value;
+  const rule = { freq, interval: Math.max(1, parseInt($('mpost-rec-interval').value)||1) };
+  if(freq==='weekly') rule.weekdays = [...editRecWeekdays].sort((a,b)=>a-b);
+  const until = $('mpost-rec-until').value;
+  if(until) rule.until = until;
+  return rule;
 }
 
 async function savePost(e){
@@ -7449,11 +7720,18 @@ async function savePost(e){
   if(!content){ toast('Bitte Text eingeben.','err'); return; }
   const schedVal = $('mpost-scheduled').value;
   const scheduled_for = schedVal ? new Date(schedVal).toISOString() : null;
+  const recurring_rule = collectRecurringRule();
+  if(recurring_rule && !scheduled_for){ toast('Für wiederkehrende Posts bitte auch "Geplant für" setzen.','err'); return; }
+  const fcVisible = $('mpost-fc-box').style.display !== 'none';
+  const first_comment = fcVisible ? ($('mpost-first-comment').value.trim() || null) : null;
+  const media = editMediaList.map(m=>({ type:m.type, path:m.path, name:m.name }));
+
+  const patch = { content, scheduled_for, media, first_comment, recurring_rule };
   if(editPostId){
-    const { error } = await sb.from('posts').update({ content, scheduled_for }).eq('id', editPostId);
+    const { error } = await sb.from('posts').update(patch).eq('id', editPostId);
     if(error){ toast('Fehler beim Speichern: '+error.message,'err'); return; }
   } else {
-    const { error } = await sb.from('posts').insert({ content, scheduled_for, status:'draft' });
+    const { error } = await sb.from('posts').insert({ ...patch, status:'draft' });
     if(error){ toast('Fehler beim Erstellen: '+error.message,'err'); return; }
   }
   toast('Gespeichert.','ok');
@@ -7465,6 +7743,11 @@ function rejectFromModal(){
   if(!editPostId) return;
   changePostStatus(editPostId, 'rejected');
   closeModal('ov-post');
+}
+
+function deletePostFromModal(){
+  if(!editPostId) return;
+  deletePostRow(editPostId);
 }
 
 // ── STATS TAB ────────────────────────────────────────────────────────

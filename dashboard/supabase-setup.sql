@@ -396,9 +396,38 @@ ALTER TABLE app_tokens ENABLE ROW LEVEL SECURITY;
 
 -- The "posts" table itself is provisioned outside this file (by the
 -- external content-engine automation that inserts drafts). This only
--- adds the column /api/linkedin-publish needs to record which LinkedIn
--- post a row maps to — safe to run even if it already exists.
+-- adds the columns the LinkedIn publish/cron/media/recurring features
+-- need — safe to run even if some of them already exist.
 ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS linkedin_post_urn TEXT;
+ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS media JSONB NOT NULL DEFAULT '[]'::jsonb;
+ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS first_comment TEXT;
+ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS recurring_rule JSONB;
+ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS recurring_parent_id UUID;
+ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS last_publish_error TEXT;
+
+-- Storage bucket for images/videos attached to LinkedIn drafts. Private —
+-- the dashboard owner uploads/reads via their authenticated session, and
+-- /api/linkedin-publish (service role) downloads the bytes at publish time
+-- to hand them to LinkedIn's asset-upload API.
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('post-media', 'post-media', false)
+ON CONFLICT (id) DO NOTHING;
+
+DROP POLICY IF EXISTS "Owner upload post media" ON storage.objects;
+DROP POLICY IF EXISTS "Owner read post media"   ON storage.objects;
+DROP POLICY IF EXISTS "Owner delete post media" ON storage.objects;
+
+CREATE POLICY "Owner upload post media"
+  ON storage.objects FOR INSERT TO authenticated
+  WITH CHECK (bucket_id = 'post-media' AND (auth.jwt() ->> 'email') = 'jasonmartinde@gmail.com');
+
+CREATE POLICY "Owner read post media"
+  ON storage.objects FOR SELECT TO authenticated
+  USING (bucket_id = 'post-media' AND (auth.jwt() ->> 'email') = 'jasonmartinde@gmail.com');
+
+CREATE POLICY "Owner delete post media"
+  ON storage.objects FOR DELETE TO authenticated
+  USING (bucket_id = 'post-media' AND (auth.jwt() ->> 'email') = 'jasonmartinde@gmail.com');
 
 
 -- ============================================================
