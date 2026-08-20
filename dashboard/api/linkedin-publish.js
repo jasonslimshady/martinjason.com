@@ -20,7 +20,12 @@
 const SUPABASE_URL       = process.env.SUPABASE_URL || 'https://blibykmyvkdtdvgzuwyr.supabase.co';
 const ALLOWED_EMAIL      = process.env.DASHBOARD_ALLOWED_EMAIL || 'jasonmartinde@gmail.com';
 const LINKEDIN_ORG_ID    = process.env.LINKEDIN_ORGANIZATION_ID || '';
-const LINKEDIN_API_VERSION = '202405';
+// LinkedIn cuts a new API version every month (format YYYYMM) and only keeps
+// each one active for ~12-24 months — an old hardcoded value WILL eventually
+// start failing with "Requested version ... is not active". If that happens
+// again, either bump the fallback below or set LINKEDIN_API_VERSION in Vercel
+// without a redeploy. Current versions: https://learn.microsoft.com/en-us/linkedin/marketing/versioning
+const LINKEDIN_API_VERSION = process.env.LINKEDIN_API_VERSION || '202601';
 
 export default async function handler(req, res) {
   const origin = req.headers.origin || '';
