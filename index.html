@@ -513,7 +513,7 @@
           </video>
           <video class="vsl__video" preload="none" playsinline
                  disablePictureInPicture disableRemotePlayback controlsList="nodownload noremoteplayback"
-                 poster="/images/video-poster.avif" width="1280" height="720" fetchpriority="high"
+                 poster="/images/video-poster.avif" width="1280" height="720" fetchpriority="high">
             <source data-src="https://pub-091972a94ee1449e9ff66fd286474ac0.r2.dev/vsl-full.mp4" type="video/mp4">
           </video>
           <button class="vsl__play" type="button" aria-label="Video abspielen">
@@ -1156,6 +1156,14 @@
     // When the video ends, just leave it on its last frame with the
     // native controls still visible — do not bring the play affordance
     // (or the background loop) back.
+
+    // Deep-link autoplay: pages linking here with ?playvsl=1 (the blog's
+    // VSL promo card) land with the video centred in the viewport and
+    // already playing, instead of just landing on the section.
+    if (/[?&]playvsl=1\b/.test(window.location.search)) {
+      fig.scrollIntoView({ behavior: 'auto', block: 'center' });
+      start();
+    }
   })();
   </script>
 

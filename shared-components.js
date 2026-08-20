@@ -63,28 +63,48 @@
 
   // ── Global article sections ──────────────────────────────────────────
   // Injected into every blog article page via slot divs.
-  // The Clarity Labs featured promo is omitted on the Clarity Labs page itself.
 
   var ARTICLE_FEATURED_PROMO_HTML =
     '<div class="article-featured-promo">' +
-    '  <a class="blog-featured reveal" href="/clarity-labs-case-study">' +
+    '  <a class="blog-featured reveal" href="/?playvsl=1#video">' +
     '    <div class="blog-featured__copy">' +
     '      <div class="blog-featured__meta">' +
-    '        <span class="blog-card__tag">Case Study</span>' +
-    '        <span class="blog-card__date">Juni 2026</span>' +
+    '        <span class="blog-card__tag">Training</span>' +
     '      </div>' +
-    '      <h2 class="blog-featured__title">Wie man KI-Produktgalerien erstellt, die konvertieren: <em>Clarity Labs Case Study</em></h2>' +
+    '      <h2 class="blog-featured__title">Wie du die Conversion deiner Produktseite steigerst<br />&amp; mehr Bestellungen bekommst ohne weitere Kosten.</h2>' +
     '      <p class="blog-featured__excerpt">' +
-    '        Wie wir für Clarity Labs eine vollständige KI-Produktgalerie entwickelt haben — von einem einzigen Freisteller bis zur finalen Produktgalerie.' +
+    '        Erfahre wie profitable DTC-Marken den gleichen Traffic in mehr Umsatz verwandeln.' +
     '      </p>' +
-    '      <span class="blog-card__read">Jetzt lesen →</span>' +
+    '      <span class="blog-card__read">Jetzt ansehen →</span>' +
     '    </div>' +
-    '    <div class="blog-featured__image-wrap blog-featured__slideshow">' +
-    '      <img class="blog-featured__image is-active" src="/images/Blog/Case Study/claritylabscasestudy-1.avif" alt="Clarity Labs Case Study" width="1562" height="1250" loading="lazy" decoding="async" />' +
-    '      <img class="blog-featured__image" src="/images/Blog/Case Study/claritylabscasestudy-2.avif" alt="Clarity Labs Case Study" width="1562" height="1250" loading="lazy" decoding="async" />' +
-    '      <img class="blog-featured__image" src="/images/Blog/Case Study/claritylabscasestudy-3.avif" alt="Clarity Labs Case Study" width="1562" height="1250" loading="lazy" decoding="async" />' +
-    '      <img class="blog-featured__image" src="/images/Blog/Case Study/claritylabscasestudy-4.avif" alt="Clarity Labs Case Study" width="1562" height="1250" loading="lazy" decoding="async" />' +
-    '      <img class="blog-featured__image" src="/images/Blog/Case Study/claritylabscasestudy-5.avif" alt="Clarity Labs Case Study" width="1562" height="1250" loading="lazy" decoding="async" />' +
+    '    <div class="blog-featured__image-wrap blog-featured__vsl-media" aria-hidden="true">' +
+    '      <video class="blog-featured__vsl-bg" autoplay muted loop playsinline preload="auto" disablePictureInPicture disableRemotePlayback tabindex="-1">' +
+    '        <source src="/videos/vsl.mp4" type="video/mp4">' +
+    '      </video>' +
+    '      <span class="vsl__play">' +
+    '        <span class="vsl__play-ring">' +
+    '          <svg width="38" height="38" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+    '            <path d="M8 5.14v13.72a1 1 0 0 0 1.54.84l10.5-6.86a1 1 0 0 0 0-1.68L9.54 4.3A1 1 0 0 0 8 5.14Z"/>' +
+    '          </svg>' +
+    '        </span>' +
+    '        <span class="vsl__speed" data-speed="1.25">' +
+    '          <span class="vsl__speed-top">' +
+    '            <svg class="vsl__speed-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '              <path d="m12 14 4-4"/>' +
+    '              <path d="M3.34 19a10 10 0 1 1 17.32 0"/>' +
+    '            </svg>' +
+    '            <span class="vsl__speed-value">1.25×</span>' +
+    '          </span>' +
+    '          <span class="vsl__speed-divider"></span>' +
+    '          <span class="vsl__speed-bottom">' +
+    '            <span class="vsl__speed-original">30 min</span>' +
+    '            <svg class="vsl__speed-bolt" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+    '              <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"/>' +
+    '            </svg>' +
+    '            <span class="vsl__speed-fast">24 min</span>' +
+    '          </span>' +
+    '        </span>' +
+    '      </span>' +
     '    </div>' +
     '  </a>' +
     '</div>';
@@ -94,7 +114,7 @@
     '  <div class="article-cta__image-wrap">' +
     '    <img src="/images/Blog/fuerdichumgesetzt.avif" alt="" width="1159" height="652" loading="lazy" decoding="async" />' +
     '  </div>' +
-    '  <a class="btn btn--primary glass-btn nav__cta" href="#contact" data-booking>Projekt besprechen</a>' +
+    '  <a class="btn btn--primary glass-btn nav__cta" href="/booking" data-booking>Audit buchen</a>' +
     '</div>';
 
   var ARTICLE_AUTHOR_HTML =
@@ -112,17 +132,25 @@
     '    />' +
     '    <div class="author-card__info">' +
     '      <p class="author-card__name" itemprop="name">Jason Martin</p>' +
-    '      <p class="author-card__role" itemprop="jobTitle">AI Product Gallery Designer · DACH · DTC</p>' +
+    '      <p class="author-card__role" itemprop="jobTitle">Performance Marketing Designer für DTC Marken</p>' +
     '      <p class="author-card__bio" itemprop="description">' +
-    '        Ich entwerfe KI-Produktgalerien für E-Commerce-Shops im DACH-Raum — von der ersten' +
-    '        Referenz bis zum finalen Bildpaket, fertig zur Verwendung. Über 5 Jahre Erfahrung' +
-    '        in Performance Creative, zuletzt als Inhaber einer Media-Buying-Agentur bei Meta.' +
-    '        Heute spezialisiert auf DTC-Brands, die Studioqualität ohne Fotostudio wollen.' +
+    '        Ich bin Jason &amp; habe 7+ Jahre Erfahrung im Media Buying, Ad Creative &amp; mehr als 3 Million' +
+    '        Euro für Brands in Ad Spend ausgegeben. Dabei habe ich gelernt, welches Bild wirklich' +
+    '        verkauft, und welches nur schön aussieht.' +
+    '        <br><br>' +
+    '        Heute baue ich Produktgalerien für E-Commerce-Shops, die nicht nur gut aussehen –' +
+    '        sondern Besucher besser zu Kunden machen als es jeder Fotograf kann.' +
+    '        <br><br>' +
+    '        Das Ganze passiert in Tagen, nicht Wochen. Ohne ein weiteres fünfstelliges' +
+    '        Fotoshooting, sondern mit individuell generierten KI-Bildern die von echten nicht' +
+    '        zu unterscheiden sind.' +
     '      </p>' +
     '      <div class="author-card__links">' +
     '        <a class="author-card__link" href="/" itemprop="url">→ Mehr über mich</a>' +
-    '        <a class="author-card__link" href="/#contact">→ Projekt anfragen</a>' +
     '        <a class="author-card__link" href="/blog">→ Alle Artikel</a>' +
+    '      </div>' +
+    '      <div class="author-card__cta">' +
+    '        <a class="btn btn--primary glass-btn" href="/booking" data-booking>Audit buchen</a>' +
     '      </div>' +
     '    </div>' +
     '  </div>' +
@@ -130,9 +158,7 @@
 
   var ctaSlot = document.querySelector('.article-global-cta-slot');
   if (ctaSlot) {
-    var isClarity = window.location.pathname.indexOf('clarity-labs-case-study') !== -1;
-    var isIphoneGalerie = window.location.pathname.indexOf('aus-iphone-fotos-eine-komplette-AI-Galerie') !== -1;
-    ctaSlot.innerHTML = ((isClarity || isIphoneGalerie) ? '' : ARTICLE_FEATURED_PROMO_HTML) + ARTICLE_CTA_HTML;
+    ctaSlot.innerHTML = ARTICLE_FEATURED_PROMO_HTML + ARTICLE_CTA_HTML;
   }
 
   var authorSlot = document.querySelector('.article-global-author-slot');
