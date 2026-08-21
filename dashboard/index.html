@@ -6300,7 +6300,7 @@ async function renderLive() {
         limit: 10
       }),
       gaRealtimeReport({
-        dimensions: [{name:'firstUserDefaultChannelGroup'}],
+        dimensions: [{name:'eventName'}],
         metrics: [{name:'activeUsers'}],
         orderBys: [{metric:{metricName:'activeUsers'},desc:true}],
         limit: 8
@@ -6336,14 +6336,14 @@ async function renderLive() {
       </div>`;
     }).join('') || `<div class="empty-st"><p class="empty-ttl" style="font-size:.8125rem">Keine aktiven Nutzer</p></div>`;
 
-    // Sources
-    const srcColors = {'Direct':'#0A84FF','Organic Search':'#30D158','Referral':'#BF5AF2','Organic Social':'#FF9F0A','Paid Search':'#5E5CE6','Email':'#FF453A'};
+    // Live events (GA4 Realtime API has no traffic-source/channel-group dimension)
+    const srcPalette = ['#0A84FF','#30D158','#BF5AF2','#FF9F0A','#5E5CE6','#FF453A','#64D2FF','#8A8A92'];
     const srcTotal = (sources?.rows||[]).reduce((s,r)=>s+(parseInt(r.metricValues[0].value)||0),0)||1;
-    const srcRows = (sources?.rows||[]).map(r => {
+    const srcRows = (sources?.rows||[]).map((r,i) => {
       const ch  = r.dimensionValues[0].value;
       const val = parseInt(r.metricValues[0].value)||0;
       const pct = Math.round((val/srcTotal)*100);
-      const col = srcColors[ch]||'#8A8A92';
+      const col = srcPalette[i % srcPalette.length];
       return `<div style="display:flex;align-items:center;gap:.75rem;padding:.5rem 1.125rem;border-bottom:1px solid var(--border)">
         <div style="width:8px;height:8px;border-radius:50%;background:${col};flex-shrink:0"></div>
         <span style="flex:1;font-size:.8125rem">${esc(ch)}</span>
@@ -6420,7 +6420,7 @@ async function renderLive() {
             ${pgRows}
           </div>
           <div class="card">
-            <div class="card-hd"><span class="card-ttl">Traffic-Quellen</span></div>
+            <div class="card-hd"><span class="card-ttl">Live-Events</span></div>
             ${srcRows}
           </div>
         </div>
