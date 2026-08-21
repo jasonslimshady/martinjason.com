@@ -13,15 +13,10 @@
 
 ## Portfolio — Galerien
 
-- [Hyaluron-Serum Relaunch](https://martinjason.com/galerie-hyaluron-serum): Kompletter PDP-Gallery-Relaunch für eine Skincare-Marke — 1 Galerie, 2 Tage Produktionszeit, –58 % Fotokosten
+- [Milo & Mia](https://martinjason.com/galerie-milo-mia): Hundefutter-Galerien — 7 Produkte, 7 Wochen
 - [Aurum Collective](https://martinjason.com/galerie-aurum-collective): Jewellery-Galerie — 3 Produkte, 1 Woche, 62 % Foto-Kosten gespart
 - [Verse Fragrances](https://martinjason.com/galerie-verse-fragrances): Duft-Galerien — 3 Galerien, 2 Wochen, –58 % Foto-Kosten
 - [Pulse Wearables](https://martinjason.com/galerie-pulse-wearables): Produktgalerie für Wearables — 2 Produkte, 2 Wochen, –67 % Foto-Kosten
-- [Capsule Drop SS26](https://martinjason.com/galerie-capsule-drop): Galerie-System für einen saisonalen Fashion-Drop — 6 SKUs, Lookbook und PDPs mit konsistentem visuellem System
-- [Keramik-Serie](https://martinjason.com/galerie-keramik-serie): In-Context-Galerien für eine österreichische Home-Marke mit handgefertigten Keramiken — 8 Produkte, vollständige PDP-Galerien
-- [Lipcare Launch](https://martinjason.com/galerie-lipcare-launch): Launch-Galerien für ein neues Lipcare-Produkt in drei Farbvarianten — 24 Bilder für alle SKUs
-- [Supplement Reihe](https://martinjason.com/galerie-supplement-reihe): PDP-Galerien und Feature-Tiles für eine deutsche Wellness-Marke — fünf Supplement-Produkte, vollständig für Landing Pages optimiert
-- [Audio-Accessory](https://martinjason.com/galerie-audio-accessory): Premium-Galerie für ein audio-technisches Produkt — Studio-Shots in Dark-Ästhetik und kontrastierenden Lifestyle-Aufnahmen
 
 ## Case Study
 
