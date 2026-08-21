@@ -7129,6 +7129,7 @@ let seoRangeKey = localStorage.getItem('seo_range') || '28';
 let seoCustomFrom = '', seoCustomTo = '';
 let seoData = null;
 let seoOpportunities = [];
+let seoOppDiagnostics = { totalQueries:0, evaluated:0, maxImpressions:0 };
 let seoChartMetric = 'clicks';
 let seoDismissed = new Set();
 let seoLastSync = null;
@@ -7592,30 +7593,38 @@ function seoComputeOpportunities(){
     out.push({ key:k, type, ...item });
   }
 
+  // Minimum-impressions thresholds per type — kept deliberately low so the
+  // engine stays useful for lower-traffic properties too. A query/page with
+  // near-zero impressions is excluded either way since the classification
+  // bands below (position, CTR ratio) rarely fire on pure noise.
+  const MIN_BASE = 5, MIN_QUICKWIN = 15, MIN_PAGE2 = 10, MIN_CTR = 50, MIN_CONTENT = 10, MIN_PREV = 8;
+  let evaluated = 0;
+
   queries.forEach(q=>{
-    if(q.impressions < 10) return;
+    if(q.impressions < MIN_BASE) return;
+    evaluated++;
     const expCtr = expectedCtrForPosition(q.position);
     const ctrRatio = expCtr>0 ? q.ctr/expCtr : 1;
     const bestPage = queryPageBest.get(q.query);
     const isCommercial = COMMERCIAL_TERMS.test(q.query);
     const base = { query:q.query, page:bestPage?.page||null, position:q.position, impressions:q.impressions, clicks:q.clicks, ctr:q.ctr, isCommercial };
 
-    if(q.position>=4 && q.position<=15 && q.impressions>=50 && ctrRatio<0.7){
+    if(q.position>=4 && q.position<=15 && q.impressions>=MIN_QUICKWIN && ctrRatio<0.7){
       push('quickwin', { ...base, recommendation:`Du rankst bereits auf Seite 1/2 (Position ${fmtPos(q.position)}), aber die CTR ist im Verhältnis niedrig. Teste einen stärkeren Title-Tag und eine prägnantere Meta-Description.` });
-    } else if(q.position>=11 && q.position<=20 && q.impressions>=30){
+    } else if(q.position>=11 && q.position<=20 && q.impressions>=MIN_PAGE2){
       push('page2', { ...base, recommendation:`Rankt auf Seite 2 (Position ${fmtPos(q.position)}). Inhalte der rankenden Seite ausbauen, thematische Tiefe erhöhen, interne Links und Title/H1 verbessern.` });
-    } else if(q.impressions>=200 && ctrRatio<0.6){
+    } else if(q.impressions>=MIN_CTR && ctrRatio<0.6){
       push('ctr', { ...base, recommendation:`Hohe Sichtbarkeit (${fmtInt(q.impressions)} Impressionen), aber unterdurchschnittliche CTR für Position ${fmtPos(q.position)}. Title/Meta-Description optimieren, Suchintention prüfen, Rich-Result-Eignung prüfen.` });
-    } else if(q.position>=11 && q.position<=30 && q.impressions>=30 && bestPage && bestPage.clicks>0){
+    } else if(q.position>=11 && q.position<=30 && q.impressions>=MIN_CONTENT && bestPage && bestPage.clicks>0){
       push('content', { ...base, recommendation:`Es gibt bereits eine rankende Seite (${esc(seoShortenUrl(bestPage.page))}). Inhalt erweitern, thematische Abdeckung verbessern, interne Links ergänzen.` });
-    } else if(q.position>=11 && q.position<=30 && q.impressions>=30){
+    } else if(q.position>=11 && q.position<=30 && q.impressions>=MIN_CONTENT){
       push('newcontent', { ...base, recommendation:`Keine klar zugeordnete, gut performende Seite gefunden. Eine dedizierte Seite für diese Suchintention in Betracht ziehen — nur falls keine bestehende Seite bereits thematisch passt.` });
     }
   });
 
   queries.forEach(q=>{
     const prev = prevByQuery.get(q.query);
-    if(!prev || prev.impressions<20) return;
+    if(!prev || prev.impressions<MIN_PREV) return;
     const clicksChange = prev.clicks>0 ? (q.clicks-prev.clicks)/prev.clicks : (q.clicks>0?1:0);
     const positionWorse = q.position - prev.position;
     if(clicksChange<=-0.25 || positionWorse>=3){
@@ -7626,7 +7635,7 @@ function seoComputeOpportunities(){
   });
   seoData.pagesCur.forEach(p=>{
     const prev = pagesPrevByPage.get(p.page);
-    if(!prev || prev.impressions<20) return;
+    if(!prev || prev.impressions<MIN_PREV) return;
     const clicksChange = prev.clicks>0 ? (p.clicks-prev.clicks)/prev.clicks : (p.clicks>0?1:0);
     if(clicksChange<=-0.25){
       push('declining', { query:null, page:p.page, position:p.position, impressions:p.impressions, clicks:p.clicks, ctr:p.ctr, isCommercial:false,
@@ -7634,6 +7643,8 @@ function seoComputeOpportunities(){
         recommendation:`Organische Klicks für diese Seite um ${Math.abs(Math.round(clicksChange*100))}% gesunken, während die Impressionen relativ ${Math.abs(((p.impressions-prev.impressions)/Math.max(prev.impressions,1))*100)<20?'stabil blieben':'sich ebenfalls verändert haben'}. Ranking und CTR prüfen.` });
     }
   });
+
+  seoOppDiagnostics = { totalQueries: queries.length, evaluated, maxImpressions: Math.max(...queries.map(q=>q.impressions),0) };
 
   const maxImpr = Math.max(...queries.map(q=>q.impressions), 1);
   const maxUpside = Math.max(...out.map(o=>Math.max((o.impressions||0)*(expectedCtrForPosition(o.position)-(o.ctr||0)),0)), 1);
@@ -7688,7 +7699,12 @@ function seoRenderOpportunities(){
   const contentOpp = seoOpportunities.filter(o=>o.type==='content'||o.type==='newcontent').length;
 
   $('seo-opp-summary').innerHTML = !seoOpportunities.length
-    ? `<div class="empty-st" style="padding:.5rem"><p class="empty-ttl">Keine SEO-Chancen erkannt</p><p class="empty-sub">Für den gewählten Zeitraum wurden keine auffälligen Muster gefunden.</p></div>`
+    ? `<div class="empty-st" style="padding:.5rem">
+        <p class="empty-ttl">Keine SEO-Chancen erkannt</p>
+        <p class="empty-sub">${seoOppDiagnostics.totalQueries===0
+          ? 'Für den gewählten Zeitraum liegen keine Suchanfragen-Daten aus der Search Console vor.'
+          : `${fmtInt(seoOppDiagnostics.evaluated)} von ${fmtInt(seoOppDiagnostics.totalQueries)} Suchanfragen mit ausreichend Impressionen ausgewertet (max. ${fmtInt(seoOppDiagnostics.maxImpressions)} Impressionen) — keine hat die Kriterien für eine Chance erfüllt. Bei geringem Traffic hilft oft ein längerer Zeitraum (z.B. „Letzte 6 Monate") oder etwas Geduld, bis mehr Daten vorliegen.`}</p>
+      </div>`
     : `<div style="display:flex;gap:1.5rem;flex-wrap:wrap;font-size:.8125rem">
         <span><strong>${counts.high}</strong> Hohe Priorität</span><span><strong>${counts.medium}</strong> Mittlere Priorität</span><span><strong>${counts.low}</strong> Niedrige Priorität</span>
         <span style="color:var(--ink-s)">·</span>
