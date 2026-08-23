@@ -87,6 +87,7 @@
     .btn--accent:hover{background:rgba(0,112,224,.85);transform:translateY(-1px)}
     .btn--danger{background:rgba(255,69,58,.14);color:var(--red);border-color:rgba(255,69,58,.22)}
     .btn--danger:hover{background:rgba(255,69,58,.82);color:#fff}
+    .btn--confirm-armed{background:rgba(255,69,58,.82)!important;color:#fff!important;border-color:transparent!important}
     .btn--sm{padding:.375rem .75rem;font-size:.8125rem}
     .btn--full{width:100%;padding:.75rem}
     .btn--icon{width:30px;height:30px;padding:0;border-radius:var(--r-sm);flex-shrink:0}
@@ -1007,13 +1008,13 @@
     <section class="panel" id="panel-linkedin">
       <div class="sec-hd">
         <span class="sec-ttl">LinkedIn</span>
-        <div style="display:flex;gap:.5rem;align-items:center">
+        <span id="li-conn-status" style="font-size:.75rem;color:var(--ink-s);margin-left:.5rem"></span>
+        <div style="display:flex;gap:.5rem;align-items:center;margin-left:auto">
           <select class="fi li-cat-filter-sel" id="li-catid-filter" title="Nach Kategorie filtern">
             <option value="">Alle Kategorien</option>
           </select>
-          <span id="li-conn-status" style="font-size:.75rem;color:var(--ink-s)"></span>
           <button class="btn btn--ghost btn--sm" id="btn-li-connect">LinkedIn verbinden</button>
-          <button class="btn btn--ghost btn--sm" id="btn-li-cats">Kategorien</button>
+          <button class="btn btn--ghost btn--sm" id="btn-li-cats"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.3"/><path d="M8 1.5v2.2M8 12.3v2.2M14.5 8h-2.2M3.7 8H1.5M12.6 3.4l-1.5 1.5M4.9 11.1l-1.5 1.5M12.6 12.6l-1.5-1.5M4.9 4.9L3.4 3.4"/></svg>Kategorien</button>
           <button class="btn btn--primary btn--sm" id="btn-new-post">+ Neuer Entwurf</button>
         </div>
       </div>
@@ -8468,7 +8469,7 @@ function liRowActionButtons(p){
     btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="posted" data-id="${p.id}" title="Nur verwenden, falls der Post bereits woanders veröffentlicht wurde">Nur Status setzen</button>`);
   }
   if(p.status!=='rejected' && p.status!=='posted') btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="reject" data-id="${p.id}" style="color:var(--red)">Ablehnen</button>`);
-  if(p.status==='rejected') btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="restore" data-id="${p.id}">Zu Entwurf</button>`);
+  if(p.status==='rejected' || p.status==='posted') btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="restore" data-id="${p.id}" title="Status zurück auf Entwurf setzen">Zu Entwurf</button>`);
   btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="delete" data-id="${p.id}" style="color:var(--red)">Löschen</button>`);
   return btns.join('');
 }
@@ -8492,8 +8493,29 @@ function wireLiRows(wrap){
     else if(act==='posted') changePostStatus(id,'posted');
     else if(act==='reject') changePostStatus(id,'rejected');
     else if(act==='restore') changePostStatus(id,'draft');
-    else if(act==='delete') deletePostRow(id);
+    else if(act==='delete') armConfirmDelete(btn, ()=>deletePostRow(id));
   }));
+}
+
+// Turns a delete button into a two-step confirmation: first click "arms" it
+// (label changes, red highlight, auto-disarms after a few seconds); only a
+// second click while armed actually runs the delete — guards against a
+// stray/accidental click on "Löschen".
+function armConfirmDelete(btn, onConfirm){
+  if(btn.dataset.armed){
+    clearTimeout(Number(btn.dataset.armTimer));
+    onConfirm();
+    return;
+  }
+  btn.dataset.armed = '1';
+  btn.dataset.origLabel = btn.textContent;
+  btn.textContent = 'Wirklich löschen?';
+  btn.classList.add('btn--confirm-armed');
+  btn.dataset.armTimer = String(setTimeout(()=>{
+    delete btn.dataset.armed;
+    btn.textContent = btn.dataset.origLabel;
+    btn.classList.remove('btn--confirm-armed');
+  }, 3000));
 }
 
 // Turns the time label into an <input type="time"> in place; on change,
@@ -8531,7 +8553,6 @@ function liEditTimeInline(el){
 }
 
 async function deletePostRow(id){
-  if(!confirm('Diesen Post unwiderruflich löschen?')) return;
   const { error } = await sb.from('posts').delete().eq('id', id);
   if(error){ toast('Löschen fehlgeschlagen: '+error.message,'err'); return; }
   toast('Post gelöscht.','ok');
@@ -8917,7 +8938,8 @@ function rejectFromModal(){
 
 function deletePostFromModal(){
   if(!editPostId) return;
-  deletePostRow(editPostId);
+  const id = editPostId;
+  armConfirmDelete($('mpost-delete-btn'), ()=>deletePostRow(id));
 }
 
 // ── STATS TAB ────────────────────────────────────────────────────────
