@@ -661,6 +661,37 @@ CREATE POLICY "Owner only" ON seo_dismissed_opportunities FOR ALL TO authenticat
   USING ((auth.jwt() ->> 'email') = 'jasonmartinde@gmail.com')
   WITH CHECK ((auth.jwt() ->> 'email') = 'jasonmartinde@gmail.com');
 
+-- ============================================================
+--  LINKEDIN POST CATEGORIES
+--  User-defined tags (name + a color picked from a preset rainbow
+--  palette) that can be attached to a post from the dashboard.
+--  Deleting a category clears it from any posts that used it.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS post_categories (
+  id         UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
+  name       TEXT        NOT NULL UNIQUE,
+  color      TEXT        NOT NULL,
+  sort_order INTEGER     NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO post_categories (name, color, sort_order) VALUES
+  ('Persönlich',   '#F04438', 0),
+  ('Value',        '#3B82F6', 1),
+  ('Portfolio',    '#22C55E', 2),
+  ('These',        '#A855F7', 3),
+  ('Marktkontext', '#F79009', 4)
+ON CONFLICT (name) DO NOTHING;
+
+ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS category_id UUID REFERENCES post_categories(id) ON DELETE SET NULL;
+
+ALTER TABLE post_categories ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Owner only" ON post_categories;
+CREATE POLICY "Owner only" ON post_categories FOR ALL TO authenticated
+  USING ((auth.jwt() ->> 'email') = 'jasonmartinde@gmail.com')
+  WITH CHECK ((auth.jwt() ->> 'email') = 'jasonmartinde@gmail.com');
+
 
 -- ============================================================
 --  DONE.
