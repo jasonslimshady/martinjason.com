@@ -357,8 +357,11 @@
     .li-card-actions button{flex:1;display:flex;align-items:center;justify-content:center;gap:.375rem;padding:.5rem 0;font-size:.75rem;font-weight:600;color:rgba(0,0,0,.6);background:none;border:none;cursor:default}
     /* Post editor: media picker, recurring, first comment */
     .li-media-picker{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.5rem}
-    .li-media-thumb{position:relative;width:64px;height:64px;border-radius:var(--r-sm);overflow:hidden;border:1px solid var(--border);background:var(--surface-2)}
-    .li-media-thumb img,.li-media-thumb video{width:100%;height:100%;object-fit:cover}
+    .li-media-thumb{position:relative;width:64px;height:64px;border-radius:var(--r-sm);overflow:hidden;border:1px solid var(--border);background:var(--surface-2);cursor:grab;transition:opacity var(--fast),outline-color var(--fast)}
+    .li-media-thumb:active{cursor:grabbing}
+    .li-media-thumb.li-media-dragging{opacity:.4}
+    .li-media-thumb.li-media-drag-over{outline:2px solid var(--accent);outline-offset:1px}
+    .li-media-thumb img,.li-media-thumb video{width:100%;height:100%;object-fit:cover;pointer-events:none}
     .li-media-thumb .li-media-del{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;border:none;font-size:11px;line-height:18px;text-align:center;cursor:pointer;padding:0}
     .li-media-add{width:64px;height:64px;border-radius:var(--r-sm);border:1.5px dashed var(--border-s);display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:var(--ink-s);cursor:pointer;background:none}
     .li-media-add:hover{border-color:var(--accent);color:var(--accent)}
@@ -8705,15 +8708,53 @@ function renderMediaPicker(){
     const inner = m.previewUrl
       ? (m.type==='video' ? `<video src="${esc(m.previewUrl)}"></video>` : `<img src="${esc(m.previewUrl)}" alt="">`)
       : '';
-    return `<div class="li-media-thumb">${inner}<button type="button" class="li-media-del" data-i="${i}" title="Entfernen">✕</button></div>`;
+    return `<div class="li-media-thumb" draggable="true" data-i="${i}" title="Ziehen zum Umsortieren">${inner}<button type="button" class="li-media-del" data-i="${i}" title="Entfernen">✕</button></div>`;
   }).join('') + `<button type="button" class="li-media-add" id="mpost-media-add-btn" title="Medien hinzufügen">+</button>`;
   wrap.querySelectorAll('.li-media-del').forEach(btn=>btn.addEventListener('click', e=>{
     e.preventDefault();
+    e.stopPropagation();
     editMediaList.splice(Number(btn.dataset.i),1);
     renderMediaPicker();
     renderPostPreview();
   }));
   $('mpost-media-add-btn').addEventListener('click', ()=>$('mpost-media-input').click());
+  wireMediaDragReorder(wrap);
+}
+
+// Lets you drag a media thumbnail onto another to reorder editMediaList —
+// only relevant once a post has 2+ media items attached.
+function wireMediaDragReorder(wrap){
+  let dragIndex = null;
+  wrap.querySelectorAll('.li-media-thumb').forEach(thumb=>{
+    thumb.addEventListener('dragstart', e=>{
+      dragIndex = Number(thumb.dataset.i);
+      thumb.classList.add('li-media-dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', String(dragIndex));
+    });
+    thumb.addEventListener('dragend', ()=>{
+      thumb.classList.remove('li-media-dragging');
+      wrap.querySelectorAll('.li-media-thumb').forEach(t=>t.classList.remove('li-media-drag-over'));
+    });
+    thumb.addEventListener('dragover', e=>{
+      if(dragIndex===null) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      thumb.classList.add('li-media-drag-over');
+    });
+    thumb.addEventListener('dragleave', ()=>thumb.classList.remove('li-media-drag-over'));
+    thumb.addEventListener('drop', e=>{
+      e.preventDefault();
+      thumb.classList.remove('li-media-drag-over');
+      const targetIndex = Number(thumb.dataset.i);
+      if(dragIndex===null || dragIndex===targetIndex) return;
+      const [moved] = editMediaList.splice(dragIndex,1);
+      editMediaList.splice(targetIndex,0,moved);
+      dragIndex = null;
+      renderMediaPicker();
+      renderPostPreview();
+    });
+  });
 }
 
 $('mpost-media-input').addEventListener('change', async (e)=>{
