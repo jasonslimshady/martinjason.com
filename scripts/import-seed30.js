@@ -126,7 +126,8 @@ function dateForDayIndex(startMonday, i) {
 //   **Medien:** <medien-text> · **Erst-Kommentar:** <kommentar-text>
 //   > post text, possibly multiple > -prefixed lines/paragraphs
 function isNoneValue(s, noneWord) {
-  return s.trim().toLowerCase().replace(/\.$/, '') === noneWord;
+  const cleaned = s.trim().toLowerCase().replace(/\.$/, '');
+  return cleaned === noneWord || cleaned.startsWith(noneWord + ' ');
 }
 
 function parseSection(seedRef, rest) {
@@ -141,7 +142,9 @@ function parseSection(seedRef, rest) {
   }
   const [, mediaRaw, commentRaw] = metaMatch;
 
-  while (i < lines.length && lines[i].trim() === '') i++;
+  // Skip blank lines and any editorial aside lines (e.g. a "*Alternativ-Motiv: …*"
+  // note) between the meta line and the actual blockquote.
+  while (i < lines.length && !lines[i].startsWith('>')) i++;
   const quoteLines = [];
   while (i < lines.length && lines[i].startsWith('>')) {
     quoteLines.push(lines[i].replace(/^>\s?/, ''));
