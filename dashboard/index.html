@@ -310,15 +310,20 @@
     .li-grid-daynum{font-size:.75rem;font-weight:600;color:var(--ink-m);flex-shrink:0}
     .li-grid-today .li-grid-daynum{color:var(--ink)}
     .li-grid-posts{display:flex;flex-direction:column;gap:.25rem;overflow:hidden;min-width:0}
-    .li-grid-post{display:flex;align-items:center;gap:.3rem;font-size:.6875rem;padding:.2rem .375rem;border-radius:5px;background:var(--surface-2);cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;transition:background var(--fast);min-width:0}
+    .li-grid-post{display:flex;flex-direction:column;align-items:flex-start;gap:.15rem;font-size:.6875rem;padding:.2rem .375rem;border-radius:5px;background:var(--surface-2);cursor:pointer;overflow:hidden;transition:background var(--fast);min-width:0}
     .li-grid-post:hover{background:var(--accent-t)}
+    .li-grid-post-line{display:flex;align-items:center;gap:.3rem;width:100%;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
     .li-grid-post-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
     .li-grid-post-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
+    .li-grid-post-cat{width:100%;overflow:hidden;text-align:left}
+    .li-grid-post-cat .li-cat-tag{font-size:.5625rem;padding:.0625rem .375rem}
     .li-grid-more{font-size:.6875rem;color:var(--ink-s);padding:.2rem .375rem;cursor:pointer}
     @media (max-width:760px){
       .li-grid-cell{min-height:64px}
       .li-grid-post-txt{display:none}
-      .li-grid-post{justify-content:center}
+      .li-grid-post-cat{display:none}
+      .li-grid-post{align-items:center}
+      .li-grid-post-line{justify-content:center}
     }
     .li-day-group{margin-bottom:1.5rem}
     .li-day-hd{font-size:.8125rem;font-weight:600;color:var(--ink-m);margin-bottom:.625rem;text-transform:capitalize}
@@ -362,6 +367,22 @@
     .li-weekday-btn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
     .lipost-time-input{font-size:.8125rem;font-weight:600;color:var(--ink);border:1px solid var(--border-s);border-radius:6px;padding:.125rem .25rem;background:var(--surface);width:80px}
     .li-status-badge{display:inline-flex;align-items:center;padding:.1875rem .5rem;border-radius:var(--r-pill);font-size:.6875rem;font-weight:600}
+    /* Category tags (user-defined, colored) */
+    .li-cat-tag{display:inline-flex;align-items:center;max-width:100%;padding:.1875rem .5rem;border-radius:var(--r-pill);font-size:.6875rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .li-cat-row{display:flex;align-items:flex-start;gap:.625rem;padding:.625rem 0;border-bottom:1px solid var(--border)}
+    .li-cat-row:last-child{border-bottom:none}
+    .li-cat-color-pick{position:relative}
+    .li-cat-color-pick summary{list-style:none;cursor:pointer}
+    .li-cat-color-pick summary::-webkit-details-marker{display:none}
+    .li-cat-color-dot{display:block;width:22px;height:22px;border-radius:50%;border:1px solid rgba(0,0,0,.12);margin-top:2px}
+    .li-cat-swatches{display:flex;gap:.3rem;flex-wrap:wrap;padding:.5rem 0 .125rem;max-width:180px}
+    .li-cat-swatch{width:20px;height:20px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0}
+    .li-cat-swatch.active{border-color:var(--ink)}
+    .li-cat-name-input{flex:1;min-width:0}
+    .li-cat-del{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--ink-s);background:none;border:none;cursor:pointer;font-size:.8125rem;margin-top:1px}
+    .li-cat-del:hover{background:var(--red-t);color:var(--red)}
+    .li-cat-add-row{display:flex;align-items:flex-start;gap:.625rem;margin-top:.5rem;padding-top:.875rem;border-top:1px solid var(--border)}
+    .li-cat-empty{font-size:.8125rem;color:var(--ink-s);margin:0 0 .5rem}
     .li-editor-grid{display:grid;grid-template-columns:1fr 300px;gap:1.25rem}
     @media (max-width:720px){ .li-editor-grid{grid-template-columns:1fr} }
     .li-metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.75rem;padding:1rem;background:var(--surface-2);border-top:1px solid var(--border)}
@@ -981,6 +1002,7 @@
         <div style="display:flex;gap:.5rem;align-items:center">
           <span id="li-conn-status" style="font-size:.75rem;color:var(--ink-s)"></span>
           <button class="btn btn--ghost btn--sm" id="btn-li-connect">LinkedIn verbinden</button>
+          <button class="btn btn--ghost btn--sm" id="btn-li-cats">Kategorien</button>
           <button class="btn btn--primary btn--sm" id="btn-new-post">+ Neuer Entwurf</button>
         </div>
       </div>
@@ -1191,6 +1213,13 @@
             </div>
 
             <div class="fg">
+              <label class="fl">Kategorie</label>
+              <select class="fi" id="mpost-category">
+                <option value="">Keine Kategorie</option>
+              </select>
+            </div>
+
+            <div class="fg">
               <label class="fl">Medien</label>
               <div class="li-media-picker" id="mpost-media-picker"></div>
               <input type="file" id="mpost-media-input" accept="image/*,video/*" multiple hidden />
@@ -1257,6 +1286,27 @@
         <button type="submit" class="btn btn--primary btn--sm" id="mpost-save">Entwurf speichern</button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- LINKEDIN CATEGORIES MODAL -->
+<div class="overlay" id="ov-li-cats">
+  <div class="modal">
+    <div class="modal-hd"><span class="modal-ttl">Kategorien verwalten</span><button class="modal-x" onclick="closeModal('ov-li-cats')">✕</button></div>
+    <div class="modal-body">
+      <div id="li-cats-list"></div>
+      <div class="li-cat-add-row">
+        <details class="li-cat-color-pick" id="li-cat-add-pick">
+          <summary class="li-cat-color-dot" id="li-cat-add-dot" title="Farbe wählen"></summary>
+          <div class="li-cat-swatches" id="li-cat-add-swatches"></div>
+        </details>
+        <input class="fi li-cat-name-input" id="li-cat-add-name" placeholder="Neue Kategorie…" maxlength="40" />
+        <button type="button" class="btn btn--primary btn--sm" id="li-cat-add-btn">+ Hinzufügen</button>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button type="button" class="btn btn--ghost btn--sm" onclick="closeModal('ov-li-cats')">Fertig</button>
+    </div>
   </div>
 </div>
 
@@ -1726,7 +1776,7 @@ async function showApp(user){
     return;
   }
   hideAllScreens(); $('screen-app').hidden=false;
-  loadStats(); loadCRM(); loadTimeEntries(); loadProjectOverview(); loadInvoices(); loadInvReminders(); loadQuotes(); loadContracts(); loadLinkedInPosts(); subscribeLinkedInRealtime(); liCheckConnection();
+  loadStats(); loadCRM(); loadTimeEntries(); loadProjectOverview(); loadInvoices(); loadInvReminders(); loadQuotes(); loadContracts(); loadPostCategories(); loadLinkedInPosts(); subscribeLinkedInRealtime(); liCheckConnection();
   await loadProjects();
   restoreTimer(); // pick up a timer that survived a reload / tab close
   // Restore last active panel (persists across reloads)
@@ -7996,6 +8046,123 @@ let liStatsRangeDays = 30;
 const STATUS_LBL_P = { draft:'Entwurf', approved:'Freigegeben', posted:'Veröffentlicht', rejected:'Abgelehnt' };
 const STATUS_TAG_P  = { draft:'tag--muted', approved:'tag--blue', posted:'tag--green', rejected:'tag--red' };
 
+// ── Post categories (colored tags: Persönlich, Value, Portfolio, …) ────
+const LI_CAT_COLORS = ['#F04438','#F79009','#EAB308','#22C55E','#14B8A6','#3B82F6','#6366F1','#A855F7','#EC4899'];
+let postCategories = [];
+let liNewCatColor = LI_CAT_COLORS[0];
+
+function catById(id){ return postCategories.find(c=>c.id===id); }
+
+// Picks black or white text for readable contrast on an arbitrary hex swatch.
+function liCatContrast(hex){
+  const h = (hex||'').replace('#','');
+  const r = parseInt(h.substr(0,2),16), g = parseInt(h.substr(2,2),16), b = parseInt(h.substr(4,2),16);
+  const lum = (0.299*r + 0.587*g + 0.114*b)/255;
+  return lum > 0.6 ? '#111' : '#fff';
+}
+
+function liCatTagHtml(categoryId){
+  const c = catById(categoryId);
+  if(!c) return '';
+  return `<span class="li-cat-tag" style="background:${c.color};color:${liCatContrast(c.color)}">${esc(c.name)}</span>`;
+}
+
+async function loadPostCategories(){
+  const { data, error } = await sb.from('post_categories').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:true});
+  if(error){ toast('Kategorien konnten nicht geladen werden: '+error.message,'err'); return; }
+  postCategories = data||[];
+  renderCategorySelect();
+  renderCatManageList();
+  renderLinkedInPanel();
+}
+
+function renderCategorySelect(){
+  const sel = $('mpost-category');
+  if(!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = `<option value="">Keine Kategorie</option>` + postCategories.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  if([...sel.options].some(o=>o.value===cur)) sel.value = cur;
+}
+
+function liCatSwatchesHtml(selectedColor, idAttr){
+  return LI_CAT_COLORS.map(col=>`<button type="button" class="li-cat-swatch${col===selectedColor?' active':''}" style="background:${col}" data-color="${col}"${idAttr?` data-id="${idAttr}"`:''} title="${col}"></button>`).join('');
+}
+
+function renderCatManageList(){
+  const wrap = $('li-cats-list');
+  if(!wrap) return;
+  if(!postCategories.length){
+    wrap.innerHTML = `<p class="li-cat-empty">Noch keine Kategorien.</p>`;
+  } else {
+    wrap.innerHTML = postCategories.map(c=>`
+      <div class="li-cat-row" data-id="${c.id}">
+        <details class="li-cat-color-pick">
+          <summary class="li-cat-color-dot" style="background:${c.color}" title="Farbe ändern"></summary>
+          <div class="li-cat-swatches">${liCatSwatchesHtml(c.color, c.id)}</div>
+        </details>
+        <input class="fi li-cat-name-input" data-id="${c.id}" value="${esc(c.name)}" maxlength="40" />
+        <button type="button" class="li-cat-del" data-id="${c.id}" title="Kategorie löschen">✕</button>
+      </div>`).join('');
+    wrap.querySelectorAll('.li-cat-row .li-cat-swatch').forEach(btn=>btn.addEventListener('click', ()=>updateCatColor(btn.dataset.id, btn.dataset.color)));
+    wrap.querySelectorAll('.li-cat-name-input').forEach(inp=>inp.addEventListener('change', ()=>updateCatName(inp.dataset.id, inp.value)));
+    wrap.querySelectorAll('.li-cat-del').forEach(btn=>btn.addEventListener('click', ()=>deleteCategory(btn.dataset.id)));
+  }
+  renderAddCatSwatches();
+}
+
+function renderAddCatSwatches(){
+  const dot = $('li-cat-add-dot');
+  const wrap = $('li-cat-add-swatches');
+  if(!dot || !wrap) return;
+  dot.style.background = liNewCatColor;
+  wrap.innerHTML = liCatSwatchesHtml(liNewCatColor, null);
+  wrap.querySelectorAll('.li-cat-swatch').forEach(btn=>btn.addEventListener('click', ()=>{
+    liNewCatColor = btn.dataset.color;
+    $('li-cat-add-pick').open = false;
+    renderAddCatSwatches();
+  }));
+}
+
+async function updateCatColor(id, color){
+  const { error } = await sb.from('post_categories').update({ color }).eq('id', id);
+  if(error){ toast('Farbe konnte nicht geändert werden: '+error.message,'err'); return; }
+  loadPostCategories();
+}
+
+async function updateCatName(id, name){
+  name = name.trim();
+  if(!name){ toast('Name darf nicht leer sein.','err'); renderCatManageList(); return; }
+  const { error } = await sb.from('post_categories').update({ name }).eq('id', id);
+  if(error){ toast('Name konnte nicht geändert werden: '+error.message,'err'); renderCatManageList(); return; }
+  loadPostCategories();
+}
+
+async function deleteCategory(id){
+  const c = catById(id);
+  const inUse = allPostsCache.some(p=>p.category_id===id);
+  const msg = inUse ? `Kategorie "${c?.name||''}" löschen? Sie wird von bestehenden Posts entfernt.` : `Kategorie "${c?.name||''}" löschen?`;
+  if(!confirm(msg)) return;
+  const { error } = await sb.from('post_categories').delete().eq('id', id);
+  if(error){ toast('Löschen fehlgeschlagen: '+error.message,'err'); return; }
+  toast('Kategorie gelöscht.','ok');
+  loadPostCategories();
+  loadLinkedInPosts();
+}
+
+$('btn-li-cats').addEventListener('click', ()=>{ renderCatManageList(); openModal('ov-li-cats'); });
+
+$('li-cat-add-btn').addEventListener('click', async ()=>{
+  const name = $('li-cat-add-name').value.trim();
+  if(!name){ toast('Bitte einen Namen eingeben.','err'); return; }
+  const sort_order = postCategories.length ? Math.max(...postCategories.map(c=>c.sort_order||0))+1 : 0;
+  const { error } = await sb.from('post_categories').insert({ name, color: liNewCatColor, sort_order });
+  if(error){ toast('Kategorie konnte nicht erstellt werden: '+error.message,'err'); return; }
+  $('li-cat-add-name').value = '';
+  liNewCatColor = LI_CAT_COLORS[0];
+  toast('Kategorie hinzugefügt.','ok');
+  loadPostCategories();
+});
+
 document.querySelectorAll('.li-subtab').forEach(btn => btn.addEventListener('click', () => {
   liActiveTab = btn.dataset.liTab;
   document.querySelectorAll('.li-subtab').forEach(b=>b.classList.remove('active'));
@@ -8060,6 +8227,18 @@ let liGridRefDate = new Date();
 let liGridExpanded = new Set();
 const STATUS_DOT_P = { draft:'var(--ink-s)', approved:'var(--blue,#0A84FF)', posted:'var(--green,#30D158)', rejected:'var(--red,#FF453A)' };
 
+// Calendar tile: status dot + text on top, category tag left-aligned below.
+function liGridPostPillHtml(p, extraStyle){
+  const catHtml = p.category_id ? `<div class="li-grid-post-cat">${liCatTagHtml(p.category_id)}</div>` : '';
+  return `<div class="li-grid-post" data-id="${p.id}"${extraStyle?` style="${extraStyle}"`:''} title="${esc(liFirstLine(p.content))}">
+      <div class="li-grid-post-line">
+        <span class="li-grid-post-dot" style="background:${STATUS_DOT_P[p.status]||'var(--ink-s)'}"></span>
+        <span class="li-grid-post-txt">${esc(liFirstLine(p.content))}</span>
+      </div>
+      ${catHtml}
+    </div>`;
+}
+
 $('li-grid-prev').addEventListener('click', ()=>{ liGridRefDate.setMonth(liGridRefDate.getMonth()-1); liGridExpanded.clear(); renderLiCalendarGrid(allPostsCache); });
 $('li-grid-next').addEventListener('click', ()=>{ liGridRefDate.setMonth(liGridRefDate.getMonth()+1); liGridExpanded.clear(); renderLiCalendarGrid(allPostsCache); });
 $('li-grid-today').addEventListener('click', ()=>{ liGridRefDate = new Date(); liGridExpanded.clear(); renderLiCalendarGrid(allPostsCache); });
@@ -8089,10 +8268,7 @@ function renderLiCalendarGrid(list){
     const dayPosts = (byDate[key]||[]).sort((a,b)=>new Date(a.scheduled_for)-new Date(b.scheduled_for));
     const expanded = liGridExpanded.has(key);
     const shown = expanded ? dayPosts : dayPosts.slice(0,3);
-    const pills = shown.map(p=>`<div class="li-grid-post" data-id="${p.id}" title="${esc(liFirstLine(p.content))}">
-        <span class="li-grid-post-dot" style="background:${STATUS_DOT_P[p.status]||'var(--ink-s)'}"></span>
-        <span class="li-grid-post-txt">${esc(liFirstLine(p.content))}</span>
-      </div>`).join('');
+    const pills = shown.map(p=>liGridPostPillHtml(p)).join('');
     const more = !expanded && dayPosts.length>3 ? `<div class="li-grid-more" data-more="${key}">+${dayPosts.length-3} mehr</div>` : '';
     html += `<div class="li-grid-cell${outside?' li-grid-outside':''}${isToday?' li-grid-today':''}">
       <div class="li-grid-daynum">${d.getDate()}</div>
@@ -8112,10 +8288,7 @@ function renderLiCalendarGrid(list){
   const nodateEl = $('li-grid-nodate');
   if(noDate.length){
     nodateEl.innerHTML = `<div class="li-day-hd">Ohne Termin</div><div style="display:flex;flex-wrap:wrap;gap:.5rem">` +
-      noDate.map(p=>`<div class="li-grid-post" data-id="${p.id}" style="max-width:220px" title="${esc(liFirstLine(p.content))}">
-        <span class="li-grid-post-dot" style="background:${STATUS_DOT_P[p.status]||'var(--ink-s)'}"></span>
-        <span class="li-grid-post-txt">${esc(liFirstLine(p.content))}</span>
-      </div>`).join('') + `</div>`;
+      noDate.map(p=>liGridPostPillHtml(p, 'max-width:220px')).join('') + `</div>`;
     nodateEl.querySelectorAll('.li-grid-post').forEach(el=>el.addEventListener('click', ()=>openEditPost(el.dataset.id)));
   } else {
     nodateEl.innerHTML = '';
@@ -8237,7 +8410,10 @@ function liRowHtml(p){
     <div class="lipost-row-side">
       <div class="lipost-row-meta">
         <span class="lipost-row-time" data-id="${p.id}" data-iso="${p.scheduled_for||''}" title="${p.scheduled_for?'Klicken zum Bearbeiten':'Kein Termin gesetzt'}">${time}</span>
-        <span class="tag ${STATUS_TAG_P[p.status]||'tag--muted'}">${STATUS_LBL_P[p.status]||p.status}</span>
+        <span style="display:flex;align-items:center;gap:.375rem;min-width:0">
+          ${liCatTagHtml(p.category_id)}
+          <span class="tag ${STATUS_TAG_P[p.status]||'tag--muted'}">${STATUS_LBL_P[p.status]||p.status}</span>
+        </span>
       </div>
       <div class="lipost-row-actions">
         ${liRowActionButtons(p)}
@@ -8551,6 +8727,7 @@ function openNewPost(){
   $('mpost-title').textContent = 'Neuer Entwurf';
   $('mpost-content').value = '';
   $('mpost-scheduled').value = '';
+  $('mpost-category').value = '';
   $('mpost-status-row').style.display = 'none';
   $('mpost-reject-btn').style.display = 'none';
   $('mpost-delete-btn').style.display = 'none';
@@ -8567,6 +8744,7 @@ function openEditPost(id){
   $('mpost-title').textContent = 'Post bearbeiten';
   $('mpost-content').value = p.content||'';
   $('mpost-scheduled').value = p.scheduled_for ? liToLocalInputValue(p.scheduled_for) : '';
+  $('mpost-category').value = p.category_id || '';
   $('mpost-status-row').style.display = '';
   $('mpost-status-tag').innerHTML = `<span class="tag ${STATUS_TAG_P[p.status]||'tag--muted'}">${STATUS_LBL_P[p.status]||p.status}</span>`;
   $('mpost-reject-btn').style.display = (p.status!=='rejected' && p.status!=='posted') ? '' : 'none';
@@ -8639,8 +8817,9 @@ async function savePost(e){
   const fcVisible = $('mpost-fc-box').style.display !== 'none';
   const first_comment = fcVisible ? ($('mpost-first-comment').value.trim() || null) : null;
   const media = editMediaList.map(m=>({ type:m.type, path:m.path, name:m.name }));
+  const category_id = $('mpost-category').value || null;
 
-  const patch = { content, scheduled_for, media, first_comment, recurring_rule };
+  const patch = { content, scheduled_for, media, first_comment, recurring_rule, category_id };
   if(editPostId){
     const { error } = await sb.from('posts').update(patch).eq('id', editPostId);
     if(error){ toast('Fehler beim Speichern: '+error.message,'err'); return; }
