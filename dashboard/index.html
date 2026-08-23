@@ -383,6 +383,11 @@
     .li-cat-del:hover{background:var(--red-t);color:var(--red)}
     .li-cat-add-row{display:flex;align-items:flex-start;gap:.625rem;margin-top:.5rem;padding-top:.875rem;border-top:1px solid var(--border)}
     .li-cat-empty{font-size:.8125rem;color:var(--ink-s);margin:0 0 .5rem}
+    /* Seed-30 fixed category (persoenlich/value/portfolio/these/markt) — separate
+       from the freeform post_categories/category_id tagging above */
+    .li-seedref-lbl{font-size:.75rem;font-weight:500;color:var(--ink-s);white-space:nowrap}
+    .li-seed-filter{width:auto;padding:.375rem .625rem;font-size:.8125rem}
+    .li-media-brief-hint{font-size:.75rem;color:var(--ink-s);background:var(--surface-2);border-radius:var(--r-sm);padding:.5rem .625rem;margin-bottom:.5rem}
     .li-editor-grid{display:grid;grid-template-columns:1fr 300px;gap:1.25rem}
     @media (max-width:720px){ .li-editor-grid{grid-template-columns:1fr} }
     .li-metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.75rem;padding:1rem;background:var(--surface-2);border-top:1px solid var(--border)}
@@ -1000,6 +1005,14 @@
       <div class="sec-hd">
         <span class="sec-ttl">LinkedIn</span>
         <div style="display:flex;gap:.5rem;align-items:center">
+          <select class="fi li-seed-filter" id="li-seed-cat-filter" title="Nach Seed-Kategorie filtern">
+            <option value="">Alle Kategorien</option>
+            <option value="persoenlich">Persönlich</option>
+            <option value="value">Value</option>
+            <option value="portfolio">Portfolio</option>
+            <option value="these">These</option>
+            <option value="markt">Markt</option>
+          </select>
           <span id="li-conn-status" style="font-size:.75rem;color:var(--ink-s)"></span>
           <button class="btn btn--ghost btn--sm" id="btn-li-connect">LinkedIn verbinden</button>
           <button class="btn btn--ghost btn--sm" id="btn-li-cats">Kategorien</button>
@@ -1198,7 +1211,7 @@
 <!-- LINKEDIN POST MODAL (add/edit) -->
 <div class="overlay" id="ov-post">
   <div class="modal modal--lg modal--post">
-    <div class="modal-hd"><span class="modal-ttl" id="mpost-title">Neuer Entwurf</span><button class="modal-x" onclick="closeModal('ov-post')">✕</button></div>
+    <div class="modal-hd"><span><span class="modal-ttl" id="mpost-title">Neuer Entwurf</span><span id="mpost-seedref" class="li-seedref-lbl"></span></span><button class="modal-x" onclick="closeModal('ov-post')">✕</button></div>
     <form id="mpost-form" onsubmit="savePost(event)">
       <div class="modal-body">
         <div class="li-editor-grid">
@@ -1220,7 +1233,20 @@
             </div>
 
             <div class="fg">
+              <label class="fl">Seed-Kategorie</label>
+              <select class="fi" id="mpost-seedcat">
+                <option value="">Keine</option>
+                <option value="persoenlich">Persönlich</option>
+                <option value="value">Value</option>
+                <option value="portfolio">Portfolio</option>
+                <option value="these">These</option>
+                <option value="markt">Markt</option>
+              </select>
+            </div>
+
+            <div class="fg">
               <label class="fl">Medien</label>
+              <div class="li-media-brief-hint" id="mpost-media-brief" style="display:none"></div>
               <div class="li-media-picker" id="mpost-media-picker"></div>
               <input type="file" id="mpost-media-input" accept="image/*,video/*" multiple hidden />
             </div>
@@ -8067,6 +8093,22 @@ function liCatTagHtml(categoryId){
   return `<span class="li-cat-tag" style="background:${c.color};color:${liCatContrast(c.color)}">${esc(c.name)}</span>`;
 }
 
+// Seed-30 fixed category (persoenlich/value/portfolio/these/markt) — a
+// separate, non-editable-color enum used to tag the seed-30 measurement
+// batch. Independent of the freeform post_categories/category_id tags above.
+const SEED_CAT_META = {
+  persoenlich: { label: 'Persönlich', color: '#F04438' },
+  value:       { label: 'Value',      color: '#3B82F6' },
+  portfolio:   { label: 'Portfolio',  color: '#22C55E' },
+  these:       { label: 'These',      color: '#A855F7' },
+  markt:       { label: 'Markt',      color: '#F79009' },
+};
+function liSeedCatTagHtml(category){
+  const m = SEED_CAT_META[category];
+  if(!m) return '';
+  return `<span class="li-cat-tag" style="background:${m.color};color:${liCatContrast(m.color)}">${esc(m.label)}</span>`;
+}
+
 async function loadPostCategories(){
   const { data, error } = await sb.from('post_categories').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:true});
   if(error){ toast('Kategorien konnten nicht geladen werden: '+error.message,'err'); return; }
@@ -8206,10 +8248,14 @@ async function loadLinkedInPosts(){
   liResolveMediaUrls(allPostsCache);
 }
 
+let liSeedCatFilter = '';
+$('li-seed-cat-filter').addEventListener('change', e=>{ liSeedCatFilter = e.target.value; renderLinkedInPanel(); });
+
 function renderLinkedInPanel(){
-  if(liActiveTab==='calendar'){ renderLiCalendar(allPostsCache); renderLiCalendarGrid(allPostsCache); }
-  else if(liActiveTab==='rejected') renderLiRejected(allPostsCache);
-  else renderLiStats(allPostsCache);
+  const list = liSeedCatFilter ? allPostsCache.filter(p=>p.category===liSeedCatFilter) : allPostsCache;
+  if(liActiveTab==='calendar'){ renderLiCalendar(list); renderLiCalendarGrid(list); }
+  else if(liActiveTab==='rejected') renderLiRejected(list);
+  else renderLiStats(list);
 }
 
 // ── Calendar view toggle (Liste ↔ Kalenderkacheln) ──────────────────────
@@ -8229,7 +8275,7 @@ const STATUS_DOT_P = { draft:'var(--ink-s)', approved:'var(--blue,#0A84FF)', pos
 
 // Calendar tile: status dot + text on top, category tag left-aligned below.
 function liGridPostPillHtml(p, extraStyle){
-  const catHtml = p.category_id ? `<div class="li-grid-post-cat">${liCatTagHtml(p.category_id)}</div>` : '';
+  const catHtml = (p.category_id || p.category) ? `<div class="li-grid-post-cat">${liSeedCatTagHtml(p.category)}${liCatTagHtml(p.category_id)}</div>` : '';
   return `<div class="li-grid-post" data-id="${p.id}"${extraStyle?` style="${extraStyle}"`:''} title="${esc(liFirstLine(p.content))}">
       <div class="li-grid-post-line">
         <span class="li-grid-post-dot" style="background:${STATUS_DOT_P[p.status]||'var(--ink-s)'}"></span>
@@ -8411,6 +8457,8 @@ function liRowHtml(p){
       <div class="lipost-row-meta">
         <span class="lipost-row-time" data-id="${p.id}" data-iso="${p.scheduled_for||''}" title="${p.scheduled_for?'Klicken zum Bearbeiten':'Kein Termin gesetzt'}">${time}</span>
         <span style="display:flex;align-items:center;gap:.375rem;min-width:0">
+          ${p.seed_ref ? `<span class="li-seedref-lbl">${esc(p.seed_ref)}</span>` : ''}
+          ${liSeedCatTagHtml(p.category)}
           ${liCatTagHtml(p.category_id)}
           <span class="tag ${STATUS_TAG_P[p.status]||'tag--muted'}">${STATUS_LBL_P[p.status]||p.status}</span>
         </span>
@@ -8728,6 +8776,9 @@ function openNewPost(){
   $('mpost-content').value = '';
   $('mpost-scheduled').value = '';
   $('mpost-category').value = '';
+  $('mpost-seedcat').value = '';
+  $('mpost-seedref').textContent = '';
+  $('mpost-media-brief').style.display = 'none';
   $('mpost-status-row').style.display = 'none';
   $('mpost-reject-btn').style.display = 'none';
   $('mpost-delete-btn').style.display = 'none';
@@ -8745,6 +8796,14 @@ function openEditPost(id){
   $('mpost-content').value = p.content||'';
   $('mpost-scheduled').value = p.scheduled_for ? liToLocalInputValue(p.scheduled_for) : '';
   $('mpost-category').value = p.category_id || '';
+  $('mpost-seedcat').value = p.category || '';
+  $('mpost-seedref').textContent = p.seed_ref ? ` · ${p.seed_ref}` : '';
+  if(p.media_brief){
+    $('mpost-media-brief').textContent = `Vor Freigabe anhängen: ${p.media_brief}`;
+    $('mpost-media-brief').style.display = '';
+  } else {
+    $('mpost-media-brief').style.display = 'none';
+  }
   $('mpost-status-row').style.display = '';
   $('mpost-status-tag').innerHTML = `<span class="tag ${STATUS_TAG_P[p.status]||'tag--muted'}">${STATUS_LBL_P[p.status]||p.status}</span>`;
   $('mpost-reject-btn').style.display = (p.status!=='rejected' && p.status!=='posted') ? '' : 'none';
@@ -8818,8 +8877,9 @@ async function savePost(e){
   const first_comment = fcVisible ? ($('mpost-first-comment').value.trim() || null) : null;
   const media = editMediaList.map(m=>({ type:m.type, path:m.path, name:m.name }));
   const category_id = $('mpost-category').value || null;
+  const category = $('mpost-seedcat').value || null;
 
-  const patch = { content, scheduled_for, media, first_comment, recurring_rule, category_id };
+  const patch = { content, scheduled_for, media, first_comment, recurring_rule, category_id, category };
   if(editPostId){
     const { error } = await sb.from('posts').update(patch).eq('id', editPostId);
     if(error){ toast('Fehler beim Speichern: '+error.message,'err'); return; }
