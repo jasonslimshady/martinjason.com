@@ -692,6 +692,32 @@ CREATE POLICY "Owner only" ON post_categories FOR ALL TO authenticated
   USING ((auth.jwt() ->> 'email') = 'jasonmartinde@gmail.com')
   WITH CHECK ((auth.jwt() ->> 'email') = 'jasonmartinde@gmail.com');
 
+-- ============================================================
+--  SEED-30 EXPERIMENT FIELDS
+--  posts.category/experiment_batch/media_brief/seed_ref are added by
+--  the content-engine automation, same as the rest of this file's
+--  posts columns. `category` is a fixed five-value enum used to tag
+--  the seed-30 batch for measurement — separate from the freeform,
+--  user-colored post_categories/category_id tagging above.
+--  posts_seed_ref_uidx keeps the import script idempotent: a second
+--  run upserts onto the same row instead of duplicating it.
+-- ============================================================
+ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS category TEXT;
+ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS experiment_batch TEXT;
+ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS media_brief TEXT;
+ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS seed_ref TEXT;
+
+DO $$ BEGIN
+  ALTER TABLE public.posts
+    ADD CONSTRAINT posts_category_check
+    CHECK (category IS NULL OR category IN ('persoenlich','value','portfolio','these','markt'));
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+CREATE INDEX IF NOT EXISTS posts_category_idx ON public.posts (category);
+CREATE INDEX IF NOT EXISTS posts_experiment_batch_idx ON public.posts (experiment_batch);
+CREATE UNIQUE INDEX IF NOT EXISTS posts_seed_ref_uidx ON public.posts (seed_ref) WHERE seed_ref IS NOT NULL;
+
 
 -- ============================================================
 --  DONE.
