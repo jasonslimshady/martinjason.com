@@ -8098,22 +8098,6 @@ function liCatTagHtml(categoryId){
   return `<span class="li-cat-tag" style="background:${c.color};color:${liCatContrast(c.color)}">${esc(c.name)}</span>`;
 }
 
-// Seed-30 fixed category (persoenlich/value/portfolio/these/markt) — a
-// separate, non-editable-color enum used to tag the seed-30 measurement
-// batch. Independent of the freeform post_categories/category_id tags above.
-const SEED_CAT_META = {
-  persoenlich: { label: 'Persönlich', color: '#F04438' },
-  value:       { label: 'Value',      color: '#3B82F6' },
-  portfolio:   { label: 'Portfolio',  color: '#22C55E' },
-  these:       { label: 'These',      color: '#A855F7' },
-  markt:       { label: 'Markt',      color: '#F79009' },
-};
-function liSeedCatTagHtml(category){
-  const m = SEED_CAT_META[category];
-  if(!m) return '';
-  return `<span class="li-cat-tag" style="background:${m.color};color:${liCatContrast(m.color)}">${esc(m.label)}</span>`;
-}
-
 async function loadPostCategories(){
   const { data, error } = await sb.from('post_categories').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:true});
   if(error){ toast('Kategorien konnten nicht geladen werden: '+error.message,'err'); return; }
@@ -8293,7 +8277,7 @@ const STATUS_DOT_P = { draft:'var(--ink-s)', approved:'var(--blue,#0A84FF)', pos
 
 // Calendar tile: category tag on top, status dot + text below, media thumbnail last.
 function liGridPostPillHtml(p, extraStyle){
-  const catHtml = (p.category_id || p.category) ? `<div class="li-grid-post-cat">${liSeedCatTagHtml(p.category)}${liCatTagHtml(p.category_id)}</div>` : '';
+  const catHtml = p.category_id ? `<div class="li-grid-post-cat">${liCatTagHtml(p.category_id)}</div>` : '';
   const img = (p.media||[]).find(m=>m.type==='image');
   const thumbUrl = img ? liMediaUrlCache[img.path] : null;
   const thumbHtml = thumbUrl ? `<img class="li-grid-post-thumb" src="${esc(thumbUrl)}" alt="" loading="lazy">` : '';
@@ -8479,8 +8463,6 @@ function liRowHtml(p){
       <div class="lipost-row-meta">
         <span class="lipost-row-time" data-id="${p.id}" data-iso="${p.scheduled_for||''}" title="${p.scheduled_for?'Klicken zum Bearbeiten':'Kein Termin gesetzt'}">${time}</span>
         <span style="display:flex;align-items:center;gap:.375rem;min-width:0">
-          ${p.seed_ref ? `<span class="li-seedref-lbl">${esc(p.seed_ref)}</span>` : ''}
-          ${liSeedCatTagHtml(p.category)}
           ${liCatTagHtml(p.category_id)}
           <span class="tag ${STATUS_TAG_P[p.status]||'tag--muted'}">${STATUS_LBL_P[p.status]||p.status}</span>
         </span>
