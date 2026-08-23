@@ -357,8 +357,11 @@
     .li-card-actions button{flex:1;display:flex;align-items:center;justify-content:center;gap:.375rem;padding:.5rem 0;font-size:.75rem;font-weight:600;color:rgba(0,0,0,.6);background:none;border:none;cursor:default}
     /* Post editor: media picker, recurring, first comment */
     .li-media-picker{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.5rem}
-    .li-media-thumb{position:relative;width:64px;height:64px;border-radius:var(--r-sm);overflow:hidden;border:1px solid var(--border);background:var(--surface-2)}
-    .li-media-thumb img,.li-media-thumb video{width:100%;height:100%;object-fit:cover}
+    .li-media-thumb{position:relative;width:64px;height:64px;border-radius:var(--r-sm);overflow:hidden;border:1px solid var(--border);background:var(--surface-2);cursor:grab;transition:opacity var(--fast),outline-color var(--fast)}
+    .li-media-thumb:active{cursor:grabbing}
+    .li-media-thumb.li-media-dragging{opacity:.4}
+    .li-media-thumb.li-media-drag-over{outline:2px solid var(--accent);outline-offset:1px}
+    .li-media-thumb img,.li-media-thumb video{width:100%;height:100%;object-fit:cover;pointer-events:none}
     .li-media-thumb .li-media-del{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;border:none;font-size:11px;line-height:18px;text-align:center;cursor:pointer;padding:0}
     .li-media-add{width:64px;height:64px;border-radius:var(--r-sm);border:1.5px dashed var(--border-s);display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:var(--ink-s);cursor:pointer;background:none}
     .li-media-add:hover{border-color:var(--accent);color:var(--accent)}
@@ -385,10 +388,8 @@
     .li-cat-del:hover{background:var(--red-t);color:var(--red)}
     .li-cat-add-row{display:flex;align-items:flex-start;gap:.625rem;margin-top:.5rem;padding-top:.875rem;border-top:1px solid var(--border)}
     .li-cat-empty{font-size:.8125rem;color:var(--ink-s);margin:0 0 .5rem}
-    /* Seed-30 fixed category (persoenlich/value/portfolio/these/markt) — separate
-       from the freeform post_categories/category_id tagging above */
     .li-seedref-lbl{font-size:.75rem;font-weight:500;color:var(--ink-s);white-space:nowrap}
-    .li-seed-filter{width:auto;padding:.375rem .625rem;font-size:.8125rem}
+    .li-cat-filter-sel{width:auto;padding:.375rem .625rem;font-size:.8125rem}
     .li-media-brief-hint{font-size:.75rem;color:var(--ink-s);background:var(--surface-2);border-radius:var(--r-sm);padding:.5rem .625rem;margin-bottom:.5rem}
     .li-editor-grid{display:grid;grid-template-columns:1fr 300px;gap:1.25rem}
     @media (max-width:720px){ .li-editor-grid{grid-template-columns:1fr} }
@@ -1007,16 +1008,8 @@
       <div class="sec-hd">
         <span class="sec-ttl">LinkedIn</span>
         <div style="display:flex;gap:.5rem;align-items:center">
-          <select class="fi li-seed-filter" id="li-catid-filter" title="Nach Kategorie filtern">
+          <select class="fi li-cat-filter-sel" id="li-catid-filter" title="Nach Kategorie filtern">
             <option value="">Alle Kategorien</option>
-          </select>
-          <select class="fi li-seed-filter" id="li-seed-cat-filter" title="Nach Seed-Kategorie filtern">
-            <option value="">Alle Seed-Kategorien</option>
-            <option value="persoenlich">Persönlich</option>
-            <option value="value">Value</option>
-            <option value="portfolio">Portfolio</option>
-            <option value="these">These</option>
-            <option value="markt">Markt</option>
           </select>
           <span id="li-conn-status" style="font-size:.75rem;color:var(--ink-s)"></span>
           <button class="btn btn--ghost btn--sm" id="btn-li-connect">LinkedIn verbinden</button>
@@ -1234,18 +1227,6 @@
               <label class="fl">Kategorie</label>
               <select class="fi" id="mpost-category">
                 <option value="">Keine Kategorie</option>
-              </select>
-            </div>
-
-            <div class="fg">
-              <label class="fl">Seed-Kategorie</label>
-              <select class="fi" id="mpost-seedcat">
-                <option value="">Keine</option>
-                <option value="persoenlich">Persönlich</option>
-                <option value="value">Value</option>
-                <option value="portfolio">Portfolio</option>
-                <option value="these">These</option>
-                <option value="markt">Markt</option>
               </select>
             </div>
 
@@ -8246,14 +8227,11 @@ async function loadLinkedInPosts(){
   liResolveMediaUrls(allPostsCache);
 }
 
-let liSeedCatFilter = '';
 let liCatIdFilter = '';
-$('li-seed-cat-filter').addEventListener('change', e=>{ liSeedCatFilter = e.target.value; renderLinkedInPanel(); });
 $('li-catid-filter').addEventListener('change', e=>{ liCatIdFilter = e.target.value; renderLinkedInPanel(); });
 
 function renderLinkedInPanel(){
   let list = allPostsCache;
-  if(liSeedCatFilter) list = list.filter(p=>p.category===liSeedCatFilter);
   if(liCatIdFilter) list = list.filter(p=>p.category_id===liCatIdFilter);
   if(liActiveTab==='calendar'){ renderLiCalendar(list); renderLiCalendarGrid(list); }
   else if(liActiveTab==='rejected') renderLiRejected(list);
@@ -8430,16 +8408,16 @@ function renderLiCalendar(list){
   });
   const keys = Object.keys(groups).sort();
   let html = '';
-  keys.forEach(key=>{
-    html += `<div class="li-day-group"><div class="li-day-hd">${liDayLabel(key)}</div><div class="li-day-list">`;
-    html += groups[key].map(p=>liRowHtml(p)).join('');
-    html += `</div></div>`;
-  });
   if(noDate.length){
     html += `<div class="li-day-group"><div class="li-day-hd">Ohne Termin</div><div class="li-day-list">`;
     html += noDate.map(p=>liRowHtml(p)).join('');
     html += `</div></div>`;
   }
+  keys.forEach(key=>{
+    html += `<div class="li-day-group"><div class="li-day-hd">${liDayLabel(key)}</div><div class="li-day-list">`;
+    html += groups[key].map(p=>liRowHtml(p)).join('');
+    html += `</div></div>`;
+  });
   wrap.innerHTML = html;
   wireLiRows(wrap);
 }
@@ -8730,15 +8708,53 @@ function renderMediaPicker(){
     const inner = m.previewUrl
       ? (m.type==='video' ? `<video src="${esc(m.previewUrl)}"></video>` : `<img src="${esc(m.previewUrl)}" alt="">`)
       : '';
-    return `<div class="li-media-thumb">${inner}<button type="button" class="li-media-del" data-i="${i}" title="Entfernen">✕</button></div>`;
+    return `<div class="li-media-thumb" draggable="true" data-i="${i}" title="Ziehen zum Umsortieren">${inner}<button type="button" class="li-media-del" data-i="${i}" title="Entfernen">✕</button></div>`;
   }).join('') + `<button type="button" class="li-media-add" id="mpost-media-add-btn" title="Medien hinzufügen">+</button>`;
   wrap.querySelectorAll('.li-media-del').forEach(btn=>btn.addEventListener('click', e=>{
     e.preventDefault();
+    e.stopPropagation();
     editMediaList.splice(Number(btn.dataset.i),1);
     renderMediaPicker();
     renderPostPreview();
   }));
   $('mpost-media-add-btn').addEventListener('click', ()=>$('mpost-media-input').click());
+  wireMediaDragReorder(wrap);
+}
+
+// Lets you drag a media thumbnail onto another to reorder editMediaList —
+// only relevant once a post has 2+ media items attached.
+function wireMediaDragReorder(wrap){
+  let dragIndex = null;
+  wrap.querySelectorAll('.li-media-thumb').forEach(thumb=>{
+    thumb.addEventListener('dragstart', e=>{
+      dragIndex = Number(thumb.dataset.i);
+      thumb.classList.add('li-media-dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', String(dragIndex));
+    });
+    thumb.addEventListener('dragend', ()=>{
+      thumb.classList.remove('li-media-dragging');
+      wrap.querySelectorAll('.li-media-thumb').forEach(t=>t.classList.remove('li-media-drag-over'));
+    });
+    thumb.addEventListener('dragover', e=>{
+      if(dragIndex===null) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      thumb.classList.add('li-media-drag-over');
+    });
+    thumb.addEventListener('dragleave', ()=>thumb.classList.remove('li-media-drag-over'));
+    thumb.addEventListener('drop', e=>{
+      e.preventDefault();
+      thumb.classList.remove('li-media-drag-over');
+      const targetIndex = Number(thumb.dataset.i);
+      if(dragIndex===null || dragIndex===targetIndex) return;
+      const [moved] = editMediaList.splice(dragIndex,1);
+      editMediaList.splice(targetIndex,0,moved);
+      dragIndex = null;
+      renderMediaPicker();
+      renderPostPreview();
+    });
+  });
 }
 
 $('mpost-media-input').addEventListener('change', async (e)=>{
@@ -8780,7 +8796,6 @@ function openNewPost(){
   $('mpost-content').value = '';
   $('mpost-scheduled').value = '';
   $('mpost-category').value = '';
-  $('mpost-seedcat').value = '';
   $('mpost-seedref').textContent = '';
   $('mpost-media-brief').style.display = 'none';
   $('mpost-status-row').style.display = 'none';
@@ -8800,7 +8815,6 @@ function openEditPost(id){
   $('mpost-content').value = p.content||'';
   $('mpost-scheduled').value = p.scheduled_for ? liToLocalInputValue(p.scheduled_for) : '';
   $('mpost-category').value = p.category_id || '';
-  $('mpost-seedcat').value = p.category || '';
   $('mpost-seedref').textContent = p.seed_ref ? ` · ${p.seed_ref}` : '';
   if(p.media_brief){
     $('mpost-media-brief').textContent = `Vor Freigabe anhängen: ${p.media_brief}`;
@@ -8881,9 +8895,8 @@ async function savePost(e){
   const first_comment = fcVisible ? ($('mpost-first-comment').value.trim() || null) : null;
   const media = editMediaList.map(m=>({ type:m.type, path:m.path, name:m.name }));
   const category_id = $('mpost-category').value || null;
-  const category = $('mpost-seedcat').value || null;
 
-  const patch = { content, scheduled_for, media, first_comment, recurring_rule, category_id, category };
+  const patch = { content, scheduled_for, media, first_comment, recurring_rule, category_id };
   if(editPostId){
     const { error } = await sb.from('posts').update(patch).eq('id', editPostId);
     if(error){ toast('Fehler beim Speichern: '+error.message,'err'); return; }
