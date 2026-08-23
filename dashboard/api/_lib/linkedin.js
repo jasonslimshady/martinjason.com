@@ -6,6 +6,8 @@
 //  so this is safe as a plain shared module, not a route.
 // ============================================================
 
+import { PDFDocument } from 'pdf-lib';
+
 export const SUPABASE_URL = process.env.SUPABASE_URL || 'https://blibykmyvkdtdvgzuwyr.supabase.co';
 export const LINKEDIN_ORG_ID = process.env.LINKEDIN_ORGANIZATION_ID || '';
 // LinkedIn cuts a new API version every month (format YYYYMM) and only keeps
@@ -167,11 +169,69 @@ async function uploadVideoAsset(accessToken, author, serviceKey, item) {
   return init.video;
 }
 
+// Builds a PDF with one full-bleed page per image, in array order — this is
+// LinkedIn's actual "carousel" mechanism: a Document post renders each PDF
+// page as a swipeable slide. (LinkedIn has no dedicated multi-image-carousel
+// object; `multiImage` instead renders as a static collage, which is not
+// what "carousel" means to people who ask for one.) pdf-lib only embeds
+// JPEG/PNG — any other image format fails loudly here rather than silently
+// producing a broken document.
+async function buildCarouselPdf(serviceKey, images) {
+  const MAX_DIM = 2000; // keep the PDF a sane size; LinkedIn scales slides to fit anyway
+  const pdf = await PDFDocument.create();
+  for (const img of images) {
+    const bytes = await downloadMediaBytes(serviceKey, img.path);
+    let embedded;
+    try {
+      embedded = await pdf.embedJpg(bytes);
+    } catch {
+      try {
+        embedded = await pdf.embedPng(bytes);
+      } catch {
+        throw new Error(`Bild "${img.name || img.path}" hat ein für Carousels nicht unterstütztes Format (nur JPG/PNG).`);
+      }
+    }
+    const scale = Math.min(1, MAX_DIM / Math.max(embedded.width, embedded.height));
+    const w = embedded.width * scale, h = embedded.height * scale;
+    const page = pdf.addPage([w, h]);
+    page.drawImage(embedded, { x: 0, y: 0, width: w, height: h });
+  }
+  return Buffer.from(await pdf.save());
+}
+
+// Documents API — same init/PUT upload shape as images/videos, but the
+// asset is the PDF itself. Like the Comments API below, this is gated
+// behind LinkedIn's Community Management API product; a 403 here usually
+// means that product isn't approved on the app yet even though plain
+// image/video posts work.
+async function uploadDocumentAsset(accessToken, author, pdfBytes) {
+  const initRes = await fetch('https://api.linkedin.com/rest/documents?action=initializeUpload', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      'LinkedIn-Version': LINKEDIN_API_VERSION,
+      'X-Restli-Protocol-Version': '2.0.0',
+    },
+    body: JSON.stringify({ initializeUploadRequest: { owner: author } }),
+  });
+  if (!initRes.ok) throw new Error('Carousel-Upload (initialize) fehlgeschlagen: ' + (await initRes.text()));
+  const init = (await initRes.json()).value;
+
+  const putRes = await fetch(init.uploadUrl, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/pdf' },
+    body: pdfBytes,
+  });
+  if (!putRes.ok) throw new Error('Carousel-Upload (PUT) fehlgeschlagen: ' + putRes.status);
+  return init.document;
+}
+
 // Builds the "content" field for the Posts API from post.media (array of
 // {type:'image'|'video', path, name}). Only one media kind can be attached
-// per LinkedIn post: a single video, a single image, or an image carousel —
+// per LinkedIn post: a single video, a single image, or a carousel document —
 // if a video is present it wins; otherwise every image is used (1 = single
-// image, 2+ = carousel).
+// image, 2+ = carousel PDF, one image per slide, in upload/edit order).
 async function buildContent(accessToken, author, serviceKey, media) {
   if (!media || !media.length) return null;
   const video = media.find(m => m.type === 'video');
@@ -181,10 +241,13 @@ async function buildContent(accessToken, author, serviceKey, media) {
   }
   const images = media.filter(m => m.type === 'image');
   if (!images.length) return null;
-  const urns = [];
-  for (const img of images) urns.push(await uploadImageAsset(accessToken, author, serviceKey, img));
-  if (urns.length === 1) return { media: { id: urns[0], title: images[0].name || 'Bild' } };
-  return { multiImage: { images: urns.map((id, i) => ({ id, altText: images[i].name || '' })) } };
+  if (images.length === 1) {
+    const urn = await uploadImageAsset(accessToken, author, serviceKey, images[0]);
+    return { media: { id: urn, title: images[0].name || 'Bild' } };
+  }
+  const pdfBytes = await buildCarouselPdf(serviceKey, images);
+  const urn = await uploadDocumentAsset(accessToken, author, pdfBytes);
+  return { media: { id: urn, title: images[0].name || 'Carousel' } };
 }
 
 // Publishes `post` (row from the "posts" table) to every configured target
