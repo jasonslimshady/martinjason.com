@@ -372,6 +372,8 @@
     .li-weekday-btn{width:32px;height:32px;border-radius:50%;border:1px solid var(--border-s);background:var(--surface);font-size:.6875rem;font-weight:600;color:var(--ink-m);cursor:pointer}
     .li-weekday-btn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
     .lipost-time-input{font-size:.8125rem;font-weight:600;color:var(--ink);border:1px solid var(--border-s);border-radius:6px;padding:.125rem .25rem;background:var(--surface);width:80px}
+    .lipost-status-pill{cursor:pointer}
+    .lipost-status-select{font-size:.6875rem;font-weight:600;color:var(--ink);border:1px solid var(--border-s);border-radius:var(--r-pill);padding:.1875rem .375rem;background:var(--surface)}
     .li-status-badge{display:inline-flex;align-items:center;padding:.1875rem .5rem;border-radius:var(--r-pill);font-size:.6875rem;font-weight:600}
     /* Category tags (user-defined, colored) */
     .li-cat-tag{display:inline-flex;align-items:center;max-width:100%;padding:.1875rem .5rem;border-radius:var(--r-pill);font-size:.6875rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -8056,8 +8058,18 @@ let editPostId = null;
 let liActiveTab = 'calendar';
 let liStatsRangeDays = 30;
 
-const STATUS_LBL_P = { draft:'Entwurf', approved:'Freigegeben', posted:'Veröffentlicht', rejected:'Abgelehnt' };
-const STATUS_TAG_P  = { draft:'tag--muted', approved:'tag--blue', posted:'tag--green', rejected:'tag--red' };
+const STATUS_LBL_P = { draft:'Entwurf', finished_draft:'Fertiger Entwurf', approved:'Freigegeben', posted:'Veröffentlicht', rejected:'Abgelehnt' };
+const STATUS_TAG_P  = { draft:'tag--muted', finished_draft:'tag--orange', approved:'tag--blue', posted:'tag--green', rejected:'tag--red' };
+// Fertiger Entwurf: content is done but deliberately held back — unlike
+// "Freigegeben" it is never picked up by the auto-publish cron (that only
+// queries status=approved), so it's a safe parking state.
+const STATUS_OPTIONS = [
+  { value: 'draft', label: 'Entwurf' },
+  { value: 'finished_draft', label: 'Fertiger Entwurf' },
+  { value: 'approved', label: 'Freigegeben' },
+  { value: 'posted', label: 'Veröffentlicht' },
+  { value: 'rejected', label: 'Abgelehnt' },
+];
 
 // ── Post categories (colored tags: Persönlich, Value, Portfolio, …) ────
 const LI_CAT_COLORS = ['#F04438','#F79009','#EAB308','#22C55E','#14B8A6','#3B82F6','#6366F1','#A855F7','#EC4899'];
@@ -8252,7 +8264,7 @@ document.querySelectorAll('.li-view-btn').forEach(btn=>btn.addEventListener('cli
 // ── Calendar tile (month grid) view ──────────────────────────────────────
 let liGridRefDate = new Date();
 let liGridExpanded = new Set();
-const STATUS_DOT_P = { draft:'var(--ink-s)', approved:'var(--blue,#0A84FF)', posted:'var(--green,#30D158)', rejected:'var(--red,#FF453A)' };
+const STATUS_DOT_P = { draft:'var(--ink-s)', finished_draft:'var(--orange,#FF9F0A)', approved:'var(--blue,#0A84FF)', posted:'var(--green,#30D158)', rejected:'var(--red,#FF453A)' };
 
 // Calendar tile: category tag on top, status dot + text below, media thumbnail last.
 function liGridPostPillHtml(p, extraStyle){
@@ -8443,7 +8455,7 @@ function liRowHtml(p){
         <span class="lipost-row-time" data-id="${p.id}" data-iso="${p.scheduled_for||''}" title="${p.scheduled_for?'Klicken zum Bearbeiten':'Kein Termin gesetzt'}">${time}</span>
         <span style="display:flex;align-items:center;gap:.375rem;min-width:0">
           ${liCatTagHtml(p.category_id)}
-          <span class="tag ${STATUS_TAG_P[p.status]||'tag--muted'}">${STATUS_LBL_P[p.status]||p.status}</span>
+          <span class="tag lipost-status-pill ${STATUS_TAG_P[p.status]||'tag--muted'}" data-id="${p.id}" data-status="${p.status}" title="Klicken, um den Status zu ändern">${STATUS_LBL_P[p.status]||p.status}</span>
         </span>
       </div>
       <div class="lipost-row-actions">
@@ -8466,7 +8478,6 @@ function liRowActionButtons(p){
   if(p.status!=='posted') btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="edit" data-id="${p.id}">Bearbeiten</button>`);
   if(p.status==='approved'){
     btns.push(`<button type="button" class="btn btn--primary btn--sm" data-act="publish" data-id="${p.id}">Jetzt auf LinkedIn posten</button>`);
-    btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="posted" data-id="${p.id}" title="Nur verwenden, falls der Post bereits woanders veröffentlicht wurde">Nur Status setzen</button>`);
   }
   if(p.status!=='rejected' && p.status!=='posted') btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="reject" data-id="${p.id}" style="color:var(--red)">Ablehnen</button>`);
   if(p.status==='rejected' || p.status==='posted') btns.push(`<button type="button" class="btn btn--ghost btn--sm" data-act="restore" data-id="${p.id}" title="Status zurück auf Entwurf setzen">Zu Entwurf</button>`);
@@ -8476,12 +8487,16 @@ function liRowActionButtons(p){
 
 function wireLiRows(wrap){
   wrap.querySelectorAll('.lipost-row').forEach(row=>row.addEventListener('click', e=>{
-    if(e.target.closest('[data-act]') || e.target.closest('.lipost-row-time')) return;
+    if(e.target.closest('[data-act]') || e.target.closest('.lipost-row-time') || e.target.closest('.lipost-status-pill')) return;
     openEditPost(row.dataset.id);
   }));
   wrap.querySelectorAll('.lipost-row-time').forEach(el=>el.addEventListener('click', e=>{
     e.stopPropagation();
     liEditTimeInline(el);
+  }));
+  wrap.querySelectorAll('.lipost-status-pill').forEach(el=>el.addEventListener('click', e=>{
+    e.stopPropagation();
+    liEditStatusInline(el);
   }));
   wrap.querySelectorAll('[data-act]').forEach(btn=>btn.addEventListener('click', e=>{
     e.stopPropagation();
@@ -8490,7 +8505,6 @@ function wireLiRows(wrap){
     if(act==='edit') openEditPost(id);
     else if(act==='approve') changePostStatus(id,'approved');
     else if(act==='publish') publishPostToLinkedIn(id, btn);
-    else if(act==='posted') changePostStatus(id,'posted');
     else if(act==='reject') changePostStatus(id,'rejected');
     else if(act==='restore') changePostStatus(id,'draft');
     else if(act==='delete') armConfirmDelete(btn, ()=>deletePostRow(id));
@@ -8516,6 +8530,38 @@ function armConfirmDelete(btn, onConfirm){
     btn.textContent = btn.dataset.origLabel;
     btn.classList.remove('btn--confirm-armed');
   }, 3000));
+}
+
+// Turns the status pill into a <select> in place — lets you jump to any
+// status directly instead of only the one-click shortcuts (Freigeben,
+// Ablehnen, Zu Entwurf …). Replaces the old "Nur Status setzen" button.
+function liEditStatusInline(el){
+  if(el.tagName === 'SELECT') return;
+  const id = el.dataset.id;
+  const current = el.dataset.status;
+  const select = document.createElement('select');
+  select.className = 'lipost-status-select';
+  STATUS_OPTIONS.forEach(opt=>{
+    const o = document.createElement('option');
+    o.value = opt.value;
+    o.textContent = opt.label;
+    if(opt.value===current) o.selected = true;
+    select.appendChild(o);
+  });
+  select.addEventListener('click', e=>e.stopPropagation());
+  let handled = false;
+  select.addEventListener('change', ()=>{
+    handled = true;
+    const next = select.value;
+    if(next!==current) changePostStatus(id, next);
+    else renderLinkedInPanel();
+  });
+  select.addEventListener('blur', ()=>{
+    if(!handled) renderLinkedInPanel();
+  });
+  el.replaceWith(select);
+  select.focus();
+  if(typeof select.showPicker === 'function'){ try{ select.showPicker(); }catch{} }
 }
 
 // Turns the time label into an <input type="time"> in place; on change,
