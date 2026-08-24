@@ -8340,14 +8340,62 @@ document.querySelectorAll('[data-li-range]').forEach(btn => btn.addEventListener
 $('btn-new-post').addEventListener('click', () => openNewPost());
 
 let liMediaUrlCache = {};
+
+// ── IMAGE TRANSFORMATION (Supabase Storage) ──────────────────────────
+// Post images are stored as full-resolution originals (often several MB — this
+// is a product-image business). Serving those straight into the feed and into
+// 64px calendar thumbnails is the single biggest thing that made the page slow.
+// Supabase Storage can resize/re-encode on the fly, but only when image
+// transformations are enabled for the project — so we probe once (result cached
+// per browser) and fall back to the untransformed original if it isn't
+// available. Videos are never transformed.
+// The feed shows a lightweight PREVIEW (small + moderately compressed, but not
+// so low it looks bad); the full-resolution original is only fetched when a
+// post is actually opened in the edit popup (see liUpgradeEditMediaFullQuality).
+const LI_IMG_TX = { width: 820, quality: 60, resize: 'contain' };
+let liTransformMode = null; // null = unknown, true/false once probed
+function liProbeTransform(samplePath){
+  return new Promise(resolve=>{
+    sb.storage.from('post-media').createSignedUrl(samplePath, 120, { transform: { width: 24, quality: 40 } })
+      .then(({ data })=>{
+        if(!data?.signedUrl){ resolve(false); return; }
+        // Image() load probe avoids CORS issues that a fetch() probe would hit.
+        const img = new Image();
+        img.onload = ()=>resolve(true);
+        img.onerror = ()=>resolve(false);
+        img.src = data.signedUrl;
+      })
+      .catch(()=>resolve(false));
+  });
+}
+async function liEnsureTransformMode(samplePath){
+  if(liTransformMode !== null) return liTransformMode;
+  let cached = null;
+  try { cached = localStorage.getItem('jm_img_tx'); } catch(e){}
+  if(cached === '1'){ liTransformMode = true;  return true; }
+  if(cached === '0'){ liTransformMode = false; return false; }
+  liTransformMode = await liProbeTransform(samplePath);
+  try { localStorage.setItem('jm_img_tx', liTransformMode ? '1' : '0'); } catch(e){}
+  return liTransformMode;
+}
+
 async function liResolveMediaUrls(posts){
-  const paths = new Set();
-  posts.forEach(p=>(p.media||[]).forEach(m=>{ if(m.path && !liMediaUrlCache[m.path]) paths.add(m.path); }));
-  if(!paths.size) return;
-  const results = await Promise.all([...paths].map(async path=>{
-    const { data } = await sb.storage.from('post-media').createSignedUrl(path, 3600);
-    return [path, data?.signedUrl || null];
+  // Separate images (transformable) from videos/other (never transformed).
+  const imgPaths = new Set(), rawPaths = new Set();
+  posts.forEach(p=>(p.media||[]).forEach(m=>{
+    if(!m.path || liMediaUrlCache[m.path]) return;
+    (m.type === 'image' ? imgPaths : rawPaths).add(m.path);
   }));
+  if(!imgPaths.size && !rawPaths.size) return;
+
+  const useTx = imgPaths.size ? await liEnsureTransformMode([...imgPaths][0]) : false;
+  const sign = (path, opts) => sb.storage.from('post-media').createSignedUrl(path, 3600, opts)
+    .then(({ data }) => [path, data?.signedUrl || null]);
+
+  const results = await Promise.all([
+    ...[...imgPaths].map(path => sign(path, useTx ? { transform: LI_IMG_TX } : undefined)),
+    ...[...rawPaths].map(path => sign(path, undefined)),
+  ]);
   let changed = false;
   results.forEach(([path,url])=>{ if(url){ liMediaUrlCache[path]=url; changed = true; } });
   if(changed) renderLinkedInPanel();
@@ -8380,11 +8428,26 @@ let liStatusFilter = '';
 $('li-catid-filter').addEventListener('change', e=>{ liCatIdFilter = e.target.value; renderLinkedInPanel(); });
 $('li-status-filter').addEventListener('change', e=>{ liStatusFilter = e.target.value; renderLinkedInPanel(); });
 
+// On load the panel is asked to re-render several times in quick succession
+// (cached paint → fresh data → categories → resolved image URLs). Coalesce
+// those into a single render on the next frame so the feed DOM is built once,
+// not four or five times.
+let _liRenderScheduled = false;
 function renderLinkedInPanel(){
+  if(_liRenderScheduled) return;
+  _liRenderScheduled = true;
+  requestAnimationFrame(()=>{ _liRenderScheduled = false; renderLinkedInPanelNow(); });
+}
+function renderLinkedInPanelNow(){
   let list = allPostsCache;
   if(liCatIdFilter) list = list.filter(p=>p.category_id===liCatIdFilter);
   if(liStatusFilter) list = list.filter(p=>p.status===liStatusFilter);
-  if(liActiveTab==='calendar'){ renderLiCalendar(list); renderLiCalendarGrid(list); }
+  if(liActiveTab==='calendar'){
+    renderLiCalendar(list);
+    // The month-grid view is hidden by default — only build it when it's the
+    // one actually on screen (the view toggle rebuilds it when switched to).
+    if(liCalendarView==='grid') renderLiCalendarGrid(list);
+  }
   else if(liActiveTab==='rejected') renderLiRejected(list);
   else renderLiStats(list);
 }
@@ -9041,8 +9104,12 @@ function openEditPost(id){
   $('mpost-save').textContent = 'Speichern';
 
   resetPostEditor();
+  // Open instantly with whatever preview is already cached, then upgrade the
+  // images to full resolution in the background — full quality is only paid
+  // for when a post is actually being edited.
   editMediaList = (p.media||[]).map(m=>({ ...m, previewUrl: liMediaUrlCache[m.path]||null }));
   renderMediaPicker();
+  liUpgradeEditMediaFullQuality(id);
 
   if(p.recurring_rule){
     $('mpost-recurring-toggle').checked = true;
@@ -9063,6 +9130,25 @@ function openEditPost(id){
 
   renderPostPreview();
   openModal('ov-post');
+}
+
+// Fetch full-resolution (untransformed) signed URLs for the images of the post
+// currently open in the editor, then refresh the editor + live preview. Runs
+// after the modal is already on screen so opening stays instant. Guarded by the
+// post id so a slow response can't overwrite a different post opened meanwhile.
+async function liUpgradeEditMediaFullQuality(id){
+  const imgs = editMediaList.filter(m => m.type === 'image' && m.path);
+  if(!imgs.length) return;
+  const results = await Promise.all(imgs.map(m =>
+    sb.storage.from('post-media').createSignedUrl(m.path, 3600)
+      .then(({ data }) => [m.path, data?.signedUrl || null])
+      .catch(() => [m.path, null])
+  ));
+  if(editPostId !== id) return; // editor moved on to another post
+  const map = Object.fromEntries(results.filter(([,u]) => u));
+  let changed = false;
+  editMediaList.forEach(m => { if(m.type === 'image' && map[m.path]){ m.previewUrl = map[m.path]; changed = true; } });
+  if(changed){ renderMediaPicker(); renderPostPreview(); }
 }
 
 function liToLocalInputValue(iso){
