@@ -52,36 +52,22 @@
     input,textarea,select{font:inherit} [hidden]{display:none!important}
 
     /* BACKGROUND — same drifting-blob treatment as martinjason.com */
-    .bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;contain:strict}
-    /* The blur + saturate live on each blob (a promoted compositor layer),
-       not on the shared parent. That way the expensive blurred bitmap is
-       rasterized ONCE and the drift animation only translates the cached
-       layer — instead of forcing a full re-blur every frame behind the
-       scrolling content, which is what made scrolling stutter and made
-       fresh content flash in blank before painting. */
-    .bg-blobs{position:absolute;inset:-10%}
-    .blob{position:absolute;border-radius:50%;opacity:.55;mix-blend-mode:multiply;filter:blur(72px) saturate(120%);will-change:transform;transform:translateZ(0);animation:drift 38s ease-in-out infinite}
-    .blob--a{width:60vmax;height:60vmax;background:radial-gradient(closest-side,#BFD7FF 0%,transparent 70%);top:-15%;left:-10%;animation-duration:42s}
-    .blob--b{width:55vmax;height:55vmax;background:radial-gradient(closest-side,#FFD9C2 0%,transparent 70%);top:30%;right:-15%;animation-duration:56s;animation-direction:reverse}
-    .blob--c{width:50vmax;height:50vmax;background:radial-gradient(closest-side,#E7DCC8 0%,transparent 70%);bottom:-20%;left:20%;animation-duration:64s}
-    /* translate-only keyframes: no scale(), so the blurred layer never needs
-       re-rasterizing mid-animation — the compositor just moves it. */
-    @keyframes drift{
-      0%,100%{transform:translate3d(0,0,0)}
-      33%{transform:translate3d(4vw,-3vh,0)}
-      66%{transform:translate3d(-3vw,4vh,0)}
-    }
-    /* Users who prefer reduced motion (or low-power devices) get a still
-       background — no continuous compositing work at all. */
-    @media (prefers-reduced-motion: reduce){
-      .blob{animation:none}
-    }
-    /* While the user is actively scrolling, freeze the drift so 100% of the
-       paint budget goes to the content coming into view — this is what stops
-       fresh content flashing in blank on a fast scroll. It resumes a moment
-       after scrolling stops (toggled from JS). */
-    body.is-scrolling .blob{animation-play-state:paused}
-    .bg-grain{position:absolute;inset:0;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");opacity:.05;mix-blend-mode:multiply}
+    /* The background is a STATIC gradient — no blur, no animation, no
+       mix-blend-mode, no will-change. The old version used three animated
+       blur(72px) blobs plus a full-screen SVG-noise multiply layer; those run
+       on the GPU every single frame and, on a Retina display, consume so much
+       raster budget that the actual scrolling content can't be painted in time
+       — which is exactly why cards flashed in blank on a fast scroll. A plain
+       radial-gradient gives the same soft colour blooms at essentially zero
+       cost and is painted once. */
+    .bg{position:fixed;inset:0;z-index:-1;pointer-events:none;
+      background:
+        radial-gradient(58vmax 58vmax at 6% -4%, rgba(191,215,255,.50), transparent 60%),
+        radial-gradient(54vmax 54vmax at 102% 30%, rgba(255,217,194,.45), transparent 60%),
+        radial-gradient(50vmax 50vmax at 22% 110%, rgba(231,220,200,.50), transparent 62%),
+        var(--bg)}
+    /* The decorative blob + grain elements are no longer rendered. */
+    .bg-blobs,.bg-grain,.blob{display:none}
 
     /* LOADING */
     #loading{position:fixed;inset:0;background:transparent;display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .3s}
@@ -128,14 +114,17 @@
     #screen-app{display:flex;height:100vh}
 
     /* SIDEBAR */
-    .sb{width:var(--sb);height:100vh;background:var(--glass-s);backdrop-filter:blur(var(--blur)) saturate(180%);-webkit-backdrop-filter:blur(var(--blur)) saturate(180%);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:1.125rem .75rem;flex-shrink:0;overflow-y:auto}
+    /* Solid sidebar — no backdrop-filter. A blurred backdrop that samples the
+       (now static) background continuously is pure GPU cost for a panel that
+       never moves; a near-opaque fill looks the same and is free. */
+    .sb{width:var(--sb);height:100vh;background:#FBFAF7;border-right:1px solid var(--border);display:flex;flex-direction:column;padding:1.125rem .75rem;flex-shrink:0;overflow-y:auto}
     .sb-brand{display:flex;align-items:center;gap:.625rem;padding:.25rem .5rem 1.125rem;border-bottom:1px solid var(--border);margin-bottom:.75rem}
     .sb-mark{width:30px;height:30px;flex-shrink:0;object-fit:contain;display:block}
     .sb-name{font-size:.875rem;font-weight:600;letter-spacing:-.01em}
     .sb-sec{font-size:.6875rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-s);padding:.5rem .5rem .25rem;margin-top:.375rem}
     .nav-item{display:flex;align-items:center;gap:.625rem;padding:.5rem .75rem;border-radius:var(--r-sm);font-size:.875rem;font-weight:500;color:var(--ink-m);cursor:pointer;transition:all var(--fast);width:100%;text-align:left;margin-bottom:2px;border:1px solid transparent}
-    .nav-item:hover{background:var(--glass-s);border-color:var(--glass-b);color:var(--ink);backdrop-filter:blur(10px) saturate(160%);-webkit-backdrop-filter:blur(10px) saturate(160%)}
-    .nav-item.active{background:rgba(10,10,10,.72);color:#fff;border-color:rgba(255,255,255,.14);backdrop-filter:blur(10px) saturate(160%);-webkit-backdrop-filter:blur(10px) saturate(160%)}
+    .nav-item:hover{background:var(--surface-2);border-color:var(--border);color:var(--ink)}
+    .nav-item.active{background:rgba(10,10,10,.85);color:#fff;border-color:rgba(255,255,255,.14)}
     .nav-item svg{width:15px;height:15px;flex-shrink:0;opacity:.7}
     .nav-item.active svg{opacity:1}
     .nav-badge{margin-left:auto;background:var(--accent);color:#fff;font-size:.625rem;font-weight:700;padding:1px 6px;border-radius:var(--r-pill);min-width:18px;text-align:center}
@@ -150,10 +139,18 @@
        shows through blank until it re-rasterizes (the bug in the recording).
        An opaque surface lets the browser raster the content into cached tiles
        and just shift them. The content sits on a clean solid surface; the
-       animated blob background still shows through the translucent sidebar. */
+       background is a cheap static gradient; the content sits on a clean solid
+       surface so the browser can fast-scroll it. */
     .main{flex:1;min-width:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;background:var(--bg)}
     .panel{flex:1;padding:1.5rem;display:none}
     .panel.active{display:block}
+    /* PERFORMANCE: strip backdrop-filter from every glass control that lives
+       inside the scrolling content. Over the opaque surface the blur is
+       invisible, but each one forces its own GPU layer and re-samples the
+       backdrop on scroll. Fixed overlays (modals, drawers) keep theirs — they
+       don't scroll and only appear on interaction. */
+    .ga-range-btn,.ga-live-btn,.ga-connect-btn,.act-type-btn,.klv-range,.pto-btn,.pto-view-toggle,.timer-hero{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+    .timer-blobs{display:none!important}
 
     /* COMPONENTS */
     .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:.875rem;margin-bottom:1.25rem}
@@ -385,10 +382,9 @@
     /* ── SCROLL PERFORMANCE ────────────────────────────────────────────
        Every panel is rendered once and then kept fully painted in the DOM —
        nothing is virtualised or discarded, so scrolling (even fast) and
-       switching panels never re-renders or blanks content. The one thing that
-       used to compete with scroll painting was the drifting background, so it
-       is frozen while the user is actively scrolling (see the .is-scrolling
-       rule below and the scroll listener in JS). */
+       switching panels never re-renders or blanks content. The scroll surface
+       is opaque and there are no blur/backdrop-filter effects competing for
+       GPU raster budget, so freshly exposed content paints instantly. */
     /* LinkedIn-style post card */
     .li-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
     .li-card-hd{display:flex;gap:.625rem;padding:.75rem .875rem .5rem}
@@ -894,11 +890,11 @@
             <select class="fi btn--sm" id="rev-client" style="width:160px;padding:.3rem .5rem;font-size:.8125rem">
               <option value="">Alle Kunden</option>
             </select>
-            <div style="display:flex;border:1px solid var(--glass-b);border-radius:var(--r-sm);overflow:hidden;backdrop-filter:blur(10px) saturate(160%);-webkit-backdrop-filter:blur(10px) saturate(160%)">
+            <div style="display:flex;border:1px solid var(--glass-b);border-radius:var(--r-sm);overflow:hidden">
               <button id="rev-date-invoice" title="Im Graphen nach Rechnungsdatum anzeigen" style="padding:.3rem .6rem;background:rgba(10,10,10,.72);border:none;cursor:pointer;font-size:.75rem;font-weight:600;color:#fff">Rechnungsdatum</button>
               <button id="rev-date-paid" title="Im Graphen nach Bezahlt-Datum anzeigen" style="padding:.3rem .6rem;background:var(--glass);border:none;cursor:pointer;font-size:.75rem;font-weight:600;color:var(--ink-m)">Bezahlt</button>
             </div>
-            <div style="display:flex;border:1px solid var(--glass-b);border-radius:var(--r-sm);overflow:hidden;backdrop-filter:blur(10px) saturate(160%);-webkit-backdrop-filter:blur(10px) saturate(160%)">
+            <div style="display:flex;border:1px solid var(--glass-b);border-radius:var(--r-sm);overflow:hidden">
               <button id="rev-type-bar" title="Balkendiagramm" style="padding:.3rem .6rem;background:rgba(10,10,10,.72);border:none;cursor:pointer;display:flex;align-items:center">
                 <svg width="14" height="14" fill="none" stroke="#fff" stroke-width="1.8" viewBox="0 0 16 16"><rect x="1" y="9" width="3" height="6" rx="1"/><rect x="6.5" y="5" width="3" height="10" rx="1"/><rect x="12" y="1.5" width="3" height="13.5" rx="1"/></svg>
               </button>
@@ -1785,25 +1781,6 @@ function cacheClearAll(){
       .forEach(k => localStorage.removeItem(k));
   } catch(e){}
 }
-
-// ── FREEZE BACKGROUND DRIFT WHILE SCROLLING ──────────────────────────
-// The drifting blobs are the only thing that repaints continuously; pausing
-// them for the moments the user is actually scrolling frees the paint budget
-// so content coming into view never flashes in blank. Resumes 160ms after the
-// last scroll event.
-(function(){
-  let scrollTimer = null;
-  const onScroll = () => {
-    document.body.classList.add('is-scrolling');
-    if(scrollTimer) clearTimeout(scrollTimer);
-    scrollTimer = setTimeout(() => document.body.classList.remove('is-scrolling'), 160);
-  };
-  // Capture-phase + passive so it catches scrolling in any nested container
-  // (the main area, modals, long lists) without slowing the scroll itself.
-  window.addEventListener('scroll', onScroll, { capture:true, passive:true });
-  window.addEventListener('wheel',  onScroll, { passive:true });
-  window.addEventListener('touchmove', onScroll, { passive:true });
-})();
 
 // ── LAZY LIBRARIES ───────────────────────────────────────────────────
 // pdf.js / JSZip / html2pdf are only needed for uploads & exports — they
