@@ -11,7 +11,16 @@
   <title>JM Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Warm up the connections the dashboard needs first: Supabase (auth +
+       every data query) and the CDNs that serve the client library. Doing the
+       DNS + TLS handshake up-front shaves a round-trip off the first request. -->
+  <link rel="preconnect" href="https://blibykmyvkdtdvgzuwyr.supabase.co" crossorigin />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="dns-prefetch" href="https://blibykmyvkdtdvgzuwyr.supabase.co" />
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" /></noscript>
   <style>
     :root {
       --bg:#F7F5F1; --surface:#fff; --surface-2:#F1EEE9;
@@ -43,16 +52,29 @@
     input,textarea,select{font:inherit} [hidden]{display:none!important}
 
     /* BACKGROUND — same drifting-blob treatment as martinjason.com */
-    .bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
-    .bg-blobs{position:absolute;inset:-10%;filter:blur(80px) saturate(120%);will-change:transform}
-    .blob{position:absolute;border-radius:50%;opacity:.55;mix-blend-mode:multiply;animation:drift 38s ease-in-out infinite}
+    .bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;contain:strict}
+    /* The blur + saturate live on each blob (a promoted compositor layer),
+       not on the shared parent. That way the expensive blurred bitmap is
+       rasterized ONCE and the drift animation only translates the cached
+       layer — instead of forcing a full re-blur every frame behind the
+       scrolling content, which is what made scrolling stutter and made
+       fresh content flash in blank before painting. */
+    .bg-blobs{position:absolute;inset:-10%}
+    .blob{position:absolute;border-radius:50%;opacity:.55;mix-blend-mode:multiply;filter:blur(72px) saturate(120%);will-change:transform;transform:translateZ(0);animation:drift 38s ease-in-out infinite}
     .blob--a{width:60vmax;height:60vmax;background:radial-gradient(closest-side,#BFD7FF 0%,transparent 70%);top:-15%;left:-10%;animation-duration:42s}
     .blob--b{width:55vmax;height:55vmax;background:radial-gradient(closest-side,#FFD9C2 0%,transparent 70%);top:30%;right:-15%;animation-duration:56s;animation-direction:reverse}
     .blob--c{width:50vmax;height:50vmax;background:radial-gradient(closest-side,#E7DCC8 0%,transparent 70%);bottom:-20%;left:20%;animation-duration:64s}
+    /* translate-only keyframes: no scale(), so the blurred layer never needs
+       re-rasterizing mid-animation — the compositor just moves it. */
     @keyframes drift{
-      0%,100%{transform:translate3d(0,0,0) scale(1)}
-      33%{transform:translate3d(4vw,-3vh,0) scale(1.05)}
-      66%{transform:translate3d(-3vw,4vh,0) scale(.97)}
+      0%,100%{transform:translate3d(0,0,0)}
+      33%{transform:translate3d(4vw,-3vh,0)}
+      66%{transform:translate3d(-3vw,4vh,0)}
+    }
+    /* Users who prefer reduced motion (or low-power devices) get a still
+       background — no continuous compositing work at all. */
+    @media (prefers-reduced-motion: reduce){
+      .blob{animation:none}
     }
     .bg-grain{position:absolute;inset:0;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");opacity:.05;mix-blend-mode:multiply}
 
@@ -342,6 +364,16 @@
     .lipost-row-time:hover{color:var(--accent)}
     .lipost-row-actions{display:grid;grid-template-columns:1fr 1fr;gap:.375rem}
     .lipost-row-actions .btn{width:100%}
+    /* ── SCROLL PERFORMANCE ────────────────────────────────────────────
+       The post feed, the calendar tiles and the analytics rows can each be
+       long lists. content-visibility:auto lets the browser skip layout +
+       paint for anything off-screen, so scrolling only ever renders what is
+       near the viewport instead of the whole list at once. The `auto`
+       contain-intrinsic-size makes each item remember its real height after
+       it has been rendered once, so nothing pops or shifts on scroll-back. */
+    .lipost-row{content-visibility:auto;contain-intrinsic-size:auto 460px}
+    .li-grid-cell{content-visibility:auto;contain-intrinsic-size:auto 104px}
+    .li-stats-row{content-visibility:auto;contain-intrinsic-size:auto 58px}
     /* LinkedIn-style post card */
     .li-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
     .li-card-hd{display:flex;gap:.625rem;padding:.75rem .875rem .5rem}
@@ -351,8 +383,11 @@
     .li-author-time{font-size:.6875rem;color:rgba(0,0,0,.6);display:flex;align-items:center;gap:.25rem}
     .li-card-body{padding:0 .875rem .625rem;font-size:.875rem;line-height:1.4;color:rgba(0,0,0,.9);white-space:pre-wrap;word-break:break-word}
     .li-hashtag{color:#0A66C2;font-weight:600}
-    .li-card-media{border-top:1px solid rgba(0,0,0,.08);overflow:hidden}
+    .li-card-media{border-top:1px solid rgba(0,0,0,.08);overflow:hidden;background:var(--surface-2)}
     .li-card-media img,.li-card-media video{width:100%;height:auto;max-height:600px;object-fit:contain;display:block}
+    /* Reserve space while the signed image URL is still resolving so the card
+       doesn't jump (and content below doesn't get shoved) when it arrives. */
+    .li-card-media.li-media-pending{min-height:200px}
     .li-card-stats{display:flex;justify-content:space-between;padding:.3rem .875rem;font-size:.6875rem;color:rgba(0,0,0,.6);border-top:1px solid rgba(0,0,0,.08)}
     .li-card-actions{display:flex;border-top:1px solid rgba(0,0,0,.08)}
     .li-card-actions button{flex:1;display:flex;align-items:center;justify-content:center;gap:.375rem;padding:.5rem 0;font-size:.75rem;font-weight:600;color:rgba(0,0,0,.6);background:none;border:none;cursor:default}
@@ -1707,6 +1742,34 @@ const { createClient } = window.supabase;
 const sb = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
 const $ = id => document.getElementById(id);
 
+// ── DATA CACHE (stale-while-revalidate) ──────────────────────────────
+// Panels that were already loaded once paint instantly from a cached copy
+// while the fresh data is re-fetched in the background — so switching panels
+// or reloading the tab no longer shows an empty screen waiting on the network.
+// The cache lives in sessionStorage (per-tab, cleared on close) and is keyed
+// by the signed-in user so one account never sees another's cached rows.
+const CACHE_PREFIX = 'jm_cache_';
+let cacheUserKey = 'anon';
+function cacheKey(name){ return CACHE_PREFIX + cacheUserKey + '_' + name; }
+function cacheGet(name){
+  try {
+    const raw = sessionStorage.getItem(cacheKey(name));
+    if(!raw) return null;
+    return JSON.parse(raw);
+  } catch(e){ return null; }
+}
+function cacheSet(name, data){
+  try { sessionStorage.setItem(cacheKey(name), JSON.stringify(data)); }
+  catch(e){ /* quota / private mode — caching is best-effort */ }
+}
+function cacheClearAll(){
+  try {
+    Object.keys(sessionStorage)
+      .filter(k => k.startsWith(CACHE_PREFIX))
+      .forEach(k => sessionStorage.removeItem(k));
+  } catch(e){}
+}
+
 // ── LAZY LIBRARIES ───────────────────────────────────────────────────
 // pdf.js / JSZip / html2pdf are only needed for uploads & exports — they
 // are loaded on demand instead of on every page view (~1 MB saved).
@@ -1799,18 +1862,50 @@ async function showApp(user){
     return;
   }
   hideAllScreens(); $('screen-app').hidden=false;
-  loadStats(); loadCRM(); loadTimeEntries(); loadProjectOverview(); loadInvoices(); loadInvReminders(); loadQuotes(); loadContracts(); loadPostCategories(); loadLinkedInPosts(); subscribeLinkedInRealtime(); liCheckConnection();
+  // Scope the data cache to this account.
+  cacheUserKey = (user?.id || user?.email || 'anon');
+
+  // Shared dependency — the project list feeds dropdowns, the timer and the
+  // invoice/time panels — so it loads first and is awaited.
   await loadProjects();
   restoreTimer(); // pick up a timer that survived a reload / tab close
-  // Restore last active panel (persists across reloads)
+
+  // Load the panel that's about to be shown first, plus everything that feeds
+  // a sidebar badge (so the counts are right even for panels you haven't
+  // opened). The remaining panels load lazily the first time they're opened —
+  // see ensurePanelData() — which keeps the initial burst small and fast.
   const savedPanel = localStorage.getItem('active_panel');
-  if (savedPanel && PANELS[savedPanel] && savedPanel !== 'analytics') switchPanel(savedPanel);
-  // Try to restore Google Analytics session without requiring re-login
-  gaAutoInit();
+  const firstPanel = (savedPanel && PANELS[savedPanel]) ? savedPanel : 'analytics';
+  if (firstPanel !== 'analytics') switchPanel(firstPanel);
+
+  // Critical for the first paint + badges: stats (analytics + invoice badge),
+  // LinkedIn (badge + the panel the user singled out) and CRM (lead badge).
+  loadStats(); loadCRM(); loadPostCategories(); loadLinkedInPosts();
+  subscribeLinkedInRealtime(); liCheckConnection();
+  ensurePanelData(firstPanel);
+
+  // Badge-only panels (quotes, contracts) and Google Analytics restore can
+  // wait until the browser is idle — they don't block the first screen.
+  const whenIdle = window.requestIdleCallback || (fn => setTimeout(fn, 200));
+  whenIdle(() => { loadQuotes(); loadContracts(); gaAutoInit(); });
+}
+
+// Per-panel lazy data loading: a panel only pays for its queries + DOM build
+// the first time it's actually opened. Panels already loaded on boot (analytics
+// stats, CRM, LinkedIn, and the idle-loaded quotes/contracts) are marked here so
+// they're never re-fetched on their first open; klaviyo/seo keep their own
+// guards inside switchPanel().
+const _panelDataLoaded = { analytics:true, crm:true, quotes:true, contracts:true, linkedin:true, klaviyo:true, seo:true };
+function ensurePanelData(id){
+  if(_panelDataLoaded[id]) return;
+  _panelDataLoaded[id] = true;
+  if(id==='time'){ loadTimeEntries(); loadProjectOverview(); }
+  else if(id==='invoices'){ loadInvoices(); loadInvReminders(); }
 }
 
 $('btn-logout').addEventListener('click', async () => {
   if (timerTick && !confirm('Der Timer läuft noch. Trotzdem abmelden?')) return;
+  cacheClearAll(); // don't leave one account's cached data for the next sign-in
   await sb.auth.signOut().catch(()=>{});
   location.reload();
 });
@@ -1895,6 +1990,7 @@ function switchPanel(id) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   $('panel-'+id).classList.add('active');
   localStorage.setItem('active_panel', id);
+  ensurePanelData(id); // load this panel's data the first time it's opened
   if (id === 'klaviyo' && !klvLoaded) {
     klvLoaded = true;
     const { start, end } = klvISORange(klvDays);
@@ -1934,13 +2030,21 @@ async function loadStats() {
 let editClientId = null;
 
 async function loadCRM() {
+  const applyClients = (list) => {
+    renderKanban(list); renderFollowups(list);
+    const leadCount = list.filter(c=>!c.is_active_client&&!['won','lost','closed'].includes(c.pipeline_stage)).length;
+    $('badge-crm').textContent = leadCount;
+    $('badge-crm').hidden = leadCount === 0;
+  };
+  const cached = cacheGet('clients');
+  if(cached) applyClients(cached);
   const { data, error } = await sb.from('clients').select('*').order('created_at',{ascending:false});
-  if(error) toast('Fehler beim Laden der Kunden: '+error.message,'err');
+  if(error){ if(!cached) toast('Fehler beim Laden der Kunden: '+error.message,'err'); return; }
   const list = data||[];
-  renderKanban(list); renderFollowups(list);
-  const leadCount = list.filter(c=>!c.is_active_client&&!['won','lost','closed'].includes(c.pipeline_stage)).length;
-  $('badge-crm').textContent = leadCount;
-  $('badge-crm').hidden = leadCount === 0;
+  const cachedRaw = cached ? JSON.stringify(cached) : null;
+  cacheSet('clients', list);
+  if(cachedRaw && cachedRaw === JSON.stringify(list)) return;
+  applyClients(list);
 }
 
 function renderKanban(clients) {
@@ -8238,14 +8342,25 @@ async function liResolveMediaUrls(posts){
 }
 
 async function loadLinkedInPosts(){
+  const applyPosts = (data) => {
+    allPostsCache = data||[];
+    const draftCount = allPostsCache.filter(p=>p.status==='draft').length;
+    $('badge-linkedin').textContent = draftCount;
+    $('badge-linkedin').hidden = draftCount===0;
+    renderLinkedInPanel();
+    liResolveMediaUrls(allPostsCache);
+  };
+  // Paint immediately from the cached copy, then revalidate in the background.
+  const cached = cacheGet('posts');
+  if(cached) applyPosts(cached);
   const { data, error } = await sb.from('posts').select('*').order('scheduled_for',{ascending:true,nullsFirst:false});
-  if(error){ toast('Fehler beim Laden der Posts: '+error.message,'err'); return; }
-  allPostsCache = data||[];
-  const draftCount = allPostsCache.filter(p=>p.status==='draft').length;
-  $('badge-linkedin').textContent = draftCount;
-  $('badge-linkedin').hidden = draftCount===0;
-  renderLinkedInPanel();
-  liResolveMediaUrls(allPostsCache);
+  if(error){ if(!cached) toast('Fehler beim Laden der Posts: '+error.message,'err'); return; }
+  const fresh = data||[];
+  const cachedRaw = cached ? JSON.stringify(cached) : null;
+  cacheSet('posts', fresh);
+  // Nothing changed since the cached paint → skip the redundant re-render.
+  if(cachedRaw && cachedRaw === JSON.stringify(fresh)) return;
+  applyPosts(fresh);
 }
 
 let liCatIdFilter = '';
@@ -8282,7 +8397,7 @@ function liGridPostPillHtml(p, extraStyle){
   const catHtml = p.category_id ? `<div class="li-grid-post-cat">${liCatTagHtml(p.category_id)}</div>` : '';
   const img = (p.media||[]).find(m=>m.type==='image');
   const thumbUrl = img ? liMediaUrlCache[img.path] : null;
-  const thumbHtml = thumbUrl ? `<img class="li-grid-post-thumb" src="${esc(thumbUrl)}" alt="" loading="lazy">` : '';
+  const thumbHtml = thumbUrl ? `<img class="li-grid-post-thumb" src="${esc(thumbUrl)}" alt="" loading="lazy" decoding="async">` : '';
   return `<div class="li-grid-post" data-id="${p.id}"${extraStyle?` style="${extraStyle}"`:''} title="${esc(liFirstLine(p.content))}">
       ${catHtml}
       <div class="li-grid-post-line">
@@ -8386,9 +8501,16 @@ function liPostCard(content, meta){
   const vid = media.find(m=>m.type==='video');
   let mediaHtml = '';
   if(vid && vid.previewUrl){
-    mediaHtml = `<div class="li-card-media"><video src="${esc(vid.previewUrl)}" controls></video></div>`;
+    mediaHtml = `<div class="li-card-media"><video src="${esc(vid.previewUrl)}" controls preload="metadata"></video></div>`;
   } else if(img && img.previewUrl){
-    mediaHtml = `<div class="li-card-media"><img src="${esc(img.previewUrl)}" alt=""></div>`;
+    // decoding=async keeps image decode off the main thread; loading=lazy
+    // skips off-screen decodes. The reserved skeleton (below) already holds
+    // the space so the card doesn't shift when the image arrives.
+    mediaHtml = `<div class="li-card-media"><img src="${esc(img.previewUrl)}" alt="" loading="lazy" decoding="async"></div>`;
+  } else if(img || vid){
+    // Media exists but its signed URL is still being fetched — reserve the
+    // space now so the card keeps its height when the URL resolves.
+    mediaHtml = `<div class="li-card-media li-media-pending"></div>`;
   }
   return `<div class="li-card">
     <div class="li-card-hd">
