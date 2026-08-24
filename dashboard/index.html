@@ -392,7 +392,7 @@
     .li-cat-add-row{display:flex;align-items:flex-start;gap:.625rem;margin-top:.5rem;padding-top:.875rem;border-top:1px solid var(--border)}
     .li-cat-empty{font-size:.8125rem;color:var(--ink-s);margin:0 0 .5rem}
     .li-seedref-lbl{font-size:.75rem;font-weight:500;color:var(--ink-s);white-space:nowrap}
-    .li-cat-filter-sel{width:auto;padding:.375rem .625rem;font-size:.8125rem}
+    .li-filter-sel{width:auto;padding:.375rem 1.9rem .375rem .625rem;font-size:.8125rem;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'><path d='M1 2.5L4 5.5L7 2.5' fill='none' stroke='%23888' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'/></svg>");background-repeat:no-repeat;background-position:right .75rem center}
     .li-media-brief-hint{font-size:.75rem;color:var(--ink-s);background:var(--surface-2);border-radius:var(--r-sm);padding:.5rem .625rem;margin-bottom:.5rem}
     .li-editor-grid{display:grid;grid-template-columns:1fr 300px;gap:1.25rem}
     @media (max-width:720px){ .li-editor-grid{grid-template-columns:1fr} }
@@ -1012,10 +1012,18 @@
         <span class="sec-ttl">LinkedIn</span>
         <span id="li-conn-status" style="font-size:.75rem;color:var(--ink-s);margin-left:.5rem"></span>
         <div style="display:flex;gap:.5rem;align-items:center;margin-left:auto">
-          <select class="fi li-cat-filter-sel" id="li-catid-filter" title="Nach Kategorie filtern">
+          <button class="btn btn--ghost btn--sm" id="btn-li-connect">LinkedIn verbinden</button>
+          <select class="fi li-filter-sel" id="li-status-filter" title="Nach Status filtern">
+            <option value="">Alle Status</option>
+            <option value="draft">Entwurf</option>
+            <option value="finished_draft">Fertiger Entwurf</option>
+            <option value="approved">Freigegeben</option>
+            <option value="posted">Veröffentlicht</option>
+            <option value="rejected">Abgelehnt</option>
+          </select>
+          <select class="fi li-filter-sel" id="li-catid-filter" title="Nach Kategorie filtern">
             <option value="">Alle Kategorien</option>
           </select>
-          <button class="btn btn--ghost btn--sm" id="btn-li-connect">LinkedIn verbinden</button>
           <button class="btn btn--ghost btn--sm" id="btn-li-cats"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.4 7.04 14.15 6.65 14.15 9.35 12.4 8.96 11.79 10.43 13.31 11.4 11.4 13.31 10.43 11.79 8.96 12.4 9.35 14.15 6.65 14.15 7.04 12.4 5.57 11.79 4.6 13.31 2.69 11.4 4.21 10.43 3.6 8.96 1.85 9.35 1.85 6.65 3.6 7.04 4.21 5.57 2.69 4.6 4.6 2.69 5.57 4.21 7.04 3.6 6.65 1.85 9.35 1.85 8.96 3.6 10.43 4.21 11.4 2.69 13.31 4.6 11.79 5.57ZM8 6.2a1.8 1.8 0 1 0 0 3.6 1.8 1.8 0 0 0 0-3.6Z"/></svg>Kategorien</button>
           <button class="btn btn--primary btn--sm" id="btn-new-post">+ Neuer Entwurf</button>
         </div>
@@ -8241,11 +8249,14 @@ async function loadLinkedInPosts(){
 }
 
 let liCatIdFilter = '';
+let liStatusFilter = '';
 $('li-catid-filter').addEventListener('change', e=>{ liCatIdFilter = e.target.value; renderLinkedInPanel(); });
+$('li-status-filter').addEventListener('change', e=>{ liStatusFilter = e.target.value; renderLinkedInPanel(); });
 
 function renderLinkedInPanel(){
   let list = allPostsCache;
   if(liCatIdFilter) list = list.filter(p=>p.category_id===liCatIdFilter);
+  if(liStatusFilter) list = list.filter(p=>p.status===liStatusFilter);
   if(liActiveTab==='calendar'){ renderLiCalendar(list); renderLiCalendarGrid(list); }
   else if(liActiveTab==='rejected') renderLiRejected(list);
   else renderLiStats(list);
