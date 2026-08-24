@@ -81,12 +81,6 @@
        fresh content flashing in blank on a fast scroll. It resumes a moment
        after scrolling stops (toggled from JS). */
     body.is-scrolling .blob{animation-play-state:paused}
-    /* During an active scroll, also drop the backdrop blur on elements inside
-       the scrolling area (buttons etc.). Over the opaque cards this blur is
-       invisible anyway, but re-computing it for every element on every scroll
-       frame is expensive — skipping it keeps fast scrolling smooth. The glass
-       look returns the instant scrolling stops. */
-    body.is-scrolling .main *{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
     .bg-grain{position:absolute;inset:0;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");opacity:.05;mix-blend-mode:multiply}
 
     /* LOADING */
@@ -110,8 +104,13 @@
     .fi:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-t)}
     textarea.fi{resize:vertical} select.fi{cursor:pointer}
 
-    /* BUTTONS — glass look: translucent fill + blurred backdrop + thin glass border */
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.625rem 1.25rem;border-radius:var(--r-sm);font-size:.9375rem;font-weight:500;transition:all var(--fast) var(--ease);cursor:pointer;border:1px solid transparent;white-space:nowrap;backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%)}
+    /* BUTTONS — translucent fill + thin glass border.
+       No backdrop-filter: it promoted every button to its own GPU layer, which
+       is why buttons kept moving smoothly while the card content behind them
+       went blank on a fast scroll. Over the (now opaque) content the blur was
+       invisible anyway, so dropping it keeps buttons in the normal content
+       layer and lets the whole panel scroll as one cached surface. */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.625rem 1.25rem;border-radius:var(--r-sm);font-size:.9375rem;font-weight:500;transition:all var(--fast) var(--ease);cursor:pointer;border:1px solid transparent;white-space:nowrap}
     .btn--primary{background:rgba(10,10,10,.72);color:#fff;border-color:rgba(255,255,255,.14)}
     .btn--primary:hover{background:rgba(26,26,26,.84);transform:translateY(-1px);box-shadow:0 4px 12px rgba(10,10,10,.2)}
     .btn--ghost{background:var(--glass);color:var(--ink-m);border-color:var(--glass-b)}
@@ -143,8 +142,16 @@
     .nav-item.active .nav-badge{background:rgba(255,255,255,.25)}
     .sb-spacer{flex:1}
 
-    /* MAIN */
-    .main{flex:1;min-width:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column}
+    /* MAIN
+       The scrolling content area is OPAQUE. This is the key to smooth
+       scrolling: when the scroll layer is transparent, the browser has to
+       re-composite it over the fixed blurred background every frame and can't
+       use its fast scroll path — so on a fast scroll, freshly exposed content
+       shows through blank until it re-rasterizes (the bug in the recording).
+       An opaque surface lets the browser raster the content into cached tiles
+       and just shift them. The content sits on a clean solid surface; the
+       animated blob background still shows through the translucent sidebar. */
+    .main{flex:1;min-width:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;background:var(--bg)}
     .panel{flex:1;padding:1.5rem;display:none}
     .panel.active{display:block}
 
