@@ -76,6 +76,17 @@
     @media (prefers-reduced-motion: reduce){
       .blob{animation:none}
     }
+    /* While the user is actively scrolling, freeze the drift so 100% of the
+       paint budget goes to the content coming into view — this is what stops
+       fresh content flashing in blank on a fast scroll. It resumes a moment
+       after scrolling stops (toggled from JS). */
+    body.is-scrolling .blob{animation-play-state:paused}
+    /* During an active scroll, also drop the backdrop blur on elements inside
+       the scrolling area (buttons etc.). Over the opaque cards this blur is
+       invisible anyway, but re-computing it for every element on every scroll
+       frame is expensive — skipping it keeps fast scrolling smooth. The glass
+       look returns the instant scrolling stops. */
+    body.is-scrolling .main *{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
     .bg-grain{position:absolute;inset:0;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");opacity:.05;mix-blend-mode:multiply}
 
     /* LOADING */
@@ -365,15 +376,12 @@
     .lipost-row-actions{display:grid;grid-template-columns:1fr 1fr;gap:.375rem}
     .lipost-row-actions .btn{width:100%}
     /* ── SCROLL PERFORMANCE ────────────────────────────────────────────
-       The post feed, the calendar tiles and the analytics rows can each be
-       long lists. content-visibility:auto lets the browser skip layout +
-       paint for anything off-screen, so scrolling only ever renders what is
-       near the viewport instead of the whole list at once. The `auto`
-       contain-intrinsic-size makes each item remember its real height after
-       it has been rendered once, so nothing pops or shifts on scroll-back. */
-    .lipost-row{content-visibility:auto;contain-intrinsic-size:auto 460px}
-    .li-grid-cell{content-visibility:auto;contain-intrinsic-size:auto 104px}
-    .li-stats-row{content-visibility:auto;contain-intrinsic-size:auto 58px}
+       Every panel is rendered once and then kept fully painted in the DOM —
+       nothing is virtualised or discarded, so scrolling (even fast) and
+       switching panels never re-renders or blanks content. The one thing that
+       used to compete with scroll painting was the drifting background, so it
+       is frozen while the user is actively scrolling (see the .is-scrolling
+       rule below and the scroll listener in JS). */
     /* LinkedIn-style post card */
     .li-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
     .li-card-hd{display:flex;gap:.625rem;padding:.75rem .875rem .5rem}
@@ -1745,30 +1753,50 @@ const $ = id => document.getElementById(id);
 // ── DATA CACHE (stale-while-revalidate) ──────────────────────────────
 // Panels that were already loaded once paint instantly from a cached copy
 // while the fresh data is re-fetched in the background — so switching panels
-// or reloading the tab no longer shows an empty screen waiting on the network.
-// The cache lives in sessionStorage (per-tab, cleared on close) and is keyed
-// by the signed-in user so one account never sees another's cached rows.
+// or reloading the tab never shows an empty screen waiting on the network.
+// The cache lives in localStorage (persists across reloads AND tab re-opens)
+// and is keyed by the signed-in user so one account never sees another's
+// cached rows. It's cleared on logout.
 const CACHE_PREFIX = 'jm_cache_';
 let cacheUserKey = 'anon';
 function cacheKey(name){ return CACHE_PREFIX + cacheUserKey + '_' + name; }
 function cacheGet(name){
   try {
-    const raw = sessionStorage.getItem(cacheKey(name));
+    const raw = localStorage.getItem(cacheKey(name));
     if(!raw) return null;
     return JSON.parse(raw);
   } catch(e){ return null; }
 }
 function cacheSet(name, data){
-  try { sessionStorage.setItem(cacheKey(name), JSON.stringify(data)); }
+  try { localStorage.setItem(cacheKey(name), JSON.stringify(data)); }
   catch(e){ /* quota / private mode — caching is best-effort */ }
 }
 function cacheClearAll(){
   try {
-    Object.keys(sessionStorage)
+    Object.keys(localStorage)
       .filter(k => k.startsWith(CACHE_PREFIX))
-      .forEach(k => sessionStorage.removeItem(k));
+      .forEach(k => localStorage.removeItem(k));
   } catch(e){}
 }
+
+// ── FREEZE BACKGROUND DRIFT WHILE SCROLLING ──────────────────────────
+// The drifting blobs are the only thing that repaints continuously; pausing
+// them for the moments the user is actually scrolling frees the paint budget
+// so content coming into view never flashes in blank. Resumes 160ms after the
+// last scroll event.
+(function(){
+  let scrollTimer = null;
+  const onScroll = () => {
+    document.body.classList.add('is-scrolling');
+    if(scrollTimer) clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => document.body.classList.remove('is-scrolling'), 160);
+  };
+  // Capture-phase + passive so it catches scrolling in any nested container
+  // (the main area, modals, long lists) without slowing the scroll itself.
+  window.addEventListener('scroll', onScroll, { capture:true, passive:true });
+  window.addEventListener('wheel',  onScroll, { passive:true });
+  window.addEventListener('touchmove', onScroll, { passive:true });
+})();
 
 // ── LAZY LIBRARIES ───────────────────────────────────────────────────
 // pdf.js / JSZip / html2pdf are only needed for uploads & exports — they
