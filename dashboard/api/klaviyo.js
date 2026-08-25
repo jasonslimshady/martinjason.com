@@ -74,6 +74,17 @@ export default async function handler(req, res) {
 
   const { resource, start, end } = req.query;
 
+  // Only the authenticated owner can reach this endpoint, but start/end still
+  // flow unmodified into Klaviyo's filter DSL below — reject anything that
+  // isn't a plain date before it gets there.
+  const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+  if (start !== undefined && !DATE_RE.test(start)) {
+    return res.status(400).json({ error: 'Invalid start date (expected YYYY-MM-DD)' });
+  }
+  if (end !== undefined && !DATE_RE.test(end)) {
+    return res.status(400).json({ error: 'Invalid end date (expected YYYY-MM-DD)' });
+  }
+
   const todayStr = new Date().toISOString().split('T')[0];
   const defaultStart = (() => {
     const d = new Date();

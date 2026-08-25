@@ -20,7 +20,8 @@ BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql
+SET search_path = public, pg_temp;
 
 
 -- ============================================================
@@ -717,6 +718,18 @@ END $$;
 CREATE INDEX IF NOT EXISTS posts_category_idx ON public.posts (category);
 CREATE INDEX IF NOT EXISTS posts_experiment_batch_idx ON public.posts (experiment_batch);
 CREATE UNIQUE INDEX IF NOT EXISTS posts_seed_ref_uidx ON public.posts (seed_ref) WHERE seed_ref IS NOT NULL;
+
+
+-- ============================================================
+--  REALTIME — the dashboard subscribes to postgres_changes on
+--  "posts" so drafts inserted by the external content-engine
+--  automation show up without a manual reload. Without this the
+--  subscription connects but silently never receives anything.
+-- ============================================================
+DO $$ BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE public.posts;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 
 -- ============================================================

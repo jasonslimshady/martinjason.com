@@ -69,10 +69,27 @@ export default async function handler(req, res) {
     if (!post) return res.status(404).json({ error: 'Post nicht gefunden' });
     if (!post.content || !post.content.trim()) return res.status(400).json({ error: 'Post hat keinen Text' });
 
+    // Claim the row atomically before publishing, so a manual click racing
+    // an overlapping cron run (or a double-click) can't publish it twice.
+    const claimRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/posts?id=eq.${encodeURIComponent(body.id)}&status=not.in.(publishing,posted)`,
+      { method: 'PATCH', headers: { ...headers, Prefer: 'return=representation' }, body: JSON.stringify({ status: 'publishing' }) },
+    );
+    const claimed = claimRes.ok ? await claimRes.json().catch(() => []) : [];
+    if (!claimed.length) {
+      return res.status(409).json({ error: 'Post wird bereits veröffentlicht oder ist schon gepostet.', code: 'already_publishing' });
+    }
+    const prevStatus = post.status;
+
     let results;
     try {
       results = await publishToLinkedIn(serviceKey, post);
     } catch (e) {
+      await fetch(`${SUPABASE_URL}/rest/v1/posts?id=eq.${encodeURIComponent(body.id)}`, {
+        method: 'PATCH',
+        headers: { ...headers, Prefer: 'return=minimal' },
+        body: JSON.stringify({ status: prevStatus }),
+      }).catch(() => {});
       if (e.code === 'not_connected' || e.code === 'reauth_required') {
         return res.status(409).json({ error: e.message, code: e.code });
       }
@@ -117,6 +134,13 @@ export default async function handler(req, res) {
           }).catch(() => {});
         }
       }
+    } else {
+      const errMsg = results.map(r => `${r.target}: ${r.error}`).join(' | ');
+      await fetch(`${SUPABASE_URL}/rest/v1/posts?id=eq.${encodeURIComponent(body.id)}`, {
+        method: 'PATCH',
+        headers: { ...headers, Prefer: 'return=minimal' },
+        body: JSON.stringify({ status: prevStatus, last_publish_error: errMsg.slice(0, 500) }),
+      }).catch(() => {});
     }
 
     return res.status(anyOk ? 200 : 502).json({ results });

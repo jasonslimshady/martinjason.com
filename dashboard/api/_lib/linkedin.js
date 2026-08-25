@@ -260,12 +260,13 @@ export async function publishToLinkedIn(serviceKey, post) {
   const targets = [{ label: 'Profil', author: person_urn }];
   if (LINKEDIN_ORG_ID) targets.push({ label: 'Unternehmensseite', author: `urn:li:organization:${LINKEDIN_ORG_ID}` });
 
-  const content = await buildContent(access_token, person_urn, serviceKey, post.media);
-
   const results = [];
   for (const t of targets) {
     if (!t.author) { results.push({ target: t.label, ok: false, error: 'Kein Ziel-URN vorhanden' }); continue; }
     try {
+      // Media assets must be uploaded with owner === post author, or LinkedIn
+      // rejects the post — so each target uploads (and pays for) its own copy.
+      const content = await buildContent(access_token, t.author, serviceKey, post.media);
       const body = {
         author: t.author,
         commentary: post.content,
