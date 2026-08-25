@@ -859,7 +859,7 @@
       <div class="sec-hd">
         <span class="sec-ttl" id="time-sec-ttl">Letzte Einträge</span>
         <div style="display:flex;gap:.5rem">
-          <button class="btn btn--ghost btn--sm" id="btn-pto-clear-filter" title="Projekt-Filter entfernen" hidden>Alle</button>
+          <button class="btn btn--ghost btn--sm" id="btn-pto-clear-filter" title="Alle Einträge anzeigen (Projekt-Filter entfernen)">Alle</button>
           <button class="btn btn--ghost btn--sm" id="btn-filter-uninvoiced" title="Nur noch offene (nicht fakturierte) Zeiteinträge anzeigen">Nicht fakturiert</button>
           <button class="btn btn--ghost btn--sm" id="btn-manage-proj">Projekte verwalten</button>
           <button class="btn btn--ghost btn--sm" id="btn-new-proj">+ Neues Projekt</button>
@@ -2881,8 +2881,14 @@ async function loadTimeEntries(){
   const ttlSuffix = [ptoSelectedProjectId ? ptoSelectedProjectName||'' : null, ptoOnlyUninvoiced ? 'nicht fakturiert' : null].filter(Boolean).join(' · ');
   const ttlEl = $('time-sec-ttl');
   if(ttlEl) ttlEl.textContent = ttlSuffix ? `Letzte Einträge — ${ttlSuffix}` : 'Letzte Einträge';
+  // Stays visible at all times (like "Nicht fakturiert" below) rather than
+  // hiding itself the moment the filter is cleared — otherwise clicking it
+  // makes the button vanish with no confirmation the filter actually reset.
   const clearBtn = $('btn-pto-clear-filter');
-  if(clearBtn) clearBtn.hidden = !ptoSelectedProjectId;
+  if(clearBtn){
+    clearBtn.classList.toggle('btn--primary', !!ptoSelectedProjectId);
+    clearBtn.classList.toggle('btn--ghost', !ptoSelectedProjectId);
+  }
 
   const tbody=$('time-body');
   if(!list.length){
@@ -3000,7 +3006,7 @@ function ptoRange() {
     // budget cycle can start on any day 1-31, so its current cycle may
     // already have begun before this calendar month did. The overview
     // itself still narrows each project down to its own cycle window.
-    const d = new Date();
+    const d = parseLocalDate(todayStr);
     const prevMonth = new Date(d.getFullYear(), d.getMonth() - 1, 1);
     return [`${prevMonth.getFullYear()}-${pad(prevMonth.getMonth()+1)}-01`, todayStr];
   }
@@ -3021,7 +3027,11 @@ function ptoRange() {
 }
 
 async function loadProjectOverview() {
-  const now = new Date();
+  // Anchored to the dashboard's fixed timezone (Asia/Singapore), not the
+  // browser's local clock — otherwise a viewer in a timezone behind SGT can
+  // have their recurring budget cycle computed against "yesterday" right
+  // around a month/cycle boundary, silently shifting week/month windows.
+  const now = parseLocalDate(today());
   const [from, to] = ptoRange();
 
   // Period geometry (local midnights), shared by both the worked-minute
@@ -3043,15 +3053,18 @@ async function loadProjectOverview() {
   }
 
   // Earliest date whose entries still count toward this view's progress:
-  // for week/month/customer we clip to the relevant recurring cycle (and
-  // the client's won date); range/date/total are already bounded by the
-  // query (total simply fetches everything, unclipped).
+  // for month/customer we clip to the relevant recurring cycle (and the
+  // client's won date); range/date/total are already bounded by the query
+  // (total simply fetches everything, unclipped). "week" is a plain
+  // calendar week (Mon-today) — it must NOT also be intersected with the
+  // recurring budget cycle, or entries from the start of the week get
+  // silently dropped whenever the week spans a cycle/month boundary (e.g.
+  // Mon-Tue still in the old month, Wed already in the new one).
   function workedClipStartISO(p) {
     const won = p.wonAt ? parseLocalDate(p.wonAt) : null;
     let start = null;
     if (ptoFilter === 'week') {
-      const cycle = ptoBudgetCycle(p.budgetStartDay, now);
-      start = new Date(Math.max(weekStartDate.getTime(), cycle.start.getTime()));
+      start = weekStartDate;
     } else if (ptoFilter === 'month') {
       start = ptoBudgetCycle(p.budgetStartDay, now).start;
     } else if (ptoFilter === 'customer') {
@@ -3065,14 +3078,17 @@ async function loadProjectOverview() {
     return localISO(start);
   }
 
+  // "Gesamt"/"Kundenzeitraum" query from 1970 onward, which for a client
+  // with a long history can otherwise silently hit PostgREST's default
+  // row cap and undercount the total — an explicit high limit avoids that.
   let { data, error } = await sb.from('time_entries')
     .select('duration_minutes,date,project_id,rate_override,is_invoiced,projects(name,rate,rate_type,budget_hours,budget_start_day,color,clients(name,won_at))')
-    .gte('date', from).lte('date', to);
+    .gte('date', from).lte('date', to).limit(20000);
   if(error){
     // "color"/"budget_start_day" may not be migrated on this database yet — never let that hide the overview itself.
     ({ data, error } = await sb.from('time_entries')
       .select('duration_minutes,date,project_id,rate_override,is_invoiced,projects(name,rate,rate_type,budget_hours,clients(name,won_at))')
-      .gte('date', from).lte('date', to));
+      .gte('date', from).lte('date', to).limit(20000));
   }
   const entries = data || [];
   const map = {};
@@ -3215,8 +3231,11 @@ async function loadProjectOverview() {
     }
     // Offen (default) shows only the still-to-invoice €; Fakturiert shows the
     // full total (open + already-invoiced combined). Minutes / budget progress
-    // stay based on all work.
-    const shownAmount = ptoAmountStatus === 'invoiced' ? p.amount : p.amountOpen;
+    // stay based on all work. "Gesamt" always shows the full total regardless
+    // of that toggle — by the time a client's history spans multiple
+    // invoices, most of it is already invoiced, so "Offen" alone would make
+    // the all-time total look far smaller than what was actually earned.
+    const shownAmount = (ptoFilter === 'total' || ptoAmountStatus === 'invoiced') ? p.amount : p.amountOpen;
     const earn = p.rateType === 'hourly' && (p.rate || shownAmount) ? fmtEur(shownAmount || 0) : '';
     return { ...p, amount: shownAmount, budgetMins, pct, rawPct, over, earn };
   });
@@ -3347,6 +3366,12 @@ let ptoAmountStatus = localStorage.getItem('pto_amount_status') || 'open';
 
 function syncPtoAmountButtons() {
   const isOpen = ptoAmountStatus === 'open';
+  // Under "Gesamt" the amount always shows the full total (see shownAmount
+  // above), so the Offen/Fakturiert toggle has no effect there — grey it
+  // out rather than leaving a control that silently does nothing.
+  const isTotal = ptoFilter === 'total';
+  $('pto-amount-toggle').style.opacity = isTotal ? '.45' : '';
+  $('pto-amount-toggle').style.pointerEvents = isTotal ? 'none' : '';
   $('pto-amount-open').style.background = isOpen ? 'rgba(10,10,10,.72)' : 'var(--glass)';
   $('pto-amount-open').style.color = isOpen ? '#fff' : 'var(--ink-m)';
   $('pto-amount-invoiced').style.background = !isOpen ? 'rgba(10,10,10,.72)' : 'var(--glass)';
