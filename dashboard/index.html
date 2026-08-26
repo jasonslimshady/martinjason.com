@@ -9385,8 +9385,8 @@ function renderLiStats(list){
   const sum = key => inRange.reduce((s,p)=>s+liNum(p[key]),0);
   const anyValue = key => inRange.some(p=>p[key]!=null);
 
-  $('li-s-profileviews').textContent = anyValue('profile_views_from_content') ? sum('profile_views_from_content') : 'Noch keine Daten';
-  $('li-s-followers').textContent    = anyValue('follower_gained') ? sum('follower_gained') : 'Noch keine Daten';
+  $('li-s-profileviews').textContent = new Intl.NumberFormat('de-DE').format(sum('profile_viewers_from_post'));
+  $('li-s-followers').textContent    = new Intl.NumberFormat('de-DE').format(sum('followers_gained_from_post'));
   $('li-s-impressions').textContent  = anyValue('impressions') ? sum('impressions') : 'Noch keine Daten';
   $('li-s-reactions').textContent    = anyValue('reactions') ? sum('reactions') : 'Noch keine Daten';
   $('li-s-comments').textContent     = anyValue('comments') ? sum('comments') : 'Noch keine Daten';
@@ -9407,8 +9407,8 @@ function renderLiStats(list){
 function liStatsRowHtml(p){
   const synced = !!p.analytics_synced_at;
   const metrics = [
-    ['Profilaufrufe', p.profile_views_from_content],
-    ['Neue Follower', p.follower_gained],
+    ['Profilaufrufe', liNum(p.profile_viewers_from_post)],
+    ['Neue Follower', liNum(p.followers_gained_from_post)],
     ['Impressions', p.impressions],
     ['Reaktionen', p.reactions],
     ['Kommentare', p.comments],
