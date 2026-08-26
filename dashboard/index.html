@@ -9383,13 +9383,13 @@ function renderLiStats(list){
   const inRange = posted.filter(p=>new Date(p.posted_at).getTime() >= cutoff);
 
   const sum = key => inRange.reduce((s,p)=>s+liNum(p[key]),0);
-  const anySynced = inRange.some(p=>p.analytics_synced_at);
+  const anyValue = key => inRange.some(p=>p[key]!=null);
 
-  $('li-s-profileviews').textContent = anySynced ? sum('profile_views_from_content') : 'Noch keine Daten';
-  $('li-s-followers').textContent    = anySynced ? sum('follower_gained') : 'Noch keine Daten';
-  $('li-s-impressions').textContent  = anySynced ? sum('impressions') : 'Noch keine Daten';
-  $('li-s-reactions').textContent    = anySynced ? sum('reactions') : 'Noch keine Daten';
-  $('li-s-comments').textContent     = anySynced ? sum('comments') : 'Noch keine Daten';
+  $('li-s-profileviews').textContent = anyValue('profile_views_from_content') ? sum('profile_views_from_content') : 'Noch keine Daten';
+  $('li-s-followers').textContent    = anyValue('follower_gained') ? sum('follower_gained') : 'Noch keine Daten';
+  $('li-s-impressions').textContent  = anyValue('impressions') ? sum('impressions') : 'Noch keine Daten';
+  $('li-s-reactions').textContent    = anyValue('reactions') ? sum('reactions') : 'Noch keine Daten';
+  $('li-s-comments').textContent     = anyValue('comments') ? sum('comments') : 'Noch keine Daten';
   $('li-s-postcount').textContent    = inRange.length;
 
   const wrap = $('li-stats-list');
