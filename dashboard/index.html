@@ -8,6 +8,7 @@
   <link rel="icon" type="image/avif" sizes="128x128" href="/favicon.avif">
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex,nofollow" />
   <title>JM Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -66,8 +67,6 @@
         radial-gradient(54vmax 54vmax at 102% 30%, rgba(255,217,194,.45), transparent 60%),
         radial-gradient(50vmax 50vmax at 22% 110%, rgba(231,220,200,.50), transparent 62%),
         var(--bg)}
-    /* The decorative blob + grain elements are no longer rendered. */
-    .bg-blobs,.bg-grain,.blob{display:none}
 
     /* LOADING */
     #loading{position:fixed;inset:0;background:transparent;display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .3s}
@@ -129,6 +128,7 @@
     .nav-item.active svg{opacity:1}
     .nav-badge{margin-left:auto;background:var(--accent);color:#fff;font-size:.625rem;font-weight:700;padding:1px 6px;border-radius:var(--r-pill);min-width:18px;text-align:center}
     .nav-item.active .nav-badge{background:rgba(255,255,255,.25)}
+    .nav-badge--err{background:var(--red,#FF453A)!important}
     .sb-spacer{flex:1}
 
     /* MAIN
@@ -150,7 +150,6 @@
        backdrop on scroll. Fixed overlays (modals, drawers) keep theirs — they
        don't scroll and only appear on interaction. */
     .ga-range-btn,.ga-live-btn,.ga-connect-btn,.act-type-btn,.klv-range,.pto-btn,.pto-view-toggle,.timer-hero{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
-    .timer-blobs{display:none!important}
 
     /* COMPONENTS */
     .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:.875rem;margin-bottom:1.25rem}
@@ -201,9 +200,9 @@
     .ga-pg-row{cursor:pointer;transition:background var(--fast)}
     .ga-pg-row:hover{background:var(--surface-2)}
     .ga-toolbar{display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap}
-    .ga-range-btn{padding:.375rem .875rem;border-radius:var(--r-pill);font-size:.8125rem;font-weight:500;background:var(--glass);color:var(--ink-m);border:1px solid var(--glass-b);cursor:pointer;transition:all var(--fast);backdrop-filter:blur(10px) saturate(160%);-webkit-backdrop-filter:blur(10px) saturate(160%)}
+    .ga-range-btn{padding:.375rem .875rem;border-radius:var(--r-pill);font-size:.8125rem;font-weight:500;background:var(--glass);color:var(--ink-m);border:1px solid var(--glass-b);cursor:pointer;transition:all var(--fast)}
     .ga-range-btn.active,.ga-range-btn:hover{background:rgba(10,10,10,.72);color:#fff;border-color:rgba(255,255,255,.14)}
-    .ga-live-btn{padding:.375rem .875rem;border-radius:var(--r-pill);font-size:.8125rem;font-weight:600;background:var(--glass);color:var(--red);border:1px solid rgba(255,69,58,.4);cursor:pointer;transition:all var(--fast);display:inline-flex;align-items:center;gap:.4rem;backdrop-filter:blur(10px) saturate(160%);-webkit-backdrop-filter:blur(10px) saturate(160%)}
+    .ga-live-btn{padding:.375rem .875rem;border-radius:var(--r-pill);font-size:.8125rem;font-weight:600;background:var(--glass);color:var(--red);border:1px solid rgba(255,69,58,.4);cursor:pointer;transition:all var(--fast);display:inline-flex;align-items:center;gap:.4rem}
     .ga-live-btn:hover,.ga-live-btn.active{background:rgba(255,69,58,.82);color:#fff;border-color:rgba(255,69,58,.5)}
     .ga-live-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}
     .ga-live-btn.active .ga-live-dot{animation:livepulse 1.2s ease-in-out infinite}
@@ -217,7 +216,7 @@
     .ga-chart-ttl{font-size:.875rem;font-weight:600;margin-bottom:1rem;color:var(--ink)}
     .ga-2col{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
     .ga-auth-wrap{display:flex;align-items:center;justify-content:center;min-height:280px;flex-direction:column;gap:.875rem;padding:2rem}
-    .ga-connect-btn{display:inline-flex;align-items:center;gap:.625rem;padding:.75rem 1.5rem;background:var(--glass-s);border:1px solid var(--glass-b);border-radius:var(--r-sm);font-size:.9375rem;font-weight:500;cursor:pointer;box-shadow:var(--shadow);transition:all var(--fast);backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%)}
+    .ga-connect-btn{display:inline-flex;align-items:center;gap:.625rem;padding:.75rem 1.5rem;background:var(--glass-s);border:1px solid var(--glass-b);border-radius:var(--r-sm);font-size:.9375rem;font-weight:500;cursor:pointer;box-shadow:var(--shadow);transition:all var(--fast)}
     .ga-connect-btn:hover{box-shadow:var(--shadow-s);transform:translateY(-1px)}
     .ga-bar-col{display:flex;flex-direction:column;align-items:center;gap:.3rem;flex:1;min-width:0}
     .ga-bar{width:100%;max-width:28px;background:var(--accent);border-radius:4px 4px 0 0;opacity:.8;transition:opacity var(--fast);cursor:default}
@@ -269,7 +268,7 @@
     .act-meta{font-size:.75rem;color:var(--ink-s);margin-top:.125rem}
     .act-form{background:var(--surface-2);border-radius:var(--r-md);padding:1rem;margin-bottom:1.25rem}
     .act-type-row{display:flex;gap:.5rem;margin-bottom:.75rem;flex-wrap:wrap}
-    .act-type-btn{padding:.3rem .75rem;border-radius:var(--r-pill);font-size:.75rem;font-weight:500;border:1px solid var(--glass-b);background:var(--glass);color:var(--ink-m);transition:all var(--fast);cursor:pointer;backdrop-filter:blur(10px) saturate(160%);-webkit-backdrop-filter:blur(10px) saturate(160%)}
+    .act-type-btn{padding:.3rem .75rem;border-radius:var(--r-pill);font-size:.75rem;font-weight:500;border:1px solid var(--glass-b);background:var(--glass);color:var(--ink-m);transition:all var(--fast);cursor:pointer}
     .act-type-btn.sel{background:rgba(10,10,10,.72);color:#fff;border-color:rgba(255,255,255,.14)}
 
     /* PROJECT LIST */
@@ -279,20 +278,8 @@
     .proj-meta{font-size:.75rem;color:var(--ink-s);margin-top:.125rem}
 
     /* TIMER */
-    .timer-hero{position:relative;overflow:hidden;background:var(--glass-s);backdrop-filter:blur(var(--blur)) saturate(180%);-webkit-backdrop-filter:blur(var(--blur)) saturate(180%);border:1px solid var(--glass-b);box-shadow:var(--shadow-s);border-radius:var(--r-lg);padding:1.75rem 2rem;color:var(--ink);margin-bottom:1.25rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap}
+    .timer-hero{position:relative;overflow:hidden;background:var(--glass-s);border:1px solid var(--glass-b);box-shadow:var(--shadow-s);border-radius:var(--r-lg);padding:1.75rem 2rem;color:var(--ink);margin-bottom:1.25rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap}
     .timer-hero>*{position:relative;z-index:1}
-    /* Same drifting-blob treatment as the page background, but faster and
-       with a bigger travel range so it reads as lively within a small box. */
-    .timer-blobs{position:absolute;inset:-30%;filter:blur(45px) saturate(140%);pointer-events:none;z-index:0}
-    .timer-blob{position:absolute;border-radius:50%;opacity:.6;mix-blend-mode:multiply;animation:timer-drift 11s ease-in-out infinite}
-    .timer-blob--a{width:55%;height:160%;background:radial-gradient(closest-side,#BFD7FF 0%,transparent 70%);top:-30%;left:-8%;animation-duration:9s}
-    .timer-blob--b{width:50%;height:150%;background:radial-gradient(closest-side,#FFD9C2 0%,transparent 70%);top:5%;right:-12%;animation-duration:12s;animation-direction:reverse}
-    .timer-blob--c{width:48%;height:140%;background:radial-gradient(closest-side,#E7DCC8 0%,transparent 70%);bottom:-35%;left:32%;animation-duration:14s}
-    @keyframes timer-drift{
-      0%,100%{transform:translate3d(0,0,0) scale(1)}
-      33%{transform:translate3d(18%,-16%,0) scale(1.18)}
-      66%{transform:translate3d(-14%,14%,0) scale(.88)}
-    }
     .timer-clk{font-size:3.25rem;font-weight:700;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:1;flex:1;min-width:200px}
     .timer-sel{background:var(--surface);border:1px solid var(--border-s);color:var(--ink);padding:.5rem .75rem;border-radius:var(--r-sm);font:inherit;font-size:.875rem;outline:none;cursor:pointer}
     .timer-sel option{color:var(--ink);background:var(--surface)}
@@ -565,7 +552,7 @@
     }
 
     /* KLAVIYO */
-    .klv-range{padding:.375rem .875rem;border-radius:var(--r-pill);font-size:.8125rem;font-weight:500;background:var(--glass);color:var(--ink-m);border:1px solid var(--glass-b);cursor:pointer;transition:all var(--fast);backdrop-filter:blur(10px) saturate(160%);-webkit-backdrop-filter:blur(10px) saturate(160%)}
+    .klv-range{padding:.375rem .875rem;border-radius:var(--r-pill);font-size:.8125rem;font-weight:500;background:var(--glass);color:var(--ink-m);border:1px solid var(--glass-b);cursor:pointer;transition:all var(--fast)}
     .klv-range.active,.klv-range:hover{background:rgba(10,10,10,.72);color:#fff;border-color:rgba(255,255,255,.14)}
 
     /* TOAST */
@@ -580,7 +567,7 @@
     .divider{height:1px;background:var(--border);margin:.875rem 0}
 
     /* PROJECT TIME OVERVIEW */
-    .pto-btn{padding:.375rem .875rem;border-radius:var(--r-pill);font-size:.8125rem;font-weight:500;background:var(--glass);color:var(--ink-m);border:1px solid var(--glass-b);cursor:pointer;transition:all var(--fast);backdrop-filter:blur(10px) saturate(160%);-webkit-backdrop-filter:blur(10px) saturate(160%)}
+    .pto-btn{padding:.375rem .875rem;border-radius:var(--r-pill);font-size:.8125rem;font-weight:500;background:var(--glass);color:var(--ink-m);border:1px solid var(--glass-b);cursor:pointer;transition:all var(--fast)}
     .pto-btn.active,.pto-btn:hover{background:rgba(10,10,10,.72);color:#fff;border-color:rgba(255,255,255,.14)}
     .pto-row{padding:.875rem 1.125rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background var(--fast)}
     .pto-row:last-child{border-bottom:none}
@@ -599,7 +586,7 @@
     .pto-bar-fill.over{background:var(--red)}
     .pto-bar-lbl{font-size:.6875rem;color:var(--ink-s);white-space:nowrap;flex-shrink:0}
     .pto-over{color:var(--red)!important}
-    .pto-view-toggle{display:flex;border:1px solid var(--glass-b);border-radius:var(--r-sm);overflow:hidden;backdrop-filter:blur(10px) saturate(160%);-webkit-backdrop-filter:blur(10px) saturate(160%)}
+    .pto-view-toggle{display:flex;border:1px solid var(--glass-b);border-radius:var(--r-sm);overflow:hidden}
     .pto-view-btn{padding:.3rem .55rem;background:var(--glass);border:none;cursor:pointer;display:flex;align-items:center;color:var(--ink-m)}
     .pto-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:.875rem}
     .pto-circle-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:1.125rem 1rem;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.5rem;cursor:pointer;transition:all var(--fast)}
@@ -648,14 +635,7 @@
 </head>
 <body>
 
-<div class="bg" aria-hidden="true">
-  <div class="bg-blobs">
-    <span class="blob blob--a"></span>
-    <span class="blob blob--b"></span>
-    <span class="blob blob--c"></span>
-  </div>
-  <div class="bg-grain"></div>
-</div>
+<div class="bg" aria-hidden="true"></div>
 
 <div id="loading"><div class="spin"></div></div>
 
@@ -811,11 +791,6 @@
     <!-- TIME PANEL -->
     <section class="panel" id="panel-time">
       <div class="timer-hero">
-        <div class="timer-blobs">
-          <span class="timer-blob timer-blob--a"></span>
-          <span class="timer-blob timer-blob--b"></span>
-          <span class="timer-blob timer-blob--c"></span>
-        </div>
         <div style="flex:1">
           <div class="timer-clk" id="timer-clk">00:00:00</div>
         </div>
@@ -1074,6 +1049,7 @@
           <button class="btn btn--primary btn--sm" id="btn-new-post">+ Neuer Entwurf</button>
         </div>
       </div>
+      <div id="li-expiry-banner" hidden style="margin:.5rem 0;padding:.5rem .75rem;border-radius:8px;background:rgba(255,69,58,.12);color:var(--red,#FF453A);font-size:.8rem;font-weight:600"></div>
       <div class="li-subtabs">
         <button class="li-subtab active" data-li-tab="calendar">Kalender</button>
         <button class="li-subtab" data-li-tab="stats">Statistiken</button>
@@ -1746,7 +1722,8 @@
 <!-- SCRIPTS -->
 <!-- pdf.js / JSZip / html2pdf werden erst bei Bedarf nachgeladen (siehe loadScript) — spart ~1 MB pro Seitenaufruf. -->
 <script src="config.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<!-- TODO: add integrity="sha384-…" once a network-connected environment can compute the hash for this pinned version (see jsdelivr's SRI hash API) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" crossorigin="anonymous"></script>
 <script>
 'use strict';
 const { createClient } = window.supabase;
@@ -1785,7 +1762,7 @@ function cacheClearAll(){
 // ── LAZY LIBRARIES ───────────────────────────────────────────────────
 // pdf.js / JSZip / html2pdf are only needed for uploads & exports — they
 // are loaded on demand instead of on every page view (~1 MB saved).
-const LIB_PDFJS    = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+const LIB_PDFJS    = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.min.js';
 const LIB_JSZIP    = 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js';
 const LIB_HTML2PDF = 'https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js';
 const _loadedScripts = {};
@@ -1794,6 +1771,7 @@ function loadScript(src){
     _loadedScripts[src] = new Promise((resolve, reject)=>{
       const el = document.createElement('script');
       el.src = src;
+      el.crossOrigin = 'anonymous';
       el.onload = resolve;
       el.onerror = ()=>{ delete _loadedScripts[src]; reject(new Error('Bibliothek konnte nicht geladen werden: '+src)); };
       document.head.appendChild(el);
@@ -1877,10 +1855,10 @@ async function showApp(user){
   // Scope the data cache to this account.
   cacheUserKey = (user?.id || user?.email || 'anon');
 
-  // Shared dependency — the project list feeds dropdowns, the timer and the
-  // invoice/time panels — so it loads first and is awaited.
-  await loadProjects();
-  restoreTimer(); // pick up a timer that survived a reload / tab close
+  // The project list feeds the timer/invoice dropdowns, but nothing on the
+  // first screen needs it — kick it off without blocking first paint, and
+  // only restoreTimer() (which needs the dropdown populated) waits on it.
+  loadProjects().then(restoreTimer);
 
   // Load the panel that's about to be shown first, plus everything that feeds
   // a sidebar badge (so the counts are right even for panels you haven't
@@ -3458,7 +3436,15 @@ async function loadInvoices(){
   const nowOverdue=list.filter(i=>i.status==='sent'&&i.due_date&&i.due_date<t);
   if(nowOverdue.length){
     nowOverdue.forEach(i=>{ i.status='overdue'; });
-    sb.from('invoices').update({status:'overdue'}).in('id',nowOverdue.map(i=>i.id)).then(()=>loadStats());
+    const { error: overdueErr } = await sb.from('invoices').update({status:'overdue'}).in('id',nowOverdue.map(i=>i.id));
+    if(overdueErr){
+      // Revert the local mutation so the table doesn't show "Überfällig"
+      // while the database still disagrees.
+      nowOverdue.forEach(i=>{ i.status='sent'; });
+      toast('Überfällig-Status konnte nicht gespeichert werden: '+overdueErr.message,'err');
+    } else {
+      loadStats();
+    }
   }
   allInvoicesCache = list;
   $('i-draft').textContent=list.filter(i=>i.status==='draft').length;
@@ -3892,10 +3878,13 @@ async function exportFilteredInvoices(){
     if(!Object.keys(zip.files).length){ toast('Für keine der gefundenen Rechnungen konnte ein PDF erstellt werden.','err'); return; }
     const zipBlob = await zip.generateAsync({type:'blob'});
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(zipBlob);
+    const zipUrl = URL.createObjectURL(zipBlob);
+    a.href = zipUrl;
     a.download = `Rechnungen-Export-${today()}.zip`;
     document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(a.href);
+    // Revoking in the same tick as click() races the download start in some
+    // browsers (Firefox/Safari) and can cancel it — give it a minute first.
+    setTimeout(()=>URL.revokeObjectURL(zipUrl), 60000);
     toast(failed ? `${list.length-failed} von ${list.length} Rechnungen exportiert (${failed} fehlgeschlagen).` : `${list.length} Rechnung${list.length!==1?'en':''} exportiert.`, failed ? 'err' : 'ok');
   } catch(e){
     toast('Export fehlgeschlagen: '+e.message,'err');
@@ -4020,6 +4009,17 @@ async function openInvoiceEdit(id){
   openModal('ov-inv-edit');
 }
 
+// Deletes every object under `${id}/` in a PDF bucket — used when a row is
+// deleted, so its attached PDF doesn't sit orphaned in Storage forever
+// (the free plan caps storage at 1 GB, and these add up).
+async function deleteStorageFolder(bucket, id){
+  try {
+    const { data, error } = await sb.storage.from(bucket).list(String(id));
+    if(error || !data || !data.length) return;
+    await sb.storage.from(bucket).remove(data.map(f=>`${id}/${f.name}`));
+  } catch(e){ /* best-effort cleanup — never block the row delete on this */ }
+}
+
 async function uploadInvoicePdf(invoiceId, file){
   const path = `${invoiceId}/${file.name}`;
   const { error } = await sb.storage.from('invoice-pdfs').upload(path, file, { upsert:true });
@@ -4098,6 +4098,7 @@ async function deleteInvoice(id, num){
   if(!confirm(`Rechnung ${num||''} wirklich löschen?`)) return;
   const { error } = await sb.from('invoices').delete().eq('id', id);
   if(error){ toast('Fehler: '+error.message,'err'); return; }
+  deleteStorageFolder('invoice-pdfs', id);
   closeModal('ov-inv-edit');
   closeModal('ov-all-invoices');
   closeModal('ov-invpreview');
@@ -4141,9 +4142,10 @@ async function processScanFile(file){
   try {
     if(typeof pdfjsLib==='undefined') await loadScript(LIB_PDFJS);
     if(typeof pdfjsLib==='undefined') throw new Error('PDF.js nicht geladen');
-    pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.js';
     const buf  = await file.arrayBuffer();
-    const pdf  = await pdfjsLib.getDocument({data:buf}).promise;
+    // isEvalSupported:false blocks the font-eval path (CVE-2024-4367) even if the CDN is compromised.
+    const pdf  = await pdfjsLib.getDocument({data:buf, isEvalSupported:false}).promise;
     let rawText = '';
     for(let p=1;p<=pdf.numPages;p++){
       const page    = await pdf.getPage(p);
@@ -4920,8 +4922,11 @@ function buildInvoiceHTML(inv, forModal=false){
 
 async function nextInvoiceNumber(excludeId){
   // Match the PDF style: INV-DD-MM-YYYY (e.g. INV-31-05-2026), shown as "#INV-…".
-  const d=new Date();
-  const base=`INV-${pad(d.getDate())}-${pad(d.getMonth()+1)}-${d.getFullYear()}`;
+  // Derived from today() (the dashboard's fixed TZ), not browser-local time —
+  // so the number always matches invoice_date, regardless of where the
+  // browser physically is when the invoice is created.
+  const [ty,tm,td]=today().split('-');
+  const base=`INV-${td}-${tm}-${ty}`;
   const { data }=await sb.from('invoices').select('id,invoice_number').like('invoice_number',`${base}%`);
   // Exclude the invoice being updated so it never collides with itself.
   const existing=new Set((data||[]).filter(r=>r.id!==excludeId).map(r=>r.invoice_number));
@@ -5295,6 +5300,7 @@ async function deleteQuote(id, num){
   if(!confirm(`Angebot ${num||''} wirklich löschen?`)) return;
   const { error } = await sb.from('quotes').delete().eq('id', id);
   if(error){ toast('Fehler: '+error.message,'err'); return; }
+  deleteStorageFolder('quote-pdfs', id);
   closeModal('ov-quopreview');
   if(currentPreviewQuo && currentPreviewQuo.id===id) currentPreviewQuo=null;
   toast('Angebot gelöscht.','ok');
@@ -5406,8 +5412,8 @@ async function uploadSignedQuote(quo, file){
 
 async function nextQuoteNumber(excludeId){
   // "ANG-DD-MM-YYYY" — same style as invoice numbers, different prefix.
-  const d=new Date();
-  const base=`ANG-${pad(d.getDate())}-${pad(d.getMonth()+1)}-${d.getFullYear()}`;
+  const [ty,tm,td]=today().split('-');
+  const base=`ANG-${td}-${tm}-${ty}`;
   const { data }=await sb.from('quotes').select('id,quote_number').like('quote_number',`${base}%`);
   const existing=new Set((data||[]).filter(r=>r.id!==excludeId).map(r=>r.quote_number));
   if(!existing.has(base)) return base;
@@ -5680,9 +5686,19 @@ const STATUS_LBL_C = { draft:'Entwurf', sent:'Gesendet', signed:'Signiert', decl
 const STATUS_TAG_C = { draft:'tag--muted', sent:'tag--blue', signed:'tag--green', declined:'tag--red', void:'tag--muted' };
 
 const CONTRACT_TEMPLATE_KEY = 'jm_contract_template';
-function loadContractTemplate(){
+// The default German contract boilerplate (~10.7 KB) lives in its own file,
+// fetched only when the Vertrag builder is actually opened — previously it
+// was a config.js constant parsed on every single page load.
+let _defaultContractTemplatePromise = null;
+function fetchDefaultContractTemplate(){
+  if(!_defaultContractTemplatePromise){
+    _defaultContractTemplatePromise = fetch('contract-template.html').then(r=>r.text());
+  }
+  return _defaultContractTemplatePromise;
+}
+async function loadContractTemplate(){
   try{ const saved=localStorage.getItem(CONTRACT_TEMPLATE_KEY); if(saved!=null && saved!=='') return saved; }catch(e){}
-  return CONFIG.CONTRACT_TEMPLATE_HTML;
+  return fetchDefaultContractTemplate();
 }
 function saveContractTemplateObj(html){ localStorage.setItem(CONTRACT_TEMPLATE_KEY, html); }
 
@@ -5874,8 +5890,8 @@ async function renderContractForm(){
 
 async function nextContractNumber(excludeId){
   // "VTR-DD-MM-YYYY" — same style as invoice/quote numbers.
-  const d=new Date();
-  const base=`VTR-${pad(d.getDate())}-${pad(d.getMonth()+1)}-${d.getFullYear()}`;
+  const [ty,tm,td]=today().split('-');
+  const base=`VTR-${td}-${tm}-${ty}`;
   const { data }=await sb.from('contracts').select('id,contract_number').like('contract_number',`${base}%`);
   const existing=new Set((data||[]).filter(r=>r.id!==excludeId).map(r=>r.contract_number));
   if(!existing.has(base)) return base;
@@ -5910,7 +5926,7 @@ async function saveContract(){
       const client = ctrClients.find(c=>c.id===ctrClientId)||{};
       const ctrNum = await nextContractNumber();
       const scope = $('ctr-scope')?.value || '';
-      const contentHtml = mergeContractFields(loadContractTemplate(), {
+      const contentHtml = mergeContractFields(await loadContractTemplate(), {
         client_name: client.company || client.name || '',
         client_address: defaultBillTo(client),
         scope_description: scope,
@@ -5960,6 +5976,7 @@ async function deleteContract(id, num){
   if(!confirm(`Vertrag ${num||''} wirklich löschen?`)) return;
   const { error } = await sb.from('contracts').delete().eq('id', id);
   if(error){ toast('Fehler: '+error.message,'err'); return; }
+  deleteStorageFolder('contract-pdfs', id);
   closeModal('ov-ctrpreview');
   if(currentPreviewContract && currentPreviewContract.id===id) currentPreviewContract=null;
   toast('Vertrag gelöscht.','ok');
@@ -6197,8 +6214,8 @@ async function sendContractViaGmail(ct){
 
 // ── CONTRACT SETTINGS (template — logo/Pay-to reuse Rechnungseinstellungen) ─
 $('btn-contract-settings').addEventListener('click', openContractSettings);
-function openContractSettings(){
-  const tpl=loadContractTemplate();
+async function openContractSettings(){
+  const tpl=await loadContractTemplate();
   $('ctr-settings-body').innerHTML=`
     <div style="font-size:.8125rem;line-height:1.55;background:var(--orange-t,#fff3cc);color:#7a5400;border-radius:var(--r-sm);padding:.75rem 1rem;margin-bottom:1.125rem">
       <strong>Arbeitsentwurf, keine Rechtsberatung.</strong> Vor dem ersten tatsächlichen Versand an einen Kunden anwaltlich prüfen lassen — insbesondere § 9 (Gewährleistung/kein Erfolgsversprechen) und § 10 (Haftung), weil dieser Vertrag als wiederverwendete Vorlage rechtlich als Allgemeine Geschäftsbedingungen (AGB, § 305 ff. BGB) gilt und damit strengerer Inhaltskontrolle unterliegt als eine individuell verhandelte Klausel. Enthält bewusst keine Erfolgs-, Ergebnis- oder Rückerstattungsgarantie (§ 9).
@@ -6468,7 +6485,10 @@ $('ga-live-btn').addEventListener('click', () => {
       b.classList.remove('active');
     });
     $('ga-live-btn').classList.add('active');
-    renderLive(); gaLiveTimer = setInterval(renderLive, 30000);
+    renderLive();
+    // Skip the GA4 realtime call while the tab is backgrounded — a
+    // forgotten Analytics tab was burning 5 API calls/30s indefinitely.
+    gaLiveTimer = setInterval(() => { if(document.visibilityState === 'visible') renderLive(); }, 30000);
   }
 });
 
@@ -6476,6 +6496,12 @@ function gaStopLive() {
   clearInterval(gaLiveTimer); gaLiveTimer = null;
   $('ga-live-btn').classList.remove('active');
 }
+
+// Refresh immediately when the tab comes back into view instead of waiting
+// out the rest of the 30s interval.
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'visible' && gaLiveTimer) renderLive();
+});
 
 // Shared GA4 Data API call. Renews the token silently and retries once
 // when it expires mid-session, so long sessions never hit a login popup.
@@ -8207,8 +8233,8 @@ let editPostId = null;
 let liActiveTab = 'calendar';
 let liStatsRangeDays = 30;
 
-const STATUS_LBL_P = { draft:'Entwurf', finished_draft:'Fertiger Entwurf', approved:'Freigegeben', posted:'Veröffentlicht', rejected:'Abgelehnt' };
-const STATUS_TAG_P  = { draft:'tag--muted', finished_draft:'tag--orange', approved:'tag--blue', posted:'tag--green', rejected:'tag--red' };
+const STATUS_LBL_P = { draft:'Entwurf', finished_draft:'Fertiger Entwurf', approved:'Freigegeben', publishing:'Wird veröffentlicht…', posted:'Veröffentlicht', rejected:'Abgelehnt' };
+const STATUS_TAG_P  = { draft:'tag--muted', finished_draft:'tag--orange', approved:'tag--blue', publishing:'tag--blue', posted:'tag--green', rejected:'tag--red' };
 // Fertiger Entwurf: content is done but deliberately held back — unlike
 // "Freigegeben" it is never picked up by the auto-publish cron (that only
 // queries status=approved), so it's a safe parking state.
@@ -8238,7 +8264,8 @@ function liCatContrast(hex){
 function liCatTagHtml(categoryId){
   const c = catById(categoryId);
   if(!c) return '';
-  return `<span class="li-cat-tag" style="background:${c.color};color:${liCatContrast(c.color)}">${esc(c.name)}</span>`;
+  const col = safeColor(c.color) || '#8E8E93';
+  return `<span class="li-cat-tag" style="background:${col};color:${liCatContrast(col)}">${esc(c.name)}</span>`;
 }
 
 async function loadPostCategories(){
@@ -8280,7 +8307,7 @@ function renderCatManageList(){
     wrap.innerHTML = postCategories.map(c=>`
       <div class="li-cat-row" data-id="${c.id}">
         <details class="li-cat-color-pick">
-          <summary class="li-cat-color-dot" style="background:${c.color}" title="Farbe ändern"></summary>
+          <summary class="li-cat-color-dot" style="background:${safeColor(c.color)||'#8E8E93'}" title="Farbe ändern"></summary>
           <div class="li-cat-swatches">${liCatSwatchesHtml(c.color, c.id)}</div>
         </details>
         <input class="fi li-cat-name-input" data-id="${c.id}" value="${esc(c.name)}" maxlength="40" />
@@ -8364,7 +8391,18 @@ document.querySelectorAll('[data-li-range]').forEach(btn => btn.addEventListener
 
 $('btn-new-post').addEventListener('click', () => openNewPost());
 
+// {path: {url, expiresAt}} — signed URLs expire after 3600s; treat an entry
+// as a miss once it's within 5 minutes of expiry so it gets re-signed
+// instead of turning into a broken image on a tab left open for over an hour.
 let liMediaUrlCache = {};
+function liMediaUrl(path){
+  const e = liMediaUrlCache[path];
+  if(!e || e.expiresAt - Date.now() < 5*60*1000) return null;
+  return e.url;
+}
+function liMediaUrlSet(path, url, ttlSec){
+  liMediaUrlCache[path] = { url, expiresAt: Date.now() + (ttlSec||3600)*1000 };
+}
 
 // ── IMAGE TRANSFORMATION (Supabase Storage) ──────────────────────────
 // Post images are stored as full-resolution originals (often several MB — this
@@ -8393,36 +8431,53 @@ function liProbeTransform(samplePath){
       .catch(()=>resolve(false));
   });
 }
+// Cached as {value, checkedAt}: a positive result stays sticky (transformations
+// don't get disabled once available), but a negative one is re-probed after
+// 24h — otherwise one transient failure (offline, a slow response, a 5xx)
+// locks the browser out of transformations forever, even after e.g. upgrading
+// the Supabase plan.
+const LI_IMG_TX_RECHECK_MS = 24*60*60*1000;
 async function liEnsureTransformMode(samplePath){
   if(liTransformMode !== null) return liTransformMode;
   let cached = null;
-  try { cached = localStorage.getItem('jm_img_tx'); } catch(e){}
-  if(cached === '1'){ liTransformMode = true;  return true; }
-  if(cached === '0'){ liTransformMode = false; return false; }
+  try { cached = JSON.parse(localStorage.getItem('jm_img_tx')||'null'); } catch(e){}
+  if(cached && cached.value === true){ liTransformMode = true; return true; }
+  if(cached && cached.value === false && (Date.now() - (cached.checkedAt||0)) < LI_IMG_TX_RECHECK_MS){
+    liTransformMode = false; return false;
+  }
   liTransformMode = await liProbeTransform(samplePath);
-  try { localStorage.setItem('jm_img_tx', liTransformMode ? '1' : '0'); } catch(e){}
+  try { localStorage.setItem('jm_img_tx', JSON.stringify({ value: liTransformMode, checkedAt: Date.now() })); } catch(e){}
   return liTransformMode;
 }
 
 async function liResolveMediaUrls(posts){
   // Separate images (transformable) from videos/other (never transformed).
+  // Images prefer the small physical preview generated at upload time
+  // (resizeImageForPreview) over the original — falls back to the original
+  // for posts uploaded before that existed, or if the preview upload failed.
   const imgPaths = new Set(), rawPaths = new Set();
   posts.forEach(p=>(p.media||[]).forEach(m=>{
-    if(!m.path || liMediaUrlCache[m.path]) return;
-    (m.type === 'image' ? imgPaths : rawPaths).add(m.path);
+    const displayPath = m.type === 'image' ? (m.previewPath || m.path) : m.path;
+    if(!displayPath || liMediaUrl(displayPath)) return;
+    (m.type === 'image' ? imgPaths : rawPaths).add(displayPath);
   }));
   if(!imgPaths.size && !rawPaths.size) return;
 
   const useTx = imgPaths.size ? await liEnsureTransformMode([...imgPaths][0]) : false;
-  const sign = (path, opts) => sb.storage.from('post-media').createSignedUrl(path, 3600, opts)
-    .then(({ data }) => [path, data?.signedUrl || null]);
+  // createSignedUrls (plural, batched) does the whole set in one request
+  // instead of one round-trip per image — the calendar can have a dozen+.
+  const signBatch = (paths, opts) => paths.length
+    ? sb.storage.from('post-media').createSignedUrls(paths, 3600, opts).then(({ data }) => data||[])
+    : Promise.resolve([]);
 
-  const results = await Promise.all([
-    ...[...imgPaths].map(path => sign(path, useTx ? { transform: LI_IMG_TX } : undefined)),
-    ...[...rawPaths].map(path => sign(path, undefined)),
+  const [imgResults, rawResults] = await Promise.all([
+    signBatch([...imgPaths], useTx ? { transform: LI_IMG_TX } : undefined),
+    signBatch([...rawPaths], undefined),
   ]);
   let changed = false;
-  results.forEach(([path,url])=>{ if(url){ liMediaUrlCache[path]=url; changed = true; } });
+  [...imgResults, ...rawResults].forEach(r=>{
+    if(r?.signedUrl && !r.error){ liMediaUrlSet(r.path, r.signedUrl); changed = true; }
+  });
   if(changed) renderLinkedInPanel();
 }
 
@@ -8430,8 +8485,12 @@ async function loadLinkedInPosts(){
   const applyPosts = (data) => {
     allPostsCache = data||[];
     const draftCount = allPostsCache.filter(p=>p.status==='draft').length;
-    $('badge-linkedin').textContent = draftCount;
-    $('badge-linkedin').hidden = draftCount===0;
+    const failCount = allPostsCache.filter(p=>p.last_publish_error).length;
+    const badge = $('badge-linkedin');
+    badge.textContent = draftCount + failCount;
+    badge.hidden = (draftCount + failCount)===0;
+    badge.classList.toggle('nav-badge--err', failCount>0);
+    badge.title = failCount>0 ? `${failCount} Post(s) mit Veröffentlichungsfehler` : '';
     renderLinkedInPanel();
     liResolveMediaUrls(allPostsCache);
   };
@@ -8490,13 +8549,13 @@ document.querySelectorAll('.li-view-btn').forEach(btn=>btn.addEventListener('cli
 // ── Calendar tile (month grid) view ──────────────────────────────────────
 let liGridRefDate = new Date();
 let liGridExpanded = new Set();
-const STATUS_DOT_P = { draft:'var(--ink-s)', finished_draft:'var(--orange,#FF9F0A)', approved:'var(--blue,#0A84FF)', posted:'var(--green,#30D158)', rejected:'var(--red,#FF453A)' };
+const STATUS_DOT_P = { draft:'var(--ink-s)', finished_draft:'var(--orange,#FF9F0A)', approved:'var(--blue,#0A84FF)', publishing:'var(--blue,#0A84FF)', posted:'var(--green,#30D158)', rejected:'var(--red,#FF453A)' };
 
 // Calendar tile: category tag on top, status dot + text below, media thumbnail last.
 function liGridPostPillHtml(p, extraStyle){
   const catHtml = p.category_id ? `<div class="li-grid-post-cat">${liCatTagHtml(p.category_id)}</div>` : '';
   const img = (p.media||[]).find(m=>m.type==='image');
-  const thumbUrl = img ? liMediaUrlCache[img.path] : null;
+  const thumbUrl = img ? liMediaUrl(img.previewPath || img.path) : null;
   const thumbHtml = thumbUrl ? `<img class="li-grid-post-thumb" src="${esc(thumbUrl)}" alt="" loading="lazy" decoding="async">` : '';
   return `<div class="li-grid-post" data-id="${p.id}"${extraStyle?` style="${extraStyle}"`:''} title="${esc(liFirstLine(p.content))}">
       ${catHtml}
@@ -8508,8 +8567,11 @@ function liGridPostPillHtml(p, extraStyle){
     </div>`;
 }
 
-$('li-grid-prev').addEventListener('click', ()=>{ liGridRefDate.setMonth(liGridRefDate.getMonth()-1); liGridExpanded.clear(); renderLiCalendarGrid(allPostsCache); });
-$('li-grid-next').addEventListener('click', ()=>{ liGridRefDate.setMonth(liGridRefDate.getMonth()+1); liGridExpanded.clear(); renderLiCalendarGrid(allPostsCache); });
+// Anchor to the 1st before shifting months — setMonth() on a mutable Date
+// overflows on the 29th-31st (e.g. 31 May → setMonth(3) → "31 April" → 1 May),
+// making navigation look stuck or skip a month.
+$('li-grid-prev').addEventListener('click', ()=>{ liGridRefDate = new Date(liGridRefDate.getFullYear(), liGridRefDate.getMonth()-1, 1); liGridExpanded.clear(); renderLiCalendarGrid(allPostsCache); });
+$('li-grid-next').addEventListener('click', ()=>{ liGridRefDate = new Date(liGridRefDate.getFullYear(), liGridRefDate.getMonth()+1, 1); liGridExpanded.clear(); renderLiCalendarGrid(allPostsCache); });
 $('li-grid-today').addEventListener('click', ()=>{ liGridRefDate = new Date(); liGridExpanded.clear(); renderLiCalendarGrid(allPostsCache); });
 
 function renderLiCalendarGrid(list){
@@ -8567,10 +8629,17 @@ function renderLiCalendarGrid(list){
 // Live updates: rows are also inserted directly by an external content-engine
 // automation, so the calendar can't rely on a one-time fetch on load.
 let liRealtimeSub = null;
+let liRealtimeDebounce = null;
 function subscribeLinkedInRealtime(){
   if(liRealtimeSub) return;
   liRealtimeSub = sb.channel('posts-changes')
-    .on('postgres_changes', { event:'*', schema:'public', table:'posts' }, () => loadLinkedInPosts())
+    .on('postgres_changes', { event:'*', schema:'public', table:'posts' }, () => {
+      // Our own mutation helpers already refetch after a change, and the
+      // cron/publish flow can touch a row 2-3 times in quick succession —
+      // debounce so one edit doesn't trigger a stack of full refetches.
+      clearTimeout(liRealtimeDebounce);
+      liRealtimeDebounce = setTimeout(loadLinkedInPosts, 400);
+    })
     .subscribe();
 }
 
@@ -8689,6 +8758,7 @@ function liRowHtml(p){
         <span style="display:flex;align-items:center;gap:.375rem;min-width:0">
           ${liCatTagHtml(p.category_id)}
           <span class="tag lipost-status-pill ${STATUS_TAG_P[p.status]||'tag--muted'}" data-id="${p.id}" data-status="${p.status}" title="Klicken, um den Status zu ändern">${STATUS_LBL_P[p.status]||p.status}</span>
+          ${p.last_publish_error ? `<span class="tag tag--red" title="${esc(p.last_publish_error)}">⚠ Fehler</span>` : ''}
         </span>
       </div>
       <div class="lipost-row-actions">
@@ -8702,7 +8772,7 @@ function liRowHtml(p){
 // lazily so the calendar list doesn't need to await anything to render.
 function liMediaPreviewMeta(media){
   if(!media || !media.length) return [];
-  return media.map(m=>({ ...m, previewUrl: liMediaUrlCache[m.path] || null }));
+  return media.map(m=>({ ...m, previewUrl: liMediaUrl(m.previewPath || m.path) || null }));
 }
 
 function liRowActionButtons(p){
@@ -8832,8 +8902,11 @@ function liEditTimeInline(el){
 }
 
 async function deletePostRow(id){
+  const media = allPostsCache.find(p=>p.id===id)?.media||[];
+  const mediaPaths = media.flatMap(m=>[m.path, m.previewPath]).filter(Boolean);
   const { error } = await sb.from('posts').delete().eq('id', id);
   if(error){ toast('Löschen fehlgeschlagen: '+error.message,'err'); return; }
+  if(mediaPaths.length) sb.storage.from('post-media').remove(mediaPaths).catch(()=>{});
   toast('Post gelöscht.','ok');
   if(editPostId===id) closeModal('ov-post');
   loadLinkedInPosts();
@@ -8888,15 +8961,29 @@ const LI_OAUTH_SCOPE = 'openid profile w_member_social';
 
 function liUpdateConnStatus(){
   const el = $('li-conn-status');
-  if(!el) return;
-  if(!CONFIG.LINKEDIN_CLIENT_ID){
-    el.textContent = 'LinkedIn nicht konfiguriert';
-    return;
+  const banner = $('li-expiry-banner');
+  if(el){
+    if(!CONFIG.LINKEDIN_CLIENT_ID){
+      el.textContent = 'LinkedIn nicht konfiguriert';
+    } else {
+      el.textContent = liConnected ? 'LinkedIn verbunden ✓' : '';
+    }
   }
-  el.textContent = liConnected ? 'LinkedIn verbunden ✓' : '';
+  if(banner){
+    const daysLeft = liTokenExpiresAt ? (liTokenExpiresAt - Date.now()) / 86400000 : null;
+    if(daysLeft != null && daysLeft < 14){
+      banner.hidden = false;
+      banner.textContent = daysLeft <= 0
+        ? '⚠ LinkedIn-Verbindung ist abgelaufen — bitte oben neu verbinden, sonst pausiert das automatische Posten.'
+        : `⚠ LinkedIn-Verbindung läuft in ${Math.ceil(daysLeft)} Tag(en) ab — bitte bald neu verbinden, sonst pausiert das automatische Posten.`;
+    } else {
+      banner.hidden = true;
+    }
+  }
 }
 
 let liConnected = false;
+let liTokenExpiresAt = null;
 
 async function liCheckConnection(){
   try{
@@ -8906,7 +8993,13 @@ async function liCheckConnection(){
       headers: { 'Authorization': 'Bearer '+session.access_token },
     });
     liConnected = res.ok;
-  }catch(e){ liConnected = false; }
+    if(res.ok){
+      const data = await res.json().catch(()=>({}));
+      liTokenExpiresAt = typeof data.expires_in === 'number' ? Date.now() + data.expires_in*1000 : null;
+    } else {
+      liTokenExpiresAt = null;
+    }
+  }catch(e){ liConnected = false; liTokenExpiresAt = null; }
   liUpdateConnStatus();
 }
 
@@ -8921,7 +9014,7 @@ async function liConnect(){
   if(!session){ toast('Bitte neu anmelden.','err'); return; }
 
   const redirectUri = window.location.origin + '/linkedin-callback.html';
-  const state = Math.random().toString(36).slice(2);
+  const state = crypto.randomUUID();
   const authUrl = 'https://www.linkedin.com/oauth/v2/authorization?' + new URLSearchParams({
     response_type: 'code',
     client_id: CONFIG.LINKEDIN_CLIENT_ID,
@@ -8935,15 +9028,16 @@ async function liConnect(){
 
   try{
     const { code } = await new Promise((resolve, reject) => {
-      const timer = setInterval(() => { if(popup.closed){ clearInterval(timer); reject(new Error('Fenster geschlossen')); } }, 500);
-      window.addEventListener('message', function onMsg(e){
+      function onMsg(e){
         if(e.origin !== window.location.origin || e.data?.source !== 'linkedin-oauth') return;
-        window.removeEventListener('message', onMsg);
-        clearInterval(timer);
+        cleanup();
         if(e.data.error){ reject(new Error(e.data.errorDescription || e.data.error)); return; }
         if(e.data.state !== state){ reject(new Error('State stimmt nicht überein')); return; }
         resolve(e.data);
-      });
+      }
+      const timer = setInterval(() => { if(popup.closed){ cleanup(); reject(new Error('Fenster geschlossen')); } }, 500);
+      function cleanup(){ window.removeEventListener('message', onMsg); clearInterval(timer); }
+      window.addEventListener('message', onMsg);
     });
 
     const res = await fetch('/api/linkedin-token', {
@@ -9057,6 +9151,29 @@ function wireMediaDragReorder(wrap){
   });
 }
 
+// Downscales an image client-side (canvas → WebP, falling back to JPEG if
+// WebP encoding isn't supported) before upload. Supabase's own image
+// transformations need the Pro plan and this project is on Free, so a
+// physically smaller file is the only way to keep the feed from serving
+// multi-megabyte originals into 64px calendar thumbnails.
+async function resizeImageForPreview(file, maxDim=1200, quality=0.72){
+  try{
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height));
+    const w = Math.max(1, Math.round(bitmap.width*scale)), h = Math.max(1, Math.round(bitmap.height*scale));
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(bitmap, 0, 0, w, h);
+    bitmap.close?.();
+    let blob = await new Promise(resolve=>canvas.toBlob(resolve, 'image/webp', quality));
+    if(!blob || blob.type !== 'image/webp'){
+      blob = await new Promise(resolve=>canvas.toBlob(resolve, 'image/jpeg', quality));
+    }
+    return blob || null;
+  }catch(e){ return null; } // best-effort — upload proceeds with the original only
+}
+
 $('mpost-media-input').addEventListener('change', async (e)=>{
   const files = [...e.target.files];
   e.target.value = '';
@@ -9066,9 +9183,21 @@ $('mpost-media-input').addEventListener('change', async (e)=>{
     toast('Lade '+file.name+' hoch…','ok');
     const { error } = await sb.storage.from('post-media').upload(path, file, { upsert:false });
     if(error){ toast('Upload fehlgeschlagen: '+error.message,'err'); continue; }
-    const { data } = await sb.storage.from('post-media').createSignedUrl(path, 3600);
-    editMediaList.push({ type, path, name: file.name, previewUrl: data?.signedUrl||null });
-    if(data?.signedUrl) liMediaUrlCache[path] = data.signedUrl;
+
+    let previewPath = null;
+    if(type === 'image'){
+      const previewBlob = await resizeImageForPreview(file);
+      if(previewBlob){
+        const ext = previewBlob.type === 'image/webp' ? 'webp' : 'jpg';
+        const candidatePath = `${path}-preview.${ext}`;
+        const { error: pErr } = await sb.storage.from('post-media').upload(candidatePath, previewBlob, { upsert:false });
+        if(!pErr) previewPath = candidatePath;
+      }
+    }
+
+    const { data } = await sb.storage.from('post-media').createSignedUrl(previewPath || path, 3600);
+    editMediaList.push({ type, path, previewPath, name: file.name, previewUrl: data?.signedUrl||null });
+    if(data?.signedUrl) liMediaUrlSet(previewPath || path, data.signedUrl);
   }
   renderMediaPicker();
   renderPostPreview();
@@ -9132,7 +9261,7 @@ function openEditPost(id){
   // Open instantly with whatever preview is already cached, then upgrade the
   // images to full resolution in the background — full quality is only paid
   // for when a post is actually being edited.
-  editMediaList = (p.media||[]).map(m=>({ ...m, previewUrl: liMediaUrlCache[m.path]||null }));
+  editMediaList = (p.media||[]).map(m=>({ ...m, previewUrl: liMediaUrl(m.path)||null }));
   renderMediaPicker();
   liUpgradeEditMediaFullQuality(id);
 
