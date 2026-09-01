@@ -100,15 +100,21 @@ export default async function handler(req, res) {
     if (anyOk) {
       const patch = { status: 'posted' };
       if (!post.posted_at) patch.posted_at = new Date().toISOString();
-      const firstUrn = results.find(r => r.ok && r.urn)?.urn;
+      const profileUrn = results.find(r => r.ok && r.target === 'Profil' && r.urn)?.urn;
+      const orgUrn = results.find(r => r.ok && r.target === 'Unternehmensseite' && r.urn)?.urn;
+      const firstUrn = profileUrn || results.find(r => r.ok && r.urn)?.urn;
       if (firstUrn) patch.linkedin_post_urn = firstUrn;
+      if (orgUrn) patch.linkedin_org_post_urn = orgUrn;
       let patchRes = await fetch(`${SUPABASE_URL}/rest/v1/posts?id=eq.${encodeURIComponent(body.id)}`, {
         method: 'PATCH',
         headers: { ...headers, Prefer: 'return=minimal' },
         body: JSON.stringify(patch),
       });
-      if (!patchRes.ok && firstUrn) {
+      if (!patchRes.ok && (firstUrn || orgUrn)) {
+        // Retry without the URN columns — they may not exist yet if the
+        // analytics migration in supabase-setup.sql hasn't been run.
         delete patch.linkedin_post_urn;
+        delete patch.linkedin_org_post_urn;
         await fetch(`${SUPABASE_URL}/rest/v1/posts?id=eq.${encodeURIComponent(body.id)}`, {
           method: 'PATCH',
           headers: { ...headers, Prefer: 'return=minimal' },

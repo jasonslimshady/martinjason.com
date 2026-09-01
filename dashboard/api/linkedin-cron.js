@@ -85,10 +85,13 @@ export default async function handler(req, res) {
         const results = await publishToLinkedIn(serviceKey, post);
         const anyOk = results.some(r => r.ok);
         if (anyOk) {
-          const firstUrn = results.find(r => r.ok && r.urn)?.urn;
+          const profileUrn = results.find(r => r.ok && r.target === 'Profil' && r.urn)?.urn;
+          const orgUrn = results.find(r => r.ok && r.target === 'Unternehmensseite' && r.urn)?.urn;
+          const firstUrn = profileUrn || results.find(r => r.ok && r.urn)?.urn;
           const fcErrors = results.filter(r => r.firstCommentError).map(r => `${r.target}: ${r.firstCommentError}`).join(' | ');
           const patch = { status: 'posted', posted_at: post.posted_at || nowIso, last_publish_error: fcErrors || null };
           if (firstUrn) patch.linkedin_post_urn = firstUrn;
+          if (orgUrn) patch.linkedin_org_post_urn = orgUrn;
           let patchRes = await fetch(`${SUPABASE_URL}/rest/v1/posts?id=eq.${encodeURIComponent(post.id)}`, {
             method: 'PATCH',
             headers: { ...headers, Prefer: 'return=minimal' },
@@ -96,6 +99,7 @@ export default async function handler(req, res) {
           });
           if (!patchRes.ok) {
             delete patch.linkedin_post_urn;
+            delete patch.linkedin_org_post_urn;
             await fetch(`${SUPABASE_URL}/rest/v1/posts?id=eq.${encodeURIComponent(post.id)}`, {
               method: 'PATCH',
               headers: { ...headers, Prefer: 'return=minimal' },

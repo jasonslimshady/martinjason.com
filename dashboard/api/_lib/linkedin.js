@@ -333,6 +333,129 @@ async function postFirstComment(accessToken, actor, shareUrn, text) {
   }
 }
 
+// ============================================================
+//  Comments — write a comment on any post (used by /api/linkedin-comment)
+//
+//  Part of the Community Management API. `as` decides who the comment is
+//  authored by: 'member' (your personal profile, default) or 'organization'
+//  (your company page — needs w_organization_social + LINKEDIN_ORGANIZATION_ID).
+// ============================================================
+export async function postComment(serviceKey, shareUrn, text, as = 'member') {
+  const { access_token, person_urn } = await ensureFreshToken(serviceKey);
+  let actor = person_urn;
+  if (as === 'organization') {
+    if (!LINKEDIN_ORG_ID) throw new Error('Kein LINKEDIN_ORGANIZATION_ID konfiguriert — als Unternehmensseite kommentieren ist nicht möglich.');
+    actor = `urn:li:organization:${LINKEDIN_ORG_ID}`;
+  }
+  const r = await fetch(`https://api.linkedin.com/rest/socialActions/${encodeURIComponent(shareUrn)}/comments`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${access_token}`,
+      'Content-Type': 'application/json',
+      'LinkedIn-Version': LINKEDIN_API_VERSION,
+      'X-Restli-Protocol-Version': '2.0.0',
+    },
+    body: JSON.stringify({ actor, object: shareUrn, message: { text } }),
+  });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    // 403 here almost always means the Community Management API product isn't
+    // approved (or the org scope wasn't granted on connect), not a bad request.
+    throw new Error(data.message || `LinkedIn ${r.status} ${r.statusText}`);
+  }
+  return { id: r.headers.get('x-restli-id') || data.$URN || null, actor };
+}
+
+// ============================================================
+//  Analytics sync — pull per-post metrics from LinkedIn
+//
+//  Two sources, each best-effort (a failure in one never blocks the other):
+//    • socialActions/{urn}                    → reactions + comments counts.
+//      Works for both personal and company posts.
+//    • organizationalEntityShareStatistics    → impressions, unique reach,
+//      link-clicks, reshares (+ authoritative reaction/comment totals).
+//      Company-page posts only; needs the org scopes + LINKEDIN_ORGANIZATION_ID.
+//
+//  LinkedIn does not expose personal-profile impressions / profile-views /
+//  followers-gained through the public API, so those columns stay NULL for
+//  profile-only posts and the dashboard shows "Noch keine Daten" for them.
+// ============================================================
+const LI_ANALYTICS_HEADERS = (accessToken) => ({
+  Authorization: `Bearer ${accessToken}`,
+  'LinkedIn-Version': LINKEDIN_API_VERSION,
+  'X-Restli-Protocol-Version': '2.0.0',
+});
+
+async function fetchSocialActionCounts(accessToken, shareUrn) {
+  const r = await fetch(`https://api.linkedin.com/rest/socialActions/${encodeURIComponent(shareUrn)}`, {
+    headers: LI_ANALYTICS_HEADERS(accessToken),
+  });
+  if (!r.ok) throw new Error(`socialActions ${r.status}: ${await r.text()}`);
+  const data = await r.json();
+  return {
+    reactions: data.likesSummary?.aggregatedTotalLikes ?? data.likesSummary?.totalLikes ?? null,
+    comments: data.commentsSummary?.aggregatedTotalComments ?? data.commentsSummary?.count ?? null,
+  };
+}
+
+async function fetchOrgShareStatistics(accessToken, orgId, shareUrn) {
+  const orgUrn = `urn:li:organization:${orgId}`;
+  const url = `https://api.linkedin.com/rest/organizationalEntityShareStatistics?q=organizationalEntity`
+    + `&organizationalEntity=${encodeURIComponent(orgUrn)}`
+    + `&shares=List(${encodeURIComponent(shareUrn)})`;
+  const r = await fetch(url, { headers: LI_ANALYTICS_HEADERS(accessToken) });
+  if (!r.ok) throw new Error(`organizationalEntityShareStatistics ${r.status}: ${await r.text()}`);
+  const data = await r.json();
+  const t = data.elements?.[0]?.totalShareStatistics;
+  if (!t) return {};
+  return {
+    impressions: t.impressionCount ?? null,
+    members_reached: t.uniqueImpressionsCount ?? null,
+    link_clicks: t.clickCount ?? null,
+    reshares: t.shareCount ?? null,
+    reactions: t.likeCount ?? null,
+    comments: t.commentCount ?? null,
+  };
+}
+
+// Returns the metric object to PATCH onto the post row (only keys with a real
+// value are returned; callers should merge and always set analytics_synced_at).
+// Throws only if NOTHING at all could be fetched, so a fully-failed sync is
+// visible instead of silently marking the post "synced" with no data.
+export async function syncPostStats(serviceKey, post) {
+  const memberUrn = post.linkedin_post_urn;
+  const orgUrn = post.linkedin_org_post_urn;
+  if (!memberUrn && !orgUrn) {
+    const err = new Error('Kein LinkedIn-URN gespeichert — dieser Post wurde nicht über das Dashboard veröffentlicht.');
+    err.code = 'no_urn';
+    return { metrics: {}, errors: [err.message] };
+  }
+  const { access_token } = await ensureFreshToken(serviceKey);
+
+  const metrics = {};
+  const errors = [];
+
+  // socialActions on whichever urn we have (member preferred — it's the one
+  // the personal Statistiken view is about).
+  const socialUrn = memberUrn || orgUrn;
+  try {
+    const counts = await fetchSocialActionCounts(access_token, socialUrn);
+    if (counts.reactions != null) metrics.reactions = counts.reactions;
+    if (counts.comments != null) metrics.comments = counts.comments;
+  } catch (e) { errors.push(e.message); }
+
+  // Company-page analytics (impressions/reach/clicks/reshares) — only if we
+  // actually posted to the org and an org id is configured.
+  if (orgUrn && LINKEDIN_ORG_ID) {
+    try {
+      const org = await fetchOrgShareStatistics(access_token, LINKEDIN_ORG_ID, orgUrn);
+      for (const [k, v] of Object.entries(org)) if (v != null) metrics[k] = v;
+    } catch (e) { errors.push(e.message); }
+  }
+
+  return { metrics, errors };
+}
+
 // ── Recurring posts: compute the next occurrence's scheduled_for from a
 // rule {freq:'daily'|'weekly'|'monthly', interval, weekdays:[0-6 Mon-Sun], until} ──
 export function nextOccurrence(scheduledFor, rule) {

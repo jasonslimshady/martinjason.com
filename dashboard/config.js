@@ -124,6 +124,28 @@ const CONFIG = {
   //  4. Paste the Client ID below. The Client Secret goes server-side
   //     only, as LINKEDIN_CLIENT_SECRET in Vercel — see api/linkedin-token.js.
   // ----------------------------------------------------------
-  LINKEDIN_CLIENT_ID: '77j7fnwt382p9k',
+  LINKEDIN_CLIENT_ID: '77dce7y1n43s31',
+
+  // ----------------------------------------------------------
+  //  LinkedIn OAuth scopes
+  //  These decide what the one-time "LinkedIn verbinden" grant is
+  //  allowed to do. Only request scopes your app is actually
+  //  approved for — an unapproved scope makes the whole connect
+  //  fail with "unauthorized_scope_error".
+  //
+  //    openid profile        → who you are (Sign In with OpenID)
+  //    w_member_social       → post + comment as your personal profile
+  //    r_organization_social → read company-page posts + their analytics
+  //    w_organization_social → post + comment as the company page
+  //    rw_organization_admin → company-page impressions/reach analytics
+  //
+  //  The last three come with the "Community Management API" product —
+  //  only keep them if that product is APPROVED on the app, otherwise the
+  //  whole connect fails with "unauthorized_scope_error". If you don't
+  //  manage a company page, trim back to 'openid profile w_member_social'
+  //  (and leave LINKEDIN_ORGANIZATION_ID unset in Vercel) — personal
+  //  profile posting and commenting still work.
+  // ----------------------------------------------------------
+  LINKEDIN_OAUTH_SCOPE: 'openid profile w_member_social r_organization_social w_organization_social rw_organization_admin',
 
 };

@@ -34,7 +34,8 @@
     }
   ],
   "crons": [
-    { "path": "/api/linkedin-cron", "schedule": "0 3 * * *" }
+    { "path": "/api/linkedin-cron", "schedule": "0 3 * * *" },
+    { "path": "/api/linkedin-sync-stats", "schedule": "0 4 * * *" }
   ],
   "regions": ["dub1"]
 }

@@ -406,6 +406,25 @@ ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS recurring_rule JSONB;
 ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS recurring_parent_id UUID;
 ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS last_publish_error TEXT;
 
+-- LinkedIn per-post analytics (populated by /api/linkedin-sync-stats, read by
+-- the dashboard's LinkedIn → Statistiken tab). All nullable: a metric stays
+-- NULL until LinkedIn actually returns a value for it, and the UI renders
+-- "Noch keine Daten" for anything still NULL. reactions/comments come from the
+-- socialActions API (works for personal + company posts); impressions, reach,
+-- link_clicks and reshares come from the organization share-statistics API and
+-- are therefore only available for posts published to a company page.
+ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS linkedin_org_post_urn TEXT;
+ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS profile_viewers_from_post INTEGER;
+ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS followers_gained_from_post INTEGER;
+ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS impressions INTEGER;
+ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS reactions INTEGER;
+ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS comments INTEGER;
+ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS members_reached INTEGER;
+ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS reshares INTEGER;
+ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS post_saves INTEGER;
+ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS link_clicks INTEGER;
+ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS analytics_synced_at TIMESTAMPTZ;
+
 -- Storage bucket for images/videos attached to LinkedIn drafts. Private —
 -- the dashboard owner uploads/reads via their authenticated session, and
 -- /api/linkedin-publish (service role) downloads the bytes at publish time
