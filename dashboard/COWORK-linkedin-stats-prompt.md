@@ -1,9 +1,11 @@
 # Claude Co-Work Prompt — LinkedIn-Post-Statistiken nach Supabase
 
-Kopiere den Text unter der Linie in eine **Claude Co-Work**-Session. Voraussetzung:
-Die Session hat Zugriff auf das Supabase-Projekt des Dashboards
-(`blibykmyvkdtdvgzuwyr`, Tabelle `public.posts`) — entweder über den
-Supabase-Connector oder MCP.
+Kopiere den Text unter der Linie in eine **Claude Co-Work**-Session.
+Voraussetzungen:
+- Ein **lokaler** Task, bei dem Claude deinen **Chrome** öffnen darf (dort bist
+  du bei LinkedIn eingeloggt, also sind die Analytics-Seiten sichtbar).
+- Zugriff auf das Supabase-Projekt des Dashboards (`blibykmyvkdtdvgzuwyr`,
+  Tabelle `public.posts`) über den Supabase-Connector oder MCP.
 
 Voraussetzung im Dashboard: Trage vorher unter **LinkedIn → Statistiken** bei
 jedem Post im Feld **„LinkedIn Analytics-URL"** den Analytics-Link ein und
@@ -29,13 +31,13 @@ limit 7;
 ```
 
 **Schritt 2 — Pro Post die Zahlen beschaffen.** Für jeden Post:
-1. Öffne die `analytics_url`.
-2. Falls die Seite hinter dem LinkedIn-Login liegt und du sie nicht lesen
-   kannst: zeige mir den Post (erste Zeile von `content`) samt seiner
-   `analytics_url` und **frag mich nach den Zahlen** — ich füge sie ein oder
-   schicke dir einen Screenshot der Analytics-Seite, den du ausliest. Rate
-   niemals Werte.
-3. Lies die sichtbaren Kennzahlen aus und ordne sie den Spalten zu:
+1. Öffne die `analytics_url` in meinem Chrome (ich bin bei LinkedIn
+   eingeloggt). Warte, bis die Analytics-Seite vollständig geladen ist.
+2. Lies die sichtbaren Kennzahlen direkt von der Seite ab. Nur wenn eine Seite
+   nicht lädt oder eine Zahl wirklich unlesbar ist: zeige mir den Post (erste
+   Zeile von `content`) samt `analytics_url` und **frag mich** — rate niemals
+   Werte.
+3. Ordne die Kennzahlen den Spalten zu:
 
    | LinkedIn-Analytics-Label            | Supabase-Spalte              |
    |-------------------------------------|------------------------------|
