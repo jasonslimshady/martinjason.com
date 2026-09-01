@@ -424,6 +424,12 @@ ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS reshares INTEGER;
 ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS post_saves INTEGER;
 ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS link_clicks INTEGER;
 ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS analytics_synced_at TIMESTAMPTZ;
+-- Manually-pasted LinkedIn "post-summary" analytics URL for this post, e.g.
+-- https://www.linkedin.com/analytics/post-summary/urn:li:activity:7497.../
+-- LinkedIn does not expose personal-post impressions via API, so the owner
+-- pastes the analytics link here and a Claude Co-Work run reads the numbers
+-- off that page and fills the metric columns above.
+ALTER TABLE IF EXISTS posts ADD COLUMN IF NOT EXISTS analytics_url TEXT;
 
 -- Storage bucket for images/videos attached to LinkedIn drafts. Private —
 -- the dashboard owner uploads/reads via their authenticated session, and

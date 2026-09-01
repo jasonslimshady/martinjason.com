@@ -439,6 +439,11 @@
     .li-stats-row-date{font-size:.75rem;color:var(--ink-s);flex-shrink:0}
     .li-chev{transition:transform var(--fast);flex-shrink:0;color:var(--ink-s)}
     .li-stats-row.open .li-chev{transform:rotate(180deg)}
+    .li-stats-body{display:flex;flex-wrap:wrap;align-items:stretch}
+    .li-stats-body .li-metrics-grid{flex:1 1 240px;min-width:0}
+    .li-stats-media{flex:0 0 150px;border-top:1px solid var(--border);background:var(--surface-2);display:flex;align-items:center;justify-content:center;padding:.625rem}
+    .li-stats-media img,.li-stats-media video{width:100%;max-height:170px;object-fit:cover;border-radius:8px;display:block}
+    @media (max-width:560px){ .li-stats-media{flex-basis:100%} }
 
     /* REVENUE CHART */
     .rev-bar-wrap{display:flex;gap:4px;align-items:flex-end;height:120px;padding-top:.75rem}
@@ -8434,45 +8439,28 @@ async function liSyncStats(){
   }
 }
 
-// ── Kommentar schreiben: post a comment on one of my published posts ──
-// Delegated so it works for every (dynamically rendered) stats row.
+// ── Analytics-URL pro Post speichern (delegiert) ──
 $('li-stats-list')?.addEventListener('click', async (e) => {
-  const btn = e.target.closest('.li-comment-btn');
+  const btn = e.target.closest('.li-analytics-save');
   if(!btn) return;
-  const box = btn.closest('.li-comment-box');
-  const urn = box.dataset.urn;
-  const orgUrn = box.dataset.orgUrn || '';
-  const ta = box.querySelector('.li-comment-input');
-  const asSel = box.querySelector('.li-comment-as');
-  const text = (ta.value||'').trim();
-  if(!text){ toast('Bitte einen Kommentartext eingeben.','err'); return; }
-  const as = asSel && asSel.value === 'organization' ? 'organization' : 'member';
-  const targetUrn = as === 'organization' && orgUrn ? orgUrn : urn;
-  const { data:{ session } } = await sb.auth.getSession();
-  if(!session){ toast('Bitte neu anmelden.','err'); return; }
-  btn.disabled = true; ta.disabled = true;
-  const prev = btn.textContent; btn.textContent = 'Sende…';
+  const box = btn.closest('.li-analytics-url');
+  const id = box.dataset.postId;
+  const input = box.querySelector('.li-analytics-input');
+  const url = (input.value||'').trim();
+  if(url && !/^https?:\/\//i.test(url)){ toast('Bitte eine gültige URL (mit https://) eingeben.','err'); return; }
+  btn.disabled = true;
+  const prev = btn.textContent; btn.textContent = 'Speichere…';
   try{
-    const res = await fetch('/api/linkedin-comment', {
-      method:'POST',
-      headers:{ 'Authorization':'Bearer '+session.access_token, 'Content-Type':'application/json' },
-      body: JSON.stringify({ urn: targetUrn, text, as }),
-    });
-    const data = await res.json().catch(()=>({}));
-    if(!res.ok){
-      if(data.code==='not_connected' || data.code==='reauth_required'){
-        toast('LinkedIn ist nicht (mehr) verbunden — bitte oben neu verbinden.','err');
-      } else {
-        toast('Kommentar fehlgeschlagen: '+(data.error||res.statusText),'err');
-      }
-      return;
-    }
-    ta.value = '';
-    toast('Kommentar auf LinkedIn veröffentlicht.','ok');
+    const { error } = await sb.from('posts').update({ analytics_url: url || null }).eq('id', id);
+    if(error){ toast('Speichern fehlgeschlagen: '+error.message,'err'); return; }
+    // keep the in-memory cache in sync so a re-render doesn't wipe the field
+    const cached = allPostsCache.find(x=>x.id===id);
+    if(cached) cached.analytics_url = url || null;
+    toast('Analytics-URL gespeichert.','ok');
   }catch(err){
-    toast('Kommentar fehlgeschlagen: '+err.message,'err');
+    toast('Speichern fehlgeschlagen: '+err.message,'err');
   }finally{
-    btn.disabled = false; ta.disabled = false; btn.textContent = prev;
+    btn.disabled = false; btn.textContent = prev;
   }
 });
 
@@ -9495,7 +9483,6 @@ function renderLiStats(list){
 }
 
 function liStatsRowHtml(p){
-  const synced = !!p.analytics_synced_at;
   const metrics = [
     ['Profilaufrufe', liNum(p.profile_viewers_from_post)],
     ['Neue Follower', liNum(p.followers_gained_from_post)],
@@ -9513,33 +9500,53 @@ function liStatsRowHtml(p){
       <span class="li-stats-row-date">${fmtDate(p.posted_at)}</span>
       <svg class="li-chev" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6l4 4 4-4"/></svg>
     </div>
-    <div class="li-metrics-grid">
-      ${!synced ? `<div style="grid-column:1/-1;font-size:.8125rem;color:var(--ink-s)">Noch keine Daten — auf „Statistiken synchronisieren“ klicken.</div>` : ''}
-      ${metrics.map(([lbl,val])=>`<div class="li-metric"><div class="li-metric-lbl">${lbl}</div><div class="li-metric-val">${liFmtMetric(val)}</div></div>`).join('')}
+    <div class="li-stats-body">
+      ${liStatsMediaHtml(p)}
+      <div class="li-metrics-grid">
+        ${metrics.map(([lbl,val])=>`<div class="li-metric"><div class="li-metric-lbl">${lbl}</div><div class="li-metric-val">${liFmtMetric(val)}</div></div>`).join('')}
+      </div>
     </div>
-    ${liCommentBoxHtml(p)}
+    ${liAnalyticsUrlHtml(p)}
   </div>`;
 }
 
-// A comment composer under each published post that has a LinkedIn URN, so
-// the owner can comment straight from the dashboard. If the post also went to
-// the company page, a target selector lets them comment as either identity.
-function liCommentBoxHtml(p){
-  const urn = p.linkedin_post_urn || '';
-  const orgUrn = p.linkedin_org_post_urn || '';
-  if(!urn && !orgUrn) return '';
-  const asSelector = orgUrn ? `
-      <select class="fi li-comment-as" style="width:auto;font-size:.75rem;padding:.25rem .5rem">
-        <option value="member">Als Profil</option>
-        <option value="organization">Als Unternehmensseite</option>
-      </select>` : '';
-  return `<div class="li-comment-box" data-urn="${esc(urn||orgUrn)}" data-org-urn="${esc(orgUrn)}" style="margin-top:.75rem;border-top:1px solid var(--line,#eee);padding-top:.75rem">
-    <div style="font-size:.75rem;font-weight:600;color:var(--ink-m);margin-bottom:.375rem">Kommentar schreiben</div>
-    <textarea class="fi li-comment-input" rows="2" maxlength="1250" placeholder="Kommentar auf LinkedIn schreiben…" style="width:100%;resize:vertical"></textarea>
-    <div style="display:flex;gap:.5rem;align-items:center;margin-top:.375rem">
-      ${asSelector}
-      <button class="btn btn--primary btn--sm li-comment-btn" style="margin-left:auto">Kommentar posten</button>
+// Small media preview shown to the left of a post's metrics. Uses the same
+// signed-URL cache (liMediaUrl) the calendar does; renders nothing until the
+// URL is resolved (liResolveMediaUrls re-renders the panel once it is).
+function liStatsMediaHtml(p){
+  const media = p.media || [];
+  if(!media.length) return '';
+  const img = media.find(m=>m.type==='image');
+  const vid = media.find(m=>m.type==='video');
+  if(img){
+    const url = liMediaUrl(img.previewPath || img.path);
+    if(!url) return '';
+    return `<div class="li-stats-media"><img src="${esc(url)}" alt="" loading="lazy" decoding="async"></div>`;
+  }
+  if(vid){
+    const url = liMediaUrl(vid.path);
+    if(!url) return '';
+    return `<div class="li-stats-media"><video src="${esc(url)}" preload="metadata" muted></video></div>`;
+  }
+  return '';
+}
+
+// Per-post field to paste the LinkedIn "post-summary" analytics URL. Since
+// LinkedIn doesn't expose personal-post impressions via API, the owner drops
+// the analytics link here; a Claude Co-Work run later reads the numbers off
+// that page and writes them into the metric columns. Saved straight to
+// Supabase (owner RLS) on click.
+function liAnalyticsUrlHtml(p){
+  const url = p.analytics_url || '';
+  const synced = p.analytics_synced_at
+    ? `Zuletzt synchronisiert: ${fmtDate(p.analytics_synced_at)}` : 'Noch nicht synchronisiert';
+  return `<div class="li-analytics-url" data-post-id="${esc(p.id)}" style="border-top:1px solid var(--border);padding:.75rem 1rem">
+    <div style="font-size:.75rem;font-weight:600;color:var(--ink-m);margin-bottom:.375rem">LinkedIn Analytics-URL</div>
+    <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+      <input type="url" class="fi li-analytics-input" value="${esc(url)}" placeholder="https://www.linkedin.com/analytics/post-summary/urn:li:activity:…/" style="flex:1;min-width:220px;font-size:.8125rem" />
+      <button class="btn btn--ghost btn--sm li-analytics-save">Speichern</button>
     </div>
+    <div class="li-analytics-hint" style="font-size:.6875rem;color:var(--ink-s);margin-top:.25rem">${synced}</div>
   </div>`;
 }
 
