@@ -8434,6 +8434,31 @@ async function liSyncStats(){
   }
 }
 
+// ── Analytics-URL pro Post speichern (delegiert) ──
+$('li-stats-list')?.addEventListener('click', async (e) => {
+  const btn = e.target.closest('.li-analytics-save');
+  if(!btn) return;
+  const box = btn.closest('.li-analytics-url');
+  const id = box.dataset.postId;
+  const input = box.querySelector('.li-analytics-input');
+  const url = (input.value||'').trim();
+  if(url && !/^https?:\/\//i.test(url)){ toast('Bitte eine gültige URL (mit https://) eingeben.','err'); return; }
+  btn.disabled = true;
+  const prev = btn.textContent; btn.textContent = 'Speichere…';
+  try{
+    const { error } = await sb.from('posts').update({ analytics_url: url || null }).eq('id', id);
+    if(error){ toast('Speichern fehlgeschlagen: '+error.message,'err'); return; }
+    // keep the in-memory cache in sync so a re-render doesn't wipe the field
+    const cached = allPostsCache.find(x=>x.id===id);
+    if(cached) cached.analytics_url = url || null;
+    toast('Analytics-URL gespeichert.','ok');
+  }catch(err){
+    toast('Speichern fehlgeschlagen: '+err.message,'err');
+  }finally{
+    btn.disabled = false; btn.textContent = prev;
+  }
+});
+
 // ── Kommentar schreiben: post a comment on one of my published posts ──
 // Delegated so it works for every (dynamically rendered) stats row.
 $('li-stats-list')?.addEventListener('click', async (e) => {
@@ -9495,7 +9520,6 @@ function renderLiStats(list){
 }
 
 function liStatsRowHtml(p){
-  const synced = !!p.analytics_synced_at;
   const metrics = [
     ['Profilaufrufe', liNum(p.profile_viewers_from_post)],
     ['Neue Follower', liNum(p.followers_gained_from_post)],
@@ -9514,10 +9538,29 @@ function liStatsRowHtml(p){
       <svg class="li-chev" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6l4 4 4-4"/></svg>
     </div>
     <div class="li-metrics-grid">
-      ${!synced ? `<div style="grid-column:1/-1;font-size:.8125rem;color:var(--ink-s)">Noch keine Daten — auf „Statistiken synchronisieren“ klicken.</div>` : ''}
       ${metrics.map(([lbl,val])=>`<div class="li-metric"><div class="li-metric-lbl">${lbl}</div><div class="li-metric-val">${liFmtMetric(val)}</div></div>`).join('')}
     </div>
+    ${liAnalyticsUrlHtml(p)}
     ${liCommentBoxHtml(p)}
+  </div>`;
+}
+
+// Per-post field to paste the LinkedIn "post-summary" analytics URL. Since
+// LinkedIn doesn't expose personal-post impressions via API, the owner drops
+// the analytics link here; a Claude Co-Work run later reads the numbers off
+// that page and writes them into the metric columns. Saved straight to
+// Supabase (owner RLS) on click.
+function liAnalyticsUrlHtml(p){
+  const url = p.analytics_url || '';
+  const synced = p.analytics_synced_at
+    ? `Zuletzt synchronisiert: ${fmtDate(p.analytics_synced_at)}` : 'Noch nicht synchronisiert';
+  return `<div class="li-analytics-url" data-post-id="${esc(p.id)}" style="margin-top:.75rem;border-top:1px solid var(--line,#eee);padding-top:.75rem">
+    <div style="font-size:.75rem;font-weight:600;color:var(--ink-m);margin-bottom:.375rem">LinkedIn Analytics-URL</div>
+    <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+      <input type="url" class="fi li-analytics-input" value="${esc(url)}" placeholder="https://www.linkedin.com/analytics/post-summary/urn:li:activity:…/" style="flex:1;min-width:220px;font-size:.8125rem" />
+      <button class="btn btn--ghost btn--sm li-analytics-save">Speichern</button>
+    </div>
+    <div class="li-analytics-hint" style="font-size:.6875rem;color:var(--ink-s);margin-top:.25rem">${synced}</div>
   </div>`;
 }
 
