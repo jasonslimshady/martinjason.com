@@ -1087,10 +1087,14 @@
 
       <!-- STATS TAB -->
       <div class="li-pane" id="li-pane-stats">
-        <div class="li-range-row">
+        <div class="li-range-row" style="align-items:center">
           <button class="ga-range-btn active" data-li-range="30">Letzte 30 Tage</button>
           <button class="ga-range-btn" data-li-range="90">Letzte 90 Tage</button>
           <button class="ga-range-btn" data-li-range="0">Gesamt</button>
+          <button class="btn btn--ghost btn--sm" id="btn-li-sync-stats" style="margin-left:auto">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" style="margin-right:.25rem;vertical-align:-2px"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2v3h-3"/></svg>Statistiken synchronisieren
+          </button>
+          <span id="li-sync-status" style="font-size:.75rem;color:var(--ink-s)"></span>
         </div>
         <div class="stat-grid" id="li-stat-grid">
           <div class="stat-card" style="background:#D9E3F3;border-color:transparent"><div class="stat-lbl">Profilaufrufe (Content)</div><div class="stat-val" id="li-s-profileviews">—</div><div class="stat-sub">wichtigste Kennzahl für Leads</div></div>
@@ -8389,6 +8393,89 @@ document.querySelectorAll('[data-li-range]').forEach(btn => btn.addEventListener
   renderLiStats(allPostsCache);
 }));
 
+// ── Statistiken synchronisieren: pull fresh per-post metrics from LinkedIn ──
+$('btn-li-sync-stats')?.addEventListener('click', liSyncStats);
+async function liSyncStats(){
+  const btn = $('btn-li-sync-stats');
+  const status = $('li-sync-status');
+  const { data:{ session } } = await sb.auth.getSession();
+  if(!session){ toast('Bitte neu anmelden.','err'); return; }
+  btn.disabled = true;
+  const prevHtml = btn.innerHTML;
+  btn.textContent = 'Synchronisiere…';
+  if(status) status.textContent = '';
+  try{
+    const res = await fetch('/api/linkedin-sync-stats', {
+      method:'POST',
+      headers:{ 'Authorization':'Bearer '+session.access_token, 'Content-Type':'application/json' },
+    });
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok){
+      if(data.code==='not_connected' || data.code==='reauth_required'){
+        toast('LinkedIn ist nicht (mehr) verbunden — bitte oben neu verbinden.','err');
+      } else {
+        toast('Sync fehlgeschlagen: '+(data.error||res.statusText),'err');
+      }
+      return;
+    }
+    toast(`Statistiken aktualisiert: ${data.updated} von ${data.checked} Posts.`, 'ok');
+    if(status){
+      const now = new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+      status.textContent = `Zuletzt: ${now} · ${data.updated} aktualisiert`
+        + (data.failed ? ` · ${data.failed} ohne Daten` : '');
+    }
+    await loadLinkedInPosts();    // pull the freshly-written metrics
+    renderLiStats(allPostsCache); // repaint the stats view
+  }catch(e){
+    toast('Sync fehlgeschlagen: '+e.message,'err');
+  }finally{
+    btn.disabled = false;
+    btn.innerHTML = prevHtml;
+  }
+}
+
+// ── Kommentar schreiben: post a comment on one of my published posts ──
+// Delegated so it works for every (dynamically rendered) stats row.
+$('li-stats-list')?.addEventListener('click', async (e) => {
+  const btn = e.target.closest('.li-comment-btn');
+  if(!btn) return;
+  const box = btn.closest('.li-comment-box');
+  const urn = box.dataset.urn;
+  const orgUrn = box.dataset.orgUrn || '';
+  const ta = box.querySelector('.li-comment-input');
+  const asSel = box.querySelector('.li-comment-as');
+  const text = (ta.value||'').trim();
+  if(!text){ toast('Bitte einen Kommentartext eingeben.','err'); return; }
+  const as = asSel && asSel.value === 'organization' ? 'organization' : 'member';
+  const targetUrn = as === 'organization' && orgUrn ? orgUrn : urn;
+  const { data:{ session } } = await sb.auth.getSession();
+  if(!session){ toast('Bitte neu anmelden.','err'); return; }
+  btn.disabled = true; ta.disabled = true;
+  const prev = btn.textContent; btn.textContent = 'Sende…';
+  try{
+    const res = await fetch('/api/linkedin-comment', {
+      method:'POST',
+      headers:{ 'Authorization':'Bearer '+session.access_token, 'Content-Type':'application/json' },
+      body: JSON.stringify({ urn: targetUrn, text, as }),
+    });
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok){
+      if(data.code==='not_connected' || data.code==='reauth_required'){
+        toast('LinkedIn ist nicht (mehr) verbunden — bitte oben neu verbinden.','err');
+      } else {
+        toast('Kommentar fehlgeschlagen: '+(data.error||res.statusText),'err');
+      }
+      return;
+    }
+    ta.value = '';
+    toast('Kommentar auf LinkedIn veröffentlicht.','ok');
+  }catch(err){
+    toast('Kommentar fehlgeschlagen: '+err.message,'err');
+  }finally{
+    btn.disabled = false; ta.disabled = false; btn.textContent = prev;
+  }
+});
+
 $('btn-new-post').addEventListener('click', () => openNewPost());
 
 // {path: {url, expiresAt}} — signed URLs expire after 3600s; treat an entry
@@ -8954,10 +9041,13 @@ async function publishPostToLinkedIn(id, btnEl){
 }
 
 // ── LinkedIn OAuth connect (one-time; see api/linkedin-token.js) ──
-// Requesting only the personal-profile scope by default. Once LinkedIn
-// approves the "Community Management API" product for company-page
-// posting, add ' w_organization_social' to LI_OAUTH_SCOPE below.
-const LI_OAUTH_SCOPE = 'openid profile w_member_social';
+// The requested scopes come from config.js → LINKEDIN_OAUTH_SCOPE so they
+// can be tuned without touching this logic. With the "Community Management
+// API" product approved this includes the organization + read-social
+// scopes needed for company-page posting, commenting and the per-post
+// Statistiken-Sync. Only scopes the app is approved for may be requested —
+// an unapproved one makes the whole connect fail with unauthorized_scope_error.
+const LI_OAUTH_SCOPE = CONFIG.LINKEDIN_OAUTH_SCOPE || 'openid profile w_member_social';
 
 function liUpdateConnStatus(){
   const el = $('li-conn-status');
@@ -9424,8 +9514,31 @@ function liStatsRowHtml(p){
       <svg class="li-chev" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6l4 4 4-4"/></svg>
     </div>
     <div class="li-metrics-grid">
-      ${!synced ? `<div style="grid-column:1/-1;font-size:.8125rem;color:var(--ink-s)">Noch keine Daten — Analytics-Sync läuft separat.</div>` : ''}
+      ${!synced ? `<div style="grid-column:1/-1;font-size:.8125rem;color:var(--ink-s)">Noch keine Daten — auf „Statistiken synchronisieren“ klicken.</div>` : ''}
       ${metrics.map(([lbl,val])=>`<div class="li-metric"><div class="li-metric-lbl">${lbl}</div><div class="li-metric-val">${liFmtMetric(val)}</div></div>`).join('')}
+    </div>
+    ${liCommentBoxHtml(p)}
+  </div>`;
+}
+
+// A comment composer under each published post that has a LinkedIn URN, so
+// the owner can comment straight from the dashboard. If the post also went to
+// the company page, a target selector lets them comment as either identity.
+function liCommentBoxHtml(p){
+  const urn = p.linkedin_post_urn || '';
+  const orgUrn = p.linkedin_org_post_urn || '';
+  if(!urn && !orgUrn) return '';
+  const asSelector = orgUrn ? `
+      <select class="fi li-comment-as" style="width:auto;font-size:.75rem;padding:.25rem .5rem">
+        <option value="member">Als Profil</option>
+        <option value="organization">Als Unternehmensseite</option>
+      </select>` : '';
+  return `<div class="li-comment-box" data-urn="${esc(urn||orgUrn)}" data-org-urn="${esc(orgUrn)}" style="margin-top:.75rem;border-top:1px solid var(--line,#eee);padding-top:.75rem">
+    <div style="font-size:.75rem;font-weight:600;color:var(--ink-m);margin-bottom:.375rem">Kommentar schreiben</div>
+    <textarea class="fi li-comment-input" rows="2" maxlength="1250" placeholder="Kommentar auf LinkedIn schreiben…" style="width:100%;resize:vertical"></textarea>
+    <div style="display:flex;gap:.5rem;align-items:center;margin-top:.375rem">
+      ${asSelector}
+      <button class="btn btn--primary btn--sm li-comment-btn" style="margin-left:auto">Kommentar posten</button>
     </div>
   </div>`;
 }
