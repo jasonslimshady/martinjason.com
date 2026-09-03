@@ -5151,7 +5151,7 @@ function renderQuoteForm(){
       <div class="inv-sum-row total"><span>Gesamtbetrag</span><span id="qli-subtotal">${fmtInvAmount(subtotal)}</span></div>
     </div>
     <div class="fg s2" style="margin-top:1.125rem">
-      <label class="fl">Zahlungsbedingungen</label>
+      <label class="fl">Terms</label>
       <textarea class="fi" id="quo-terms" rows="3">${esc(quoPaymentTerms||'')}</textarea>
     </div>`;
   const selectedLead = quoClients.find(c=>c.id===quoClientId && !c.is_active_client);
@@ -5491,7 +5491,7 @@ function buildQuoteHTML(quo, forModal=false){
       <div class="invd-tot-row b"><span>Total amount:</span><span>${fmtInvAmount(total)}</span></div>
     </div>
 
-    ${quo.payment_terms?`<div class="invd-payment"><div class="invd-h">Payment terms</div>${invMultiline(quo.payment_terms)}</div>`:''}
+    ${quo.payment_terms?`<div class="invd-payment"><div class="invd-h">Terms</div>${invMultiline(quo.payment_terms)}</div>`:''}
 
     <div class="invd-accept">
       <div class="invd-accept-col"><div class="invd-accept-line">Place, date</div></div>
