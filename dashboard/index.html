@@ -8796,7 +8796,7 @@ function renderLiCalendar(list){
     const key = tzDateStr(new Date(p.scheduled_for));
     (groups[key] ||= []).push(p);
   });
-  const keys = Object.keys(groups).sort();
+  const keys = Object.keys(groups).sort().reverse();
   let html = '';
   if(noDate.length){
     html += `<div class="li-day-group"><div class="li-day-hd">Ohne Termin</div><div class="li-day-list">`;
