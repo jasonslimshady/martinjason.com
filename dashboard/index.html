@@ -240,6 +240,7 @@
     .kcol.kdrop{background:var(--accent-t);outline:2px dashed var(--accent);outline-offset:-2px}
     .kcard[draggable=true]{cursor:grab}
     .kcard.kdragging{opacity:.4;transform:none;box-shadow:none}
+    .kdrop-line{height:3px;margin:-.125rem 0 .375rem;border-radius:2px;background:var(--accent)}
 
     /* DRAWER (client detail) */
     .drawer-overlay{position:fixed;inset:0;background:rgba(10,10,10,.25);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);z-index:50;opacity:0;pointer-events:none;transition:opacity var(--fast)}
@@ -2054,16 +2055,27 @@ async function loadCRM() {
   applyClients(list);
 }
 
+// Manual order within a column. Unsorted leads fall back to created_at
+// (newest first), on the same scale, so new leads still land on top.
+function kPos(c){
+  return c.pipeline_position ?? -Date.parse(c.created_at||0);
+}
+
 function renderKanban(clients) {
   const board = $('kanban-board'); board.innerHTML='';
   STAGE_CFG.forEach(st => {
-    const cards = clients.filter(c=>c.pipeline_stage===st.id);
+    const cards = clients.filter(c=>c.pipeline_stage===st.id).sort((a,b)=>kPos(a)-kPos(b));
     const col = document.createElement('div'); col.className='kcol';
     col.dataset.stage = st.id;
     col.innerHTML=`<div class="kcol-hd"><div class="kcol-lbl"><span class="kdot" style="background:${st.color}"></span>${st.label}</div><span class="kcnt">${cards.length}</span></div>
     <div class="kcol-body">${cards.map(kCard).join('')}${!cards.length?'<div class="kempty"></div>':''}</div>`;
     board.appendChild(col);
   });
+  const line = document.createElement('div'); line.className='kdrop-line';
+  const clearDrop = () => {
+    line.remove();
+    board.querySelectorAll('.kcol.kdrop').forEach(k=>k.classList.remove('kdrop'));
+  };
   board.querySelectorAll('.kcard').forEach(c=>{
     c.draggable = true;
     c.addEventListener('click',()=>openDrawer(c.dataset.id));
@@ -2072,44 +2084,73 @@ function renderKanban(clients) {
       e.dataTransfer.effectAllowed = 'move';
       try { e.dataTransfer.setData('text/plain', c.dataset.id); } catch(err) {}
     });
-    c.addEventListener('dragend', () => {
-      c.classList.remove('kdragging');
-      board.querySelectorAll('.kcol.kdrop').forEach(k=>k.classList.remove('kdrop'));
-    });
+    c.addEventListener('dragend', () => { c.classList.remove('kdragging'); clearDrop(); });
   });
   board.querySelectorAll('.kcol').forEach(col=>{
+    const body = col.querySelector('.kcol-body');
     col.addEventListener('dragover', e => {
       if(!board.querySelector('.kdragging')) return;
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
+      board.querySelectorAll('.kcol.kdrop').forEach(k=>{ if(k!==col) k.classList.remove('kdrop'); });
       col.classList.add('kdrop');
+      // Drop indicator goes before the first card whose midpoint is below the cursor.
+      const next = [...body.querySelectorAll('.kcard:not(.kdragging)')]
+        .find(k=>{ const r=k.getBoundingClientRect(); return e.clientY < r.top + r.height/2; });
+      if(next){ if(line.nextSibling!==next) body.insertBefore(line, next); }
+      else if(body.lastElementChild!==line) body.appendChild(line);
     });
     col.addEventListener('dragleave', e => {
-      if(!col.contains(e.relatedTarget)) col.classList.remove('kdrop');
+      if(!col.contains(e.relatedTarget)){ col.classList.remove('kdrop'); line.remove(); }
     });
     col.addEventListener('drop', e => {
       e.preventDefault();
-      col.classList.remove('kdrop');
       const dragEl = board.querySelector('.kdragging');
-      if(dragEl) moveClientStage(dragEl.dataset.id, col.dataset.stage);
+      if(!dragEl || line.parentNode!==body){ clearDrop(); return; }
+      const sib = (el, dir) => { while((el=el[dir]) && !(el.classList.contains('kcard') && !el.classList.contains('kdragging'))); return el; };
+      const before = sib(line,'previousElementSibling'), after = sib(line,'nextElementSibling');
+      clearDrop();
+      moveClient(dragEl.dataset.id, col.dataset.stage, before?.dataset.id, after?.dataset.id);
     });
   });
 }
 
 // Drag & drop in the pipeline: optimistic re-render, then persist. Mirrors
-// saveClient's stage side effects (is_active_client, won_at).
-async function moveClientStage(id, stage){
-  const prev = crmClients.find(c=>String(c.id)===String(id));
-  if(!prev || prev.pipeline_stage===stage) return;
-  const payload = { pipeline_stage:stage, is_active_client:stage==='won',
-    won_at: stage==='won' ? (prev.won_at||today()) : null };
+// saveClient's stage side effects (is_active_client, won_at). Position is the
+// midpoint between the new neighbours, so a move only writes one row.
+let posMigrationWarned = false;
+async function moveClient(id, stage, beforeId, afterId){
+  const byId = x => crmClients.find(c=>String(c.id)===String(x));
+  const prev = byId(id);
+  if(!prev) return;
+  const before = beforeId && byId(beforeId), after = afterId && byId(afterId);
+  const sameStage = prev.pipeline_stage===stage;
+  // Dropped back into its own slot — nothing to do.
+  if(sameStage){
+    const col = crmClients.filter(c=>c.pipeline_stage===stage).sort((a,b)=>kPos(a)-kPos(b));
+    const i = col.indexOf(prev);
+    if((col[i-1]||null)===(before||null) && (col[i+1]||null)===(after||null)) return;
+  }
+  const STEP = 60000; // gap used at the column edges (same scale as created_at ms)
+  let pos = before && after ? (kPos(before)+kPos(after))/2
+          : before ? kPos(before)+STEP
+          : after  ? kPos(after)-STEP
+          : 0;
+  const payload = { pipeline_position:pos };
+  if(!sameStage) Object.assign(payload, { pipeline_stage:stage, is_active_client:stage==='won',
+    won_at: stage==='won' ? (prev.won_at||today()) : null });
   const prevList = crmClients;
   const nextList = crmClients.map(c=>c===prev ? { ...c, ...payload } : c);
   applyClients(nextList);
   let { error } = await sb.from('clients').update(payload).eq('id',id);
-  // Graceful fallback if won_at isn't migrated yet (same as saveClient).
-  if(error && /won_at|column|schema cache/i.test(error.message||'')){
-    const { won_at, ...base } = payload;
+  // Graceful fallback if pipeline_position / won_at aren't migrated yet (same as saveClient).
+  if(error && /pipeline_position|won_at|column|schema cache/i.test(error.message||'')){
+    const { pipeline_position, won_at, ...base } = payload;
+    if(!posMigrationWarned){
+      posMigrationWarned = true;
+      toast('Reihenfolge nicht gespeichert — bitte das aktualisierte supabase-setup.sql in Supabase ausführen.','err');
+    }
+    if(sameStage){ if(crmClients===nextList) applyClients(prevList); return; }
     ({ error } = await sb.from('clients').update(base).eq('id',id));
   }
   if(error){
@@ -2119,8 +2160,10 @@ async function moveClientStage(id, stage){
     return;
   }
   cacheSet('clients', crmClients);
-  toast(`${prev.name} → ${STAGE_MAP[stage]?.label||stage}`,'ok');
-  loadStats();
+  if(!sameStage){
+    toast(`${prev.name} → ${STAGE_MAP[stage]?.label||stage}`,'ok');
+    loadStats();
+  }
 }
 
 function kCard(c){
