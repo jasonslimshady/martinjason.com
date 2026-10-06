@@ -236,7 +236,9 @@
     .kc-ft{display:flex;align-items:center;justify-content:space-between}
     .kc-date{font-size:.6875rem;color:var(--ink-s)}
     .kempty{height:52px;border:1.5px dashed var(--border);border-radius:var(--r-sm)}
-    .kcol-body{min-height:52px}
+    .kcol-body{min-height:52px;overflow-y:auto;scrollbar-width:thin}
+    .kcol-body::-webkit-scrollbar{display:block;width:6px}
+    .kcol-body::-webkit-scrollbar-thumb{background:rgba(10,10,10,.16);border-radius:99px}
     .kcol.kdrop{background:var(--accent-t);outline:2px dashed var(--accent);outline-offset:-2px}
     .kcard[draggable=true]{cursor:grab}
     .kcard.kdragging{opacity:.4;transform:none;box-shadow:none}
@@ -2029,6 +2031,7 @@ function switchPanel(id) {
   $('panel-'+id).classList.add('active');
   localStorage.setItem('active_panel', id);
   ensurePanelData(id); // load this panel's data the first time it's opened
+  if (id === 'crm') fitKanbanColumns(); // may have rendered while hidden
   if (id === 'klaviyo' && !klvLoaded) {
     klvLoaded = true;
     const { start, end } = klvISORange(klvDays);
@@ -2105,8 +2108,23 @@ function kPos(c){
   return c.pipeline_position ?? -Date.parse(c.created_at||0);
 }
 
+// Columns show at most this many cards; the rest scrolls inside the column,
+// so the pipeline section keeps a fixed height.
+function fitKanbanColumns(){
+  const KCOL_MAX_CARDS = 7;
+  document.querySelectorAll('#kanban-board .kcol-body').forEach(body=>{
+    const cards = body.querySelectorAll('.kcard');
+    body.style.maxHeight = '';
+    if(cards.length <= KCOL_MAX_CARDS || !body.offsetParent) return; // hidden panel: measure later
+    body.style.maxHeight = (cards[KCOL_MAX_CARDS].offsetTop - cards[0].offsetTop) + 'px';
+  });
+}
+
 function renderKanban(clients) {
-  const board = $('kanban-board'); board.innerHTML='';
+  const board = $('kanban-board');
+  // Keep each column's scroll position across re-renders (e.g. after a drop).
+  const scrolls = Object.fromEntries([...board.querySelectorAll('.kcol')].map(k=>[k.dataset.stage, k.querySelector('.kcol-body').scrollTop]));
+  board.innerHTML='';
   STAGE_CFG.forEach(st => {
     const cards = clients.filter(c=>c.pipeline_stage===st.id && kVisible(c)).sort((a,b)=>kPos(a)-kPos(b));
     const col = document.createElement('div'); col.className='kcol';
@@ -2115,6 +2133,8 @@ function renderKanban(clients) {
     <div class="kcol-body">${cards.map(kCard).join('')}${!cards.length?'<div class="kempty"></div>':''}</div>`;
     board.appendChild(col);
   });
+  fitKanbanColumns();
+  board.querySelectorAll('.kcol').forEach(k=>{ k.querySelector('.kcol-body').scrollTop = scrolls[k.dataset.stage]||0; });
   const line = document.createElement('div'); line.className='kdrop-line';
   const clearDrop = () => {
     line.remove();
