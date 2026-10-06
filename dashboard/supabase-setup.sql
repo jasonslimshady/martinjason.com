@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS clients (
                     )),
   is_active_client  BOOLEAN     NOT NULL DEFAULT false,
   won_at            DATE,                   -- date the client was won (used for budget proration)
+  pipeline_position DOUBLE PRECISION,       -- manual order within a pipeline column (NULL = by created_at)
   notes             TEXT,
   next_followup_date DATE,
   tags              TEXT[]      DEFAULT '{}',
@@ -186,6 +187,17 @@ BEGIN
     WHERE table_name = 'clients' AND column_name = 'won_at'
   ) THEN
     ALTER TABLE clients ADD COLUMN won_at DATE;
+  END IF;
+END $$;
+
+-- Migration helper: add pipeline_position column to clients if missing
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'clients' AND column_name = 'pipeline_position'
+  ) THEN
+    ALTER TABLE clients ADD COLUMN pipeline_position DOUBLE PRECISION;
   END IF;
 END $$;
 
