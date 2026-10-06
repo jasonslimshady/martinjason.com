@@ -790,7 +790,16 @@
 
     <!-- CRM PANEL -->
     <section class="panel" id="panel-crm">
-      <div class="sec-hd"><span class="sec-ttl">Pipeline</span><button class="btn btn--primary btn--sm" id="btn-new-client">+ Neuer Lead</button></div>
+      <div class="sec-hd"><span class="sec-ttl">Pipeline</span>
+        <div style="display:flex;gap:.5rem;align-items:center">
+          <select class="fi li-filter-sel" id="crm-tag-filter" title="Nach Tag filtern">
+            <option value="">Alle Leads</option>
+            <option value="agentur">Agenturen</option>
+            <option value="shop">Shops</option>
+          </select>
+          <button class="btn btn--primary btn--sm" id="btn-new-client">+ Neuer Lead</button>
+        </div>
+      </div>
       <div class="kanban" id="kanban-board"></div>
       <div style="margin-top:1.375rem">
         <div class="sec-hd"><span class="sec-ttl">Follow-ups fällig</span></div>
@@ -1238,6 +1247,11 @@
               <option value="new_lead">Neuer Lead</option><option value="contacted">Kontaktiert</option>
               <option value="proposal">Angebot</option><option value="negotiation">Verhandlung</option>
               <option value="won">Gewonnen</option><option value="closed">Abgeschlossen</option><option value="lost">Verloren</option>
+            </select>
+          </div>
+          <div class="fg"><label class="fl">Tag</label>
+            <select class="fi" id="mc-tag">
+              <option value="">Kein Tag</option><option value="agentur">Agentur</option><option value="shop">Shop</option>
             </select>
           </div>
           <div class="fg" id="mc-won-at-row" style="display:none"><label class="fl">Gewonnen am</label><input class="fi" id="mc-won-at" type="date" /></div>
@@ -1846,6 +1860,13 @@ const STAGE_CFG = [
   { id:'lost',        label:'Verloren',    color:'#FF453A', tag:'tag--red' },
 ];
 const STAGE_MAP = Object.fromEntries(STAGE_CFG.map(s => [s.id, s]));
+// Lead tags, stored in clients.tags (TEXT[]); one tag per lead.
+const LEAD_TAGS = {
+  agentur: { label:'Agentur', tag:'tag--purple' },
+  shop:    { label:'Shop',    tag:'tag--teal' },
+};
+const leadTag = c => (c.tags||[]).find(t=>LEAD_TAGS[t]) || '';
+const leadTagHtml = (c, style='font-size:.6rem') => { const t = LEAD_TAGS[leadTag(c)]; return t ? `<span class="tag ${t.tag}" style="${style}">${t.label}</span>` : ''; };
 const ACT_ICONS = { call:'📞', email:'✉️', meeting:'🤝', note:'📝', other:'💬' };
 const ACT_CSS   = { call:'act-call', email:'act-email', meeting:'act-meeting', note:'act-note', other:'act-other' };
 
@@ -2047,6 +2068,16 @@ async function loadStats() {
 let editClientId = null;
 
 let crmClients = [];
+let crmTagFilter = '';
+try { crmTagFilter = localStorage.getItem('crm_tag_filter') || ''; } catch(e) {}
+if(!LEAD_TAGS[crmTagFilter]) crmTagFilter = '';
+$('crm-tag-filter').value = crmTagFilter;
+$('crm-tag-filter').addEventListener('change', e => {
+  crmTagFilter = e.target.value;
+  try { localStorage.setItem('crm_tag_filter', crmTagFilter); } catch(err) {}
+  renderKanban(crmClients);
+});
+const kVisible = c => !crmTagFilter || leadTag(c) === crmTagFilter;
 
 function applyClients(list) {
   crmClients = list;
@@ -2077,7 +2108,7 @@ function kPos(c){
 function renderKanban(clients) {
   const board = $('kanban-board'); board.innerHTML='';
   STAGE_CFG.forEach(st => {
-    const cards = clients.filter(c=>c.pipeline_stage===st.id).sort((a,b)=>kPos(a)-kPos(b));
+    const cards = clients.filter(c=>c.pipeline_stage===st.id && kVisible(c)).sort((a,b)=>kPos(a)-kPos(b));
     const col = document.createElement('div'); col.className='kcol';
     col.dataset.stage = st.id;
     col.innerHTML=`<div class="kcol-hd"><div class="kcol-lbl"><span class="kdot" style="background:${st.color}"></span>${st.label}</div><span class="kcnt">${cards.length}</span></div>
@@ -2140,7 +2171,7 @@ async function moveClient(id, stage, beforeId, afterId){
   const sameStage = prev.pipeline_stage===stage;
   // Dropped back into its own slot — nothing to do.
   if(sameStage){
-    const col = crmClients.filter(c=>c.pipeline_stage===stage).sort((a,b)=>kPos(a)-kPos(b));
+    const col = crmClients.filter(c=>c.pipeline_stage===stage && kVisible(c)).sort((a,b)=>kPos(a)-kPos(b));
     const i = col.indexOf(prev);
     if((col[i-1]||null)===(before||null) && (col[i+1]||null)===(after||null)) return;
   }
@@ -2190,7 +2221,7 @@ function kCard(c){
     ${c.company?`<div class="kc-co">${esc(c.company)}</div>`:''}
     <div class="kc-ft">
       <span class="kc-date" style="${overdue?'color:var(--red)':dueToday?'color:var(--orange)':''}">${overdue?'⚠ ':''}${fmtDate(c.next_followup_date||c.created_at)}</span>
-      ${c.email?'<span class="tag tag--blue" style="font-size:.6rem">✉</span>':''}
+      <span style="display:flex;gap:.25rem">${leadTagHtml(c)}${c.email?'<span class="tag tag--blue" style="font-size:.6rem">✉</span>':''}</span>
     </div></div>`;
 }
 
@@ -2227,13 +2258,14 @@ async function saveClient(e){
     address:$('mc-address').value.trim()||null, vat_id:$('mc-vatid').value.trim()||null,
     won_at: stage === 'won' ? wonAtVal : null,
     next_followup_date:$('mc-followup').value||null, notes:$('mc-notes').value.trim()||null,
+    tags: $('mc-tag').value ? [$('mc-tag').value] : [],
     is_active_client:stage==='won' };
   let { error } = editClientId
     ? await sb.from('clients').update(payload).eq('id',editClientId)
     : await sb.from('clients').insert(payload);
   // Graceful fallback if new columns aren't migrated yet.
-  if(error && /address|vat_id|won_at|column|schema cache/i.test(error.message||'')){
-    const { address, vat_id, won_at, ...base } = payload;
+  if(error && /address|vat_id|won_at|tags|column|schema cache/i.test(error.message||'')){
+    const { address, vat_id, won_at, tags, ...base } = payload;
     const retry = editClientId
       ? await sb.from('clients').update(base).eq('id',editClientId)
       : await sb.from('clients').insert(base);
@@ -2259,7 +2291,7 @@ async function openDrawer(id){
   $('dr-name').textContent    = c.name;
   $('dr-company').textContent = c.company||'';
   const st = STAGE_MAP[c.pipeline_stage]||{label:c.pipeline_stage,tag:'tag--muted'};
-  $('dr-stage-tag').innerHTML = `<span class="tag ${st.tag}">${st.label}</span>${c.is_active_client?'<span class="tag tag--green" style="margin-left:.375rem">Aktiver Kunde</span>':''}`;
+  $('dr-stage-tag').innerHTML = `<span class="tag ${st.tag}">${st.label}</span>${c.is_active_client?'<span class="tag tag--green" style="margin-left:.375rem">Aktiver Kunde</span>':''}${leadTagHtml(c,'margin-left:.375rem')}`;
   // Info tab
   const webUrl = safeUrl(c.website); // only http(s) becomes a clickable link
   $('dr-info-rows').innerHTML = [
@@ -2283,6 +2315,7 @@ async function openDrawer(id){
     $('mc-address').value=c.address||''; $('mc-vatid').value=c.vat_id||'';
     $('mc-won-at').value=c.won_at||''; $('mc-won-at-row').style.display=c.pipeline_stage==='won'?'':'none';
     $('mc-followup').value=c.next_followup_date||''; $('mc-notes').value=c.notes||'';
+    $('mc-tag').value=leadTag(c);
     openModal('ov-client');
   };
   $('dr-delete-btn').onclick = async () => {
