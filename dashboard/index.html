@@ -1776,7 +1776,10 @@ function cacheClearAll(){
 // ── LAZY LIBRARIES ───────────────────────────────────────────────────
 // pdf.js / JSZip / html2pdf are only needed for uploads & exports — they
 // are loaded on demand instead of on every page view (~1 MB saved).
-const LIB_PDFJS    = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.min.js';
+// pdf.js 4.x ships only ES modules (.mjs) — there is no pdf.min.js, so it
+// must be loaded via import() rather than a classic <script> tag.
+const LIB_PDFJS        = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.min.mjs';
+const LIB_PDFJS_WORKER = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.mjs';
 const LIB_JSZIP    = 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js';
 const LIB_HTML2PDF = 'https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js';
 const _loadedScripts = {};
@@ -1792,6 +1795,16 @@ function loadScript(src){
     });
   }
   return _loadedScripts[src];
+}
+let _pdfjsPromise = null;
+function loadPdfjs(){
+  if(!_pdfjsPromise){
+    _pdfjsPromise = import(LIB_PDFJS).then(lib=>{
+      lib.GlobalWorkerOptions.workerSrc = LIB_PDFJS_WORKER;
+      return lib;
+    }).catch(()=>{ _pdfjsPromise = null; throw new Error('Bibliothek konnte nicht geladen werden: '+LIB_PDFJS); });
+  }
+  return _pdfjsPromise;
 }
 
 // ── COMPANY / INVOICE SETTINGS ────────────────────────────────────────
@@ -4257,9 +4270,7 @@ async function processScanFile(file){
   $('scan-result').hidden = false;
   $('scan-result').innerHTML = `<div class="ga-auth-wrap" style="min-height:160px"><div class="spin"></div><p style="color:var(--ink-m);margin:0">Rechnung wird analysiert…</p></div>`;
   try {
-    if(typeof pdfjsLib==='undefined') await loadScript(LIB_PDFJS);
-    if(typeof pdfjsLib==='undefined') throw new Error('PDF.js nicht geladen');
-    pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.js';
+    const pdfjsLib = await loadPdfjs();
     const buf  = await file.arrayBuffer();
     // isEvalSupported:false blocks the font-eval path (CVE-2024-4367) even if the CDN is compromised.
     const pdf  = await pdfjsLib.getDocument({data:buf, isEvalSupported:false}).promise;
