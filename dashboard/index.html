@@ -236,6 +236,10 @@
     .kc-ft{display:flex;align-items:center;justify-content:space-between}
     .kc-date{font-size:.6875rem;color:var(--ink-s)}
     .kempty{height:52px;border:1.5px dashed var(--border);border-radius:var(--r-sm)}
+    .kcol-body{min-height:52px}
+    .kcol.kdrop{background:var(--accent-t);outline:2px dashed var(--accent);outline-offset:-2px}
+    .kcard[draggable=true]{cursor:grab}
+    .kcard.kdragging{opacity:.4;transform:none;box-shadow:none}
 
     /* DRAWER (client detail) */
     .drawer-overlay{position:fixed;inset:0;background:rgba(10,10,10,.25);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);z-index:50;opacity:0;pointer-events:none;transition:opacity var(--fast)}
@@ -2028,13 +2032,17 @@ async function loadStats() {
 // ── CRM ─────────────────────────────────────────────────────────────
 let editClientId = null;
 
+let crmClients = [];
+
+function applyClients(list) {
+  crmClients = list;
+  renderKanban(list); renderFollowups(list);
+  const leadCount = list.filter(c=>!c.is_active_client&&!['won','lost','closed'].includes(c.pipeline_stage)).length;
+  $('badge-crm').textContent = leadCount;
+  $('badge-crm').hidden = leadCount === 0;
+}
+
 async function loadCRM() {
-  const applyClients = (list) => {
-    renderKanban(list); renderFollowups(list);
-    const leadCount = list.filter(c=>!c.is_active_client&&!['won','lost','closed'].includes(c.pipeline_stage)).length;
-    $('badge-crm').textContent = leadCount;
-    $('badge-crm').hidden = leadCount === 0;
-  };
   const cached = cacheGet('clients');
   if(cached) applyClients(cached);
   const { data, error } = await sb.from('clients').select('*').order('created_at',{ascending:false});
@@ -2051,11 +2059,68 @@ function renderKanban(clients) {
   STAGE_CFG.forEach(st => {
     const cards = clients.filter(c=>c.pipeline_stage===st.id);
     const col = document.createElement('div'); col.className='kcol';
+    col.dataset.stage = st.id;
     col.innerHTML=`<div class="kcol-hd"><div class="kcol-lbl"><span class="kdot" style="background:${st.color}"></span>${st.label}</div><span class="kcnt">${cards.length}</span></div>
-    <div>${cards.map(kCard).join('')}${!cards.length?'<div class="kempty"></div>':''}</div>`;
+    <div class="kcol-body">${cards.map(kCard).join('')}${!cards.length?'<div class="kempty"></div>':''}</div>`;
     board.appendChild(col);
   });
-  document.querySelectorAll('.kcard').forEach(c=>c.addEventListener('click',()=>openDrawer(c.dataset.id)));
+  board.querySelectorAll('.kcard').forEach(c=>{
+    c.draggable = true;
+    c.addEventListener('click',()=>openDrawer(c.dataset.id));
+    c.addEventListener('dragstart', e => {
+      c.classList.add('kdragging');
+      e.dataTransfer.effectAllowed = 'move';
+      try { e.dataTransfer.setData('text/plain', c.dataset.id); } catch(err) {}
+    });
+    c.addEventListener('dragend', () => {
+      c.classList.remove('kdragging');
+      board.querySelectorAll('.kcol.kdrop').forEach(k=>k.classList.remove('kdrop'));
+    });
+  });
+  board.querySelectorAll('.kcol').forEach(col=>{
+    col.addEventListener('dragover', e => {
+      if(!board.querySelector('.kdragging')) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      col.classList.add('kdrop');
+    });
+    col.addEventListener('dragleave', e => {
+      if(!col.contains(e.relatedTarget)) col.classList.remove('kdrop');
+    });
+    col.addEventListener('drop', e => {
+      e.preventDefault();
+      col.classList.remove('kdrop');
+      const dragEl = board.querySelector('.kdragging');
+      if(dragEl) moveClientStage(dragEl.dataset.id, col.dataset.stage);
+    });
+  });
+}
+
+// Drag & drop in the pipeline: optimistic re-render, then persist. Mirrors
+// saveClient's stage side effects (is_active_client, won_at).
+async function moveClientStage(id, stage){
+  const prev = crmClients.find(c=>String(c.id)===String(id));
+  if(!prev || prev.pipeline_stage===stage) return;
+  const payload = { pipeline_stage:stage, is_active_client:stage==='won',
+    won_at: stage==='won' ? (prev.won_at||today()) : null };
+  const prevList = crmClients;
+  const nextList = crmClients.map(c=>c===prev ? { ...c, ...payload } : c);
+  applyClients(nextList);
+  let { error } = await sb.from('clients').update(payload).eq('id',id);
+  // Graceful fallback if won_at isn't migrated yet (same as saveClient).
+  if(error && /won_at|column|schema cache/i.test(error.message||'')){
+    const { won_at, ...base } = payload;
+    ({ error } = await sb.from('clients').update(base).eq('id',id));
+  }
+  if(error){
+    // Only roll back if nothing else re-rendered the board meanwhile.
+    if(crmClients===nextList) applyClients(prevList);
+    toast('Fehler beim Verschieben: '+error.message,'err');
+    return;
+  }
+  cacheSet('clients', crmClients);
+  toast(`${prev.name} → ${STAGE_MAP[stage]?.label||stage}`,'ok');
+  loadStats();
 }
 
 function kCard(c){
