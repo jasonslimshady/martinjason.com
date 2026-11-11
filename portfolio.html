@@ -7,14 +7,14 @@
   <link rel="icon" type="image/png" sizes="128x128" href="/images/favicon.png">
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Martin, Jason — Portfolio (Backup)</title>
-  <meta name="description" content="Ich erstelle KI-generierte Produktgalerien in Studioqualität – für DACH-DTC-Marken, die mehr aus ihren Produktseiten herausholen wollen. Ab 599 €/Produkt." />
+  <title>Jason Martin — CRO &amp; Performance Designer</title>
+  <meta name="description" content="Designer und Performance Marketer. Ads, Landingpages und Shops, gebaut für Conversions. Über 3 Mio. € Werbebudget verwaltet. Offen für Freelance- und Festanstellungen." />
   <meta name="theme-color" content="#F7F5F1" />
   <meta name="robots" content="noindex, nofollow" />
 
   <!-- Open Graph -->
-  <meta property="og:title" content="Jason Martin — Produktgrafiken für DTC Brands" />
-  <meta property="og:description" content="Produktgrafiken für DTC Brands in Studioqualität – erstellt mit KI, nicht mit Kameras." />
+  <meta property="og:title" content="Jason Martin — CRO &amp; Performance Designer" />
+  <meta property="og:description" content="Designer und Performance Marketer. Ads, Landingpages und Shops, gebaut für Conversions. Über 3 Mio. € Werbebudget verwaltet. Offen für Freelance- und Festanstellungen." />
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="de_DE" />
 
@@ -335,7 +335,7 @@
     }
 
     /* 7b-2. HERO LOGO SLIDER — references, looping right → left */
-    :root { --logo-strip-h: 72px; --logo-slot-w: 150px; }
+    :root { --logo-strip-h: 96px; --logo-slot-w: 225px; }
     .logo-strip {
       position: absolute; left: 0; right: 0; bottom: 0;
       height: var(--logo-strip-h); overflow: hidden; z-index: 10;
@@ -352,7 +352,7 @@
       display: flex; align-items: center; justify-content: center; padding: 0 22px;
     }
     .logo-strip__item img {
-      max-width: 100%; max-height: 34px; width: auto; height: auto;
+      max-width: 100%; max-height: 51px; width: auto; height: auto;
       object-fit: contain; opacity: 0.75;
     }
 
@@ -516,6 +516,9 @@
       opacity: 0; transform: translateY(10px);
       transition: opacity var(--dur-base) var(--ease-apple), transform var(--dur-base) var(--ease-apple);
     }
+    .world-card__list a { pointer-events: none; text-underline-offset: 3px; }
+    .world-card.is-active .world-card__list a { pointer-events: auto; }
+    .world-card__list a:hover, .world-card__list a:focus-visible { text-decoration: underline; }
     .world-card.is-active .world-card__shade { transform: translateY(0); }
     /* Spotlight: dim the rest of the page while a card is hovered */
     .worlds-dim {
@@ -530,6 +533,15 @@
     .world-card.is-active .world-card__list li:nth-child(3) { transition-delay: 100ms; }
     .world-card.is-active .world-card__list li:nth-child(4) { transition-delay: 150ms; }
     .world-card.is-active .world-card__list li:nth-child(5) { transition-delay: 200ms; }
+    /* Desktop: cards extend down to fill the viewport (e.g. MacBook Pro 14").
+       Text stays where it sat on the old 3:4 card (height 44.444vw):
+       title centred at 22.222vw, list bottom at 39.111vw (12% above old bottom). */
+    @media (min-width: 761px) {
+      .world-card { aspect-ratio: auto; height: max(44.444vw, 100vh); }
+      .world-card__title { top: 22.222vw; }
+      .world-card__list { top: 39.111vw; bottom: auto; transform: translateY(-100%); }
+      .world-card__shade { top: 22.222vw; height: auto; }
+    }
     @media (max-width: 760px) {
       .worlds__br { display: inline; }
       .worlds__title { margin-bottom: var(--space-4); }
@@ -559,11 +571,11 @@
       .hero__cta-bar { bottom: 0.5rem; }
       /* Allow scroll indicator to sit below the hero's bottom edge */
       .hero { overflow: visible; }
-      :root { --logo-strip-h: 60px; --logo-slot-w: 120px; }
-      .logo-strip { bottom: -4.5rem; }
-      .logo-strip__item img { max-height: 28px; }
+      :root { --logo-strip-h: 78px; --logo-slot-w: 180px; }
+      .logo-strip { bottom: -5.25rem; }
+      .logo-strip__item img { max-height: 42px; }
       .hero__scroll { bottom: -0.5rem; }
-      .hero { margin-bottom: 4.5rem; }
+      .hero { margin-bottom: 5.25rem; }
       .hero__scroll span { background: var(--color-ink-muted); }
     }
   </style>
@@ -579,6 +591,10 @@
   <!-- Full stylesheet — non-render-blocking async load -->
   <link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="styles.css"></noscript>
+
+  <!-- Case studies styles — async (section is below the fold) -->
+  <link rel="preload" href="/portfolio/case-studies.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="/portfolio/case-studies.css"></noscript>
 
   <!-- Booking popup styles — async (popup never shown on initial load) -->
   <link rel="preload" href="booking-popup.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -728,11 +744,11 @@
             <div class="world-card__shade" aria-hidden="true"></div>
             <span class="world-card__title">Design</span>
             <ul class="world-card__list">
-              <li>AI product galleries</li>
-              <li>Ad creatives (static, video, UGC, AI)</li>
-              <li>Web &amp; shop design</li>
-              <li>UI/UX &amp; app design</li>
-              <li>3D renders &amp; motion</li>
+              <li><a href="#case-ai-gallery">AI product galleries</a></li>
+              <li><a href="#case-meta-ads">Ad creatives (static, video, UGC, AI)</a></li>
+              <li><a href="#case-tierzucht24">Web &amp; shop design</a></li>
+              <li><a href="#case-nest-app">UI/UX &amp; app design</a></li>
+              <li><a href="#case-ai-gallery">3D renders &amp; motion</a></li>
             </ul>
           </div>
           <div class="world-card reveal" style="--reveal-delay: 80ms" tabindex="0">
@@ -741,11 +757,11 @@
             <div class="world-card__shade" aria-hidden="true"></div>
             <span class="world-card__title">Marketing</span>
             <ul class="world-card__list">
-              <li>€3M+ ad spend managed</li>
-              <li>Meta, TikTok &amp; Google Ads</li>
-              <li>Creative strategy &amp; UGC</li>
-              <li>Klaviyo email marketing</li>
-              <li>Full-funnel performance</li>
+              <li><a href="#case-meta-ads">€3M+ ad spend managed</a></li>
+              <li><a href="#case-meta-ads">Meta, TikTok &amp; Google Ads</a></li>
+              <li><a href="#case-meta-ads">Creative strategy &amp; UGC</a></li>
+              <li><a href="#case-email-flows">Klaviyo email marketing</a></li>
+              <li><a href="#case-landing-page">Full-funnel performance</a></li>
             </ul>
           </div>
           <div class="world-card reveal" style="--reveal-delay: 160ms" tabindex="0">
@@ -754,13 +770,27 @@
             <div class="world-card__shade" aria-hidden="true"></div>
             <span class="world-card__title">CRO</span>
             <ul class="world-card__list">
-              <li>Landing page design</li>
-              <li>A/B testing</li>
-              <li>Heatmaps &amp; session analysis</li>
-              <li>GA4 &amp; Meta Pixel tracking</li>
-              <li>Shopify Management</li>
+              <li><a href="#case-landing-page">Landing page design</a></li>
+              <li><a href="#case-landing-page">A/B testing</a></li>
+              <li><a href="#case-landing-page">Heatmaps &amp; session analysis</a></li>
+              <li><a href="#case-landing-page">GA4 &amp; Meta Pixel tracking</a></li>
+              <li><a href="#case-tierzucht24">Shopify Management</a></li>
             </ul>
           </div>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         CASE STUDIES — content: /portfolio/case-studies.json
+         rendered by /portfolio/case-studies.js, styled by case-studies.css
+         ================================================================== -->
+    <section id="cases" class="section cases">
+      <div class="container">
+        <header class="cases__head">
+          <p class="eyebrow cases__eyebrow"></p>
+          <h2 class="section__title cases__title"></h2>
+        </header>
+        <div class="cases__list"></div>
       </div>
     </section>
 
@@ -777,24 +807,18 @@
         <div class="about__copy">
           <p class="eyebrow reveal">Über mich</p>
           <h2 class="section__title reveal" style="--reveal-delay: 80ms">
-            Deine Produktgalerien sehen zwar gut aus, <em>aber konvertieren schlecht?</em>
+            Viele Designer machen es schön. <em>Ich mache es profitabel.</em>
           </h2>
           <p class="reveal" style="--reveal-delay: 160ms">
-            Ich weiß warum! Ich bin Jason & habe 7+ Jahre Erfahrung im Meta Media Buying, Ad Creative & mehrere Million Euro für Brands ausgegeben. Dabei habe ich gelernt, was wirklich verkauft, und was nur schön aussieht.
-          </p>
-          <p class="reveal" style="--reveal-delay: 200ms">
-            Heute baue ich mit KI Produktgalerien für E-Commerce-Shops, die nicht nur gut aussehen – sondern Besucher auch zu Kunden machen.
+            7+ Jahre Performance Marketing, über 3 Mio. € verwaltetes Werbebudget und 12+ Jahre Design. Ich habe meine eigene Performance-Agentur geführt (2019–2025) und das Marketing bei edubily geleitet. Ich gestalte Ads, Landingpages und Shops und teste sie, bis sie verkaufen.
           </p>
           <p class="reveal" style="--reveal-delay: 240ms">
-            12+ Jahre Design + KI-Tools + Blick eines Performance-Marketers + weniger Kosten = mehr Gewinn
-          </p>
-          <p class="reveal" style="--reveal-delay: 260ms">
-            Kein Studio. Kein Fotograf. Keine wochenlange Wartezeit.
+            Design + Marketing + CRO = eine Person für den ganzen Funnel.
           </p>
           <ul class="about__points reveal" style="--reveal-delay: 280ms">
-            <li>Mehr Conversions – Bildlogik, die verkauft, nicht nur beeindruckt.</li>
-            <li>Weniger Kosten – professionelle Produktbilder ohne Begrenzungen, teuren Fotograf oder Models.</li>
-            <li>Fertige Galerie in Tagen – fertig bevor dein nächster Konkurrent überhaupt bucht.</li>
+            <li>Ads, die den Scroll stoppen und den CPA senken</li>
+            <li>Seiten, gebaut und A/B-getestet für mehr Conversions</li>
+            <li>Offen für Freelance, Teilzeit &amp; Vollzeit · remote, EU-Zeiten</li>
           </ul>
         </div>
       </div>
@@ -807,15 +831,14 @@
       <div class="container contact__inner">
         <p class="eyebrow reveal">Kontakt</p>
         <h2 class="contact__title reveal" style="--reveal-delay: 80ms">
-          Lass uns über deine Produktseite sprechen.
+          Lass uns über deine nächste Stelle oder dein Projekt sprechen.
         </h2>
         <p class="contact__sub reveal" style="--reveal-delay: 160ms">
-          30 Minuten, kostenlos, kein Pitch. Wir schauen uns deine Produktseite gemeinsam an –
-          und du gehst mit drei konkreten Verbesserungen raus, ob wir zusammenarbeiten oder nicht.
+          Buch dir ein kostenloses 30-Minuten-Gespräch. Ich schaue mir deine Ads oder Produktseite an und bringe 3 konkrete Ideen mit, egal ob wir zusammenarbeiten oder nicht.
         </p>
         <div class="contact__cta reveal" style="--reveal-delay: 240ms">
           <a class="btn btn--primary btn--lg glass-btn" href="#contact" data-booking>
-            Termin buchen
+            Gespräch buchen
           </a>
         </div>
       </div>
@@ -827,6 +850,7 @@
 
   <script src="/shared-components.js" defer></script>
   <script src="script.js" defer></script>
+  <script src="/portfolio/case-studies.js" defer></script>
 
   <!-- ====================================================================
        Booking popup — replace YOUR-VERCEL-URL after deploying the API.

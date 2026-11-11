@@ -1,0 +1,205 @@
+/* =====================================================================
+   Case studies (/portfolio #cases) — uses the page's existing tokens
+   (--color-*, --radius-*, --space-*, --ease-apple, --font-display …).
+   ===================================================================== */
+
+.cases__head { text-align: center; margin-bottom: var(--space-6); }
+.cases__list { display: grid; gap: clamp(4.5rem, 9vw, 8rem); }
+
+/* ── shared section pattern ─────────────────────────────────────── */
+.case {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);   /* visual | copy */
+  gap: clamp(2rem, 5vw, 4.5rem);
+  align-items: center;
+  scroll-margin-top: var(--space-4);
+}
+.case__visual { order: -1; min-width: 0; }        /* visual left … */
+.case--flip { grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); }  /* copy | visual */
+.case--flip .case__visual { order: 1; }           /* … then right */
+
+.case__tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: var(--space-2); }
+.case__tags li {
+  font-size: 0.74rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--color-accent); background: var(--color-accent-tint);
+  padding: 0.3rem 0.7rem; border-radius: var(--radius-pill);
+}
+.case__title {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-display); font-weight: 700;
+  font-size: clamp(1.5rem, 2.4vw, 2rem); line-height: var(--lh-snug); letter-spacing: -0.02em;
+}
+.case__meta { margin: 0; color: var(--color-ink-soft); font-size: 0.92rem; }
+.case__hero { margin: var(--space-4) 0 var(--space-3); display: grid; gap: 0.2rem; }
+.case__hero strong {
+  font-family: var(--font-display); font-weight: 900;
+  font-size: clamp(3rem, 6.4vw, 5.6rem); line-height: 0.95; letter-spacing: -0.045em;
+  color: var(--color-ink);
+}
+.case__hero--long strong { font-size: clamp(2.2rem, 3.8vw, 3.6rem); white-space: nowrap; }
+.case__hero span { font-size: 1rem; font-weight: 500; color: var(--color-ink-muted); }
+
+/* "How I did it" toggle */
+.case__how { border-top: 1px solid var(--color-border); padding-top: var(--space-2); }
+.case__how summary {
+  list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.45rem;
+  font-size: 0.92rem; font-weight: 600; color: var(--color-ink);
+}
+.case__how summary::-webkit-details-marker { display: none; }
+.case__how summary::after {
+  content: "+"; display: grid; place-items: center; width: 1.3rem; height: 1.3rem;
+  border-radius: 50%; border: 1px solid var(--color-border-strong); font-weight: 500;
+  transition: transform var(--dur-base) var(--ease-apple);
+}
+.case__how[open] summary::after { transform: rotate(45deg); }
+.case__how summary:hover { color: var(--color-accent); }
+.case__how dl { margin: var(--space-2) 0 0; display: grid; gap: 0.6rem; font-size: 0.95rem; }
+.case__how dl div { display: grid; grid-template-columns: 6.2rem 1fr; gap: 0.6rem; }
+.case__how dt { font-weight: 600; color: var(--color-ink-soft); }
+.case__how dd { margin: 0; color: var(--color-ink); }
+
+/* placeholder marker for "[PH]" values */
+.ph-flag {
+  display: inline-block; vertical-align: 0.3em; margin-right: 0.35em;
+  font: 700 0.62rem/1 var(--font-sans); letter-spacing: 0.06em;
+  padding: 0.22em 0.4em; border-radius: 4px;
+  background: #FFE7A3; color: #6B4E00;
+}
+
+/* scroll-in */
+.case { opacity: 0; transform: translateY(28px);
+  transition: opacity var(--dur-slow) var(--ease-apple), transform var(--dur-slow) var(--ease-apple); }
+.case.is-in { opacity: 1; transform: none; }
+
+/* ── media primitives ───────────────────────────────────────────── */
+.cs-media { position: relative; overflow: hidden; border-radius: var(--radius-md); background: var(--color-surface-2); }
+.cs-media img, .cs-media video { width: 100%; height: 100%; object-fit: cover; }
+.cs-media.cs-fill { position: absolute; inset: 0; border-radius: 0; aspect-ratio: auto !important; }
+.cs-ph {
+  display: grid; place-items: center; padding: 0.75rem; text-align: center;
+  background: #D9D6D0; color: #6E6B66;
+  font-size: 0.8rem; font-weight: 500; line-height: 1.3;
+}
+.cs-chip {
+  display: inline-block; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 0.3rem 0.65rem; border-radius: var(--radius-pill);
+  background: var(--glass-bg-strong); color: var(--color-ink);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+}
+
+/* browser frame + screenshot that scrolls on hover */
+.cs-browser { position: relative; margin: 0; border-radius: var(--radius-md); overflow: hidden;
+  background: var(--color-surface); border: 1px solid var(--color-border); box-shadow: var(--glass-shadow-strong); }
+.cs-browser > .cs-chip { position: absolute; top: 2.6rem; left: 0.75rem; z-index: 2; }
+.cs-browser__bar { display: flex; gap: 6px; padding: 0.7rem 0.85rem; border-bottom: 1px solid var(--color-border); }
+.cs-browser__bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--color-border-strong); }
+.cs-browser__screen { position: relative; aspect-ratio: 16 / 10; overflow: hidden; }
+.cs-scroll {
+  position: absolute; left: 0; right: 0; top: 0; transform: translateY(0);
+  transition: top 7s linear, transform 7s linear;
+}
+.cs-scroll > .cs-media { border-radius: 0; }
+.cs-scroll > .cs-ph { place-items: start center; padding-top: 3rem; }
+.cs-browser:hover .cs-scroll, .cs-phone:hover .cs-scroll,
+.is-scrolling .cs-scroll { top: 100%; transform: translateY(-100%); }
+
+/* phone frame */
+.cs-phone { position: relative; border-radius: 34px; padding: 7px; background: #111;
+  box-shadow: 0 1px 1px rgba(10,10,10,0.08), 0 24px 50px rgba(10,10,10,0.18); }
+.cs-phone__screen { position: relative; aspect-ratio: 9 / 19.5; overflow: hidden; border-radius: 28px; background: var(--color-surface-2); }
+
+/* ── 1. gallery: compare slider + masonry ───────────────────────── */
+.cs-v-gallery { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: var(--space-2); align-items: start; }
+.cs-compare { position: relative; overflow: hidden; border-radius: var(--radius-lg); background: var(--color-surface-2);
+  box-shadow: var(--glass-shadow-strong); user-select: none; }
+.cs-compare__layer { position: absolute; inset: 0; }
+.cs-compare__after { clip-path: inset(0 0 0 var(--pos)); }
+.cs-compare__after .cs-ph { background: #CBC7C0; }
+.cs-compare__handle { position: absolute; top: 0; bottom: 0; left: var(--pos); width: 2px; margin-left: -1px;
+  background: #fff; box-shadow: 0 0 0 1px rgba(0,0,0,0.08); pointer-events: none; }
+.cs-compare__handle::after { content: "⟷"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;
+  background: #fff; color: var(--color-ink); font-size: 1rem; box-shadow: 0 6px 18px rgba(0,0,0,0.18); }
+.cs-compare__tag { position: absolute; top: 0.75rem; z-index: 2; pointer-events: none; }
+.cs-compare__tag--l { left: 0.75rem; }
+.cs-compare__tag--r { right: 0.75rem; }
+.cs-compare__range { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; z-index: 3; }
+.cs-compare__range:focus-visible + * , .cs-compare:focus-within { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+.cs-masonry { columns: 2; column-gap: var(--space-2); }
+.cs-masonry > .cs-media { break-inside: avoid; margin-bottom: var(--space-2); }
+
+/* ── 2. ads: reel + stat chips ──────────────────────────────────── */
+.cs-reel { display: flex; gap: var(--space-2); overflow-x: auto; scroll-snap-type: x mandatory;
+  padding-bottom: 0.75rem; scrollbar-width: thin; outline: none; }
+.cs-reel__item { flex: 0 0 clamp(150px, 26%, 210px); scroll-snap-align: start; }
+.cs-reel__item .cs-media { border-radius: var(--radius-lg); }
+.cs-stats { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: var(--space-2); }
+.cs-stat { display: inline-flex; align-items: baseline; gap: 0.5rem; padding: 0.55rem 0.95rem;
+  border-radius: var(--radius-pill); background: var(--color-surface); border: 1px solid var(--color-border); }
+.cs-stat__label { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-ink-soft); }
+.cs-stat__value { font-size: 1.05rem; font-weight: 700; }
+
+/* ── 3. redesign: before / after browsers ───────────────────────── */
+.cs-v-pair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+.cs-v-pair .cs-browser:last-child { border-color: var(--color-accent); box-shadow: 0 0 0 4px var(--color-accent-tint), var(--glass-shadow-strong); }
+
+/* ── 4. email: flow + previews ──────────────────────────────────── */
+.cs-flow { display: flex; align-items: stretch; gap: 0.5rem; margin: 0 0 var(--space-3); padding: 0; list-style: none; }
+.cs-flow__node { flex: 1 1 0; display: grid; gap: 0.15rem; padding: 1rem; text-align: center;
+  border-radius: var(--radius-md); background: var(--color-surface); border: 1px solid var(--color-border); box-shadow: var(--glass-shadow); }
+.cs-flow__name { font-size: 0.82rem; font-weight: 600; color: var(--color-ink-muted); }
+.cs-flow__share { font-size: clamp(1.4rem, 2.4vw, 2rem); font-weight: 800; letter-spacing: -0.03em; }
+.cs-flow__sub { font-size: 0.75rem; color: var(--color-ink-soft); }
+.cs-flow__arrow { align-self: center; color: var(--color-accent); font-size: 1.3rem; }
+.cs-mails { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); max-width: 480px; margin-inline: auto; }
+.cs-mail { position: relative; aspect-ratio: 3 / 5; overflow: hidden; border-radius: var(--radius-md);
+  border: 1px solid var(--color-border); box-shadow: var(--glass-shadow); background: var(--color-surface); }
+
+/* ── 5. app: staggered phones + badges ──────────────────────────── */
+.cs-phones { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(0.75rem, 2vw, 1.5rem);
+  align-items: start; padding-bottom: 3rem; max-width: 640px; margin-inline: auto; }
+.cs-phones .cs-phone:nth-child(2) { transform: translateY(3rem); }
+.cs-phones .cs-phone:nth-child(3) { transform: translateY(1.5rem); }
+.cs-badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; margin-top: var(--space-3); }
+.cs-badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.7rem 1.1rem;
+  border-radius: var(--radius-pill); background: var(--color-ink); color: var(--color-bg);
+  font-size: 0.92rem; font-weight: 600; transition: background var(--dur-fast) var(--ease-apple); }
+.cs-badge:hover { background: var(--color-accent); }
+.cs-badge.is-ph { cursor: default; }
+.cs-badge .ph-flag { margin: 0 0 0 0.2rem; vertical-align: 0; }
+
+/* ── 6. shop: desktop + overlapping phone ───────────────────────── */
+.cs-v-shop { position: relative; padding: 0 9% 12% 0; }
+.cs-v-shop .cs-phone { position: absolute; right: 0; bottom: 0; width: 24%; }
+
+/* ── mobile ─────────────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .case, .case--flip { grid-template-columns: 1fr; gap: var(--space-4); }
+  .case__visual, .case--flip .case__visual { order: -1; }   /* visual first */
+  .cases__head { margin-bottom: var(--space-5); }
+}
+@media (max-width: 560px) {
+  .cs-v-gallery { grid-template-columns: 1fr; }
+  .cs-masonry { columns: 3; column-gap: 0.5rem; }
+  .cs-masonry > .cs-media { margin-bottom: 0.5rem; border-radius: var(--radius-sm); }
+  .cs-masonry .cs-ph { font-size: 0.62rem; padding: 0.3rem; }
+  .cs-reel__item { flex-basis: 62%; }
+  .cs-v-pair { gap: var(--space-2); }
+  .cs-browser__bar { padding: 0.5rem 0.6rem; }
+  .cs-browser > .cs-chip { top: 2rem; left: 0.5rem; font-size: 0.62rem; }
+  .cs-flow { flex-direction: column; }
+  .cs-flow__arrow { transform: rotate(90deg); }
+  .cs-phone { border-radius: 22px; padding: 4px; }
+  .cs-phone__screen { border-radius: 18px; }
+  .cs-phones .cs-ph { font-size: 0.65rem; }
+  .case__how dl div { grid-template-columns: 1fr; gap: 0.1rem; }
+}
+
+/* ── reduced motion ─────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .case { opacity: 1; transform: none; transition: none; }
+  .cs-scroll { transition: none; }
+  .cs-browser:hover .cs-scroll, .cs-phone:hover .cs-scroll, .is-scrolling .cs-scroll { top: 0; transform: none; }
+  html { scroll-behavior: auto; }
+}
