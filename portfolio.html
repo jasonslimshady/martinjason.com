@@ -453,6 +453,61 @@
       z-index: 1;
     }
 
+
+    /* 3 WELTEN — full-bleed 9:16 cards with hover video */
+    .worlds__title {
+      margin: 0 0 var(--space-5); text-align: center;
+      font-family: var(--font-display); font-weight: 900;
+      font-size: var(--fs-h2); line-height: var(--lh-tight); letter-spacing: -0.02em;
+    }
+    .worlds__br { display: none; }
+    .worlds__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; width: 100%; }
+    .world-card {
+      position: relative; aspect-ratio: 9 / 16; overflow: hidden;
+      background: #111; color: #fff; outline: none; cursor: default;
+    }
+    .world-card__img, .world-card__video {
+      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    }
+    .world-card__video { opacity: 0; transition: opacity 250ms ease; }
+    .world-card.is-playing .world-card__video { opacity: 1; }
+    .world-card__shade {
+      position: absolute; left: 0; right: 0; bottom: 0; height: 50%;
+      background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.55) 45%, rgba(0,0,0,0) 100%);
+      transform: translateY(100%); transition: transform var(--dur-slow) var(--ease-apple);
+      pointer-events: none;
+    }
+    .world-card__title {
+      position: absolute; top: 50%; left: 0; right: 0; transform: translateY(-50%);
+      text-align: center; font-family: var(--font-display); font-weight: 900;
+      font-size: clamp(1.8rem, 3.6vw, 3.4rem); letter-spacing: -0.02em; text-transform: uppercase;
+      color: #fff;
+      text-shadow: 0 2px 0 rgba(0,0,0,0.75), 0 10px 30px rgba(0,0,0,0.75);
+    }
+    .world-card__list {
+      position: absolute; left: 0; right: 0; bottom: 0; height: 33.333%;
+      display: flex; flex-direction: column; justify-content: center; gap: 0.35rem;
+      padding: 0 var(--space-3); text-align: center;
+      color: #fff; font-weight: 500; font-size: clamp(0.9rem, 1.15vw, 1.1rem); line-height: 1.3;
+    }
+    .world-card__list li {
+      opacity: 0; transform: translateY(10px);
+      transition: opacity var(--dur-base) var(--ease-apple), transform var(--dur-base) var(--ease-apple);
+    }
+    .world-card.is-active .world-card__shade { transform: translateY(0); }
+    .world-card.is-active .world-card__list li { opacity: 1; transform: none; }
+    .world-card.is-active .world-card__list li:nth-child(2) { transition-delay: 50ms; }
+    .world-card.is-active .world-card__list li:nth-child(3) { transition-delay: 100ms; }
+    .world-card.is-active .world-card__list li:nth-child(4) { transition-delay: 150ms; }
+    .world-card.is-active .world-card__list li:nth-child(5) { transition-delay: 200ms; }
+    @media (max-width: 760px) {
+      .worlds__br { display: inline; }
+      .worlds__title { margin-bottom: var(--space-4); }
+      .worlds__grid { grid-template-columns: 1fr; }
+      .world-card__title { font-size: clamp(2.4rem, 12vw, 3.6rem); }
+      .world-card__list { font-size: 1.05rem; }
+    }
+
     /* REDUCED MOTION */
     @media (prefers-reduced-motion: reduce) {
       .reveal { opacity: 1; transform: none; transition: none; }
@@ -610,15 +665,6 @@
 
       </div><!-- /.hero__parallax -->
 
-      <!-- CTA buttons — below the visible image composition -->
-      <div class="hero__cta-bar">
-        <a class="btn btn--ghost" href="#worlds">Mehr erfahren</a>
-        <a class="btn btn--primary glass-btn" href="#contact">
-          Kostenloses Erstgespräch
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-        </a>
-      </div>
-
       <a class="hero__scroll" href="#worlds" aria-label="Weiter scrollen">
         <span></span>
       </a>
@@ -632,21 +678,48 @@
          ================================================================== -->
     <section id="worlds" class="section worlds">
       <div class="container">
-        <div class="project-title padding">
-          <h2 class="section__title reveal">Ich kombiniere 3 Welten.</h2>
-          <span class="project-title__count reveal" style="--reveal-delay: 80ms" aria-hidden="true">(3)</span>
-        </div>
-        <div class="services-wrapper">
-          <div class="service-column reveal">
-            <span class="service-title">Design</span>
+        <h2 class="worlds__title reveal">ICH KOMBINIERE <br class="worlds__br">3 WELTEN</h2>
+      </div>
+      <div class="worlds__grid">
+          <div class="world-card reveal" tabindex="0">
+            <img class="world-card__img" src="/portfolio/design-background.avif" alt="" loading="lazy" decoding="async" />
+            <video class="world-card__video" data-src="/portfolio/design-video.mp4" muted playsinline preload="none" aria-hidden="true"></video>
+            <div class="world-card__shade" aria-hidden="true"></div>
+            <span class="world-card__title">Design</span>
+            <ul class="world-card__list">
+              <li>AI product galleries</li>
+              <li>Ad creatives (static, video, UGC, AI)</li>
+              <li>Web &amp; shop design</li>
+              <li>UI/UX &amp; app design</li>
+              <li>3D renders &amp; motion</li>
+            </ul>
           </div>
-          <div class="service-column reveal" style="--reveal-delay: 80ms">
-            <span class="service-title">Marketing</span>
+          <div class="world-card reveal" style="--reveal-delay: 80ms" tabindex="0">
+            <img class="world-card__img" src="/portfolio/marketing-background.avif" alt="" loading="lazy" decoding="async" />
+            <video class="world-card__video" data-src="/portfolio/marketing-video.mp4" muted playsinline preload="none" aria-hidden="true"></video>
+            <div class="world-card__shade" aria-hidden="true"></div>
+            <span class="world-card__title">Marketing</span>
+            <ul class="world-card__list">
+              <li>€3M+ ad spend managed</li>
+              <li>Meta, TikTok &amp; Google Ads</li>
+              <li>Creative strategy &amp; UGC</li>
+              <li>Klaviyo email marketing</li>
+              <li>Full-funnel performance</li>
+            </ul>
           </div>
-          <div class="service-column reveal" style="--reveal-delay: 160ms">
-            <span class="service-title">CRO</span>
+          <div class="world-card reveal" style="--reveal-delay: 160ms" tabindex="0">
+            <img class="world-card__img" src="/portfolio/cro-background.avif" alt="" loading="lazy" decoding="async" />
+            <video class="world-card__video" data-src="/portfolio/cro-video.mp4" muted playsinline preload="none" aria-hidden="true"></video>
+            <div class="world-card__shade" aria-hidden="true"></div>
+            <span class="world-card__title">CRO</span>
+            <ul class="world-card__list">
+              <li>Landing page design</li>
+              <li>A/B testing</li>
+              <li>Heatmaps &amp; session analysis</li>
+              <li>GA4 &amp; Meta Pixel tracking</li>
+              <li>Shopify Management</li>
+            </ul>
           </div>
-        </div>
       </div>
     </section>
 
@@ -875,6 +948,53 @@
     // ── Fire ─────────────────────────────────────────────────────────────────
     wake(); // Start the loop for the first frame (desktop only; mobile uses CSS animations)
 
+  })();
+  </script>
+
+
+  <!-- 3 Welten — hover (desktop) / in-view (touch) video, plays once and holds last frame -->
+  <script>
+  (function () {
+    var cards = document.querySelectorAll('.world-card');
+    if (!cards.length) return;
+    var canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+    function activate(card) {
+      card.classList.add('is-active');
+      var v = card.querySelector('.world-card__video');
+      if (!v.src) { v.src = v.dataset.src; v.preload = 'auto'; }
+      try { v.currentTime = 0; } catch (e) {}
+      var p = v.play();
+      card.classList.add('is-playing');
+      if (p && p.catch) p.catch(function () { card.classList.remove('is-playing'); });
+    }
+    function deactivate(card) {
+      card.classList.remove('is-active', 'is-playing');
+      var v = card.querySelector('.world-card__video');
+      v.pause();
+    }
+
+    cards.forEach(function (card) {
+      var v = card.querySelector('.world-card__video');
+      v.addEventListener('ended', function () { v.pause(); }); /* hold last frame */
+      if (canHover) {
+        card.addEventListener('mouseenter', function () { activate(card); });
+        card.addEventListener('mouseleave', function () { deactivate(card); });
+        card.addEventListener('focus', function () { activate(card); });
+        card.addEventListener('blur', function () { deactivate(card); });
+      }
+    });
+
+    /* Touch devices have no hover: trigger when the card is mostly in view */
+    if (!canHover && 'IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.intersectionRatio >= 0.6) activate(e.target);
+          else if (e.intersectionRatio < 0.3) deactivate(e.target);
+        });
+      }, { threshold: [0, 0.3, 0.6] });
+      cards.forEach(function (c) { io.observe(c); });
+    }
   })();
   </script>
 
