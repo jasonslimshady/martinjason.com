@@ -339,6 +339,7 @@
     .logo-strip {
       position: absolute; left: 0; right: 0; bottom: 0;
       height: var(--logo-strip-h); overflow: hidden; z-index: 10;
+      mix-blend-mode: multiply; /* hides white logo backgrounds on the light hero */
       -webkit-mask-image: linear-gradient(to right, transparent 0, black 8%, black 92%, transparent 100%);
               mask-image: linear-gradient(to right, transparent 0, black 8%, black 92%, transparent 100%);
     }
@@ -698,7 +699,7 @@
 
       </div><!-- /.hero__parallax -->
 
-      <!-- Reference logos — files /portfolio/logo-references/1.avif … 33.avif,
+      <!-- Reference logos — files /portfolio/logo-references/1-edubily.avif … 33-matchory.avif,
            built + animated by the "Logo slider" script at the end of <body>. -->
       <div class="logo-strip" id="logoStrip" role="region" aria-label="Referenzen">
         <div class="logo-strip__track"></div>
@@ -723,7 +724,7 @@
       <div class="worlds__grid">
           <div class="world-card reveal" tabindex="0">
             <img class="world-card__img" src="/portfolio/design-background.avif" alt="" loading="lazy" decoding="async" />
-            <video class="world-card__video" data-src="/portfolio/design-video.mp4" muted playsinline preload="auto" aria-hidden="true"></video>
+            <video class="world-card__video" data-src="/portfolio/design-video-web.mp4" muted playsinline preload="auto" aria-hidden="true"></video>
             <div class="world-card__shade" aria-hidden="true"></div>
             <span class="world-card__title">Design</span>
             <ul class="world-card__list">
@@ -736,7 +737,7 @@
           </div>
           <div class="world-card reveal" style="--reveal-delay: 80ms" tabindex="0">
             <img class="world-card__img" src="/portfolio/marketing-background.avif" alt="" loading="lazy" decoding="async" />
-            <video class="world-card__video" data-src="/portfolio/marketing-video.mp4" muted playsinline preload="auto" aria-hidden="true"></video>
+            <video class="world-card__video" data-src="/portfolio/marketing-video-web.mp4" muted playsinline preload="auto" aria-hidden="true"></video>
             <div class="world-card__shade" aria-hidden="true"></div>
             <span class="world-card__title">Marketing</span>
             <ul class="world-card__list">
@@ -749,7 +750,7 @@
           </div>
           <div class="world-card reveal" style="--reveal-delay: 160ms" tabindex="0">
             <img class="world-card__img" src="/portfolio/cro-background.avif" alt="" loading="lazy" decoding="async" />
-            <video class="world-card__video" data-src="/portfolio/cro-video.mp4" muted playsinline preload="auto" aria-hidden="true"></video>
+            <video class="world-card__video" data-src="/portfolio/cro-video-web.mp4" muted playsinline preload="auto" aria-hidden="true"></video>
             <div class="world-card__shade" aria-hidden="true"></div>
             <span class="world-card__title">CRO</span>
             <ul class="world-card__list">
@@ -998,7 +999,16 @@
     var strip = document.getElementById('logoStrip');
     if (!strip) return;
     var track = strip.querySelector('.logo-strip__track');
-    var COUNT = 33, COPIES = 3, SPEED = 30; /* px per second */
+    /* Order = order on screen; files live in /portfolio/logo-references/<name>.avif */
+    var LOGOS = [
+      '1-edubily', '2-sheko', '3-tz24', '4-milomia', '5-natures-way', '6-vitasauri',
+      '7-hye', '8-mybugbar', '9-nahmoo', '10-lifestyledrinks', '11-feierbar', '12-unanimous',
+      '13-naloox', '14-nuimi', '15-dailyfive', '16-sipcult', '17-fightandfitness', '18-deluxetee',
+      '19-themushroomelixir', '20-wallando', '21-aloyay', '22-natierlich', '23-thisisnotacardgame', '24-rgandor',
+      '25-maatimaati', '26-gocardsag', '27-lillyvalentin', '28-jollypaws', '29-vitattoo', '30-iloveitilikeit',
+      '31-prettycheeky', '32-nesk', '33-matchory'
+    ];
+    var COUNT = LOGOS.length, COPIES = 3, SPEED = 30; /* px per second */
     var DIR = '/portfolio/logo-references/';
 
     for (var c = 0; c < COPIES; c++) {
@@ -1006,8 +1016,8 @@
         var item = document.createElement('div');
         item.className = 'logo-strip__item';
         var img = document.createElement('img');
-        img.src = DIR + i + '.avif';
-        img.alt = c === 1 ? 'Referenz-Logo ' + i : '';
+        img.src = DIR + LOGOS[i - 1] + '.avif';
+        img.alt = c === 1 ? LOGOS[i - 1].replace(/^\d+-/, '') : '';
         img.decoding = 'async';
         img.onerror = function () { this.style.visibility = 'hidden'; };
         item.appendChild(img);
