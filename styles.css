@@ -1212,3 +1212,62 @@
 /* ── FAQ answers with multiple paragraphs ─────────── */
 .faq-answer p { margin: 0 0 0.9em; }
 .faq-answer p:last-child { margin-bottom: 0; }
+
+/* ── "Ich kombiniere 3 Welten" — title row + services grid ───────
+   Layout pattern borrowed from the .project-title / .services-wrapper
+   blocks on karim-saab.com, restyled with this site's own tokens. ── */
+.project-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--space-3);
+}
+.project-title.padding { padding-bottom: var(--space-6); }
+.project-title__count {
+  flex-shrink: 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.4rem;
+  color: var(--color-ink-soft);
+}
+
+.services-wrapper {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.service-column {
+  position: relative;
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5) var(--space-4);
+  transition: transform var(--dur-base) var(--ease-apple), box-shadow var(--dur-base) var(--ease-apple), border-color var(--dur-base) var(--ease-apple);
+}
+.service-column:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(10, 10, 10, 0.07);
+  border-color: var(--color-accent);
+}
+.service-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 2.2vw, 1.6rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+  transition: color var(--dur-base) var(--ease-apple);
+}
+.service-column:hover .service-title { color: var(--color-accent); }
+
+@media (max-width: 760px) {
+  .services-wrapper { grid-template-columns: 1fr; }
+  .service-column { min-height: 140px; }
+  .project-title { flex-direction: column; align-items: flex-start; gap: var(--space-1); }
+  .project-title.padding { padding-bottom: var(--space-4); }
+}
