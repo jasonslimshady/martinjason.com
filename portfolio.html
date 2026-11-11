@@ -247,7 +247,7 @@
 
     /* 7a. NAV */
     .nav-wrap {
-      position: fixed !important; /* override any external stylesheet (e.g. cached styles.css that has sticky) */
+      position: absolute !important; /* not sticky on /portfolio — scrolls away with the page */
       top: var(--space-2);
       left: 0; right: 0;
       z-index: 40;
@@ -315,8 +315,8 @@
       background: var(--glass-bg-strong);
     }
     .hero__scroll {
-      position: absolute; 
-      bottom:1.5rem; left: 50%;
+      position: absolute;
+      bottom: calc(var(--logo-strip-h) + 1.25rem); left: 50%;
       width: 22px; height: 36px;
       border: 1px solid var(--color-border-strong);
       border-radius: 999px; transform: translateX(-50%);
@@ -332,6 +332,27 @@
       0% { transform: translateY(-6px); opacity: 0; }
       35% { opacity: 1; }
       100% { transform: translateY(8px); opacity: 0; }
+    }
+
+    /* 7b-2. HERO LOGO SLIDER — references, looping right → left */
+    :root { --logo-strip-h: 72px; --logo-slot-w: 150px; }
+    .logo-strip {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      height: var(--logo-strip-h); overflow: hidden; z-index: 10;
+      -webkit-mask-image: linear-gradient(to right, transparent 0, black 8%, black 92%, transparent 100%);
+              mask-image: linear-gradient(to right, transparent 0, black 8%, black 92%, transparent 100%);
+    }
+    .logo-strip__track {
+      position: absolute; top: 0; left: 0; height: 100%;
+      display: flex; align-items: center; will-change: transform;
+    }
+    .logo-strip__item {
+      flex: 0 0 var(--logo-slot-w); width: var(--logo-slot-w); height: 100%;
+      display: flex; align-items: center; justify-content: center; padding: 0 22px;
+    }
+    .logo-strip__item img {
+      max-width: 100%; max-height: 34px; width: auto; height: auto;
+      object-fit: contain; opacity: 0.75;
     }
 
     /* 7c. HERO PARALLAX */
@@ -463,7 +484,7 @@
     .worlds__br { display: none; }
     .worlds__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; width: 100%; }
     .world-card {
-      position: relative; aspect-ratio: 9 / 16; overflow: hidden;
+      position: relative; aspect-ratio: 3 / 4; overflow: hidden;
       background: #111; color: #fff; outline: none; cursor: default;
     }
     .world-card__img, .world-card__video {
@@ -485,8 +506,8 @@
       text-shadow: 0 2px 0 rgba(0,0,0,0.75), 0 10px 30px rgba(0,0,0,0.75);
     }
     .world-card__list {
-      position: absolute; left: 0; right: 0; bottom: 0; height: 33.333%;
-      display: flex; flex-direction: column; justify-content: center; gap: 0.35rem;
+      position: absolute; left: 0; right: 0; bottom: 12%;
+      display: flex; flex-direction: column; justify-content: flex-end; gap: 0.35rem;
       padding: 0 var(--space-3); text-align: center;
       color: #fff; font-weight: 500; font-size: clamp(0.9rem, 1.15vw, 1.1rem); line-height: 1.3;
     }
@@ -495,6 +516,14 @@
       transition: opacity var(--dur-base) var(--ease-apple), transform var(--dur-base) var(--ease-apple);
     }
     .world-card.is-active .world-card__shade { transform: translateY(0); }
+    /* Spotlight: dim the rest of the page while a card is hovered */
+    .worlds-dim {
+      position: fixed; inset: 0; z-index: 45; pointer-events: none;
+      background: rgba(0,0,0,0.45); opacity: 0;
+      transition: opacity var(--dur-base) var(--ease-apple);
+    }
+    body.worlds-spotlight .worlds-dim { opacity: 1; }
+    .world-card.is-active { z-index: 50; }
     .world-card.is-active .world-card__list li { opacity: 1; transform: none; }
     .world-card.is-active .world-card__list li:nth-child(2) { transition-delay: 50ms; }
     .world-card.is-active .world-card__list li:nth-child(3) { transition-delay: 100ms; }
@@ -529,7 +558,11 @@
       .hero__cta-bar { bottom: 0.5rem; }
       /* Allow scroll indicator to sit below the hero's bottom edge */
       .hero { overflow: visible; }
-      .hero__scroll { bottom: -3rem; }
+      :root { --logo-strip-h: 60px; --logo-slot-w: 120px; }
+      .logo-strip { bottom: -4.5rem; }
+      .logo-strip__item img { max-height: 28px; }
+      .hero__scroll { bottom: -0.5rem; }
+      .hero { margin-bottom: 4.5rem; }
       .hero__scroll span { background: var(--color-ink-muted); }
     }
   </style>
@@ -665,6 +698,12 @@
 
       </div><!-- /.hero__parallax -->
 
+      <!-- Reference logos — files /portfolio/logo-references/1.avif … 33.avif,
+           built + animated by the "Logo slider" script at the end of <body>. -->
+      <div class="logo-strip" id="logoStrip" role="region" aria-label="Referenzen">
+        <div class="logo-strip__track"></div>
+      </div>
+
       <a class="hero__scroll" href="#worlds" aria-label="Weiter scrollen">
         <span></span>
       </a>
@@ -680,10 +719,11 @@
       <div class="container">
         <h2 class="worlds__title reveal">ICH KOMBINIERE <br class="worlds__br">3 WELTEN</h2>
       </div>
+      <div class="worlds-dim" aria-hidden="true"></div>
       <div class="worlds__grid">
           <div class="world-card reveal" tabindex="0">
             <img class="world-card__img" src="/portfolio/design-background.avif" alt="" loading="lazy" decoding="async" />
-            <video class="world-card__video" data-src="/portfolio/design-video.mp4" muted playsinline preload="none" aria-hidden="true"></video>
+            <video class="world-card__video" data-src="/portfolio/design-video.mp4" muted playsinline preload="auto" aria-hidden="true"></video>
             <div class="world-card__shade" aria-hidden="true"></div>
             <span class="world-card__title">Design</span>
             <ul class="world-card__list">
@@ -696,7 +736,7 @@
           </div>
           <div class="world-card reveal" style="--reveal-delay: 80ms" tabindex="0">
             <img class="world-card__img" src="/portfolio/marketing-background.avif" alt="" loading="lazy" decoding="async" />
-            <video class="world-card__video" data-src="/portfolio/marketing-video.mp4" muted playsinline preload="none" aria-hidden="true"></video>
+            <video class="world-card__video" data-src="/portfolio/marketing-video.mp4" muted playsinline preload="auto" aria-hidden="true"></video>
             <div class="world-card__shade" aria-hidden="true"></div>
             <span class="world-card__title">Marketing</span>
             <ul class="world-card__list">
@@ -709,7 +749,7 @@
           </div>
           <div class="world-card reveal" style="--reveal-delay: 160ms" tabindex="0">
             <img class="world-card__img" src="/portfolio/cro-background.avif" alt="" loading="lazy" decoding="async" />
-            <video class="world-card__video" data-src="/portfolio/cro-video.mp4" muted playsinline preload="none" aria-hidden="true"></video>
+            <video class="world-card__video" data-src="/portfolio/cro-video.mp4" muted playsinline preload="auto" aria-hidden="true"></video>
             <div class="world-card__shade" aria-hidden="true"></div>
             <span class="world-card__title">CRO</span>
             <ul class="world-card__list">
@@ -952,6 +992,57 @@
   </script>
 
 
+  <!-- Logo slider — logo 1 starts centred, 33 to its left, drifts left forever -->
+  <script>
+  (function () {
+    var strip = document.getElementById('logoStrip');
+    if (!strip) return;
+    var track = strip.querySelector('.logo-strip__track');
+    var COUNT = 33, COPIES = 3, SPEED = 30; /* px per second */
+    var DIR = '/portfolio/logo-references/';
+
+    for (var c = 0; c < COPIES; c++) {
+      for (var i = 1; i <= COUNT; i++) {
+        var item = document.createElement('div');
+        item.className = 'logo-strip__item';
+        var img = document.createElement('img');
+        img.src = DIR + i + '.avif';
+        img.alt = c === 1 ? 'Referenz-Logo ' + i : '';
+        img.decoding = 'async';
+        img.onerror = function () { this.style.visibility = 'hidden'; };
+        item.appendChild(img);
+        track.appendChild(item);
+      }
+    }
+
+    var slotW, setW, x;
+    function measure() {
+      slotW = track.firstElementChild.getBoundingClientRect().width;
+      setW = slotW * COUNT;
+      /* logo 1 of the middle copy centred on screen → logo 33 of copy 1 sits to its left */
+      x = strip.clientWidth / 2 - (setW + slotW / 2);
+    }
+    measure();
+    window.addEventListener('resize', measure, { passive: true });
+
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var last = null, visible = true;
+    function frame(t) {
+      if (last !== null && visible && !reduce) {
+        x -= SPEED * Math.min(t - last, 100) / 1000;
+        if (x <= -2 * setW) x += setW;
+      }
+      last = t;
+      track.style.transform = 'translate3d(' + x.toFixed(2) + 'px,0,0)';
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (e) { visible = e[0].isIntersecting; }).observe(strip);
+    }
+  })();
+  </script>
+
   <!-- 3 Welten — hover (desktop) / in-view (touch) video, plays once and holds last frame -->
   <script>
   (function () {
@@ -959,10 +1050,21 @@
     if (!cards.length) return;
     var canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
+    /* Preload all three videos once the page has loaded, so hover starts instantly */
+    function preloadAll() {
+      cards.forEach(function (card) {
+        var v = card.querySelector('.world-card__video');
+        if (!v.getAttribute('src')) { v.src = v.dataset.src; v.load(); }
+      });
+    }
+    if (document.readyState === 'complete') preloadAll();
+    else window.addEventListener('load', preloadAll);
+
     function activate(card) {
       card.classList.add('is-active');
+      if (canHover) document.body.classList.add('worlds-spotlight');
       var v = card.querySelector('.world-card__video');
-      if (!v.src) { v.src = v.dataset.src; v.preload = 'auto'; }
+      if (!v.getAttribute('src')) { v.src = v.dataset.src; }
       try { v.currentTime = 0; } catch (e) {}
       var p = v.play();
       card.classList.add('is-playing');
@@ -970,6 +1072,7 @@
     }
     function deactivate(card) {
       card.classList.remove('is-active', 'is-playing');
+      if (!document.querySelector('.world-card.is-active')) document.body.classList.remove('worlds-spotlight');
       var v = card.querySelector('.world-card__video');
       v.pause();
     }
