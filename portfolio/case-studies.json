@@ -24,12 +24,13 @@
         "result": "[PH] A complete studio-grade gallery in days, without a photoshoot."
       },
       "media": {
-        "main": {
-          "old": "/portfolio/AI Product gallery/ai-product-gallery-1-old.avif",
-          "new": "/portfolio/AI Product gallery/ai-product-gallery-1-new.avif",
-          "alt": "Milo & Mia product image #1"
-        },
         "grid": [
+          {
+            "old": "/portfolio/AI Product gallery/ai-product-gallery-1-old.avif",
+            "new": "/portfolio/AI Product gallery/ai-product-gallery-1-new.avif",
+            "label": "1:1 gallery image #1",
+            "alt": "Milo & Mia product image #1"
+          },
           {
             "old": "/portfolio/AI Product gallery/ai-product-gallery-2-old.avif",
             "new": "/portfolio/AI Product gallery/ai-product-gallery-2-new.avif",
@@ -59,12 +60,6 @@
             "new": "/portfolio/AI Product gallery/ai-product-gallery-6-new.avif",
             "label": "1:1 gallery image #6",
             "alt": "Milo & Mia product image #6"
-          },
-          {
-            "old": "/portfolio/AI Product gallery/ai-product-gallery-7-old.avif",
-            "new": "/portfolio/AI Product gallery/ai-product-gallery-7-new.avif",
-            "label": "1:1 gallery image #7",
-            "alt": "Milo & Mia product image #7"
           }
         ]
       }
@@ -147,7 +142,7 @@
     },
     {
       "id": "case-landing-page",
-      "layout": "redesign",
+      "layout": "landing",
       "tags": [
         "CRO",
         "A/B Testing",
@@ -167,17 +162,32 @@
         "result": "[PH] Conversion rate more than doubled at the same ad spend."
       },
       "media": {
-        "before": {
-          "src": "",
-          "label": "Full-page screenshot — before",
-          "ratio": "1/3",
-          "alt": "Landing page before"
-        },
-        "after": {
-          "src": "",
-          "label": "Full-page screenshot — after",
-          "ratio": "1/3",
-          "alt": "Landing page after"
+        "desktops": [
+          {
+            "src": "/portfolio/Landingpages/hye-desktop-web.avif",
+            "label": "Desktop landing page #1",
+            "alt": "hye landing page, desktop"
+          },
+          {
+            "src": "/portfolio/Landingpages/edubily-produktquiz-desktop-web.avif",
+            "label": "Desktop landing page #2",
+            "alt": "edubily product quiz landing page, desktop"
+          },
+          {
+            "src": "/portfolio/Landingpages/ViTattoo-desktop-web.avif",
+            "label": "Desktop landing page #3",
+            "alt": "ViTattoo landing page, desktop"
+          },
+          {
+            "src": "/portfolio/Landingpages/edubily-black-sale-desktop-web.avif",
+            "label": "Desktop landing page #4",
+            "alt": "edubily Black Sale landing page, desktop"
+          }
+        ],
+        "mobile": {
+          "src": "/portfolio/Landingpages/edubily-black-sale-mobile-web.avif",
+          "label": "Mobile landing page",
+          "alt": "edubily Black Sale landing page, mobile"
         }
       }
     },
@@ -314,16 +324,14 @@
       },
       "media": {
         "desktop": {
-          "src": "",
+          "src": "/portfolio/Shop/shop-desktop-web.avif",
           "label": "Desktop full-page screenshot",
-          "ratio": "1/3",
-          "alt": "Tierzucht24 desktop shop"
+          "alt": "Tierzucht24 shop, desktop"
         },
         "mobile": {
-          "src": "",
+          "src": "/portfolio/Shop/shop-mobile-web.avif",
           "label": "Mobile full-page screenshot",
-          "ratio": "9/40",
-          "alt": "Tierzucht24 mobile shop"
+          "alt": "Tierzucht24 shop, mobile"
         }
       }
     }

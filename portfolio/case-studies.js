@@ -58,8 +58,8 @@
       '<div class="cs-browser__screen"><div class="cs-scroll">' + media(m) + '</div></div>' +
       '</figure>';
   }
-  function phone(m, scroll) {
-    return '<div class="cs-phone"><div class="cs-phone__screen">' +
+  function phone(m, scroll, extra) {
+    return '<div class="cs-phone' + (extra ? ' ' + extra : '') + '"><div class="cs-phone__screen">' +
       (scroll ? '<div class="cs-scroll">' + media(m) + '</div>' : media(m, 'cs-fill')) +
       '</div></div>';
   }
@@ -70,7 +70,7 @@
        Clicking a thumb loads its old/new pair into the big compare.
        A missing file shows a grey box with its label instead. */
     gallery: function (c) {
-      var m = c.media, main = m.main;
+      var m = c.media, main = m.grid[0];   /* thumb #1 is shown big first */
       function img(src, cls, alt) {
         return '<img class="' + cls + '" src="' + esc(url(src)) + '" alt="' + esc(alt || '') + '" decoding="async" onerror="this.parentNode.classList.add(\'is-missing\')" />';
       }
@@ -83,8 +83,8 @@
           '<span class="cs-compare__handle" aria-hidden="true"></span>' +
           '<input class="cs-compare__range" type="range" min="0" max="100" value="50" aria-label="Drag to compare photo and AI image" />' +
         '</div>';
-      var thumbs = '<div class="cs-thumbs">' + m.grid.map(function (g) {
-        return '<button type="button" class="cs-thumb cs-sq" data-old="' + esc(url(g.old)) + '" data-new="' + esc(url(g.new)) + '"' +
+      var thumbs = '<div class="cs-thumbs">' + m.grid.map(function (g, i) {
+        return '<button type="button" class="cs-thumb cs-sq' + (i ? '' : ' is-active') + '" aria-pressed="' + !i + '" data-old="' + esc(url(g.old)) + '" data-new="' + esc(url(g.new)) + '"' +
           ' data-alt="' + esc(g.alt || '') + '" data-ph="' + esc(g.label) + '" aria-label="Show ' + esc(g.alt || g.label) + ' in the large preview">' +
           '<img src="' + esc(url(g.new)) + '" alt="" loading="lazy" decoding="async" onerror="this.parentNode.classList.add(\'is-missing\')" />' +
         '</button>';
@@ -103,11 +103,15 @@
       return row + chips;
     },
 
-    redesign: function (c) {
-      return '<div class="cs-v-pair">' +
-        browser(c.media.before, 'Before') +
-        browser(c.media.after, 'After') +
-        '</div>';
+    /* 2×2 desktop browsers; the last one gets a phone overlapping its bottom-right */
+    landing: function (c) {
+      var d = c.media.desktops;
+      return '<div class="cs-v-landing">' + d.map(function (m, i) {
+        var last = i === d.length - 1 && c.media.mobile;
+        return last
+          ? '<div class="cs-lp-combo">' + browser(m) + phone(c.media.mobile, true, 'cs-phone--sm') + '</div>'
+          : browser(m);
+      }).join('') + '</div>';
     },
 
     email: function (c) {
@@ -173,6 +177,17 @@
     root.querySelectorAll('.cs-compare').forEach(function (box) {
       var r = box.querySelector('.cs-compare__range');
       r.addEventListener('input', function () { box.style.setProperty('--pos', r.value + '%'); });
+    });
+
+    /* hover-scroll speed: ~1.4s per screen-height of screenshot, min 4s */
+    root.querySelectorAll('.cs-scroll img').forEach(function (img) {
+      function setDur() {
+        var scroll = img.closest('.cs-scroll'), screen = scroll.parentNode;
+        var screens = scroll.offsetHeight / Math.max(1, screen.clientHeight);
+        scroll.style.setProperty('--scroll-dur', Math.max(4, (screens - 1) * 1.4).toFixed(1) + 's');
+      }
+      if (img.complete && img.naturalHeight) setDur(); else img.addEventListener('load', setDur);
+      window.addEventListener('resize', setDur, { passive: true });
     });
 
     /* gallery thumbs → load that old/new pair into the big compare */

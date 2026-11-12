@@ -93,16 +93,20 @@
   background: var(--color-surface); border: 1px solid var(--color-border); box-shadow: var(--glass-shadow-strong); }
 .cs-browser > .cs-chip { position: absolute; top: 2.6rem; left: 0.75rem; z-index: 2; }
 .cs-browser__bar { display: flex; gap: 6px; padding: 0.7rem 0.85rem; border-bottom: 1px solid var(--color-border); }
-.cs-browser__bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--color-border-strong); }
+.cs-browser__bar i { width: 10px; height: 10px; border-radius: 50%; background: #FF5F57; box-shadow: inset 0 0 0 0.5px rgba(0,0,0,0.12); }
+.cs-browser__bar i:nth-child(2) { background: #FEBC2E; }
+.cs-browser__bar i:nth-child(3) { background: #28C840; }
 .cs-browser__screen { position: relative; aspect-ratio: 16 / 10; overflow: hidden; }
 .cs-scroll {
   position: absolute; left: 0; right: 0; top: 0; transform: translateY(0);
-  transition: top 7s linear, transform 7s linear;
+  transition: top 0.9s var(--ease-apple), transform 0.9s var(--ease-apple);   /* quick return */
 }
+.cs-scroll img { height: auto !important; }
 .cs-scroll > .cs-media { border-radius: 0; }
 .cs-scroll > .cs-ph { place-items: start center; padding-top: 3rem; }
 .cs-browser:hover .cs-scroll, .cs-phone:hover .cs-scroll,
-.is-scrolling .cs-scroll { top: 100%; transform: translateY(-100%); }
+.is-scrolling .cs-scroll { top: 100%; transform: translateY(-100%);
+  transition: top var(--scroll-dur, 7s) linear, transform var(--scroll-dur, 7s) linear; }
 
 /* phone frame */
 .cs-phone { position: relative; border-radius: 34px; padding: 7px; background: #111;
@@ -125,14 +129,15 @@
 .cs-compare__tag--l { left: 0.75rem; }
 .cs-compare__tag--r { right: 0.75rem; }
 .cs-compare__range { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; z-index: 3; }
-.cs-compare:focus-within { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+.cs-compare:has(.cs-compare__range:focus-visible) { outline: 2px solid var(--color-accent); outline-offset: 3px; } /* keyboard only */
 .cs-thumbs { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-2); }
 .cs-thumb { position: relative; aspect-ratio: 1 / 1; padding: 0; overflow: hidden; border-radius: var(--radius-md);
-  background: #D9D6D0; outline: 2px solid transparent; outline-offset: 2px;
-  transition: outline-color var(--dur-fast) var(--ease-apple), transform var(--dur-fast) var(--ease-apple); }
+  background: #D9D6D0; outline: 2px solid transparent; outline-offset: 2px; opacity: 0.55;
+  transition: opacity var(--dur-fast) var(--ease-apple), transform var(--dur-fast) var(--ease-apple); }
 .cs-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .cs-thumb:hover { transform: translateY(-2px); }
-.cs-thumb.is-active, .cs-thumb:focus-visible { outline-color: var(--color-accent); }
+.cs-thumb:hover, .cs-thumb.is-active { opacity: 1; }   /* selected = full colour, others dimmed */
+.cs-thumb:focus-visible { outline-color: var(--color-accent); }
 /* file not there (yet) → grey box with its label */
 .cs-sq.is-missing img { display: none; }
 .cs-sq.is-missing::after { content: attr(data-ph); position: absolute; inset: 0; display: grid; place-items: center;
@@ -149,9 +154,12 @@
 .cs-stat__label { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-ink-soft); }
 .cs-stat__value { font-size: 1.05rem; font-weight: 700; }
 
-/* ── 3. redesign: before / after browsers ───────────────────────── */
-.cs-v-pair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
-.cs-v-pair .cs-browser:last-child { border-color: var(--color-accent); box-shadow: 0 0 0 4px var(--color-accent-tint), var(--glass-shadow-strong); }
+/* ── 3. landing pages: 2×2 browsers, phone on the last one ────── */
+.cs-v-landing { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+.cs-lp-combo { position: relative; }
+.cs-lp-combo .cs-phone { position: absolute; right: -4%; bottom: -10%; width: 26%; z-index: 2; }
+.cs-phone--sm { border-radius: 16px; padding: 3px; }
+.cs-phone--sm .cs-phone__screen { border-radius: 13px; }
 
 /* ── 4. email: flow + previews ──────────────────────────────────── */
 .cs-flow { display: flex; align-items: stretch; gap: 0.5rem; margin: 0 0 var(--space-3); padding: 0; list-style: none; }
@@ -194,7 +202,9 @@
   .cs-thumb { border-radius: var(--radius-sm); }
   .cs-thumb.is-missing::after { font-size: 0.62rem; padding: 0.3rem; }
   .cs-reel__item { flex-basis: 62%; }
-  .cs-v-pair { gap: var(--space-2); }
+  .cs-v-landing { gap: var(--space-2); }
+  .cs-phone--sm { border-radius: 10px; padding: 2px; }
+  .cs-phone--sm .cs-phone__screen { border-radius: 8px; }
   .cs-browser__bar { padding: 0.5rem 0.6rem; }
   .cs-browser > .cs-chip { top: 2rem; left: 0.5rem; font-size: 0.62rem; }
   .cs-flow { flex-direction: column; }

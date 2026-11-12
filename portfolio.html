@@ -335,7 +335,7 @@
     }
 
     /* 7b-2. HERO LOGO SLIDER — references, looping right → left */
-    :root { --logo-strip-h: 96px; --logo-slot-w: 225px; }
+    :root { --logo-strip-h: 96px; --logo-slot-w: 120px; }
     .logo-strip {
       position: absolute; left: 0; right: 0; bottom: 0;
       height: var(--logo-strip-h); overflow: hidden; z-index: 10;
@@ -349,7 +349,7 @@
     }
     .logo-strip__item {
       flex: 0 0 var(--logo-slot-w); width: var(--logo-slot-w); height: 100%;
-      display: flex; align-items: center; justify-content: center; padding: 0 22px;
+      display: flex; align-items: center; justify-content: center; padding: 0 6px;
     }
     .logo-strip__item img {
       max-width: 100%; max-height: 51px; width: auto; height: auto;
@@ -550,6 +550,10 @@
       .world-card__list { font-size: 1.05rem; }
     }
 
+    /* No focus outline / tap flash on mouse clicks or taps; keyboard users still get :focus-visible */
+    * { -webkit-tap-highlight-color: transparent; }
+    :focus:not(:focus-visible) { outline: none; }
+
     /* REDUCED MOTION */
     @media (prefers-reduced-motion: reduce) {
       .reveal { opacity: 1; transform: none; transition: none; }
@@ -571,7 +575,7 @@
       .hero__cta-bar { bottom: 0.5rem; }
       /* Allow scroll indicator to sit below the hero's bottom edge */
       .hero { overflow: visible; }
-      :root { --logo-strip-h: 78px; --logo-slot-w: 180px; }
+      :root { --logo-strip-h: 78px; --logo-slot-w: 95px; }
       .logo-strip { bottom: -5.25rem; }
       .logo-strip__item img { max-height: 42px; }
       .hero__scroll { bottom: -0.5rem; }
