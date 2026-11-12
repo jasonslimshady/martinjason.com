@@ -29,6 +29,7 @@
     return esc(s);
   }
   function ratio(r) { return r ? ' style="aspect-ratio:' + esc(r) + '"' : ''; }
+  function url(src) { return String(src || '').replace(/ /g, '%20'); }
   function isVideo(src) { return /\.(mp4|webm|mov)(\?|$)/i.test(src || ''); }
 
   /* One media slot: placeholder, image or video */
@@ -41,12 +42,12 @@
     }
     if (isVideo(m.src)) {
       return '<div class="' + cls + '"' + ratio(m.ratio) + '>' +
-             '<video class="cs-video" data-src="' + esc(m.src) + '"' +
-             (m.poster ? ' poster="' + esc(m.poster) + '"' : '') +
+             '<video class="cs-video" data-src="' + esc(url(m.src)) + '"' +
+             (m.poster ? ' poster="' + esc(url(m.poster)) + '"' : '') +
              ' muted loop playsinline preload="none" aria-label="' + esc(m.label) + '"></video></div>';
     }
     return '<div class="' + cls + '"' + ratio(m.ratio) + '>' +
-           '<img src="' + esc(m.src) + '" alt="' + esc(m.alt || '') + '" loading="lazy" decoding="async" /></div>';
+           '<img src="' + esc(url(m.src)) + '" alt=""' + esc(m.alt || '') + '" loading="lazy" decoding="async" /></div>';
   }
 
   /* Browser frame whose tall screenshot scrolls on hover */
@@ -65,19 +66,30 @@
 
   /* ── layout-specific visuals ─────────────────────────────────────── */
   var VISUALS = {
+    /* Big 1:1 old/new compare + 6 square thumbs (show the "-new" image).
+       Clicking a thumb loads its old/new pair into the big compare.
+       A missing file shows a grey box with its label instead. */
     gallery: function (c) {
-      var m = c.media;
+      var m = c.media, main = m.main;
+      function img(src, cls, alt) {
+        return '<img class="' + cls + '" src="' + esc(url(src)) + '" alt="' + esc(alt || '') + '" decoding="async" onerror="this.parentNode.classList.add(\'is-missing\')" />';
+      }
       var compare =
-        '<div class="cs-compare" style="aspect-ratio:' + esc(m.before.ratio || '4/5') + ';--pos:50%">' +
-          '<div class="cs-compare__layer">' + media(m.before, 'cs-fill') + '</div>' +
-          '<div class="cs-compare__layer cs-compare__after">' + media(m.after, 'cs-fill') + '</div>' +
+        '<div class="cs-compare" style="--pos:50%">' +
+          '<div class="cs-compare__layer cs-sq" data-ph="Original photo">' + img(main.old, 'cs-compare__old', 'Original photo') + '</div>' +
+          '<div class="cs-compare__layer cs-compare__after cs-sq" data-ph="AI image">' + img(main.new, 'cs-compare__new', main.alt) + '</div>' +
           '<span class="cs-chip cs-compare__tag cs-compare__tag--l">Photo</span>' +
           '<span class="cs-chip cs-compare__tag cs-compare__tag--r">AI</span>' +
           '<span class="cs-compare__handle" aria-hidden="true"></span>' +
           '<input class="cs-compare__range" type="range" min="0" max="100" value="50" aria-label="Drag to compare photo and AI image" />' +
         '</div>';
-      var grid = '<div class="cs-masonry">' + m.grid.map(function (g) { return media(g); }).join('') + '</div>';
-      return '<div class="cs-v-gallery">' + compare + grid + '</div>';
+      var thumbs = '<div class="cs-thumbs">' + m.grid.map(function (g) {
+        return '<button type="button" class="cs-thumb cs-sq" data-old="' + esc(url(g.old)) + '" data-new="' + esc(url(g.new)) + '"' +
+          ' data-alt="' + esc(g.alt || '') + '" data-ph="' + esc(g.label) + '" aria-label="Show ' + esc(g.alt || g.label) + ' in the large preview">' +
+          '<img src="' + esc(url(g.new)) + '" alt="" loading="lazy" decoding="async" onerror="this.parentNode.classList.add(\'is-missing\')" />' +
+        '</button>';
+      }).join('') + '</div>';
+      return '<div class="cs-v-gallery">' + compare + thumbs + '</div>';
     },
 
     ads: function (c) {
@@ -161,6 +173,23 @@
     root.querySelectorAll('.cs-compare').forEach(function (box) {
       var r = box.querySelector('.cs-compare__range');
       r.addEventListener('input', function () { box.style.setProperty('--pos', r.value + '%'); });
+    });
+
+    /* gallery thumbs → load that old/new pair into the big compare */
+    root.querySelectorAll('.cs-v-gallery').forEach(function (g) {
+      var box = g.querySelector('.cs-compare');
+      var oldImg = box.querySelector('.cs-compare__old'), newImg = box.querySelector('.cs-compare__new');
+      var range = box.querySelector('.cs-compare__range');
+      function load(el, src) { el.parentNode.classList.remove('is-missing'); el.src = src; }
+      g.querySelectorAll('.cs-thumb').forEach(function (b) {
+        b.addEventListener('click', function () {
+          g.querySelectorAll('.cs-thumb').forEach(function (x) { x.classList.toggle('is-active', x === b); x.setAttribute('aria-pressed', x === b); });
+          load(oldImg, b.dataset.old);
+          load(newImg, b.dataset.new);
+          newImg.alt = b.dataset.alt;
+          range.value = 50; box.style.setProperty('--pos', '50%');
+        });
+      });
     });
 
     /* scroll-in reveal + videos play only while visible */
