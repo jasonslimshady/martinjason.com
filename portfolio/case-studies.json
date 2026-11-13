@@ -7,17 +7,20 @@
       "layout": "gallery",
       "tags": [
         "Design",
-        "AI Imagery",
-        "3D"
+        "AI",
+        "CRO"
       ],
-      "title": "AI product gallery",
-      "client": "Milo & Mia",
-      "role": "[PH] Designer",
-      "timeframe": "[PH] 2025",
-      "hero": {
-        "value": "[PH] €0",
-        "label": "photoshoot cost"
-      },
+      "title": "AI product galleries",
+      "hero": [
+        {
+          "value": "€0",
+          "label": "photoshoot cost"
+        },
+        {
+          "value": "2.5%",
+          "label": "average conversion increase"
+        }
+      ],
       "story": {
         "problem": "[PH] Product pages relied on flat packshots that didn't sell the product.",
         "action": "[PH] I generated a full lifestyle and detail gallery with AI from simple product photos.",
@@ -61,8 +64,87 @@
             "label": "1:1 gallery image #6",
             "alt": "Milo & Mia product image #6"
           }
+        ],
+        "compareLabels": {
+          "old": "Old",
+          "new": "New • AI"
+        },
+        "fullGallery": [
+          {
+            "src": "",
+            "label": "Gallery image #1",
+            "ratio": "1/1",
+            "alt": ""
+          },
+          {
+            "src": "",
+            "label": "Gallery image #2",
+            "ratio": "1/1",
+            "alt": ""
+          },
+          {
+            "src": "",
+            "label": "Gallery image #3",
+            "ratio": "1/1",
+            "alt": ""
+          },
+          {
+            "src": "",
+            "label": "Gallery image #4",
+            "ratio": "1/1",
+            "alt": ""
+          },
+          {
+            "src": "",
+            "label": "Gallery image #5",
+            "ratio": "1/1",
+            "alt": ""
+          },
+          {
+            "src": "",
+            "label": "Gallery image #6",
+            "ratio": "1/1",
+            "alt": ""
+          },
+          {
+            "src": "",
+            "label": "Gallery image #7",
+            "ratio": "1/1",
+            "alt": ""
+          },
+          {
+            "src": "",
+            "label": "Gallery image #8",
+            "ratio": "1/1",
+            "alt": ""
+          },
+          {
+            "src": "",
+            "label": "Gallery image #9",
+            "ratio": "1/1",
+            "alt": ""
+          },
+          {
+            "src": "",
+            "label": "Gallery image #10",
+            "ratio": "1/1",
+            "alt": ""
+          },
+          {
+            "src": "",
+            "label": "Gallery image #11",
+            "ratio": "1/1",
+            "alt": ""
+          },
+          {
+            "src": "",
+            "label": "Gallery image #12",
+            "ratio": "1/1",
+            "alt": ""
+          }
         ]
-      }
+      },
+      "subtitle": "Conversion optimised product gallery redesigns"
     },
     {
       "id": "case-meta-ads",
@@ -73,12 +155,9 @@
         "UGC"
       ],
       "title": "Meta ad creatives",
-      "client": "[PH] Agency / edubily",
-      "role": "[PH] Creative strategist",
-      "timeframe": "[PH] 2019–2025",
       "hero": {
-        "value": "[PH] 4.2x",
-        "label": "return on ad spend"
+        "value": "5.2x",
+        "label": "average return on ad spend"
       },
       "story": {
         "problem": "[PH] Ads fatigued fast and CPA kept climbing.",
@@ -88,15 +167,15 @@
       "stats": [
         {
           "label": "CPA",
-          "value": "[PH] −35%"
+          "value": "−35%"
         },
         {
           "label": "ROAS",
-          "value": "[PH] 4.2x"
+          "value": "5.2x"
         },
         {
           "label": "Ad spend",
-          "value": "[PH] €1.2M"
+          "value": "€3.0M+"
         }
       ],
       "media": {
@@ -137,8 +216,47 @@
             "label": "9:16 ad video #6",
             "ratio": "9/16"
           }
+        ],
+        "images": [
+          {
+            "src": "",
+            "label": "4:5 ad image #1",
+            "ratio": "4/5",
+            "alt": ""
+          },
+          {
+            "src": "",
+            "label": "4:5 ad image #2",
+            "ratio": "4/5",
+            "alt": ""
+          },
+          {
+            "src": "",
+            "label": "4:5 ad image #3",
+            "ratio": "4/5",
+            "alt": ""
+          },
+          {
+            "src": "",
+            "label": "4:5 ad image #4",
+            "ratio": "4/5",
+            "alt": ""
+          },
+          {
+            "src": "",
+            "label": "4:5 ad image #5",
+            "ratio": "4/5",
+            "alt": ""
+          },
+          {
+            "src": "",
+            "label": "4:5 ad image #6",
+            "ratio": "4/5",
+            "alt": ""
+          }
         ]
-      }
+      },
+      "subtitle": "Since 2019 I manage Meta Ads, from account setups to finished ads in every format and I managed over 50.000€ ad spend per month, even when AI was not around."
     },
     {
       "id": "case-landing-page",
@@ -146,9 +264,9 @@
       "tags": [
         "CRO",
         "A/B Testing",
-        "Landing Page"
+        "Marketing"
       ],
-      "title": "Landing page redesign",
+      "title": "Landing pages",
       "client": "[PH] Client",
       "role": "[PH] CRO designer",
       "timeframe": "[PH] 2024",
@@ -199,10 +317,7 @@
         "Email",
         "Klaviyo"
       ],
-      "title": "Klaviyo email flows",
-      "client": "[PH] Client",
-      "role": "[PH] Email marketer",
-      "timeframe": "[PH] 2024",
+      "title": "Klaviyo email marketing",
       "hero": {
         "value": "[PH] 32%",
         "label": "of revenue from email"
@@ -241,7 +356,8 @@
             "alt": ""
           }
         ]
-      }
+      },
+      "subtitle": "I’ve been working in Klaviyo since 2021 creating campaigns and complex flows"
     },
     {
       "id": "case-nest-app",
@@ -249,16 +365,19 @@
       "tags": [
         "Design",
         "UI/UX",
-        "App"
+        "App Development"
       ],
-      "title": "Nest property app",
-      "client": "Nest (own product)",
-      "role": "[PH] Founder & designer",
-      "timeframe": "[PH] 2025",
-      "hero": {
-        "value": "[PH] 3",
-        "label": "platforms, live now"
-      },
+      "title": "“Nest” – Property app",
+      "hero": [
+        {
+          "value": "2600+",
+          "label": "users"
+        },
+        {
+          "value": "4500+",
+          "label": "listings"
+        }
+      ],
       "story": {
         "problem": "[PH] Managing a property meant juggling spreadsheets and chats.",
         "action": "[PH] I designed and shipped one app for web, iOS and Android.",
@@ -267,15 +386,20 @@
       "badges": [
         {
           "type": "appstore",
-          "href": "[PH]"
+          "href": "https://apps.apple.com/de/app/nest-bali-rentals-property/id6815255252",
+          "image": "/portfolio/App-Store-Download-Button.svg",
+          "alt": "Download on the App Store"
         },
         {
           "type": "googleplay",
-          "href": "[PH]"
+          "href": "https://play.google.com/store/apps/details?id=com.nestbali.app&pcampaignid=web_share",
+          "image": "/portfolio/Play Store Download-Button.svg",
+          "alt": "Get it on Google Play"
         },
         {
           "type": "web",
-          "href": "[PH]"
+          "href": "https://nest-bali.com",
+          "label": "Website"
         }
       ],
       "media": {
@@ -299,7 +423,8 @@
             "alt": "Nest app screen 3"
           }
         ]
-      }
+      },
+      "subtitle": "Nest replaces Facebook Marketplace/Groups and makes long-term renting, buying homes & buying land across Bali easy. Filter your search, see listings on a map and message verified owners directly."
     },
     {
       "id": "case-tierzucht24",
