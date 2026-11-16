@@ -483,9 +483,9 @@
       font-size: var(--fs-h2); line-height: var(--lh-tight); letter-spacing: -0.02em;
     }
     .worlds__br { display: none; }
-    .worlds__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); width: 100%; padding-inline: var(--container-pad); }
+    .worlds__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1rem, 2.6vw, 2.75rem); width: 100%; padding-inline: clamp(1.25rem, 7vw, 8rem); }
     .world-card {
-      position: relative; aspect-ratio: 3 / 4; overflow: hidden; border-radius: var(--radius-lg);
+      position: relative; aspect-ratio: 3 / 4; overflow: hidden; border-radius: var(--radius-xl);
       isolation: isolate; /* keeps the rounded clip on the video in Safari */
       background: #111; color: #fff; outline: none; cursor: default;
     }
@@ -534,14 +534,19 @@
     .world-card.is-active .world-card__list li:nth-child(3) { transition-delay: 100ms; }
     .world-card.is-active .world-card__list li:nth-child(4) { transition-delay: 150ms; }
     .world-card.is-active .world-card__list li:nth-child(5) { transition-delay: 200ms; }
-    /* Desktop: cards extend down to fill the viewport (e.g. MacBook Pro 14").
-       Text stays where it sat on the old 3:4 card (height 44.444vw):
-       title centred at 22.222vw, list bottom at 39.111vw (12% above old bottom). */
+    .world-card.is-active .world-card__list li:nth-child(6) { transition-delay: 250ms; }
+    /* Desktop: cards fill the viewport height (e.g. MacBook Pro 14").
+       Title sits a little below the middle, the hover list in the lower part. */
     @media (min-width: 761px) {
       .world-card { aspect-ratio: auto; height: max(44.444vw, 100vh); }
-      .world-card__title { top: 22.222vw; }
-      .world-card__list { top: 39.111vw; bottom: auto; transform: translateY(-100%); }
-      .world-card__shade { top: 22.222vw; height: auto; }
+      .world-card__title { top: 56%; }
+      .world-card__list { bottom: 9%; }
+      .world-card__shade { top: 45%; height: auto; }
+    }
+    @media (max-width: 760px) {
+      .world-card__title { top: 56%; transition: top var(--dur-slow) var(--ease-apple); }
+      .world-card.is-active .world-card__title { top: 30%; }   /* make room for the list */
+      .world-card__list { bottom: 7%; }
     }
     @media (max-width: 760px) {
       .worlds__br { display: inline; }
@@ -750,10 +755,11 @@
             <span class="world-card__title">Design</span>
             <ul class="world-card__list">
               <li><a href="#case-ai-gallery">AI product galleries</a></li>
-              <li><a href="#case-meta-ads">Ad creatives (static, video, UGC, AI)</a></li>
+              <li><a href="#case-aplus">A+ Content</a></li>
+              <li><a href="#case-meta-ads">Ad creative</a></li>
               <li><a href="#case-tierzucht24">Web &amp; shop design</a></li>
               <li><a href="#case-nest-app">UI/UX &amp; app design</a></li>
-              <li><a href="#case-3d">3D renders &amp; motion</a></li>
+              <li><a href="#case-3d">3D renderings</a></li>
             </ul>
           </div>
           <div class="world-card reveal" style="--reveal-delay: 80ms" tabindex="0">
@@ -762,9 +768,9 @@
             <div class="world-card__shade" aria-hidden="true"></div>
             <span class="world-card__title">Marketing</span>
             <ul class="world-card__list">
-              <li><a href="#case-meta-ads">€3M+ ad spend managed</a></li>
+              <li><a href="#case-meta-ads">Media Buying</a></li>
               <li><a href="#case-meta-ads">Meta &amp; TikTok Ads</a></li>
-              <li><a href="#case-meta-ads">Creative strategy &amp; UGC</a></li>
+              <li><a href="#case-meta-ads">Creative Strategy &amp; UGC</a></li>
               <li><a href="#case-email-flows">Klaviyo email marketing</a></li>
               <li><a href="#case-landing-page">Full-funnel performance</a></li>
             </ul>
@@ -775,8 +781,8 @@
             <div class="world-card__shade" aria-hidden="true"></div>
             <span class="world-card__title">CRO</span>
             <ul class="world-card__list">
-              <li><a href="#case-landing-page">Landing page design</a></li>
               <li><a href="#case-landing-page">A/B testing</a></li>
+              <li><a href="#case-landing-page">Landing page design</a></li>
               <li><a href="#case-landing-page">Heatmaps &amp; session analysis</a></li>
               <li><a href="#case-landing-page">GA4 &amp; Meta Pixel tracking</a></li>
               <li><a href="#case-tierzucht24">Shopify Management</a></li>
