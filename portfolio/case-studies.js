@@ -54,12 +54,25 @@
            '<img src="' + esc(url(m.src)) + '" alt="' + esc(m.alt || '') + '" loading="lazy" decoding="async" draggable="false" /></div>';
   }
 
+  /* A+ content: stacked modules; a list of images = horizontal slider row */
+  function aplus(m) {
+    function im(x) {
+      return '<img src="' + esc(url(x.src)) + '" alt="" loading="lazy" decoding="async" draggable="false"' +
+        (x.w ? ' width="' + x.w + '" height="' + x.h + '"' : '') + ' />';
+    }
+    return '<div class="cs-aplus" role="img" aria-label="' + esc(m.alt || m.label || '') + '">' + m.modules.map(function (row) {
+      if (!Array.isArray(row)) return im(row);
+      return '<div class="cs-aplus__car" data-count="' + row.length + '" style="aspect-ratio:' + row[0].w + '/' + row[0].h + '">' +
+        '<div class="cs-aplus__strip" style="width:' + row.length * 100 + '%">' + row.map(im).join('') + '</div></div>';
+    }).join('') + '</div>';
+  }
+
   /* Browser frame whose tall screenshot scrolls on hover */
   function browser(m, label) {
     return '<figure class="cs-browser">' +
       (label ? '<figcaption class="cs-chip">' + esc(label) + '</figcaption>' : '') +
       '<div class="cs-browser__bar" aria-hidden="true"><i></i><i></i><i></i></div>' +
-      '<div class="cs-browser__screen"><div class="cs-scroll">' + media(m) + '</div></div>' +
+      '<div class="cs-browser__screen"><div class="cs-scroll">' + (m.modules ? aplus(m) : media(m)) + '</div></div>' +
       '</figure>';
   }
   /* E-mail client frame: toolbar + sender header, then the campaign scrolls on hover */
@@ -134,7 +147,7 @@
     ads: function (c) {
       function slider(items, name, hidden) {
         var cols = Math.ceil(items.length / 2);
-        return '<div class="cs-slider" data-panel="' + name + '"' + (tabbed ? ' role="tabpanel"' : '') + ' aria-label="' + esc(c.title) + ' ' + name + '"' + (hidden ? ' hidden' : '') + '>' +
+        return '<div class="cs-slider' + (c.shadow ? ' cs-slider--shadow' : '') + '" data-panel="' + name + '"' + (tabbed ? ' role="tabpanel"' : '') + ' aria-label="' + esc(c.title) + ' ' + name + '"' + (hidden ? ' hidden' : '') + '>' +
           '<div class="cs-slider__track" style="--cols:' + cols + '">' +
             items.map(function (v, i) {
               var place = ' style="grid-row:' + (i < cols ? 1 : 2) + ';grid-column:' + (i % cols + 1) + '"';
@@ -201,6 +214,7 @@
 
   /* ── one section ─────────────────────────────────────────────────── */
   function heroBlock(h) {
+    if (!h) return '';
     var list = Array.isArray(h) ? h : [h];
     var long = list.length === 1 && String(list[0].value).replace('[PH]', '').trim().length > 6;
     return '<div class="case__hero' + (list.length > 1 ? ' case__hero--duo' : '') + (long ? ' case__hero--long' : '') + '">' +
@@ -433,15 +447,56 @@
     });
   }
 
-  /* ── behaviour: image slides grow in place; edge items grow inward so nothing is clipped ── */
+  /* ── behaviour: image slides zoom from their centre ────────────────
+     A fixed overlay (outside the slider's clip) is laid out at the final,
+     larger size and animated small→large with transform, so the resting
+     state is rendered at full resolution instead of an upscaled bitmap. */
   function wireGrow() {
-    root.querySelectorAll('.cs-slide--grow').forEach(function (sl) {
-      sl.addEventListener('mouseenter', function () {
-        var tr = sl.closest('.cs-slider__track').getBoundingClientRect(), r = sl.getBoundingClientRect();
-        var x = r.left - tr.left < r.width * 0.5 ? 'left' : tr.right - r.right < r.width * 0.5 ? 'right' : 'center';
-        sl.style.transformOrigin = x + ' ' + (r.top - tr.top < r.height * 0.5 ? 'top' : 'bottom');   /* row 1 grows down, row 2 up */
-      });
+    var tiles = root.querySelectorAll('.cs-slide--grow');
+    if (!tiles.length || !canHover) return;
+    var z = document.createElement('div');
+    z.className = 'cs-zoom'; z.setAttribute('aria-hidden', 'true');
+    z.innerHTML = '<img alt="" decoding="async" />';
+    document.body.appendChild(z);
+    var zi = z.querySelector('img'), current = null, anim = null;
+    var SCALE = 1.8, PAD = 16;
+
+    function off() { current = null; if (anim) { anim.cancel(); anim = null; } z.classList.remove('is-on'); }
+    function hide() {
+      if (!current) return;
+      var from = current._zoomFrom; current = null;
+      if (anim) anim.cancel();
+      anim = z.animate([{ transform: 'none' }, { transform: from }],
+        { duration: reduceMotion ? 0 : 220, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' });
+      anim.onfinish = function () { anim = null; if (!current) z.classList.remove('is-on'); };
+    }
+    function show(tile) {
+      var img = tile.querySelector('img');
+      if (!img || !img.getAttribute('src')) return;
+      if (anim) anim.cancel();
+      current = tile;
+      var r = tile.querySelector('.cs-media').getBoundingClientRect();
+      var vw = document.documentElement.clientWidth, vh = window.innerHeight;
+      var sc = Math.max(1, Math.min(SCALE, (vw - PAD * 2) / r.width, (vh - PAD * 2) / r.height));
+      var w = r.width * sc, h = r.height * sc;
+      var cx = r.left + r.width / 2, cy = r.top + r.height / 2;            /* grow from the tile centre … */
+      var left = Math.min(Math.max(PAD, cx - w / 2), vw - PAD - w);        /* … nudged to stay on screen */
+      var top = Math.min(Math.max(PAD, cy - h / 2), vh - PAD - h);
+      z.style.cssText = 'left:' + left + 'px;top:' + top + 'px;width:' + w + 'px;height:' + h + 'px;';
+      zi.src = img.currentSrc || img.src; zi.alt = img.alt || '';
+      var dx = cx - (left + w / 2), dy = cy - (top + h / 2);
+      tile._zoomFrom = 'translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px) scale(' + (1 / sc).toFixed(4) + ')';
+      z.classList.add('is-on');
+      anim = z.animate([{ transform: tile._zoomFrom }, { transform: 'none' }],
+        { duration: reduceMotion ? 0 : 380, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' });
+      anim.onfinish = function () { anim = null; };
+    }
+    tiles.forEach(function (t) {
+      t.addEventListener('mouseenter', function () { show(t); });
+      t.addEventListener('mouseleave', function () { if (current === t) hide(); });
     });
+    window.addEventListener('scroll', off, { passive: true });
+    root.querySelectorAll('.cs-slider__track').forEach(function (tr) { tr.addEventListener('scroll', off, { passive: true }); });
   }
 
   /* ── behaviour: click an ad video → grows into a popup, plays with sound ── */
@@ -495,16 +550,40 @@
 
   /* ── behaviour: screenshot auto-scroll (hover / in view), hold to pause ── */
   function wireScrollers() {
+    /* Each frame plays a timeline of segments:
+         { v: [fromY, toY] }      vertical scroll of the screenshot
+         { h: rowEl, n: count }   an A+ slider row, moved sideways image by image
+       Speed: ~1.4s per frame-height vertically, 1.2s per image sideways. */
+    var V_SPEED = 1.4, H_SPEED = 1.2;
     var scrollers = [];
     root.querySelectorAll('.cs-scroll').forEach(function (el) {
-      var s = { el: el, screen: el.parentNode, p: 0, dir: 0, dur: 7, paused: false };
-      var img = el.querySelector('img');
-      function setDur() {   /* ~1.4s per screen-height of screenshot, min 4s */
-        var screens = el.offsetHeight / Math.max(1, s.screen.clientHeight);
-        s.dur = Math.max(4, (screens - 1) * 1.4);
-      }
-      if (img) { if (img.complete && img.naturalHeight) setDur(); else img.addEventListener('load', setDur); }
-      window.addEventListener('resize', setDur, { passive: true });
+      var s = { el: el, screen: el.parentNode, t: 0, dir: 0, paused: false, segs: null, T: 0 };
+      s.build = function () {
+        var frameH = s.screen.clientHeight, total = el.offsetHeight;
+        var maxY = Math.max(0, total - frameH), segs = [], y = 0, T = 0;
+        function vseg(to) { var d = (to - y) / frameH * V_SPEED; segs.push({ v: [y, to], d: d }); T += d; y = to; }
+        el.querySelectorAll('.cs-aplus__car').forEach(function (car) {
+          var stopY = Math.min(maxY, Math.max(0, car.offsetTop + car.offsetHeight - frameH));   /* row fully visible */
+          if (stopY > y) vseg(stopY);
+          var n = +car.dataset.count, d = (n - 1) * H_SPEED;
+          segs.push({ h: car, n: n, d: d }); T += d;
+        });
+        if (maxY > y) vseg(maxY);
+        if (segs.length === 1 && segs[0].v) { segs[0].d = Math.max(4, segs[0].d); T = segs[0].d; }   /* plain screenshot: min 4s */
+        s.segs = segs; s.T = Math.max(T, 0.001);
+        if (s.t > s.T) s.t = s.T;
+      };
+      s.apply = function () {
+        var left = s.t, y = 0;
+        s.segs.forEach(function (g) {
+          var p = Math.max(0, Math.min(1, left / g.d)); left -= g.d;
+          if (g.v) { if (p > 0) y = g.v[0] + (g.v[1] - g.v[0]) * (s.segs.length === 1 ? p : ease(p)); }
+          else g.h.firstChild.style.transform = 'translate3d(' + (-ease(p) * (g.n - 1) * 100 / g.n).toFixed(3) + '%,0,0)';
+        });
+        el.style.transform = 'translate3d(0,' + (-y).toFixed(1) + 'px,0)';
+      };
+      el.querySelectorAll('img').forEach(function (im) { if (!im.complete) im.addEventListener('load', function () { s.segs = null; }); });
+      window.addEventListener('resize', function () { s.segs = null; }, { passive: true });
       scrollers.push(s);
     });
     if (!scrollers.length || reduceMotion) return;
@@ -514,11 +593,12 @@
       var dt = last === null ? 0 : Math.min(0.1, (ts - last) / 1000); last = ts;
       var active = false;
       scrollers.forEach(function (s) {
-        if (s.dir > 0 && !s.paused) s.p = Math.min(1, s.p + dt / s.dur);
-        if (s.dir < 0) s.p = Math.max(0, s.p - dt / 0.6);
-        var max = Math.max(0, s.el.offsetHeight - s.screen.clientHeight);
-        s.el.style.transform = 'translate3d(0,' + (-s.p * max).toFixed(1) + 'px,0)';
-        if ((s.dir > 0 && s.p < 1) || (s.dir < 0 && s.p > 0)) active = true;
+        if (!s.dir && !s.t) return;
+        if (!s.segs) s.build();
+        if (s.dir > 0 && !s.paused) s.t = Math.min(s.T, s.t + dt);
+        if (s.dir < 0) s.t = Math.max(0, s.t - dt * s.T / 0.6);          /* quick rewind */
+        s.apply();
+        if ((s.dir > 0 && s.t < s.T) || (s.dir < 0 && s.t > 0)) active = true;
       });
       if (active) requestAnimationFrame(loop); else { running = false; last = null; }
     }

@@ -151,10 +151,6 @@
       ],
       "title": "AI A+ Content",
       "subtitle": "A+ content created with the help of AI image generation, to sell the benefits bullet points can’t.",
-      "hero": {
-        "value": "[PH] +X%",
-        "label": "conversion rate"
-      },
       "story": {
         "problem": "[PH] Problem in one sentence.",
         "action": "[PH] What I did in one sentence.",
@@ -163,36 +159,216 @@
       "media": {
         "desktops": [
           {
-            "src": "",
-            "label": "A+ content #1 (full-length screenshot)",
-            "alt": "",
-            "ratio": "16/10"
+            "label": "Belly Bites",
+            "alt": "Belly Bites A+ content",
+            "modules": [
+              {
+                "src": "/portfolio/A+ Content-web/1.Belly Bites/1.avif",
+                "w": 900,
+                "h": 675
+              },
+              {
+                "src": "/portfolio/A+ Content-web/1.Belly Bites/2.avif",
+                "w": 900,
+                "h": 675
+              },
+              {
+                "src": "/portfolio/A+ Content-web/1.Belly Bites/3.avif",
+                "w": 900,
+                "h": 675
+              },
+              {
+                "src": "/portfolio/A+ Content-web/1.Belly Bites/4.avif",
+                "w": 900,
+                "h": 675
+              },
+              {
+                "src": "/portfolio/A+ Content-web/1.Belly Bites/5.avif",
+                "w": 900,
+                "h": 675
+              },
+              [
+                {
+                  "src": "/portfolio/A+ Content-web/1.Belly Bites/6-1.avif",
+                  "w": 900,
+                  "h": 675
+                },
+                {
+                  "src": "/portfolio/A+ Content-web/1.Belly Bites/6-2.avif",
+                  "w": 900,
+                  "h": 675
+                },
+                {
+                  "src": "/portfolio/A+ Content-web/1.Belly Bites/6-3.avif",
+                  "w": 900,
+                  "h": 675
+                },
+                {
+                  "src": "/portfolio/A+ Content-web/1.Belly Bites/6-4.avif",
+                  "w": 900,
+                  "h": 675
+                }
+              ]
+            ]
           },
           {
-            "src": "",
-            "label": "A+ content #2 (full-length screenshot)",
-            "alt": "",
-            "ratio": "16/10"
+            "label": "Zangenfalle",
+            "alt": "Zangenfalle A+ content",
+            "modules": [
+              {
+                "src": "/portfolio/A+ Content-web/2.Zangenfalle/1.avif",
+                "w": 900,
+                "h": 675
+              },
+              {
+                "src": "/portfolio/A+ Content-web/2.Zangenfalle/2.avif",
+                "w": 900,
+                "h": 938
+              },
+              {
+                "src": "/portfolio/A+ Content-web/2.Zangenfalle/3.avif",
+                "w": 900,
+                "h": 675
+              },
+              {
+                "src": "/portfolio/A+ Content-web/2.Zangenfalle/4.avif",
+                "w": 900,
+                "h": 778
+              },
+              {
+                "src": "/portfolio/A+ Content-web/2.Zangenfalle/5.avif",
+                "w": 900,
+                "h": 675
+              },
+              {
+                "src": "/portfolio/A+ Content-web/2.Zangenfalle/6.avif",
+                "w": 900,
+                "h": 394
+              },
+              {
+                "src": "/portfolio/A+ Content-web/2.Zangenfalle/7.avif",
+                "w": 900,
+                "h": 675
+              }
+            ]
           },
           {
-            "src": "",
-            "label": "A+ content #3 (full-length screenshot)",
-            "alt": "",
-            "ratio": "16/10"
+            "label": "Schubkarrenreifen",
+            "alt": "Schubkarrenreifen A+ content",
+            "modules": [
+              {
+                "src": "/portfolio/A+ Content-web/3.Schubkarrenreifen/1.avif",
+                "w": 900,
+                "h": 675
+              },
+              {
+                "src": "/portfolio/A+ Content-web/3.Schubkarrenreifen/2.avif",
+                "w": 900,
+                "h": 810
+              },
+              {
+                "src": "/portfolio/A+ Content-web/3.Schubkarrenreifen/3.avif",
+                "w": 900,
+                "h": 728
+              },
+              {
+                "src": "/portfolio/A+ Content-web/3.Schubkarrenreifen/4.avif",
+                "w": 900,
+                "h": 838
+              },
+              {
+                "src": "/portfolio/A+ Content-web/3.Schubkarrenreifen/5.avif",
+                "w": 900,
+                "h": 675
+              },
+              {
+                "src": "/portfolio/A+ Content-web/3.Schubkarrenreifen/6.avif",
+                "w": 900,
+                "h": 400
+              },
+              {
+                "src": "/portfolio/A+ Content-web/3.Schubkarrenreifen/7.avif",
+                "w": 900,
+                "h": 675
+              }
+            ]
           },
           {
-            "src": "",
-            "label": "A+ content #4 (full-length screenshot)",
-            "alt": "",
-            "ratio": "16/10"
+            "label": "Lachs Kartoffel",
+            "alt": "Lachs Kartoffel A+ content",
+            "modules": [
+              {
+                "src": "/portfolio/A+ Content-web/4.Lachs Kartoffel/1.avif",
+                "w": 900,
+                "h": 675
+              },
+              {
+                "src": "/portfolio/A+ Content-web/4.Lachs Kartoffel/2.avif",
+                "w": 900,
+                "h": 675
+              },
+              [
+                {
+                  "src": "/portfolio/A+ Content-web/4.Lachs Kartoffel/3-1.avif",
+                  "w": 900,
+                  "h": 675
+                },
+                {
+                  "src": "/portfolio/A+ Content-web/4.Lachs Kartoffel/3-2.avif",
+                  "w": 900,
+                  "h": 675
+                },
+                {
+                  "src": "/portfolio/A+ Content-web/4.Lachs Kartoffel/3-3.avif",
+                  "w": 900,
+                  "h": 675
+                },
+                {
+                  "src": "/portfolio/A+ Content-web/4.Lachs Kartoffel/3-4.avif",
+                  "w": 900,
+                  "h": 675
+                }
+              ],
+              {
+                "src": "/portfolio/A+ Content-web/4.Lachs Kartoffel/4.avif",
+                "w": 900,
+                "h": 675
+              },
+              [
+                {
+                  "src": "/portfolio/A+ Content-web/4.Lachs Kartoffel/5-1.avif",
+                  "w": 900,
+                  "h": 675
+                },
+                {
+                  "src": "/portfolio/A+ Content-web/4.Lachs Kartoffel/5-2.avif",
+                  "w": 900,
+                  "h": 675
+                },
+                {
+                  "src": "/portfolio/A+ Content-web/4.Lachs Kartoffel/5-3.avif",
+                  "w": 900,
+                  "h": 675
+                },
+                {
+                  "src": "/portfolio/A+ Content-web/4.Lachs Kartoffel/5-4.avif",
+                  "w": 900,
+                  "h": 675
+                },
+                {
+                  "src": "/portfolio/A+ Content-web/4.Lachs Kartoffel/5-5.avif",
+                  "w": 900,
+                  "h": 675
+                }
+              ],
+              {
+                "src": "/portfolio/A+ Content-web/4.Lachs Kartoffel/6.avif",
+                "w": 900,
+                "h": 676
+              }
+            ]
           }
-        ],
-        "mobile": {
-          "src": "",
-          "label": "A+ content mobile",
-          "alt": "",
-          "ratio": "9/19.5"
-        }
+        ]
       }
     },
     {
@@ -452,12 +628,7 @@
             "label": "Desktop landing page #4",
             "alt": "edubily Black Sale landing page, desktop"
           }
-        ],
-        "mobile": {
-          "src": "/portfolio/Landingpages/edubily-black-sale-mobile-web.avif",
-          "label": "Mobile landing page",
-          "alt": "edubily Black Sale landing page, mobile"
-        }
+        ]
       },
       "flip": false,
       "subtitle": "Ads need landing pages that match the ad itself, answer objections and turn traffic into customers."
@@ -472,8 +643,8 @@
       ],
       "title": "Klaviyo email marketing",
       "hero": {
-        "value": "[PH] 32%",
-        "label": "of revenue from email"
+        "value": "€160.000+",
+        "label": "revenue generated"
       },
       "story": {
         "problem": "[PH] Email was an afterthought with no automated flows.",
@@ -588,13 +759,6 @@
         "CRO"
       ],
       "title": "Tierzucht24 shop",
-      "client": "Tierzucht24",
-      "role": "[PH] Shop designer",
-      "timeframe": "[PH] 2024",
-      "hero": {
-        "value": "[PH] +X%",
-        "label": "revenue"
-      },
       "story": {
         "problem": "[PH] The old shop was hard to navigate, especially on mobile.",
         "action": "[PH] I redesigned the shop with clear categories and a faster checkout.",
@@ -612,7 +776,8 @@
           "alt": "Tierzucht24 shop, mobile"
         }
       },
-      "flip": true
+      "flip": true,
+      "subtitle": "Redesign of one of Germanys biggest farm-supply shops, from homepage through menu and product pages."
     },
     {
       "id": "case-3d",
@@ -626,8 +791,8 @@
       "title": "3D Renderings",
       "subtitle": "Photorealistic product renders as the foundation for the edubily redesign 2025, built in Blender.",
       "hero": {
-        "value": "16",
-        "label": "product renders"
+        "value": "32",
+        "label": "product models"
       },
       "story": {
         "problem": "[PH] Problem in one sentence.",
@@ -733,7 +898,8 @@
             "alt": "edubily 3D product render #16"
           }
         ]
-      }
+      },
+      "shadow": true
     }
   ]
 }
