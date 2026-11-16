@@ -62,6 +62,23 @@
       '<div class="cs-browser__screen"><div class="cs-scroll">' + media(m) + '</div></div>' +
       '</figure>';
   }
+  /* E-mail client frame: toolbar + sender header, then the campaign scrolls on hover */
+  var MAIL_ICONS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>' +
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9M10 13h4"/></svg>' +
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>' +
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M20 20v-5a6 6 0 0 0-6-6H4"/></svg>';
+  function mail(m) {
+    var from = m.from || '';
+    return '<figure class="cs-mailapp">' +
+      '<div class="cs-mailapp__bar" aria-hidden="true">' + MAIL_ICONS + '</div>' +
+      '<div class="cs-mailapp__head">' +
+        '<span class="cs-mailapp__avatar" aria-hidden="true">' + esc(from.charAt(0).toUpperCase()) + '</span>' +
+        '<span class="cs-mailapp__meta"><strong>' + esc(from) + '</strong><span>' + (m.subject ? esc(m.subject) : 'to me') + '</span></span>' +
+        '<time class="cs-mailapp__time">' + esc(m.time || '') + '</time>' +
+      '</div>' +
+      '<div class="cs-browser__screen cs-mailapp__screen"><div class="cs-scroll">' + media(m) + '</div></div>' +
+      '</figure>';
+  }
   function phone(m, scroll, extra) {
     return '<div class="cs-phone' + (extra ? ' ' + extra : '') + '"><div class="cs-phone__screen">' +
       (scroll ? '<div class="cs-scroll">' + media(m) + '</div>' : media(m, 'cs-fill')) +
@@ -117,7 +134,7 @@
     ads: function (c) {
       function slider(items, name, hidden) {
         var cols = Math.ceil(items.length / 2);
-        return '<div class="cs-slider" data-panel="' + name + '" role="tabpanel" aria-label="Ad ' + name + '"' + (hidden ? ' hidden' : '') + '>' +
+        return '<div class="cs-slider" data-panel="' + name + '"' + (tabbed ? ' role="tabpanel"' : '') + ' aria-label="' + esc(c.title) + ' ' + name + '"' + (hidden ? ' hidden' : '') + '>' +
           '<div class="cs-slider__track" style="--cols:' + cols + '">' +
             items.map(function (v, i) {
               var place = ' style="grid-row:' + (i < cols ? 1 : 2) + ';grid-column:' + (i % cols + 1) + '"';
@@ -125,21 +142,25 @@
                 ? '<video class="cs-video" data-src="' + esc(url(v.src)) + '" muted loop playsinline preload="none" aria-label="' + esc(v.label) + '"></video>'
                 : v.src ? '<img data-src="' + esc(url(v.src)) + '" alt="' + esc(v.alt || '') + '" decoding="async" draggable="false" />'
                 : '<span class="cs-ph">' + esc(v.label) + '</span>';
-              return '<div class="cs-slide" data-col="' + (i % cols) + '"' + place + '><div class="cs-media"' + ratio(v.ratio) + '>' + inner + '</div></div>';
+              var grow = !isVideo(v.src) ? ' cs-slide--grow' : '';   /* images grow in place on hover */
+              return '<div class="cs-slide' + grow + '" data-col="' + (i % cols) + '"' + place + '><div class="cs-media"' + ratio(v.ratio) + '>' + inner + '</div></div>';
             }).join('') +
           '</div>' +
           '<button type="button" class="cs-arrow cs-arrow--prev" aria-label="Previous" hidden>' + ICON_CHEV_L + '</button>' +
           '<button type="button" class="cs-arrow cs-arrow--next" aria-label="Next">' + ICON_CHEV_R + '</button>' +
         '</div>';
       }
-      var hasImages = c.media.images && c.media.images.length;
+      /* "videos" + "images" → two tabs; "items" alone → a single slider (e.g. 3D renders) */
+      var first = c.media.videos || c.media.items || [];
+      var hasImages = !!(c.media.videos && c.media.images && c.media.images.length);
+      var tabbed = hasImages;
       var tabs = hasImages
         ? '<div class="cs-tabs" role="tablist" aria-label="Ad format">' +
             '<button type="button" role="tab" class="cs-tab is-active" aria-selected="true" data-tab="videos">Videos</button>' +
             '<button type="button" role="tab" class="cs-tab" aria-selected="false" data-tab="images">Images</button>' +
           '</div>'
         : '';
-      return tabs + slider(c.media.videos, 'videos', false) + (hasImages ? slider(c.media.images, 'images', true) : '');
+      return tabs + slider(first, c.media.videos ? 'videos' : 'items', false) + (hasImages ? slider(c.media.images, 'images', true) : '');
     },
 
     /* 2×2 desktop browsers; the last one gets a phone overlapping its bottom-right */
@@ -151,17 +172,11 @@
       }).join('') + '</div>';
     },
 
+    /* 2×2 campaign screenshots inside e-mail client frames (grow + scroll like landing pages) */
     email: function (c) {
-      var flow = '<ol class="cs-flow">' + c.flow.map(function (n, i) {
-        return (i ? '<li class="cs-flow__arrow" aria-hidden="true">→</li>' : '') +
-          '<li class="cs-flow__node"><span class="cs-flow__name">' + esc(n.name) + '</span>' +
-          '<strong class="cs-flow__share">' + t(n.share) + '</strong>' +
-          '<span class="cs-flow__sub">of revenue</span></li>';
-      }).join('') + '</ol>';
-      var mails = '<div class="cs-mails">' + c.media.emails.map(function (e) {
-        return '<div class="cs-mail">' + media(e, 'cs-fill') + '</div>';
+      return '<div class="cs-v-landing cs-v-mail">' + c.media.emails.map(function (m) {
+        return '<div class="cs-lp-item">' + mail(m) + '</div>';
       }).join('') + '</div>';
-      return flow + mails;
     },
 
     app: function (c) {
@@ -418,6 +433,17 @@
     });
   }
 
+  /* ── behaviour: image slides grow in place; edge items grow inward so nothing is clipped ── */
+  function wireGrow() {
+    root.querySelectorAll('.cs-slide--grow').forEach(function (sl) {
+      sl.addEventListener('mouseenter', function () {
+        var tr = sl.closest('.cs-slider__track').getBoundingClientRect(), r = sl.getBoundingClientRect();
+        var x = r.left - tr.left < r.width * 0.5 ? 'left' : tr.right - r.right < r.width * 0.5 ? 'right' : 'center';
+        sl.style.transformOrigin = x + ' ' + (r.top - tr.top < r.height * 0.5 ? 'top' : 'bottom');   /* row 1 grows down, row 2 up */
+      });
+    });
+  }
+
   /* ── behaviour: click an ad video → grows into a popup, plays with sound ── */
   function wireVideoPopup() {
     var vids = root.querySelectorAll('.cs-slider .cs-video');
@@ -501,7 +527,7 @@
 
     /* a trigger = landing tile (browser + phone scroll together), else each frame */
     var triggers = [];
-    root.querySelectorAll('.cs-lp-item, .cs-browser, .cs-phone').forEach(function (el) {
+    root.querySelectorAll('.cs-lp-item, .cs-browser, .cs-phone, .cs-mailapp').forEach(function (el) {
       if (el.closest('.cs-lp-item') && !el.classList.contains('cs-lp-item')) return;
       if (group(el).length) triggers.push(el);
     });
@@ -571,6 +597,7 @@
     wireTabs();
     wireSliders();
     wireVideoPopup();
+    wireGrow();
     wireScrollers();
     wireVisibility();
     /* arrived with a #case-… hash → jump there now that it exists */
