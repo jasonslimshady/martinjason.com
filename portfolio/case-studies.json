@@ -141,6 +141,61 @@
       "flip": true
     },
     {
+      "id": "case-aplus",
+      "layout": "landing",
+      "flip": false,
+      "tags": [
+        "Design",
+        "AI",
+        "Marketing"
+      ],
+      "title": "AI A+ Content",
+      "subtitle": "A+ content created with the help of AI image generation, to sell the benefits bullet points can’t.",
+      "hero": {
+        "value": "[PH] +X%",
+        "label": "conversion rate"
+      },
+      "story": {
+        "problem": "[PH] Problem in one sentence.",
+        "action": "[PH] What I did in one sentence.",
+        "result": "[PH] Result in one sentence."
+      },
+      "media": {
+        "desktops": [
+          {
+            "src": "",
+            "label": "A+ content #1 (full-length screenshot)",
+            "alt": "",
+            "ratio": "16/10"
+          },
+          {
+            "src": "",
+            "label": "A+ content #2 (full-length screenshot)",
+            "alt": "",
+            "ratio": "16/10"
+          },
+          {
+            "src": "",
+            "label": "A+ content #3 (full-length screenshot)",
+            "alt": "",
+            "ratio": "16/10"
+          },
+          {
+            "src": "",
+            "label": "A+ content #4 (full-length screenshot)",
+            "alt": "",
+            "ratio": "16/10"
+          }
+        ],
+        "mobile": {
+          "src": "",
+          "label": "A+ content mobile",
+          "alt": "",
+          "ratio": "9/19.5"
+        }
+      }
+    },
+    {
       "id": "case-meta-ads",
       "layout": "ads",
       "tags": [
@@ -354,7 +409,8 @@
           }
         ]
       },
-      "subtitle": "Since 2019 I manage everything connected to Meta Ads & Ad Creatives. I managed over 50.000€ ad spend per month, even when AI was not around."
+      "subtitle": "Since 2019 I manage everything connected to Meta Ads & Ad Creatives. I managed over 50.000€ ad spend per month, even when AI was not around.",
+      "flip": true
     },
     {
       "id": "case-landing-page",
@@ -365,12 +421,9 @@
         "Marketing"
       ],
       "title": "Landing pages",
-      "client": "[PH] Client",
-      "role": "[PH] CRO designer",
-      "timeframe": "[PH] 2024",
       "hero": {
-        "value": "[PH] 1.4% → 3.1%",
-        "label": "conversion rate"
+        "value": "4.2%",
+        "label": "average conversion rate"
       },
       "story": {
         "problem": "[PH] High traffic, but visitors bounced before adding to cart.",
@@ -405,7 +458,9 @@
           "label": "Mobile landing page",
           "alt": "edubily Black Sale landing page, mobile"
         }
-      }
+      },
+      "flip": false,
+      "subtitle": "Ads need landing pages that match the ad itself, answer objections and turn traffic into customers."
     },
     {
       "id": "case-email-flows",
@@ -425,37 +480,36 @@
         "action": "[PH] I set up and designed welcome, cart and post-purchase flows.",
         "result": "[PH] Email became a reliable, hands-off revenue channel."
       },
-      "flow": [
-        {
-          "name": "Welcome",
-          "share": "[PH] 12%"
-        },
-        {
-          "name": "Abandoned Cart",
-          "share": "[PH] 14%"
-        },
-        {
-          "name": "Post-Purchase",
-          "share": "[PH] 6%"
-        }
-      ],
       "media": {
         "emails": [
           {
-            "src": "",
-            "label": "Email preview — Welcome",
-            "ratio": "3/5",
-            "alt": ""
+            "src": "/portfolio/eMail Marketing/beerballer.avif",
+            "from": "Beerballer",
+            "time": "Today",
+            "alt": "Beerballer email campaign"
           },
           {
-            "src": "",
-            "label": "Email preview — Abandoned cart",
-            "ratio": "3/5",
-            "alt": ""
+            "src": "/portfolio/eMail Marketing/edubily-vip-sale.avif",
+            "from": "edubily",
+            "time": "Today",
+            "alt": "edubily VIP Sale email campaign"
+          },
+          {
+            "src": "/portfolio/eMail Marketing/feierbar.avif",
+            "from": "feierbar",
+            "time": "Yesterday",
+            "alt": "feierbar email campaign"
+          },
+          {
+            "src": "/portfolio/eMail Marketing/hye.avif",
+            "from": "hye",
+            "time": "Yesterday",
+            "alt": "hye email campaign"
           }
         ]
       },
-      "subtitle": "I’ve been working in Klaviyo since 2021 creating campaigns and complex flows"
+      "subtitle": "After the sale customers need email marketing, I created hundreds of flows & weekly campaigns, that turn customers into repeated buyers.",
+      "flip": true
     },
     {
       "id": "case-nest-app",
@@ -522,7 +576,8 @@
           }
         ]
       },
-      "subtitle": "Nest replaces Facebook Marketplace/Groups and makes long-term renting, buying homes & buying land across Bali easy. Filter your search, see listings on a map and message verified owners directly."
+      "subtitle": "Nest replaces Facebook Marketplace/Groups and makes long-term renting, buying homes & buying land across Bali easy. Filter your search, see listings on a map and message verified owners directly.",
+      "flip": false
     },
     {
       "id": "case-tierzucht24",
@@ -556,6 +611,128 @@
           "label": "Mobile full-page screenshot",
           "alt": "Tierzucht24 shop, mobile"
         }
+      },
+      "flip": true
+    },
+    {
+      "id": "case-3d",
+      "layout": "ads",
+      "flip": false,
+      "tags": [
+        "Design",
+        "3D",
+        "Blender"
+      ],
+      "title": "3D Renderings",
+      "subtitle": "Photorealistic product renders as the foundation for the edubily redesign 2025, built in Blender.",
+      "hero": {
+        "value": "16",
+        "label": "product renders"
+      },
+      "story": {
+        "problem": "[PH] Problem in one sentence.",
+        "action": "[PH] What I did in one sentence.",
+        "result": "[PH] Result in one sentence."
+      },
+      "media": {
+        "items": [
+          {
+            "src": "/portfolio/3D Renderings/3d-rendering-new-1.avif",
+            "label": "3D render #1",
+            "ratio": "1/1",
+            "alt": "edubily 3D product render #1"
+          },
+          {
+            "src": "/portfolio/3D Renderings/3d-rendering-new-2.avif",
+            "label": "3D render #2",
+            "ratio": "1/1",
+            "alt": "edubily 3D product render #2"
+          },
+          {
+            "src": "/portfolio/3D Renderings/3d-rendering-new-3.avif",
+            "label": "3D render #3",
+            "ratio": "1/1",
+            "alt": "edubily 3D product render #3"
+          },
+          {
+            "src": "/portfolio/3D Renderings/3d-rendering-new-4.avif",
+            "label": "3D render #4",
+            "ratio": "1/1",
+            "alt": "edubily 3D product render #4"
+          },
+          {
+            "src": "/portfolio/3D Renderings/3d-rendering-new-5.avif",
+            "label": "3D render #5",
+            "ratio": "1/1",
+            "alt": "edubily 3D product render #5"
+          },
+          {
+            "src": "/portfolio/3D Renderings/3d-rendering-new-6.avif",
+            "label": "3D render #6",
+            "ratio": "1/1",
+            "alt": "edubily 3D product render #6"
+          },
+          {
+            "src": "/portfolio/3D Renderings/3d-rendering-new-7.avif",
+            "label": "3D render #7",
+            "ratio": "1/1",
+            "alt": "edubily 3D product render #7"
+          },
+          {
+            "src": "/portfolio/3D Renderings/3d-rendering-new-8.avif",
+            "label": "3D render #8",
+            "ratio": "1/1",
+            "alt": "edubily 3D product render #8"
+          },
+          {
+            "src": "/portfolio/3D Renderings/3d-rendering-new-9.avif",
+            "label": "3D render #9",
+            "ratio": "1/1",
+            "alt": "edubily 3D product render #9"
+          },
+          {
+            "src": "/portfolio/3D Renderings/3d-rendering-new10.avif",
+            "label": "3D render #10",
+            "ratio": "1/1",
+            "alt": "edubily 3D product render #10"
+          },
+          {
+            "src": "/portfolio/3D Renderings/3d-rendering-new-11.avif",
+            "label": "3D render #11",
+            "ratio": "1/1",
+            "alt": "edubily 3D product render #11"
+          },
+          {
+            "src": "/portfolio/3D Renderings/3d-rendering-new-12.avif",
+            "label": "3D render #12",
+            "ratio": "1/1",
+            "alt": "edubily 3D product render #12"
+          },
+          {
+            "src": "/portfolio/3D Renderings/3d-rendering-new-13.avif",
+            "label": "3D render #13",
+            "ratio": "1/1",
+            "alt": "edubily 3D product render #13"
+          },
+          {
+            "src": "/portfolio/3D Renderings/3d-rendering-new-14.avif",
+            "label": "3D render #14",
+            "ratio": "1/1",
+            "alt": "edubily 3D product render #14"
+          },
+          {
+            "src": "/portfolio/3D Renderings/3d-rendering-new-15.avif",
+            "label": "3D render #15",
+            "ratio": "1/1",
+            "alt": "edubily 3D product render #15"
+          },
+          {
+            "src": "/portfolio/3D Renderings/3d-rendering-new-16.avif",
+            "label": "3D render #16",
+            "ratio": "1/1",
+            "alt": "edubily 3D product render #16"
+          }
+        ]
       }
     }
   ]
