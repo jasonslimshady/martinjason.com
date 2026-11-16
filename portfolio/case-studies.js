@@ -92,14 +92,14 @@
             '<span class="cs-compare__handle" aria-hidden="true"><span class="cs-compare__knob">' + ICON_ARROWS + '</span></span>' +
             '<input class="cs-compare__range" type="range" min="0" max="100" step="0.1" value="50" aria-label="Drag to compare old and new image" />' +
           '</div>' +
-          '<div class="cs-compare__labels"><span class="cs-chip">' + esc(L.old) + '</span>' +
+          '<div class="cs-compare__labels"><span class="cs-chip cs-tag-old">' + esc(L.old) + '</span>' +
             '<button type="button" class="cs-textbtn cs-gallery-open">View full gallery</button>' +
-            '<span class="cs-chip">' + esc(L.new) + '</span></div>' +
+            '<span class="cs-chip cs-tag-new">' + esc(L.new) + '</span></div>' +
         '</div>';
       var thumbs = '<div class="cs-thumbs">' + m.grid.map(function (g, i) {
         return '<button type="button" class="cs-thumb cs-sq' + (i ? '' : ' is-active') + '" aria-pressed="' + !i + '" data-old="' + esc(url(g.old)) + '" data-new="' + esc(url(g.new)) + '"' +
           ' data-alt="' + esc(g.alt || '') + '" data-ph="' + esc(g.label) + '"' +
-          ' data-gallery="' + esc(JSON.stringify((g.gallery || []).map(url))) + '" aria-label="Show ' + esc(g.alt || g.label) + ' in the large preview">' +
+          ' data-gallery="' + esc(JSON.stringify((g.gallery || []).map(url))) + '" data-title="' + esc(g.galleryTitle || '') + '" aria-label="Show ' + esc(g.alt || g.label) + ' in the large preview">' +
           '<img src="' + esc(url(g.new)) + '" alt="" loading="lazy" decoding="async" draggable="false" onerror="this.parentNode.classList.add(\'is-missing\')" />' +
         '</button>';
       }).join('') + '</div>';
@@ -190,7 +190,10 @@
     var long = list.length === 1 && String(list[0].value).replace('[PH]', '').trim().length > 6;
     return '<div class="case__hero' + (list.length > 1 ? ' case__hero--duo' : '') + (long ? ' case__hero--long' : '') + '">' +
       list.map(function (x) {
-        return '<p><strong>' + t(x.value) + '</strong><span>' + t(x.label) + '</span></p>';
+        var trend = x.trend === 'up'
+          ? '<svg class="case__trend" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="increase"><path d="M12 20V5M5 11l7-7 7 7"/></svg>'
+          : '';
+        return '<p><strong>' + t(x.value) + trend + '</strong><span>' + t(x.label) + '</span></p>';
       }).join('') + '</div>';
   }
 
@@ -198,7 +201,8 @@
     var s = c.story || {};
     var meta = c.subtitle ? t(c.subtitle)
       : [c.client, c.role, c.timeframe].filter(Boolean).map(t).join(' <span aria-hidden="true">·</span> ');
-    return '<article class="case case--' + esc(c.layout) + (i % 2 ? ' case--flip' : '') + '" id="' + esc(c.id) + '">' +
+    var flip = typeof c.flip === 'boolean' ? c.flip : i % 2 === 1;   /* "flip": true → copy left, visual right */
+    return '<article class="case case--' + esc(c.layout) + (flip ? ' case--flip' : '') + '" id="' + esc(c.id) + '">' +
       '<div class="case__copy">' +
         '<ul class="case__tags">' + c.tags.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' +
         '<h3 class="case__title">' + t(c.title) + '</h3>' +
@@ -277,7 +281,7 @@
       var token = 0;
       thumbs.forEach(function (b) {
         b.addEventListener('click', function () {
-          if (demo) { demo.stopped = true; demo = null; }
+          if (demo) { demo.stopped = true; demo = null; } tags(null);
           thumbs.forEach(function (x) { x.classList.toggle('is-active', x === b); x.setAttribute('aria-pressed', x === b); });
           var my = ++token;
           /* swap both layers together once both are decoded → no half-swapped frame */
@@ -295,19 +299,30 @@
       /* auto demo: middle → right (old) · 1s · → left (new) · 1s · → middle.
          Any interaction with the slider stops it. */
       var demo = null, touched = false;
-      function stopDemo() { touched = true; if (demo) { demo.stopped = true; demo = null; } }
+      var tagOld = sec.querySelector('.cs-tag-old'), tagNew = sec.querySelector('.cs-tag-new');
+      function tags(which) {   /* 'old' | 'new' | null → which tag is highlighted */
+        if (tagOld) tagOld.classList.toggle('is-on', which === 'old');
+        if (tagNew) tagNew.classList.toggle('is-on', which === 'new');
+      }
+      function stopDemo() { touched = true; tags(null); if (demo) { demo.stopped = true; demo = null; } }
       function runDemo(force) {
         if (reduceMotion || (touched && !force)) return;   /* user already took over → no demo */
         if (demo) demo.stopped = true;
         var d = demo = { stopped: false };
-        var steps = [[50, 100, 900], [100, 100, 1000], [100, 0, 1500], [0, 0, 1000], [0, 50, 900]];
+        /* [from, to, ms, highlighted tag] */
+        var steps = [[50, 100, 900, 'old'], [100, 100, 1000, 'old'], [100, 0, 1500, 'new'], [0, 0, 1000, 'new'], [0, 50, 900, null]];
         var i = 0, start = null;
+        tags('old');
         function frame(ts) {
           if (d.stopped) return;
           if (start === null) start = ts;
           var st = steps[i], p = Math.min(1, (ts - start) / st[2]);
           setPos(+(st[0] + (st[1] - st[0]) * ease(p)).toFixed(2));
-          if (p >= 1) { i++; start = ts; if (i >= steps.length) { demo = null; return; } }
+          if (p >= 1) {
+            i++; start = ts;
+            if (i >= steps.length) { demo = null; return; }
+            tags(steps[i][3]);
+          }
           requestAnimationFrame(frame);
         }
         requestAnimationFrame(frame);
@@ -329,7 +344,7 @@
           var active = g.querySelector('.cs-thumb.is-active') || thumbs[0];
           var list = []; try { list = JSON.parse(active.dataset.gallery || '[]'); } catch (e) {}
           var n = Array.prototype.indexOf.call(thumbs, active) + 1;
-          dlg.querySelector('h4').textContent = 'Gallery ' + n + ' · ' + list.length + ' images';
+          dlg.querySelector('h4').textContent = active.dataset.title || ('Gallery ' + n);
           dlg.querySelector('.cs-dialog__grid').innerHTML = list.map(function (src, i) {
             return '<div class="cs-media" style="aspect-ratio:1/1"><img src="' + esc(src) + '" alt="Gallery ' + n + ', image ' + (i + 1) + '" decoding="async" draggable="false" /></div>';
           }).join('');
@@ -385,10 +400,10 @@
         if (near) slides.forEach(function (s) { if (+s.dataset.col <= last + 1) load(s); });   /* visible + next column */
         var end = x + track.clientWidth >= track.scrollWidth - 2;
         next.hidden = end;
+        prev.hidden = x <= 2;   /* back at the first column → hide "<" again */
       }
       sl._update = update;
       next.addEventListener('click', function () {
-        prev.hidden = false;   /* stays visible from now on */
         track.scrollBy({ left: colW(), behavior: reduceMotion ? 'auto' : 'smooth' });
       });
       prev.addEventListener('click', function () {
@@ -400,6 +415,55 @@
         new IntersectionObserver(function (e) { if (e[0].isIntersecting) { near = true; update(); } }, { rootMargin: '600px 0px' }).observe(sl.closest('.case'));
       } else { near = true; }
       update();
+    });
+  }
+
+  /* ── behaviour: click an ad video → grows into a popup, plays with sound ── */
+  function wireVideoPopup() {
+    var vids = root.querySelectorAll('.cs-slider .cs-video');
+    if (!vids.length) return;
+    var dlg = document.createElement('dialog');
+    dlg.className = 'cs-vpop';
+    dlg.setAttribute('aria-label', 'Ad video');
+    dlg.innerHTML = '<div class="cs-vpop__box"><video playsinline loop></video>' +
+      '<button type="button" class="cs-vpop__close" aria-label="Close video">' + ICON_CLOSE + '</button></div>';
+    document.body.appendChild(dlg);
+    var box = dlg.querySelector('.cs-vpop__box'), pv = dlg.querySelector('video');
+    var origin = null;
+
+    function close() {
+      if (!dlg.open) return;
+      var finish = function () { pv.pause(); pv.removeAttribute('src'); pv.load(); dlg.close(); };
+      if (reduceMotion || !box.animate) return finish();
+      var a = box.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'scale(0.92)' }], { duration: 180, easing: 'ease-in' });
+      a.onfinish = finish;
+    }
+    dlg.querySelector('.cs-vpop__close').addEventListener('click', close);
+    dlg.addEventListener('click', function (e) { if (!box.contains(e.target)) close(); });   /* backdrop */
+    dlg.addEventListener('cancel', function (e) { e.preventDefault(); close(); });             /* Esc */
+    dlg.addEventListener('close', function () { document.documentElement.classList.remove('cs-modal-open'); });
+
+    vids.forEach(function (v) {
+      var slide = v.closest('.cs-slide');
+      slide.classList.add('is-clickable');
+      slide.setAttribute('role', 'button'); slide.setAttribute('tabindex', '0');
+      slide.setAttribute('aria-label', 'Play ' + (v.getAttribute('aria-label') || 'video') + ' with sound');
+      function open() {
+        origin = v.getBoundingClientRect();
+        pv.src = v.getAttribute('src') || v.dataset.src;
+        pv.muted = false; pv.currentTime = 0;
+        dlg.showModal(); document.documentElement.classList.add('cs-modal-open');
+        var pr = pv.play(); if (pr && pr.catch) pr.catch(function () { pv.muted = true; pv.play(); });
+        if (reduceMotion || !box.animate) return;
+        var end = box.getBoundingClientRect();   /* grow from the clicked card */
+        var sx = origin.width / end.width, sy = origin.height / end.height;
+        var dx = origin.left + origin.width / 2 - (end.left + end.width / 2);
+        var dy = origin.top + origin.height / 2 - (end.top + end.height / 2);
+        box.animate([{ transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')', borderRadius: '14px' },
+                     { transform: 'none' }], { duration: 420, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' });
+      }
+      slide.addEventListener('click', open);
+      slide.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
     });
   }
 
@@ -506,6 +570,7 @@
     wireGallery();
     wireTabs();
     wireSliders();
+    wireVideoPopup();
     wireScrollers();
     wireVisibility();
     /* arrived with a #case-… hash → jump there now that it exists */

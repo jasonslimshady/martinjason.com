@@ -483,9 +483,10 @@
       font-size: var(--fs-h2); line-height: var(--lh-tight); letter-spacing: -0.02em;
     }
     .worlds__br { display: none; }
-    .worlds__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; width: 100%; }
+    .worlds__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); width: 100%; padding-inline: var(--container-pad); }
     .world-card {
-      position: relative; aspect-ratio: 3 / 4; overflow: hidden;
+      position: relative; aspect-ratio: 3 / 4; overflow: hidden; border-radius: var(--radius-lg);
+      isolation: isolate; /* keeps the rounded clip on the video in Safari */
       background: #111; color: #fff; outline: none; cursor: default;
     }
     .world-card__img, .world-card__video {
@@ -762,7 +763,7 @@
             <span class="world-card__title">Marketing</span>
             <ul class="world-card__list">
               <li><a href="#case-meta-ads">€3M+ ad spend managed</a></li>
-              <li><a href="#case-meta-ads">Meta, TikTok &amp; Google Ads</a></li>
+              <li><a href="#case-meta-ads">Meta &amp; TikTok Ads</a></li>
               <li><a href="#case-meta-ads">Creative strategy &amp; UGC</a></li>
               <li><a href="#case-email-flows">Klaviyo email marketing</a></li>
               <li><a href="#case-landing-page">Full-funnel performance</a></li>
