@@ -110,6 +110,7 @@
 .cs-browser__bar i:nth-child(2) { background: #FEBC2E; }
 .cs-browser__bar i:nth-child(3) { background: #28C840; }
 .cs-browser__screen { position: relative; aspect-ratio: 16 / 10; overflow: hidden; }
+.cs-browser__screen--aplus { aspect-ratio: 4 / 3; }   /* A+ modules are 1800×1350 → one module fills the frame */
 .cs-scroll { position: absolute; left: 0; right: 0; top: 0; will-change: transform; }   /* moved by JS */
 .cs-scroll img { height: auto !important; }
 .cs-scroll > .cs-media { border-radius: 0; }

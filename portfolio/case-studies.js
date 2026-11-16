@@ -29,7 +29,7 @@
   /* Text with an optional "[PH]" prefix → flagged span */
   function t(s) {
     if (isPH(s)) return '<span class="ph-flag" title="Placeholder">PH</span>' + esc(s.slice(4).trim());
-    return esc(s);
+    return esc(s).replace(/\n/g, '<br>');   /* "\n" in the JSON = line break */
   }
   function ratio(r) { return r ? ' style="aspect-ratio:' + esc(r) + '"' : ''; }
   function url(src) { return String(src || '').replace(/ /g, '%20'); }
@@ -72,7 +72,7 @@
     return '<figure class="cs-browser">' +
       (label ? '<figcaption class="cs-chip">' + esc(label) + '</figcaption>' : '') +
       '<div class="cs-browser__bar" aria-hidden="true"><i></i><i></i><i></i></div>' +
-      '<div class="cs-browser__screen"><div class="cs-scroll">' + (m.modules ? aplus(m) : media(m)) + '</div></div>' +
+      '<div class="cs-browser__screen' + (m.modules ? ' cs-browser__screen--aplus' : '') + '"><div class="cs-scroll">' + (m.modules ? aplus(m) : media(m)) + '</div></div>' +
       '</figure>';
   }
   /* E-mail client frame: toolbar + sender header, then the campaign scrolls on hover */
@@ -451,6 +451,14 @@
      A fixed overlay (outside the slider's clip) is laid out at the final,
      larger size and animated small→large with transform, so the resting
      state is rendered at full resolution instead of an upscaled bitmap. */
+  /* true when el is not cut off by its slider window or by the viewport */
+  function fullyVisible(el) {
+    var r = el.getBoundingClientRect(), tr = el.closest('.cs-slider__track');
+    var box = tr ? tr.getBoundingClientRect() : { left: -1e9, right: 1e9 };
+    var vw = document.documentElement.clientWidth, vh = window.innerHeight;
+    return r.left >= Math.max(0, box.left) - 1 && r.right <= Math.min(vw, box.right) + 1 && r.top >= -1 && r.bottom <= vh + 1;
+  }
+
   function wireGrow() {
     var tiles = root.querySelectorAll('.cs-slide--grow');
     if (!tiles.length || !canHover) return;
@@ -472,7 +480,7 @@
     }
     function show(tile) {
       var img = tile.querySelector('img');
-      if (!img || !img.getAttribute('src')) return;
+      if (!img || !img.getAttribute('src') || !fullyVisible(tile)) return;
       if (anim) anim.cancel();
       current = tile;
       var r = tile.querySelector('.cs-media').getBoundingClientRect();
@@ -584,6 +592,17 @@
       };
       el.querySelectorAll('img').forEach(function (im) { if (!im.complete) im.addEventListener('load', function () { s.segs = null; }); });
       window.addEventListener('resize', function () { s.segs = null; }, { passive: true });
+      /* wheel / trackpad: scroll the frame by hand — takes over from the animation.
+         Moving down walks the same timeline, so A+ slider rows move sideways in between. */
+      s.screen.addEventListener('wheel', function (e) {
+        if (!s.segs) s.build();
+        var pxPerSec = s.screen.clientHeight / V_SPEED;
+        var delta = (Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX) * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? s.screen.clientHeight : 1);
+        var next = Math.max(0, Math.min(s.T, s.t + delta / pxPerSec));
+        if (next === s.t) return;            /* at the top / bottom → let the page scroll */
+        e.preventDefault();
+        s.dir = 0; s.t = next; s.apply();
+      }, { passive: false });
       scrollers.push(s);
     });
     if (!scrollers.length || reduceMotion) return;
@@ -657,14 +676,14 @@
     var vio = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
         var v = e.target;
-        if (e.isIntersecting) {
-          if (!v.getAttribute('src') && v.dataset.src) { v.src = v.dataset.src; v.removeAttribute('data-src'); }
+        if (e.isIntersecting && !v.getAttribute('src') && v.dataset.src) { v.src = v.dataset.src; v.removeAttribute('data-src'); }
+        if (e.intersectionRatio >= 0.98) {   /* only fully visible videos play (not ones cut off by the slider) */
           if (!reduceMotion) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
         } else {
           v.pause();
         }
       });
-    }, { threshold: 0.6 });
+    }, { threshold: [0, 0.98, 1] });
     videos.forEach(function (v) { vio.observe(v); });
   }
 
