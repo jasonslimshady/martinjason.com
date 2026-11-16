@@ -13,12 +13,13 @@
       "title": "AI product galleries",
       "hero": [
         {
-          "value": "€0",
-          "label": "photoshoot cost"
+          "value": "2.5%",
+          "label": "average conversion increase",
+          "trend": "up"
         },
         {
-          "value": "2.5%",
-          "label": "average conversion increase"
+          "value": "€0",
+          "label": "photoshoot cost"
         }
       ],
       "story": {
@@ -43,7 +44,8 @@
               "/portfolio/AI Product gallery/gallery-1/7.avif",
               "/portfolio/AI Product gallery/gallery-1/8.avif",
               "/portfolio/AI Product gallery/gallery-1/9.avif"
-            ]
+            ],
+            "galleryTitle": "Milo & Mia - Kalb, Kürbis & Hirse Nassfutter für Hunde"
           },
           {
             "old": "/portfolio/AI Product gallery/ai-product-gallery-2-old.avif",
@@ -59,7 +61,8 @@
               "/portfolio/AI Product gallery/gallery-2/6.avif",
               "/portfolio/AI Product gallery/gallery-2/7.avif",
               "/portfolio/AI Product gallery/gallery-2/8.avif"
-            ]
+            ],
+            "galleryTitle": "Tierzucht24 - FlyX Fliegenfalle"
           },
           {
             "old": "/portfolio/AI Product gallery/ai-product-gallery-3-old.avif",
@@ -76,7 +79,8 @@
               "/portfolio/AI Product gallery/gallery-3/7.avif",
               "/portfolio/AI Product gallery/gallery-3/8.avif",
               "/portfolio/AI Product gallery/gallery-3/9.avif"
-            ]
+            ],
+            "galleryTitle": "Tierzucht24 - Rattenköderbox"
           },
           {
             "old": "/portfolio/AI Product gallery/ai-product-gallery-4-old.avif",
@@ -92,7 +96,8 @@
               "/portfolio/AI Product gallery/gallery-4/6.avif",
               "/portfolio/AI Product gallery/gallery-4/7.avif",
               "/portfolio/AI Product gallery/gallery-4/8.avif"
-            ]
+            ],
+            "galleryTitle": "Smart Ring"
           },
           {
             "old": "/portfolio/AI Product gallery/ai-product-gallery-5-old.avif",
@@ -107,7 +112,8 @@
               "/portfolio/AI Product gallery/gallery-5/5.avif",
               "/portfolio/AI Product gallery/gallery-5/6.avif",
               "/portfolio/AI Product gallery/gallery-5/7.avif"
-            ]
+            ],
+            "galleryTitle": "Tierzucht24 - Wespenspray"
           },
           {
             "old": "/portfolio/AI Product gallery/ai-product-gallery-6-old.avif",
@@ -122,15 +128,17 @@
               "/portfolio/AI Product gallery/gallery-6/5.avif",
               "/portfolio/AI Product gallery/gallery-6/6.avif",
               "/portfolio/AI Product gallery/gallery-6/7.avif"
-            ]
+            ],
+            "galleryTitle": "Tierzucht24 - Petsafe Cats unterirdischer Katzenzaun"
           }
         ],
         "compareLabels": {
           "old": "Old",
-          "new": "New • AI"
+          "new": "New"
         }
       },
-      "subtitle": "Many brands don’t want to spend thousands on a single photo shooting, so I create full product galleries supported by AI, ready in days, not weeks."
+      "subtitle": "Many brands don’t want to spend thousands on a single photo shooting, so I create full product galleries supported by AI, ready in days, not weeks.",
+      "flip": true
     },
     {
       "id": "case-meta-ads",
@@ -140,7 +148,7 @@
         "Creative Strategy",
         "UGC"
       ],
-      "title": "Meta ad creatives",
+      "title": "Meta & TikTok Media Buying & Creative Strategy",
       "hero": {
         "value": "5.2x",
         "label": "average return on ad spend"
