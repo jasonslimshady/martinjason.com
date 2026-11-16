@@ -32,119 +32,105 @@
             "old": "/portfolio/AI Product gallery/ai-product-gallery-1-old.avif",
             "new": "/portfolio/AI Product gallery/ai-product-gallery-1-new.avif",
             "label": "1:1 gallery image #1",
-            "alt": "Milo & Mia product image #1"
+            "alt": "Milo & Mia product image #1",
+            "gallery": [
+              "/portfolio/AI Product gallery/gallery-1/1.avif",
+              "/portfolio/AI Product gallery/gallery-1/2.avif",
+              "/portfolio/AI Product gallery/gallery-1/3.avif",
+              "/portfolio/AI Product gallery/gallery-1/4.avif",
+              "/portfolio/AI Product gallery/gallery-1/5.avif",
+              "/portfolio/AI Product gallery/gallery-1/6.avif",
+              "/portfolio/AI Product gallery/gallery-1/7.avif",
+              "/portfolio/AI Product gallery/gallery-1/8.avif",
+              "/portfolio/AI Product gallery/gallery-1/9.avif"
+            ]
           },
           {
             "old": "/portfolio/AI Product gallery/ai-product-gallery-2-old.avif",
             "new": "/portfolio/AI Product gallery/ai-product-gallery-2-new.avif",
             "label": "1:1 gallery image #2",
-            "alt": "Milo & Mia product image #2"
+            "alt": "Milo & Mia product image #2",
+            "gallery": [
+              "/portfolio/AI Product gallery/gallery-2/1.avif",
+              "/portfolio/AI Product gallery/gallery-2/2.avif",
+              "/portfolio/AI Product gallery/gallery-2/3.avif",
+              "/portfolio/AI Product gallery/gallery-2/4.avif",
+              "/portfolio/AI Product gallery/gallery-2/5.avif",
+              "/portfolio/AI Product gallery/gallery-2/6.avif",
+              "/portfolio/AI Product gallery/gallery-2/7.avif",
+              "/portfolio/AI Product gallery/gallery-2/8.avif"
+            ]
           },
           {
             "old": "/portfolio/AI Product gallery/ai-product-gallery-3-old.avif",
             "new": "/portfolio/AI Product gallery/ai-product-gallery-3-new.avif",
             "label": "1:1 gallery image #3",
-            "alt": "Milo & Mia product image #3"
+            "alt": "Milo & Mia product image #3",
+            "gallery": [
+              "/portfolio/AI Product gallery/gallery-3/1.avif",
+              "/portfolio/AI Product gallery/gallery-3/2.avif",
+              "/portfolio/AI Product gallery/gallery-3/3.avif",
+              "/portfolio/AI Product gallery/gallery-3/4.avif",
+              "/portfolio/AI Product gallery/gallery-3/5.avif",
+              "/portfolio/AI Product gallery/gallery-3/6.avif",
+              "/portfolio/AI Product gallery/gallery-3/7.avif",
+              "/portfolio/AI Product gallery/gallery-3/8.avif",
+              "/portfolio/AI Product gallery/gallery-3/9.avif"
+            ]
           },
           {
             "old": "/portfolio/AI Product gallery/ai-product-gallery-4-old.avif",
             "new": "/portfolio/AI Product gallery/ai-product-gallery-4-new.avif",
             "label": "1:1 gallery image #4",
-            "alt": "Milo & Mia product image #4"
+            "alt": "Milo & Mia product image #4",
+            "gallery": [
+              "/portfolio/AI Product gallery/gallery-4/1.avif",
+              "/portfolio/AI Product gallery/gallery-4/2.avif",
+              "/portfolio/AI Product gallery/gallery-4/3.avif",
+              "/portfolio/AI Product gallery/gallery-4/4.avif",
+              "/portfolio/AI Product gallery/gallery-4/5.avif",
+              "/portfolio/AI Product gallery/gallery-4/6.avif",
+              "/portfolio/AI Product gallery/gallery-4/7.avif",
+              "/portfolio/AI Product gallery/gallery-4/8.avif"
+            ]
           },
           {
             "old": "/portfolio/AI Product gallery/ai-product-gallery-5-old.avif",
             "new": "/portfolio/AI Product gallery/ai-product-gallery-5-new.avif",
             "label": "1:1 gallery image #5",
-            "alt": "Milo & Mia product image #5"
+            "alt": "Milo & Mia product image #5",
+            "gallery": [
+              "/portfolio/AI Product gallery/gallery-5/1.avif",
+              "/portfolio/AI Product gallery/gallery-5/2.avif",
+              "/portfolio/AI Product gallery/gallery-5/3.avif",
+              "/portfolio/AI Product gallery/gallery-5/4.avif",
+              "/portfolio/AI Product gallery/gallery-5/5.avif",
+              "/portfolio/AI Product gallery/gallery-5/6.avif",
+              "/portfolio/AI Product gallery/gallery-5/7.avif"
+            ]
           },
           {
             "old": "/portfolio/AI Product gallery/ai-product-gallery-6-old.avif",
             "new": "/portfolio/AI Product gallery/ai-product-gallery-6-new.avif",
             "label": "1:1 gallery image #6",
-            "alt": "Milo & Mia product image #6"
+            "alt": "Milo & Mia product image #6",
+            "gallery": [
+              "/portfolio/AI Product gallery/gallery-6/1.avif",
+              "/portfolio/AI Product gallery/gallery-6/2.avif",
+              "/portfolio/AI Product gallery/gallery-6/3.avif",
+              "/portfolio/AI Product gallery/gallery-6/4.avif",
+              "/portfolio/AI Product gallery/gallery-6/5.avif",
+              "/portfolio/AI Product gallery/gallery-6/6.avif",
+              "/portfolio/AI Product gallery/gallery-6/7.avif"
+            ]
           }
         ],
         "compareLabels": {
           "old": "Old",
           "new": "New • AI"
-        },
-        "fullGallery": [
-          {
-            "src": "",
-            "label": "Gallery image #1",
-            "ratio": "1/1",
-            "alt": ""
-          },
-          {
-            "src": "",
-            "label": "Gallery image #2",
-            "ratio": "1/1",
-            "alt": ""
-          },
-          {
-            "src": "",
-            "label": "Gallery image #3",
-            "ratio": "1/1",
-            "alt": ""
-          },
-          {
-            "src": "",
-            "label": "Gallery image #4",
-            "ratio": "1/1",
-            "alt": ""
-          },
-          {
-            "src": "",
-            "label": "Gallery image #5",
-            "ratio": "1/1",
-            "alt": ""
-          },
-          {
-            "src": "",
-            "label": "Gallery image #6",
-            "ratio": "1/1",
-            "alt": ""
-          },
-          {
-            "src": "",
-            "label": "Gallery image #7",
-            "ratio": "1/1",
-            "alt": ""
-          },
-          {
-            "src": "",
-            "label": "Gallery image #8",
-            "ratio": "1/1",
-            "alt": ""
-          },
-          {
-            "src": "",
-            "label": "Gallery image #9",
-            "ratio": "1/1",
-            "alt": ""
-          },
-          {
-            "src": "",
-            "label": "Gallery image #10",
-            "ratio": "1/1",
-            "alt": ""
-          },
-          {
-            "src": "",
-            "label": "Gallery image #11",
-            "ratio": "1/1",
-            "alt": ""
-          },
-          {
-            "src": "",
-            "label": "Gallery image #12",
-            "ratio": "1/1",
-            "alt": ""
-          }
-        ]
+        }
       },
-      "subtitle": "Conversion optimised product gallery redesigns"
+      "subtitle": "Many brands don’t want to spend thousands on a single photo shooting, so I create full product galleries supported by AI, ready in days, not weeks."
     },
     {
       "id": "case-meta-ads",
@@ -181,82 +167,186 @@
       "media": {
         "videos": [
           {
-            "src": "/portfolio/Meta ad creatives/meta-ad-creatives-video-1.mp4",
-            "poster": "",
-            "label": "9:16 ad video #1",
+            "src": "/portfolio/Meta ad creatives/Videos-web/meta-ad-creatives-video-1.mp4",
+            "label": "Ad video #1",
             "ratio": "9/16"
           },
           {
-            "src": "/portfolio/Meta ad creatives/meta-ad-creatives-video-2.mp4",
-            "poster": "",
-            "label": "9:16 ad video #2",
+            "src": "/portfolio/Meta ad creatives/Videos-web/meta-ad-creatives-video-2.mp4",
+            "label": "Ad video #2",
             "ratio": "9/16"
           },
           {
-            "src": "/portfolio/Meta ad creatives/meta-ad-creatives-video-3.mp4",
-            "poster": "",
-            "label": "9:16 ad video #3",
+            "src": "/portfolio/Meta ad creatives/Videos-web/meta-ad-creatives-video-3.mp4",
+            "label": "Ad video #3",
             "ratio": "9/16"
           },
           {
-            "src": "/portfolio/Meta ad creatives/meta-ad-creatives-video-4.mp4",
-            "poster": "",
-            "label": "9:16 ad video #4",
+            "src": "/portfolio/Meta ad creatives/Videos-web/meta-ad-creatives-video-4.mp4",
+            "label": "Ad video #4",
             "ratio": "9/16"
           },
           {
-            "src": "/portfolio/Meta ad creatives/meta-ad-creatives-video-5.mp4",
-            "poster": "",
-            "label": "9:16 ad video #5",
+            "src": "/portfolio/Meta ad creatives/Videos-web/meta-ad-creatives-video-5.mp4",
+            "label": "Ad video #5",
             "ratio": "9/16"
           },
           {
-            "src": "/portfolio/Meta ad creatives/meta-ad-creatives-video-6.mp4",
-            "poster": "",
-            "label": "9:16 ad video #6",
+            "src": "/portfolio/Meta ad creatives/Videos-web/meta-ad-creatives-video-6.mp4",
+            "label": "Ad video #6",
+            "ratio": "9/16"
+          },
+          {
+            "src": "/portfolio/Meta ad creatives/Videos-web/meta-ad-creatives-video-7.mp4",
+            "label": "Ad video #7",
+            "ratio": "9/16"
+          },
+          {
+            "src": "/portfolio/Meta ad creatives/Videos-web/meta-ad-creatives-video-8.mp4",
+            "label": "Ad video #8",
+            "ratio": "9/16"
+          },
+          {
+            "src": "/portfolio/Meta ad creatives/Videos-web/meta-ad-creatives-video-9.mp4",
+            "label": "Ad video #9",
+            "ratio": "9/16"
+          },
+          {
+            "src": "/portfolio/Meta ad creatives/Videos-web/meta-ad-creatives-video-10.mp4",
+            "label": "Ad video #10",
+            "ratio": "9/16"
+          },
+          {
+            "src": "/portfolio/Meta ad creatives/Videos-web/meta-ad-creatives-video-11.mp4",
+            "label": "Ad video #11",
+            "ratio": "9/16"
+          },
+          {
+            "src": "/portfolio/Meta ad creatives/Videos-web/meta-ad-creatives-video-12.mp4",
+            "label": "Ad video #12",
+            "ratio": "9/16"
+          },
+          {
+            "src": "/portfolio/Meta ad creatives/Videos-web/meta-ad-creatives-video-13.mp4",
+            "label": "Ad video #13",
+            "ratio": "9/16"
+          },
+          {
+            "src": "/portfolio/Meta ad creatives/Videos-web/meta-ad-creatives-video-14.mp4",
+            "label": "Ad video #14",
+            "ratio": "9/16"
+          },
+          {
+            "src": "/portfolio/Meta ad creatives/Videos-web/meta-ad-creatives-video-15.mp4",
+            "label": "Ad video #15",
+            "ratio": "9/16"
+          },
+          {
+            "src": "/portfolio/Meta ad creatives/Videos-web/meta-ad-creatives-video-16.mp4",
+            "label": "Ad video #16",
             "ratio": "9/16"
           }
         ],
         "images": [
           {
-            "src": "",
-            "label": "4:5 ad image #1",
-            "ratio": "4/5",
-            "alt": ""
+            "src": "/portfolio/Meta ad creatives/Images/meta-ad-creatives-image-1.avif",
+            "label": "Ad image #1",
+            "ratio": "9/16",
+            "alt": "Meta ad creative #1"
           },
           {
-            "src": "",
-            "label": "4:5 ad image #2",
-            "ratio": "4/5",
-            "alt": ""
+            "src": "/portfolio/Meta ad creatives/Images/meta-ad-creatives-image-2.avif",
+            "label": "Ad image #2",
+            "ratio": "9/16",
+            "alt": "Meta ad creative #2"
           },
           {
-            "src": "",
-            "label": "4:5 ad image #3",
-            "ratio": "4/5",
-            "alt": ""
+            "src": "/portfolio/Meta ad creatives/Images/meta-ad-creatives-image-3.avif",
+            "label": "Ad image #3",
+            "ratio": "9/16",
+            "alt": "Meta ad creative #3"
           },
           {
-            "src": "",
-            "label": "4:5 ad image #4",
-            "ratio": "4/5",
-            "alt": ""
+            "src": "/portfolio/Meta ad creatives/Images/meta-ad-creatives-image-4.avif",
+            "label": "Ad image #4",
+            "ratio": "9/16",
+            "alt": "Meta ad creative #4"
           },
           {
-            "src": "",
-            "label": "4:5 ad image #5",
-            "ratio": "4/5",
-            "alt": ""
+            "src": "/portfolio/Meta ad creatives/Images/meta-ad-creatives-image-5.avif",
+            "label": "Ad image #5",
+            "ratio": "9/16",
+            "alt": "Meta ad creative #5"
           },
           {
-            "src": "",
-            "label": "4:5 ad image #6",
-            "ratio": "4/5",
-            "alt": ""
+            "src": "/portfolio/Meta ad creatives/Images/meta-ad-creatives-image-6.avif",
+            "label": "Ad image #6",
+            "ratio": "9/16",
+            "alt": "Meta ad creative #6"
+          },
+          {
+            "src": "/portfolio/Meta ad creatives/Images/meta-ad-creatives-image-7.avif",
+            "label": "Ad image #7",
+            "ratio": "9/16",
+            "alt": "Meta ad creative #7"
+          },
+          {
+            "src": "/portfolio/Meta ad creatives/Images/meta-ad-creatives-image-8.avif",
+            "label": "Ad image #8",
+            "ratio": "9/16",
+            "alt": "Meta ad creative #8"
+          },
+          {
+            "src": "/portfolio/Meta ad creatives/Images/meta-ad-creatives-image-9.avif",
+            "label": "Ad image #9",
+            "ratio": "9/16",
+            "alt": "Meta ad creative #9"
+          },
+          {
+            "src": "/portfolio/Meta ad creatives/Images/meta-ad-creatives-image-10.avif",
+            "label": "Ad image #10",
+            "ratio": "9/16",
+            "alt": "Meta ad creative #10"
+          },
+          {
+            "src": "/portfolio/Meta ad creatives/Images/meta-ad-creatives-image-11.avif",
+            "label": "Ad image #11",
+            "ratio": "9/16",
+            "alt": "Meta ad creative #11"
+          },
+          {
+            "src": "/portfolio/Meta ad creatives/Images/meta-ad-creatives-image-12.avif",
+            "label": "Ad image #12",
+            "ratio": "9/16",
+            "alt": "Meta ad creative #12"
+          },
+          {
+            "src": "/portfolio/Meta ad creatives/Images/meta-ad-creatives-image-13.avif",
+            "label": "Ad image #13",
+            "ratio": "9/16",
+            "alt": "Meta ad creative #13"
+          },
+          {
+            "src": "/portfolio/Meta ad creatives/Images/meta-ad-creatives-image-14.avif",
+            "label": "Ad image #14",
+            "ratio": "9/16",
+            "alt": "Meta ad creative #14"
+          },
+          {
+            "src": "/portfolio/Meta ad creatives/Images/meta-ad-creatives-image-15.avif",
+            "label": "Ad image #15",
+            "ratio": "9/16",
+            "alt": "Meta ad creative #15"
+          },
+          {
+            "src": "/portfolio/Meta ad creatives/Images/meta-ad-creatives-image-16.avif",
+            "label": "Ad image #16",
+            "ratio": "9/16",
+            "alt": "Meta ad creative #16"
           }
         ]
       },
-      "subtitle": "Since 2019 I manage Meta Ads, from account setups to finished ads in every format and I managed over 50.000€ ad spend per month, even when AI was not around."
+      "subtitle": "Since 2019 I manage everything connected to Meta Ads & Ad Creatives. I managed over 50.000€ ad spend per month, even when AI was not around."
     },
     {
       "id": "case-landing-page",

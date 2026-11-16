@@ -69,6 +69,8 @@
   }
 
   var ICON_ARROWS = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 7l-5 5 5 5M15 7l5 5-5 5"/></svg>';
+  var ICON_CHEV_R = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
+  var ICON_CHEV_L = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
   var ICON_CLOSE = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 
   /* ── layout-specific visuals ─────────────────────────────────────── */
@@ -90,30 +92,45 @@
             '<span class="cs-compare__handle" aria-hidden="true"><span class="cs-compare__knob">' + ICON_ARROWS + '</span></span>' +
             '<input class="cs-compare__range" type="range" min="0" max="100" step="0.1" value="50" aria-label="Drag to compare old and new image" />' +
           '</div>' +
-          '<div class="cs-compare__labels"><span class="cs-chip">' + esc(L.old) + '</span><span class="cs-chip">' + esc(L.new) + '</span></div>' +
-          (m.fullGallery ? '<button type="button" class="cs-textbtn cs-gallery-open">View full gallery</button>' : '') +
+          '<div class="cs-compare__labels"><span class="cs-chip">' + esc(L.old) + '</span>' +
+            '<button type="button" class="cs-textbtn cs-gallery-open">View full gallery</button>' +
+            '<span class="cs-chip">' + esc(L.new) + '</span></div>' +
         '</div>';
       var thumbs = '<div class="cs-thumbs">' + m.grid.map(function (g, i) {
         return '<button type="button" class="cs-thumb cs-sq' + (i ? '' : ' is-active') + '" aria-pressed="' + !i + '" data-old="' + esc(url(g.old)) + '" data-new="' + esc(url(g.new)) + '"' +
-          ' data-alt="' + esc(g.alt || '') + '" data-ph="' + esc(g.label) + '" aria-label="Show ' + esc(g.alt || g.label) + ' in the large preview">' +
+          ' data-alt="' + esc(g.alt || '') + '" data-ph="' + esc(g.label) + '"' +
+          ' data-gallery="' + esc(JSON.stringify((g.gallery || []).map(url))) + '" aria-label="Show ' + esc(g.alt || g.label) + ' in the large preview">' +
           '<img src="' + esc(url(g.new)) + '" alt="" loading="lazy" decoding="async" draggable="false" onerror="this.parentNode.classList.add(\'is-missing\')" />' +
         '</button>';
       }).join('') + '</div>';
-      var dialog = m.fullGallery
-        ? '<dialog class="cs-dialog" aria-label="Full gallery">' +
-            '<div class="cs-dialog__head"><h4>' + esc(c.title) + '</h4>' +
+      /* popup — filled on open with the gallery of the selected thumb */
+      var dialog = '<dialog class="cs-dialog" aria-label="Full gallery">' +
+            '<div class="cs-dialog__head"><h4>Full gallery</h4>' +
             '<button type="button" class="cs-dialog__close" aria-label="Close gallery">' + ICON_CLOSE + '</button></div>' +
-            '<div class="cs-dialog__grid">' + m.fullGallery.map(function (g) { return media(g); }).join('') + '</div>' +
-          '</dialog>'
-        : '';
+            '<div class="cs-dialog__grid"></div>' +
+          '</dialog>';
       return '<div class="cs-v-gallery">' + compare + thumbs + '</div>' + dialog;
     },
 
-    /* Videos / Images tabs above a horizontal reel */
+    /* Videos / Images tabs above a 2-row slider (row 1 = items 1–8, row 2 = 9–16).
+       Arrow buttons move one column at a time; media load lazily, always one column ahead. */
     ads: function (c) {
-      function reel(items, name, hidden) {
-        return '<div class="cs-reel" data-panel="' + name + '" role="tabpanel" tabindex="0" aria-label="Ad ' + name + ', scroll sideways"' + (hidden ? ' hidden' : '') + '>' +
-          items.map(function (v) { return '<div class="cs-reel__item">' + media(v) + '</div>'; }).join('') + '</div>';
+      function slider(items, name, hidden) {
+        var cols = Math.ceil(items.length / 2);
+        return '<div class="cs-slider" data-panel="' + name + '" role="tabpanel" aria-label="Ad ' + name + '"' + (hidden ? ' hidden' : '') + '>' +
+          '<div class="cs-slider__track" style="--cols:' + cols + '">' +
+            items.map(function (v, i) {
+              var place = ' style="grid-row:' + (i < cols ? 1 : 2) + ';grid-column:' + (i % cols + 1) + '"';
+              var inner = isVideo(v.src)
+                ? '<video class="cs-video" data-src="' + esc(url(v.src)) + '" muted loop playsinline preload="none" aria-label="' + esc(v.label) + '"></video>'
+                : v.src ? '<img data-src="' + esc(url(v.src)) + '" alt="' + esc(v.alt || '') + '" decoding="async" draggable="false" />'
+                : '<span class="cs-ph">' + esc(v.label) + '</span>';
+              return '<div class="cs-slide" data-col="' + (i % cols) + '"' + place + '><div class="cs-media"' + ratio(v.ratio) + '>' + inner + '</div></div>';
+            }).join('') +
+          '</div>' +
+          '<button type="button" class="cs-arrow cs-arrow--prev" aria-label="Previous" hidden>' + ICON_CHEV_L + '</button>' +
+          '<button type="button" class="cs-arrow cs-arrow--next" aria-label="Next">' + ICON_CHEV_R + '</button>' +
+        '</div>';
       }
       var hasImages = c.media.images && c.media.images.length;
       var tabs = hasImages
@@ -122,11 +139,7 @@
             '<button type="button" role="tab" class="cs-tab" aria-selected="false" data-tab="images">Images</button>' +
           '</div>'
         : '';
-      var chips = '<div class="cs-stats">' + (c.stats || []).map(function (s) {
-        return '<div class="cs-stat"><span class="cs-stat__label">' + esc(s.label) + '</span>' +
-               '<strong class="cs-stat__value">' + t(s.value) + '</strong></div>';
-      }).join('') + '</div>';
-      return tabs + reel(c.media.videos, 'videos', false) + (hasImages ? reel(c.media.images, 'images', true) : '') + chips;
+      return tabs + slider(c.media.videos, 'videos', false) + (hasImages ? slider(c.media.images, 'images', true) : '');
     },
 
     /* 2×2 desktop browsers; the last one gets a phone overlapping its bottom-right */
@@ -191,6 +204,10 @@
         '<h3 class="case__title">' + t(c.title) + '</h3>' +
         (meta ? '<p class="case__meta">' + meta + '</p>' : '') +
         heroBlock(c.hero) +
+        (c.stats && c.stats.length ? '<div class="cs-stats">' + c.stats.map(function (x) {
+          return '<div class="cs-stat"><span class="cs-stat__label">' + esc(x.label) + '</span>' +
+                 '<strong class="cs-stat__value">' + t(x.value) + '</strong></div>';
+        }).join('') + '</div>' : '') +
         '<details class="case__how"><summary>How I did it<span class="case__how-icon" aria-hidden="true"></span></summary>' +
           '<div class="case__how-body"><dl>' +
             '<div><dt>Problem</dt><dd>' + t(s.problem) + '</dd></div>' +
@@ -260,7 +277,7 @@
       var token = 0;
       thumbs.forEach(function (b) {
         b.addEventListener('click', function () {
-          stopDemo();
+          if (demo) { demo.stopped = true; demo = null; }
           thumbs.forEach(function (x) { x.classList.toggle('is-active', x === b); x.setAttribute('aria-pressed', x === b); });
           var my = ++token;
           /* swap both layers together once both are decoded → no half-swapped frame */
@@ -270,6 +287,7 @@
             show(newImg, b.dataset.new, ok[1]);
             newImg.alt = b.dataset.alt;
             setPos(50);
+            runDemo(true);   /* replay the intro animation for the new pair */
           });
         });
       });
@@ -278,8 +296,9 @@
          Any interaction with the slider stops it. */
       var demo = null, touched = false;
       function stopDemo() { touched = true; if (demo) { demo.stopped = true; demo = null; } }
-      function runDemo() {
-        if (reduceMotion || touched) return;   /* user already took over → no demo */
+      function runDemo(force) {
+        if (reduceMotion || (touched && !force)) return;   /* user already took over → no demo */
+        if (demo) demo.stopped = true;
         var d = demo = { stopped: false };
         var steps = [[50, 100, 900], [100, 100, 1000], [100, 0, 1500], [0, 0, 1000], [0, 50, 900]];
         var i = 0, start = null;
@@ -307,7 +326,14 @@
       var dlg = sec.querySelector('.cs-dialog'), openBtn = sec.querySelector('.cs-gallery-open');
       if (dlg && openBtn && dlg.showModal) {
         openBtn.addEventListener('click', function () {
-          dlg.showModal(); document.documentElement.classList.add('cs-modal-open');
+          var active = g.querySelector('.cs-thumb.is-active') || thumbs[0];
+          var list = []; try { list = JSON.parse(active.dataset.gallery || '[]'); } catch (e) {}
+          var n = Array.prototype.indexOf.call(thumbs, active) + 1;
+          dlg.querySelector('h4').textContent = 'Gallery ' + n + ' · ' + list.length + ' images';
+          dlg.querySelector('.cs-dialog__grid').innerHTML = list.map(function (src, i) {
+            return '<div class="cs-media" style="aspect-ratio:1/1"><img src="' + esc(src) + '" alt="Gallery ' + n + ', image ' + (i + 1) + '" decoding="async" draggable="false" /></div>';
+          }).join('');
+          dlg.showModal(); dlg.scrollTop = 0; document.documentElement.classList.add('cs-modal-open');
         });
         dlg.querySelector('.cs-dialog__close').addEventListener('click', function () { dlg.close(); });
         dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });   /* backdrop */
@@ -325,10 +351,55 @@
           tabs.querySelectorAll('.cs-tab').forEach(function (x) {
             var on = x === b; x.classList.toggle('is-active', on); x.setAttribute('aria-selected', on);
           });
-          vis.querySelectorAll('.cs-reel[data-panel]').forEach(function (p) { p.hidden = p.dataset.panel !== b.dataset.tab; });
+          vis.querySelectorAll('[data-panel]').forEach(function (p) {
+            p.hidden = p.dataset.panel !== b.dataset.tab;
+            if (!p.hidden && p._update) p._update();
+          });
           vis.querySelectorAll('[hidden] video').forEach(function (v) { v.pause(); });
         });
       });
+    });
+  }
+
+  /* ── behaviour: ad sliders (arrows, one column per click, load one column ahead) ── */
+  function wireSliders() {
+    root.querySelectorAll('.cs-slider').forEach(function (sl) {
+      var track = sl.querySelector('.cs-slider__track');
+      var prev = sl.querySelector('.cs-arrow--prev'), next = sl.querySelector('.cs-arrow--next');
+      var slides = Array.prototype.slice.call(sl.querySelectorAll('.cs-slide'));
+      var near = false;
+      function colW() {
+        var a = slides[0], b = slides.filter(function (x) { return x.dataset.col === '1'; })[0];
+        return b ? b.offsetLeft - a.offsetLeft : a.offsetWidth;
+      }
+      function load(slide) {
+        var m = slide.querySelector('[data-src]');
+        if (!m) return;
+        m.src = m.dataset.src; m.removeAttribute('data-src');
+        if (m.tagName === 'VIDEO') { m.preload = 'auto'; m.load(); }
+      }
+      function update() {
+        if (sl.hidden) return;
+        var w = colW() || 1, x = track.scrollLeft;
+        var first = Math.floor(x / w), last = Math.ceil((x + track.clientWidth) / w) - 1;
+        if (near) slides.forEach(function (s) { if (+s.dataset.col <= last + 1) load(s); });   /* visible + next column */
+        var end = x + track.clientWidth >= track.scrollWidth - 2;
+        next.hidden = end;
+      }
+      sl._update = update;
+      next.addEventListener('click', function () {
+        prev.hidden = false;   /* stays visible from now on */
+        track.scrollBy({ left: colW(), behavior: reduceMotion ? 'auto' : 'smooth' });
+      });
+      prev.addEventListener('click', function () {
+        track.scrollBy({ left: -colW(), behavior: reduceMotion ? 'auto' : 'smooth' });
+      });
+      track.addEventListener('scroll', function () { window.requestAnimationFrame(update); }, { passive: true });
+      window.addEventListener('resize', update, { passive: true });
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (e) { if (e[0].isIntersecting) { near = true; update(); } }, { rootMargin: '600px 0px' }).observe(sl.closest('.case'));
+      } else { near = true; }
+      update();
     });
   }
 
@@ -417,13 +488,13 @@
       entries.forEach(function (e) {
         var v = e.target;
         if (e.isIntersecting) {
-          if (!v.getAttribute('src')) v.src = v.dataset.src;
+          if (!v.getAttribute('src') && v.dataset.src) { v.src = v.dataset.src; v.removeAttribute('data-src'); }
           if (!reduceMotion) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
         } else {
           v.pause();
         }
       });
-    }, { threshold: 0.4 });
+    }, { threshold: 0.6 });
     videos.forEach(function (v) { vio.observe(v); });
   }
 
@@ -434,6 +505,7 @@
     wireDetails();
     wireGallery();
     wireTabs();
+    wireSliders();
     wireScrollers();
     wireVisibility();
     /* arrived with a #case-… hash → jump there now that it exists */
