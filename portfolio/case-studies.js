@@ -213,12 +213,12 @@
   };
 
   /* ── one section ─────────────────────────────────────────────────── */
-  function heroBlock(h) {
+  function heroBlock(h, size) {   /* size: 'small' forces the compact number size */
     if (!h) return '';
     var list = Array.isArray(h) ? h : [h];
     var long = list.length === 1 && String(list[0].value).replace('[PH]', '').trim().length > 6;
     var maxLen = Math.max.apply(null, list.map(function (x) { return String(x.value).replace('[PH]', '').trim().length + (x.trend ? 1 : 0); }));
-    return '<div class="case__hero' + (list.length > 1 ? ' case__hero--duo' : '') + (list.length > 1 && maxLen >= 6 ? ' case__hero--duo-long' : '') + (long ? ' case__hero--long' : '') + '">' +
+    return '<div class="case__hero' + (list.length > 1 ? ' case__hero--duo' : '') + (list.length > 1 && (maxLen >= 6 || size === 'small') ? ' case__hero--duo-long' : '') + (long ? ' case__hero--long' : '') + '">' +
       list.map(function (x) {
         var trend = x.trend === 'up'
           ? '<svg class="case__trend" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="increase"><path d="M12 20V5M5 11l7-7 7 7"/></svg>'
@@ -237,7 +237,7 @@
         '<ul class="case__tags">' + c.tags.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' +
         '<h3 class="case__title">' + t(c.title) + '</h3>' +
         (meta ? '<p class="case__meta">' + meta + '</p>' : '') +
-        heroBlock(c.hero) +
+        heroBlock(c.hero, c.heroSize) +
         (c.stats && c.stats.length ? '<div class="cs-stats">' + c.stats.map(function (x) {
           return '<div class="cs-stat"><span class="cs-stat__label">' + esc(x.label) + '</span>' +
                  '<strong class="cs-stat__value">' + t(x.value) + '</strong></div>';
