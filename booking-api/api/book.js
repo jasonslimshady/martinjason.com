@@ -24,15 +24,27 @@ const MEETING_TITLES = {
   partner:       'Gallery Partner werden - Gespräch mit Martin, Jason',
 };
 
-function getEventTitle(meetingTypeId, fallbackName) {
+// English titles — used when the booking comes from the English /portfolio page (lang: 'en')
+const MEETING_TITLES_EN = {
+  erstgespraech: 'Free 30-minute intro call with Jason Martin',
+  hiring:        'Hiring call with Jason Martin',
+  project:       'Project call with Jason Martin',
+};
+
+function getEventTitle(meetingTypeId, fallbackName, lang) {
+  if (lang === 'en') return MEETING_TITLES_EN[meetingTypeId] || 'Call with Jason Martin';
   return MEETING_TITLES[meetingTypeId] || `Strategiegespräch mit ${fallbackName}`;
+}
+
+function escHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
 // ── Formatters ────────────────────────────────────────────────────────────────
 
-function fmtDateTime(isoString, timezone) {
+function fmtDateTime(isoString, timezone, lang) {
   try {
-    return new Intl.DateTimeFormat('de-DE', {
+    return new Intl.DateTimeFormat(lang === 'en' ? 'en-GB' : 'de-DE', {
       timeZone: timezone,
       weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
       hour: '2-digit', minute: '2-digit', hour12: false,
@@ -40,9 +52,9 @@ function fmtDateTime(isoString, timezone) {
   } catch (_) { return isoString; }
 }
 
-function fmtTime(isoString, timezone) {
+function fmtTime(isoString, timezone, lang) {
   try {
-    return new Intl.DateTimeFormat('de-DE', {
+    return new Intl.DateTimeFormat(lang === 'en' ? 'en-GB' : 'de-DE', {
       timeZone: timezone,
       hour: '2-digit', minute: '2-digit', hour12: false,
     }).format(new Date(isoString));
@@ -51,11 +63,19 @@ function fmtTime(isoString, timezone) {
 
 // ── Calendar event ────────────────────────────────────────────────────────────
 
-async function createCalendarEvent({ slot, name, email, description, timezone, meetingTypeId }) {
+async function createCalendarEvent({ slot, name, email, description, timezone, meetingTypeId, lang }) {
   const calendar = getCalendarClient();
-  const eventTitle = getEventTitle(meetingTypeId, name);
+  const eventTitle = getEventTitle(meetingTypeId, name, lang);
 
-  const eventDescription =
+  const eventDescription = lang === 'en'
+    ? `30-minute call: ${eventTitle}\n\n` +
+      (description ? `Topic: ${description}\n\n` : '') +
+      `Booked time (guest's time zone, ${timezone}):\n` +
+      `${fmtDateTime(slot.start, timezone, 'en')} – ${fmtTime(slot.end, timezone, 'en')}\n\n` +
+      `Booked time (Bali / Jason):\n` +
+      `${fmtDateTime(slot.start, 'Asia/Makassar', 'en')} – ${fmtTime(slot.end, 'Asia/Makassar', 'en')}\n\n` +
+      `A Google Meet link is added automatically.`
+    :
     `30-Minuten ${eventTitle}\n\n` +
     (description ? `Thema: ${description}\n\n` : '') +
     `Gebuchte Zeit (Besucherzone ${timezone}):\n` +
@@ -164,10 +184,83 @@ function buildEmailHtml({ name, slot, timezone, description }) {
 </html>`;
 }
 
-async function sendConfirmationEmail({ name, email, slot, timezone, description }) {
+// English confirmation (bookings from /portfolio) — same layout as the German one
+function buildEmailHtmlEn({ name, slot, timezone, description }) {
+  const dateStr     = fmtDateTime(slot.start, timezone, 'en');
+  const timeEnd     = fmtTime(slot.end, timezone, 'en');
+  const baliDateStr = fmtDateTime(slot.start, 'Asia/Makassar', 'en');
+  const n = escHtml(name), d = escHtml(description);
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#F7F5F1;font-family:-apple-system,BlinkMacSystemFont,'Inter',sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F5F1;padding:40px 16px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
+
+        <tr><td style="padding-bottom:24px;">
+          <p style="margin:0;font-size:13px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:#0A84FF;">Jason Martin</p>
+          <p style="margin:4px 0 0;font-size:13px;color:#8A8A92;">CRO &amp; Performance Designer</p>
+        </td></tr>
+
+        <tr><td style="background:#fff;border-radius:20px;border:1px solid rgba(10,10,10,0.08);padding:36px 32px;box-shadow:0 4px 24px rgba(10,10,10,0.06);">
+
+          <div style="width:52px;height:52px;border-radius:50%;background:rgba(10,132,255,0.08);border:1px solid rgba(10,132,255,0.18);display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
+            <span style="font-size:22px;">✅</span>
+          </div>
+
+          <h1 style="margin:0 0 8px;font-size:22px;font-weight:600;letter-spacing:-0.02em;color:#0A0A0A;">You're booked!</h1>
+          <p style="margin:0 0 24px;font-size:15px;color:#54545A;line-height:1.55;">
+            Hi ${n}, thanks for booking a call. It's in my calendar, and you'll receive a Google Calendar invite in a moment.
+          </p>
+
+          <div style="background:#F7F5F1;border-radius:12px;padding:20px 24px;margin-bottom:24px;">
+            <p style="margin:0 0 4px;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.1em;color:#8A8A92;">Your call</p>
+            <p style="margin:0 0 2px;font-size:16px;font-weight:600;color:#0A0A0A;">${dateStr}</p>
+            <p style="margin:0;font-size:13px;color:#54545A;">until ${timeEnd} · your time zone</p>
+            ${timezone !== 'Asia/Makassar' ? `<p style="margin:6px 0 0;font-size:12px;color:#8A8A92;">Jason's time (Bali): ${baliDateStr}</p>` : ''}
+          </div>
+
+          ${d ? `
+          <div style="border-left:3px solid #0A84FF;padding:8px 16px;margin-bottom:24px;background:rgba(10,132,255,0.04);border-radius:0 8px 8px 0;">
+            <p style="margin:0;font-size:13px;color:#54545A;font-style:italic;">"${d}"</p>
+          </div>` : ''}
+
+          <div style="margin-bottom:24px;">
+            <p style="margin:0 0 10px;font-size:14px;font-weight:600;color:#0A0A0A;">What to expect</p>
+            <p style="margin:0 0 6px;font-size:14px;color:#54545A;">💬 &nbsp;We talk about your role or project and what you need</p>
+            <p style="margin:0 0 6px;font-size:14px;color:#54545A;">📈 &nbsp;I share relevant work and how I'd approach it</p>
+            <p style="margin:0;font-size:14px;color:#54545A;">🎥 &nbsp;We meet on Google Meet (the link is in the calendar invite)</p>
+          </div>
+
+          <p style="margin:0 0 4px;font-size:14px;color:#54545A;">Talk soon,</p>
+          <p style="margin:0;font-size:15px;font-weight:600;color:#0A0A0A;">Jason Martin</p>
+          <p style="margin:2px 0 0;font-size:13px;color:#8A8A92;">martinjason.com</p>
+
+        </td></tr>
+
+        <tr><td style="padding-top:20px;text-align:center;">
+          <p style="margin:0;font-size:12px;color:#8A8A92;">
+            Need to reschedule? Just reply to this email.
+          </p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
+async function sendConfirmationEmail({ name, email, slot, timezone, description, lang }) {
   const gmail   = getGmailClient();
-  const subject = `Termin bestätigt: ${fmtDateTime(slot.start, timezone)}`;
-  const html    = buildEmailHtml({ name, slot, timezone, description });
+  const subject = lang === 'en'
+    ? `Call confirmed: ${fmtDateTime(slot.start, timezone, 'en')}`
+    : `Termin bestätigt: ${fmtDateTime(slot.start, timezone)}`;
+  const html    = lang === 'en'
+    ? buildEmailHtmlEn({ name, slot, timezone, description })
+    : buildEmailHtml({ name, slot, timezone, description });
 
   const message = [
     `From: "${HOST_NAME}" <${HOST_EMAIL}>`,
@@ -209,6 +302,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST')   return res.status(405).json({ error: 'Method not allowed' });
 
   const { slot, name, email, description, timezone, meetingType } = req.body || {};
+  const lang = (req.body || {}).lang === 'en' ? 'en' : 'de';   // 'en' = English /portfolio page
 
   // Validate
   if (!slot?.start || !slot?.end || !name?.trim() || !email?.trim()) {
@@ -225,12 +319,12 @@ export default async function handler(req, res) {
 
   try {
     // 1. Create calendar event
-    await createCalendarEvent({ slot, name, email, description: description?.trim() || '', timezone: tz, meetingTypeId: meetingType });
+    await createCalendarEvent({ slot, name, email, description: description?.trim() || '', timezone: tz, meetingTypeId: meetingType, lang });
     console.log(`[book] Calendar event created for ${email} at ${slot.start}`);
 
     // 2. Send confirmation email (non-fatal if it fails)
     try {
-      await sendConfirmationEmail({ name, email, slot, timezone: tz, description: description?.trim() || '' });
+      await sendConfirmationEmail({ name, email, slot, timezone: tz, description: description?.trim() || '', lang });
       console.log(`[book] Confirmation email sent to ${email}`);
     } catch (emailErr) {
       console.error('[book] Email send failed (booking still confirmed):', emailErr.message);
