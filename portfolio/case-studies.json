@@ -13,8 +13,8 @@
       "title": "AI product galleries",
       "hero": [
         {
-          "value": "2.5%",
-          "label": "average conversion increase",
+          "value": "Ø 2.5%",
+          "label": "conversion increase",
           "trend": "up"
         },
         {
@@ -23,9 +23,9 @@
         }
       ],
       "story": {
-        "problem": "[PH] Product pages relied on flat packshots that didn't sell the product.",
-        "action": "[PH] I generated a full lifestyle and detail gallery with AI from simple product photos.",
-        "result": "[PH] A complete studio-grade gallery in days, without a photoshoot."
+        "problem": "Product pages relied on flat pack shots that show the product, but didn’t sell it.",
+        "action": "I created full detail galleries with the help of AI from simple & already existing product photos.",
+        "result": "A complete studio-grade gallery done in days and optimised for conversion, without a new photoshoot."
       },
       "media": {
         "grid": [
@@ -137,7 +137,7 @@
           "new": "New"
         }
       },
-      "subtitle": "Many brands don’t want to spend thousands on a single photo shooting, so I create full product galleries supported by AI, ready in days, not weeks.",
+      "subtitle": "Many brands don’t want to spend thousands on a single photo shooting, so I create full product galleries supported by AI for their shops & Amazon listings. Finished in days, not weeks. No new photo shootings needed and with the know-how of CRO - not just to make it look nice.",
       "flip": true
     },
     {
@@ -152,9 +152,9 @@
       "title": "AI A+ Content",
       "subtitle": "A+ content created with the help of AI image generation, to sell the benefits bullet points can’t.",
       "story": {
-        "problem": "[PH] Problem in one sentence.",
-        "action": "[PH] What I did in one sentence.",
-        "result": "[PH] Result in one sentence."
+        "problem": "Non-existing or badly converting A+ content.",
+        "action": "I created full detail A+ content with the help of AI from simple & already existing product photos.",
+        "result": "Complete studio-grade A+ content done in days and optimised for conversion, without a new photoshoot."
       },
       "media": {
         "desktops": [
@@ -369,7 +369,18 @@
             ]
           }
         ]
-      }
+      },
+      "hero": [
+        {
+          "value": "Ø 1.9%",
+          "label": "conversion increase",
+          "trend": "up"
+        },
+        {
+          "value": "€0",
+          "label": "photoshoot cost"
+        }
+      ]
     },
     {
       "id": "case-meta-ads",
@@ -381,22 +392,22 @@
       ],
       "title": "Meta & TikTok\nMedia Buying &\nCreative Strategy",
       "hero": {
-        "value": "5.2x",
-        "label": "average return on ad spend"
+        "value": "Ø 5.2x",
+        "label": "ROAS"
       },
       "story": {
-        "problem": "[PH] Ads fatigued fast and CPA kept climbing.",
-        "action": "[PH] I built a weekly testing system of hooks, UGC and static variants.",
-        "result": "[PH] Lower CPA and scalable winners every month."
+        "problem": "Ads fatigued fast and CPA kept climbing.",
+        "action": "I built a weekly testing system of hooks, UGC and static variants.",
+        "result": "Lower CPA and scalable winners every month."
       },
       "stats": [
         {
-          "label": "CPA",
-          "value": "−35%"
+          "label": "Ø CAC",
+          "value": "12€"
         },
         {
-          "label": "ROAS",
-          "value": "5.2x"
+          "label": "Ø CTR",
+          "value": "5.4%"
         },
         {
           "label": "Ad spend",
@@ -585,7 +596,7 @@
           }
         ]
       },
-      "subtitle": "Since 2019 I manage everything connected to Meta Ads & Ad Creatives. I managed over 50.000€ ad spend per month, even when AI was not around.",
+      "subtitle": "Since 2019 I manage hundreds of ad accounts & thousands of creatives. In total I managed over 3.000.000€ ad spend and at the highest point 50.000€ ad spend per month, even when AI was not around.",
       "flip": true
     },
     {
@@ -602,9 +613,9 @@
         "label": "average conversion rate"
       },
       "story": {
-        "problem": "[PH] High traffic, but visitors bounced before adding to cart.",
-        "action": "[PH] I rebuilt the page around one offer and A/B-tested the new layout.",
-        "result": "[PH] Conversion rate more than doubled at the same ad spend."
+        "problem": "High traffic, but visitors bounced before adding to cart.",
+        "action": "I rebuilt the pages around new offers and A/B-tested with data from Microsoft Clarity.",
+        "result": "The average conversion rate more than doubled with the same ad spend."
       },
       "media": {
         "desktops": [
@@ -647,9 +658,9 @@
         "label": "revenue generated"
       },
       "story": {
-        "problem": "[PH] Email was an afterthought with no automated flows.",
-        "action": "[PH] I set up and designed welcome, cart and post-purchase flows.",
-        "result": "[PH] Email became a reliable, hands-off revenue channel."
+        "problem": "Email campaigns or flows did not convert good enough.",
+        "action": "I set up flows and email campaigns actually optimised for conversion.",
+        "result": "Email became a reliable, profitable & often the companies best marketing channel."
       },
       "media": {
         "emails": [
@@ -702,9 +713,9 @@
         }
       ],
       "story": {
-        "problem": "[PH] Managing a property meant juggling spreadsheets and chats.",
-        "action": "[PH] I designed and shipped one app for web, iOS and Android.",
-        "result": "[PH] Live on all three platforms with real users."
+        "problem": "In Bali people search on Facebook for long-term rentals & property, but Facebook was never built for this. There are many scammers, inaccurate information, no search filters and no map view.",
+        "action": "I designed and shipped the whole platform for web, iOS and Android with the help of Claude.",
+        "result": "2600+ users that love the platform and found their current place to stay or property to buy."
       },
       "badges": [
         {
@@ -747,7 +758,7 @@
           }
         ]
       },
-      "subtitle": "Nest replaces Facebook Marketplace/Groups and makes long-term renting, buying homes & buying land across Bali easy. Filter your search, see listings on a map and message verified owners directly.",
+      "subtitle": "I created Nest completely by myself to replace Facebook Marketplace/Groups and makes long-term renting, buying homes & buying land across Bali easy. Filter your search, see listings on a map and message verified owners directly.",
       "flip": false
     },
     {
@@ -760,9 +771,9 @@
       ],
       "title": "Tierzucht24 shop",
       "story": {
-        "problem": "[PH] The old shop was hard to navigate, especially on mobile.",
-        "action": "[PH] I redesigned the shop with clear categories and a faster checkout.",
-        "result": "[PH] More revenue from the same traffic."
+        "problem": "The old shop was hard to navigate and had mostly cutout images for its products.",
+        "action": "I redesigned the homepage, menu, categories and product pages and created 125 new conversion-optimised AI image galleries within 5 months for the bestselling products.",
+        "result": "More revenue from the same traffic."
       },
       "media": {
         "desktop": {
@@ -777,7 +788,26 @@
         }
       },
       "flip": true,
-      "subtitle": "Redesign of one of Germanys biggest farm-supply shops, from homepage through menu and product pages."
+      "subtitle": "Redesign of one of Germany’s biggest farm-supply shops, including 125 new AI product galleries created for the bestselling products.",
+      "hero": [
+        {
+          "value": "11%",
+          "label": "AOV increase"
+        },
+        {
+          "value": "Ø 0.5%",
+          "label": "conversion increase",
+          "trend": "up"
+        },
+        {
+          "value": "55%",
+          "label": "more returning customers"
+        },
+        {
+          "value": "7%",
+          "label": "more revenue"
+        }
+      ]
     },
     {
       "id": "case-3d",
@@ -790,14 +820,20 @@
       ],
       "title": "3D Renderings",
       "subtitle": "Photorealistic product renders as the foundation for the edubily redesign 2025, built in Blender.",
-      "hero": {
-        "value": "32",
-        "label": "product models"
-      },
+      "hero": [
+        {
+          "value": "32",
+          "label": "product models"
+        },
+        {
+          "value": "50.000€+",
+          "label": "costs saved"
+        }
+      ],
       "story": {
-        "problem": "[PH] Problem in one sentence.",
-        "action": "[PH] What I did in one sentence.",
-        "result": "[PH] Result in one sentence."
+        "problem": "edubily originally planned a photo shooting of the new designed products, which would have cost an insane amount, so I offered to create 3D renderings for everything while I was employed there.",
+        "action": "I created 32 product models for different products and sizes.",
+        "result": "Saving edubily tens of thousands in Euro and setting them up for any motion, design or now AI related use."
       },
       "media": {
         "items": [

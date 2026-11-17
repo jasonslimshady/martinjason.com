@@ -415,6 +415,16 @@
       -webkit-user-drag: none;
     }
 
+    /* Transition band: same vertical placement as object-fit: contain, but always
+       stretched to the full width so its ends are never cut off on wide screens. */
+    @media (min-width: 981px) {
+      .parallax-layer--transition img {
+        position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+        width: 100%; height: auto; aspect-ratio: 2535 / 1426; max-height: 100%;
+        object-fit: fill;
+      }
+    }
+
     /* 8. REVEAL — initial hidden state (prevents FOUC) */
     .reveal {
       opacity: 0; transform: translateY(18px);
@@ -487,6 +497,7 @@
     .world-card {
       position: relative; aspect-ratio: 3 / 4; overflow: hidden; border-radius: var(--radius-xl);
       isolation: isolate; /* keeps the rounded clip on the video in Safari */
+      box-shadow: 0 2px 6px rgba(10,10,10,0.08), 0 18px 44px rgba(10,10,10,0.16);
       background: #111; color: #fff; outline: none; cursor: default;
     }
     .world-card__img, .world-card__video {
@@ -538,7 +549,7 @@
     /* Desktop: cards fill the viewport height (e.g. MacBook Pro 14").
        Title sits a little below the middle, the hover list in the lower part. */
     @media (min-width: 761px) {
-      .world-card { aspect-ratio: auto; height: max(44.444vw, 100vh); }
+      .world-card { aspect-ratio: auto; height: max(40vw, 86vh); }
       .world-card__title { top: 56%; }
       .world-card__list { bottom: 9%; }
       .world-card__shade { top: 45%; height: auto; }
@@ -641,7 +652,24 @@
   <!-- ====================================================================
        Glass nav (sticky)
        ==================================================================== -->
-  <header class="nav-wrap"></header>
+  <header class="nav-wrap">
+    <nav class="nav glass" aria-label="Portfolio navigation">
+      <a class="nav__brand" href="/" aria-label="Jason Martin — Home">
+        <img class="nav__brand-mark" src="/images/favicon.png" alt="Jason Martin" width="32" height="32" />
+        <span class="nav__brand-name">Martin, Jason</span>
+      </a>
+      <ul class="nav__links">
+        <li><a href="#case-ai-gallery">Product galleries</a></li>
+        <li><a href="#case-aplus">A+ content</a></li>
+        <li><a href="#case-meta-ads">Media Buying</a></li>
+        <li><a href="#case-landing-page">Landing pages</a></li>
+        <li><a href="#case-email-flows">Email marketing</a></li>
+        <li><a href="#case-nest-app">UI/UX</a></li>
+        <li><a href="#case-tierzucht24">Shop</a></li>
+        <li><a href="#about">About me</a></li>
+      </ul>
+    </nav>
+  </header>
 
   <main id="top">
 
@@ -707,8 +735,8 @@
           </picture>
         </div>
 
-        <!-- Layer 8 — Transition overlay, fixed -->
-        <div class="parallax-layer" data-depth="0">
+        <!-- Layer 8 — Transition overlay, fixed (stretched to full width, see .parallax-layer--transition) -->
+        <div class="parallax-layer parallax-layer--transition" data-depth="0">
           <picture>
             <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/8-transition.avif" type="image/avif">
             <img src="images/Homepage%20Header%20Parallax%20Images/8-transition.avif" alt="" decoding="async" />
@@ -744,7 +772,7 @@
          ================================================================== -->
     <section id="worlds" class="section worlds">
       <div class="container">
-        <h2 class="worlds__title reveal">ICH KOMBINIERE <br class="worlds__br">3 WELTEN</h2>
+        <h2 class="worlds__title reveal">I COMBINE <br class="worlds__br">3 WORLDS</h2>
       </div>
       <div class="worlds-dim" aria-hidden="true"></div>
       <div class="worlds__grid">
