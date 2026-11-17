@@ -361,10 +361,11 @@
         range.addEventListener(ev, stopDemo, { passive: true });
       });
       if ('IntersectionObserver' in window) {
+        /* first demo only once ~30% of the section is in view (never on load); reduced motion → no demo */
         var dio = new IntersectionObserver(function (e) {
           if (e[0].isIntersecting) { dio.disconnect(); setTimeout(runDemo, 300); }
-        }, { threshold: 0.6 });
-        dio.observe(box);
+        }, { threshold: 0.3 });
+        dio.observe(sec);
       }
 
       /* full gallery popup */

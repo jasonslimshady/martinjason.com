@@ -92,12 +92,21 @@
 
   var overlay = null;
 
+  /* Copy by page language: English pages (<html lang="en">, e.g. /portfolio) get English text;
+     German pages keep the original German copy unchanged. */
+  var EN = /^en/i.test(document.documentElement.lang || '');
+  var T = EN ? {
+    label: 'Privacy settings', eyebrow: 'Cookies &amp; privacy', title: 'Privacy settings',
+    body: 'We use cookies for web analytics (Google Analytics 4) and session recordings (Microsoft Clarity) to keep improving this website. You can withdraw your consent at any time.',
+    link: 'Read the privacy policy\u00a0→', reject: 'Decline', accept: 'Accept all'
+  } : null;
+
   function createPopup() {
     overlay = document.createElement('div');
     overlay.className = 'cookie-overlay';
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
-    overlay.setAttribute('aria-label', 'Datenschutz-Einstellungen');
+    overlay.setAttribute('aria-label', T ? T.label : 'Datenschutz-Einstellungen');
 
     var shell = document.createElement('div');
     shell.className = 'cookie-popup-shell';
@@ -118,6 +127,15 @@
         '<button class="cp-btn cp-btn--secondary" data-action="reject">Ablehnen</button>' +
         '<button class="cp-btn cp-btn--primary" data-action="accept">Alle akzeptieren</button>' +
       '</div>';
+
+    if (T) {   /* English page → English copy */
+      popup.querySelector('.cp-eyebrow').innerHTML = T.eyebrow;
+      popup.querySelector('.cp-title').textContent = T.title;
+      popup.querySelector('.cp-body').textContent = T.body;
+      popup.querySelector('.cp-link').textContent = T.link;
+      popup.querySelector('[data-action="reject"]').textContent = T.reject;
+      popup.querySelector('[data-action="accept"]').textContent = T.accept;
+    }
 
     shell.appendChild(popup);
     overlay.appendChild(shell);
