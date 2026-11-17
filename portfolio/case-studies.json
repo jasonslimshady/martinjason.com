@@ -13,7 +13,7 @@
       "title": "AI product galleries",
       "hero": [
         {
-          "value": "Ø 2.5%",
+          "value": "Avg. 2.5%",
           "label": "conversion increase",
           "trend": "up"
         },
@@ -32,8 +32,8 @@
           {
             "old": "/portfolio/AI Product gallery/ai-product-gallery-1-old.avif",
             "new": "/portfolio/AI Product gallery/ai-product-gallery-1-new.avif",
-            "label": "1:1 gallery image #1",
-            "alt": "Milo & Mia product image #1",
+            "label": "Milo & Mia – Veal, pumpkin & millet wet dog food (image 1)",
+            "alt": "AI product gallery image: Milo & Mia veal, pumpkin & millet wet dog food",
             "gallery": [
               "/portfolio/AI Product gallery/gallery-1/1.avif",
               "/portfolio/AI Product gallery/gallery-1/2.avif",
@@ -45,13 +45,13 @@
               "/portfolio/AI Product gallery/gallery-1/8.avif",
               "/portfolio/AI Product gallery/gallery-1/9.avif"
             ],
-            "galleryTitle": "Milo & Mia - Kalb, Kürbis & Hirse Nassfutter für Hunde"
+            "galleryTitle": "Milo & Mia – Veal, pumpkin & millet wet dog food"
           },
           {
             "old": "/portfolio/AI Product gallery/ai-product-gallery-2-old.avif",
             "new": "/portfolio/AI Product gallery/ai-product-gallery-2-new.avif",
-            "label": "1:1 gallery image #2",
-            "alt": "Milo & Mia product image #2",
+            "label": "Tierzucht24 – FlyX fly trap (image 2)",
+            "alt": "AI product gallery image: Tierzucht24 FlyX fly trap",
             "gallery": [
               "/portfolio/AI Product gallery/gallery-2/1.avif",
               "/portfolio/AI Product gallery/gallery-2/2.avif",
@@ -62,13 +62,13 @@
               "/portfolio/AI Product gallery/gallery-2/7.avif",
               "/portfolio/AI Product gallery/gallery-2/8.avif"
             ],
-            "galleryTitle": "Tierzucht24 - FlyX Fliegenfalle"
+            "galleryTitle": "Tierzucht24 – FlyX fly trap"
           },
           {
             "old": "/portfolio/AI Product gallery/ai-product-gallery-3-old.avif",
             "new": "/portfolio/AI Product gallery/ai-product-gallery-3-new.avif",
-            "label": "1:1 gallery image #3",
-            "alt": "Milo & Mia product image #3",
+            "label": "Tierzucht24 – Rat bait box (image 3)",
+            "alt": "AI product gallery image: Tierzucht24 rat bait box",
             "gallery": [
               "/portfolio/AI Product gallery/gallery-3/1.avif",
               "/portfolio/AI Product gallery/gallery-3/2.avif",
@@ -80,13 +80,13 @@
               "/portfolio/AI Product gallery/gallery-3/8.avif",
               "/portfolio/AI Product gallery/gallery-3/9.avif"
             ],
-            "galleryTitle": "Tierzucht24 - Rattenköderbox"
+            "galleryTitle": "Tierzucht24 – Rat bait box"
           },
           {
             "old": "/portfolio/AI Product gallery/ai-product-gallery-4-old.avif",
             "new": "/portfolio/AI Product gallery/ai-product-gallery-4-new.avif",
-            "label": "1:1 gallery image #4",
-            "alt": "Milo & Mia product image #4",
+            "label": "Smart Ring (image 4)",
+            "alt": "AI product gallery image: smart ring",
             "gallery": [
               "/portfolio/AI Product gallery/gallery-4/1.avif",
               "/portfolio/AI Product gallery/gallery-4/2.avif",
@@ -97,13 +97,14 @@
               "/portfolio/AI Product gallery/gallery-4/7.avif",
               "/portfolio/AI Product gallery/gallery-4/8.avif"
             ],
-            "galleryTitle": "Smart Ring"
+            "galleryTitle": "Smart Ring",
+            "_todo": "TODO: brand of the smart ring unknown — add the brand to galleryTitle, alt and label."
           },
           {
             "old": "/portfolio/AI Product gallery/ai-product-gallery-5-old.avif",
             "new": "/portfolio/AI Product gallery/ai-product-gallery-5-new.avif",
-            "label": "1:1 gallery image #5",
-            "alt": "Milo & Mia product image #5",
+            "label": "Tierzucht24 – Wasp spray (image 5)",
+            "alt": "AI product gallery image: Tierzucht24 wasp spray",
             "gallery": [
               "/portfolio/AI Product gallery/gallery-5/1.avif",
               "/portfolio/AI Product gallery/gallery-5/2.avif",
@@ -113,13 +114,13 @@
               "/portfolio/AI Product gallery/gallery-5/6.avif",
               "/portfolio/AI Product gallery/gallery-5/7.avif"
             ],
-            "galleryTitle": "Tierzucht24 - Wespenspray"
+            "galleryTitle": "Tierzucht24 – Wasp spray"
           },
           {
             "old": "/portfolio/AI Product gallery/ai-product-gallery-6-old.avif",
             "new": "/portfolio/AI Product gallery/ai-product-gallery-6-new.avif",
-            "label": "1:1 gallery image #6",
-            "alt": "Milo & Mia product image #6",
+            "label": "Tierzucht24 – PetSafe underground cat fence (image 6)",
+            "alt": "AI product gallery image: Tierzucht24 PetSafe underground cat fence",
             "gallery": [
               "/portfolio/AI Product gallery/gallery-6/1.avif",
               "/portfolio/AI Product gallery/gallery-6/2.avif",
@@ -129,7 +130,7 @@
               "/portfolio/AI Product gallery/gallery-6/6.avif",
               "/portfolio/AI Product gallery/gallery-6/7.avif"
             ],
-            "galleryTitle": "Tierzucht24 - Petsafe Cats unterirdischer Katzenzaun"
+            "galleryTitle": "Tierzucht24 – PetSafe underground cat fence"
           }
         ],
         "compareLabels": {
@@ -137,8 +138,9 @@
           "new": "New"
         }
       },
-      "subtitle": "Many brands don’t want to spend thousands on a single photo shooting, so I create full product galleries supported by AI for their shops & Amazon listings. Finished in days, not weeks. No new photo shootings needed and with the know-how of CRO - not just to make it look nice.",
-      "flip": true
+      "subtitle": "Many brands don’t want to spend thousands on a single photoshoot, so I create full product galleries supported by AI for their shops & Amazon listings. Finished in days, not weeks. No new photoshoots needed and built with CRO know-how, not just to look nice.",
+      "flip": true,
+      "_todo": "TODO: 'Avg. 2.5% conversion increase' (here) vs 'Avg. 0.5%' (Tierzucht24) — state whether each is percentage points or relative lift, then update both labels."
     },
     {
       "id": "case-aplus",
@@ -150,9 +152,9 @@
         "Marketing"
       ],
       "title": "AI A+ Content",
-      "subtitle": "A+ content created with the help of AI image generation, to sell the benefits bullet points can’t.",
+      "subtitle": "AI-generated A+ content that sells the benefits bullet points can’t.",
       "story": {
-        "problem": "Non-existing or badly converting A+ content.",
+        "problem": "Missing or poorly converting A+ content.",
         "action": "I created full detail A+ content with the help of AI from simple & already existing product photos.",
         "result": "Complete studio-grade A+ content done in days and optimised for conversion, without a new photoshoot."
       },
@@ -160,7 +162,7 @@
         "desktops": [
           {
             "label": "Belly Bites",
-            "alt": "Belly Bites A+ content",
+            "alt": "Belly Bites dog snack A+ content",
             "modules": [
               {
                 "src": "/portfolio/A+ Content-web/1.Belly Bites/1.avif",
@@ -212,8 +214,8 @@
             ]
           },
           {
-            "label": "Zangenfalle",
-            "alt": "Zangenfalle A+ content",
+            "label": "Pincer trap",
+            "alt": "Pincer trap A+ content",
             "modules": [
               {
                 "src": "/portfolio/A+ Content-web/2.Zangenfalle/1.avif",
@@ -253,8 +255,8 @@
             ]
           },
           {
-            "label": "Schubkarrenreifen",
-            "alt": "Schubkarrenreifen A+ content",
+            "label": "Wheelbarrow tyre",
+            "alt": "Wheelbarrow tyre A+ content",
             "modules": [
               {
                 "src": "/portfolio/A+ Content-web/3.Schubkarrenreifen/1.avif",
@@ -294,8 +296,8 @@
             ]
           },
           {
-            "label": "Lachs Kartoffel",
-            "alt": "Lachs Kartoffel A+ content",
+            "label": "Salmon & potato",
+            "alt": "Salmon & potato dog food A+ content",
             "modules": [
               {
                 "src": "/portfolio/A+ Content-web/4.Lachs Kartoffel/1.avif",
@@ -372,7 +374,7 @@
       },
       "hero": [
         {
-          "value": "Ø 1.9%",
+          "value": "Avg. 1.9%",
           "label": "conversion increase",
           "trend": "up"
         },
@@ -392,7 +394,7 @@
       ],
       "title": "Meta & TikTok\nMedia Buying &\nCreative Strategy",
       "hero": {
-        "value": "Ø 5.2x",
+        "value": "Avg. 5.2x",
         "label": "ROAS"
       },
       "story": {
@@ -402,16 +404,16 @@
       },
       "stats": [
         {
-          "label": "Ø CAC",
-          "value": "12€"
+          "label": "Avg. CAC",
+          "value": "€12"
         },
         {
-          "label": "Ø CTR",
+          "label": "Avg. CTR",
           "value": "5.4%"
         },
         {
           "label": "Ad spend",
-          "value": "€3.0M+"
+          "value": "€3M+"
         }
       ],
       "media": {
@@ -596,8 +598,9 @@
           }
         ]
       },
-      "subtitle": "Since 2019 I manage hundreds of ad accounts & thousands of creatives. In total I managed over 3.000.000€ ad spend and at the highest point 50.000€ ad spend per month, even when AI was not around.",
-      "flip": true
+      "subtitle": "Since 2019 I’ve managed hundreds of ad accounts & thousands of creatives. In total I managed over €3M in ad spend, peaking at €50,000 a month, long before AI tools.",
+      "flip": true,
+      "_todo": "TODO: the stat chip says CAC, the 'How I did it' text says CPA — pick one term and use it in both places."
     },
     {
       "id": "case-landing-page",
@@ -642,7 +645,8 @@
         ]
       },
       "flip": false,
-      "subtitle": "Ads need landing pages that match the ad itself, answer objections and turn traffic into customers."
+      "subtitle": "Ads need landing pages that match the ad itself, answer objections and turn traffic into customers.",
+      "_todo": "TODO: change 'more than doubled' to 'from X% to 4.2%' once the starting conversion rate is known."
     },
     {
       "id": "case-email-flows",
@@ -654,13 +658,13 @@
       ],
       "title": "Klaviyo email marketing",
       "hero": {
-        "value": "€160.000+",
+        "value": "€160,000+",
         "label": "revenue generated"
       },
       "story": {
-        "problem": "Email campaigns or flows did not convert good enough.",
+        "problem": "Email campaigns or flows did not convert well enough.",
         "action": "I set up flows and email campaigns actually optimised for conversion.",
-        "result": "Email became a reliable, profitable & often the companies best marketing channel."
+        "result": "Email became a reliable, profitable & often the company’s best marketing channel."
       },
       "media": {
         "emails": [
@@ -690,7 +694,7 @@
           }
         ]
       },
-      "subtitle": "After the sale customers need email marketing, I created hundreds of flows & weekly campaigns, that turn customers into repeated buyers.",
+      "subtitle": "After the first sale, email turns customers into repeat buyers. I’ve built hundreds of flows and weekly campaigns that do exactly that.",
       "flip": true
     },
     {
@@ -704,18 +708,18 @@
       "title": "“Nest” – Property app",
       "hero": [
         {
-          "value": "2600+",
+          "value": "2,600+",
           "label": "users"
         },
         {
-          "value": "4500+",
+          "value": "4,500+",
           "label": "listings"
         }
       ],
       "story": {
         "problem": "In Bali people search on Facebook for long-term rentals & property, but Facebook was never built for this. There are many scammers, inaccurate information, no search filters and no map view.",
         "action": "I designed and shipped the whole platform for web, iOS and Android with the help of Claude.",
-        "result": "2600+ users that love the platform and found their current place to stay or property to buy."
+        "result": "2,600+ users, many of whom found their current home through it."
       },
       "badges": [
         {
@@ -758,7 +762,7 @@
           }
         ]
       },
-      "subtitle": "I created Nest completely by myself to replace Facebook Marketplace/Groups and makes long-term renting, buying homes & buying land across Bali easy. Filter your search, see listings on a map and message verified owners directly.",
+      "subtitle": "I created Nest on my own to replace Facebook Marketplace/Groups and make long-term renting, buying homes & buying land across Bali easy. Filter your search, see listings on a map and message verified owners directly.",
       "flip": false
     },
     {
@@ -795,7 +799,7 @@
           "label": "AOV increase"
         },
         {
-          "value": "Ø 0.5%",
+          "value": "Avg. 0.5%",
           "label": "conversion increase",
           "trend": "up"
         },
@@ -819,21 +823,21 @@
         "Blender"
       ],
       "title": "3D Renderings",
-      "subtitle": "Photorealistic product renders as the foundation for the edubily redesign 2025, built in Blender.",
+      "subtitle": "Photorealistic product renders as the foundation for edubily’s 2025 redesign, built in Blender.",
       "hero": [
         {
           "value": "32",
           "label": "product models"
         },
         {
-          "value": "50.000€+",
-          "label": "costs saved"
+          "value": "€50,000+",
+          "label": "saved"
         }
       ],
       "story": {
-        "problem": "edubily originally planned a photo shooting of the new designed products, which would have cost an insane amount, so I offered to create 3D renderings for everything while I was employed there.",
+        "problem": "edubily originally planned a photoshoot of the newly designed products at a very high cost, so I offered to create 3D renderings for everything while I was employed there.",
         "action": "I created 32 product models for different products and sizes.",
-        "result": "Saving edubily tens of thousands in Euro and setting them up for any motion, design or now AI related use."
+        "result": "Saved edubily €50,000+ and gave them assets for motion, design and AI."
       },
       "media": {
         "items": [

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
 
@@ -8,15 +8,15 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jason Martin — CRO &amp; Performance Designer</title>
-  <meta name="description" content="Designer und Performance Marketer. Ads, Landingpages und Shops, gebaut für Conversions. Über 3 Mio. € Werbebudget verwaltet. Offen für Freelance- und Festanstellungen." />
+  <meta name="description" content="Designer and performance marketer. Ads, landing pages and shops built to convert. €3M+ in ad spend managed. Open to freelance, part-time and full-time roles." />
   <meta name="theme-color" content="#F7F5F1" />
   <meta name="robots" content="noindex, nofollow" />
 
   <!-- Open Graph -->
   <meta property="og:title" content="Jason Martin — CRO &amp; Performance Designer" />
-  <meta property="og:description" content="Designer und Performance Marketer. Ads, Landingpages und Shops, gebaut für Conversions. Über 3 Mio. € Werbebudget verwaltet. Offen für Freelance- und Festanstellungen." />
+  <meta property="og:description" content="Designer and performance marketer. Ads, landing pages and shops built to convert. €3M+ in ad spend managed. Open to freelance, part-time and full-time roles." />
   <meta property="og:type" content="website" />
-  <meta property="og:locale" content="de_DE" />
+  <meta property="og:locale" content="en_US" />
 
   <!-- Structured Data — WebSite + Organization + SiteNavigationElement -->
   <script type="application/ld+json">
@@ -25,10 +25,10 @@
       "@context": "https://schema.org",
       "@type": "WebSite",
       "@id": "https://martinjason.com/#website",
-      "name": "Martin, Jason",
+      "name": "Jason Martin",
       "url": "https://martinjason.com",
-      "description": "Produktgrafiken für DTC Brands in Studioqualität – erstellt mit KI, nicht mit Kameras.",
-      "inLanguage": "de-DE",
+      "description": "CRO & performance designer: ads, landing pages and shops built to convert.",
+      "inLanguage": "en",
       "potentialAction": {
         "@type": "SearchAction",
         "target": {
@@ -42,7 +42,7 @@
       "@context": "https://schema.org",
       "@type": "Organization",
       "@id": "https://martinjason.com/#organization",
-      "name": "Martin, Jason",
+      "name": "Jason Martin",
       "url": "https://martinjason.com",
       "logo": {
         "@type": "ImageObject",
@@ -58,21 +58,25 @@
       "@type": "WebPage",
       "@id": "https://martinjason.com/#webpage",
       "url": "https://martinjason.com",
-      "name": "Martin, Jason — Produktgrafiken für DTC Brands in Studioqualität",
+      "name": "Jason Martin — CRO & Performance Designer",
       "isPartOf": { "@id": "https://martinjason.com/#website" },
       "about": { "@id": "https://martinjason.com/#organization" },
-      "inLanguage": "de-DE"
+      "inLanguage": "en"
     },
     {
       "@context": "https://schema.org",
       "@type": "SiteNavigationElement",
-      "name": ["Leistungen", "Galerien", "Blog", "Über mich", "Termin buchen"],
+      "name": ["Product galleries", "A+ content", "Media buying", "Landing pages", "Email marketing", "UI/UX", "Shop", "3D renderings", "About me"],
       "url": [
-        "https://martinjason.com/#services",
-        "https://martinjason.com/#work",
-        "https://martinjason.com/blog",
-        "https://martinjason.com/#about",
-        "https://martinjason.com/#contact"
+        "https://martinjason.com/portfolio#case-ai-gallery",
+        "https://martinjason.com/portfolio#case-aplus",
+        "https://martinjason.com/portfolio#case-meta-ads",
+        "https://martinjason.com/portfolio#case-landing-page",
+        "https://martinjason.com/portfolio#case-email-flows",
+        "https://martinjason.com/portfolio#case-nest-app",
+        "https://martinjason.com/portfolio#case-tierzucht24",
+        "https://martinjason.com/portfolio#case-3d",
+        "https://martinjason.com/portfolio#about"
       ]
     }
   ]
@@ -604,10 +608,8 @@
   <!-- Parallax layers 3, 5 — preload so they render before JS kicks in.
        media queries match the <picture> sources so each device only
        downloads the variant it actually renders. -->
-  <link rel="preload" href="images/Homepage%20Header%20Parallax%20Images/3-headline.avif" as="image" type="image/avif" fetchpriority="high" media="(min-width: 981px)" />
-  <link rel="preload" href="images/Homepage%20Header%20Parallax%20Images/5-jason-freisteller.avif" as="image" type="image/avif" fetchpriority="high" media="(min-width: 981px)" />
-  <link rel="preload" href="images/Homepage%20Header%20Parallax%20Images%20Mobile/3-headline.avif" as="image" type="image/avif" fetchpriority="high" media="(max-width: 980px)" />
-  <link rel="preload" href="images/Homepage%20Header%20Parallax%20Images%20Mobile/5-jason-freisteller.avif" as="image" type="image/avif" fetchpriority="high" media="(max-width: 980px)" />
+  <link rel="preload" href="images/Homepage%20Header%20Parallax%20Images/3-headline.avif" as="image" type="image/avif" fetchpriority="high" />
+  <link rel="preload" href="images/Homepage%20Header%20Parallax%20Images/5-jason-freisteller.avif" as="image" type="image/avif" fetchpriority="high" />
 
   <!-- Full stylesheet — non-render-blocking async load -->
   <link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -632,6 +634,72 @@
     function gtag(){dataLayer.push(arguments);}
     window.gtag = gtag;
   </script>
+  <!-- Portfolio-only additions: nav + hamburger, hero tagline as text, mobile hero crop, contact row -->
+  <style>
+    /* NAV — more room after the last link (no CTA button anymore) */
+    .nav { padding-right: 1.4rem; }
+    .nav__links { gap: 1.15rem; font-size: 0.92rem; }
+    .nav__links a { white-space: nowrap; }
+    .nav__toggle { display: none; margin-left: auto; width: 42px; height: 42px; border-radius: 50%;
+      flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--color-ink); }
+    .nav__toggle span { display: block; width: 18px; height: 2px; border-radius: 2px; background: currentColor;
+      transition: transform var(--dur-base) var(--ease-apple), opacity var(--dur-fast) var(--ease-apple); }
+    .nav.is-open .nav__toggle span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    .nav.is-open .nav__toggle span:nth-child(2) { opacity: 0; }
+    .nav.is-open .nav__toggle span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+    /* Below 1180px the 9 links don't fit in one row → hamburger + dropdown with the same links */
+    @media (max-width: 1180px) {
+      html body .nav { position: relative; padding-right: 0.5rem; }
+      html body .nav__toggle { display: inline-flex; }
+      html body .nav__links {
+        display: none; position: absolute; top: calc(100% + 0.5rem); right: 0; left: 0;
+        flex-direction: column; gap: 0; margin: 0; padding: 0.5rem;
+        border-radius: var(--radius-lg); background: var(--glass-bg-strong);
+        -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+                backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+        border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow-strong); font-size: 1rem;
+      }
+      html body .nav.is-open .nav__links { display: flex; }
+      html body .nav__links a { display: block; padding: 0.7rem 1rem; border-radius: var(--radius-md); color: var(--color-ink); }
+      html body .nav__links a::after { display: none; }
+      html body .nav__links a:hover { background: rgba(10,10,10,0.05); }
+      html body .nav__brand-name { display: block; font-size: 0.96rem; }
+    }
+
+    /* HERO TAGLINE — real text in the exact frame of the old 9-zitat.avif (2535×1426) */
+    .parallax-layer--quote { container-type: size; pointer-events: none; }
+    .hero-quote { position: absolute; inset: 0; margin: auto;
+      width: min(100cqw, 177.776cqh); height: min(100cqh, 56.252cqw); container-type: inline-size; }
+    .hero-quote__box {
+      position: absolute; left: 31.28%; top: 70.13%; width: 37.40%; height: 9.05%; margin: 0;
+      display: flex; align-items: center; justify-content: center; text-align: center;
+      background: #EDEDED; border: max(1px, 0.12cqw) solid #1B8AD3; color: #111;
+      font-family: "Avenir Next", Avenir, var(--font-sans); font-weight: 500;
+      font-size: 1.58cqw; line-height: 1.25; letter-spacing: -0.005em;
+    }
+    .hero-quote__box i { position: absolute; width: 0.72cqw; height: 0.72cqw; background: #fff;
+      border: max(1px, 0.1cqw) solid #1B8AD3; transform: translate(-50%, -50%); }
+    .hero-quote__box i:nth-of-type(1) { left: 0; top: 0; }
+    .hero-quote__box i:nth-of-type(2) { left: 100%; top: 0; }
+    .hero-quote__box i:nth-of-type(3) { left: 0; top: 100%; }
+    .hero-quote__box i:nth-of-type(4) { left: 100%; top: 100%; }
+
+    /* MOBILE HERO — same layers as desktop, cropped: the 16:9 stage is scaled so the
+       "Design that CONVERTS" headline fills the width; the sides of the room are cut off. */
+    @media (max-width: 980px) {
+      :root { --stage-w: 140vw; --stage-top: 4.25rem; }
+      html body .hero { height: calc(var(--stage-w) * 0.5625 + var(--stage-top)); padding: 0; }
+      html body .parallax-layer:not(.parallax-layer--bg) {
+        top: var(--stage-top); bottom: auto; left: 50%; right: auto;
+        width: var(--stage-w); height: calc(var(--stage-w) * 0.5625); margin-left: calc(var(--stage-w) / -2);
+      }
+    }
+    @media (max-width: 600px) { :root { --stage-w: 180vw; } }
+
+    /* CONTACT — button row + small note */
+    .contact__cta--row { justify-content: flex-start; }
+    .contact__note { margin: var(--space-3) 0 0; font-size: 0.92rem; color: var(--color-ink-muted); }
+  </style>
 </head>
 <body>
 
@@ -655,17 +723,21 @@
   <header class="nav-wrap">
     <nav class="nav glass" aria-label="Portfolio navigation">
       <a class="nav__brand" href="/" aria-label="Jason Martin — Home">
-        <img class="nav__brand-mark" src="/images/favicon.png" alt="Jason Martin" width="32" height="32" />
-        <span class="nav__brand-name">Martin, Jason</span>
+        <img class="nav__brand-mark" src="/images/favicon.png" alt="" width="32" height="32" />
+        <span class="nav__brand-name">Jason Martin</span>
       </a>
-      <ul class="nav__links">
+      <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="navLinks" aria-label="Open menu">
+        <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+      </button>
+      <ul class="nav__links" id="navLinks">
         <li><a href="#case-ai-gallery">Product galleries</a></li>
         <li><a href="#case-aplus">A+ content</a></li>
-        <li><a href="#case-meta-ads">Media Buying</a></li>
+        <li><a href="#case-meta-ads">Media buying</a></li>
         <li><a href="#case-landing-page">Landing pages</a></li>
         <li><a href="#case-email-flows">Email marketing</a></li>
         <li><a href="#case-nest-app">UI/UX</a></li>
         <li><a href="#case-tierzucht24">Shop</a></li>
+        <li><a href="#case-3d">3D renderings</a></li>
         <li><a href="#about">About me</a></li>
       </ul>
     </nav>
@@ -677,12 +749,13 @@
          HERO — Fullscreen parallax
          ================================================================== -->
     <section class="hero">
+      <h1 class="visually-hidden">Design that converts — Jason Martin, CRO &amp; performance designer</h1>
 
       <!-- Fullscreen parallax layer stack
            data-depth: 0 = fixed, 1 = full --px-max-move.
            Higher depth → travels farther (feels "closer to viewer").
            Layer order: 1 = lowest (background), 9 = highest (foreground). -->
-      <div class="hero__parallax" id="heroParallax" aria-hidden="true">
+      <div class="hero__parallax" id="heroParallax">
 
         <!-- Layer 1 — Hintergrund CSS-Verlauf, fixed -->
         <div class="parallax-layer parallax-layer--bg" data-depth="0"></div>
@@ -690,76 +763,69 @@
         <!-- Layer 2 — Windows decoration -->
         <div class="parallax-layer" data-depth="0.2">
           <picture>
-            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/2-windows.avif" type="image/avif">
-            <img src="images/Homepage%20Header%20Parallax%20Images/2-windows.avif" alt="" decoding="async" />
+            <img src="images/Homepage%20Header%20Parallax%20Images/2-windows.avif" alt="Bright studio room with tall windows" decoding="async" />
           </picture>
         </div>
 
         <!-- Layer 3 — Headline "AI-COMMERCE DESIGN" -->
         <div class="parallax-layer" data-depth="0.25">
           <picture>
-            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/3-headline.avif" type="image/avif">
-            <img src="images/Homepage%20Header%20Parallax%20Images/3-headline.avif" alt="" fetchpriority="high" />
+            <img src="images/Homepage%20Header%20Parallax%20Images/3-headline.avif" alt="Design that converts" fetchpriority="high" />
           </picture>
         </div>
 
         <!-- Layer 4 — Folder "Material" -->
         <div class="parallax-layer" data-depth="0.30">
           <picture>
-            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/4-folder-material.avif" type="image/avif">
-            <img src="images/Homepage%20Header%20Parallax%20Images/4-folder-material.avif" alt="" decoding="async" />
+            <img src="images/Homepage%20Header%20Parallax%20Images/4-folder-material.avif" alt="Folder icon labelled Design" decoding="async" />
           </picture>
         </div>
 
         <!-- Layer 5 — Jason Freisteller (main subject) -->
         <div class="parallax-layer" data-depth="0.20">
           <picture>
-            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/5-jason-freisteller.avif" type="image/avif">
-            <img src="images/Homepage%20Header%20Parallax%20Images/5-jason-freisteller.avif" alt="" fetchpriority="high" />
+            <img src="images/Homepage%20Header%20Parallax%20Images/5-jason-freisteller.avif" alt="Jason Martin drinking an iced coffee while working on his laptop" fetchpriority="high" />
           </picture>
         </div>
 
         <!-- Layer 6 — "günstiger & besser" badge -->
         <div class="parallax-layer" data-depth="0.55">
           <picture>
-            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/6-gnstiger-besser.avif" type="image/avif">
-            <img src="images/Homepage%20Header%20Parallax%20Images/6-gnstiger-besser.avif" alt="" decoding="async" />
+            <img src="images/Homepage%20Header%20Parallax%20Images/6-gnstiger-besser.avif" alt="Badge: €3M+ ad spend" decoding="async" />
           </picture>
         </div>
 
         <!-- Layer 7 — Folder "AI Generated" -->
         <div class="parallax-layer" data-depth="0.65">
           <picture>
-            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/7-folder-ai-generated.avif" type="image/avif">
-            <img src="images/Homepage%20Header%20Parallax%20Images/7-folder-ai-generated.avif" alt="" decoding="async" />
+            <img src="images/Homepage%20Header%20Parallax%20Images/7-folder-ai-generated.avif" alt="Folder icon labelled Marketing" decoding="async" />
           </picture>
         </div>
 
         <!-- Layer 8 — Transition overlay, fixed (stretched to full width, see .parallax-layer--transition) -->
         <div class="parallax-layer parallax-layer--transition" data-depth="0">
           <picture>
-            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/8-transition.avif" type="image/avif">
-            <img src="images/Homepage%20Header%20Parallax%20Images/8-transition.avif" alt="" decoding="async" />
+            <img src="images/Homepage%20Header%20Parallax%20Images/8-transition.avif" alt="Soft light band fading into the page" decoding="async" />
           </picture>
         </div>
 
-        <!-- Layer 9 — Zitat -->
-        <div class="parallax-layer" data-depth="0.6">
-          <picture>
-            <source media="(max-width: 980px)" srcset="images/Homepage%20Header%20Parallax%20Images%20Mobile/9-zitat.avif" type="image/avif">
-            <img src="images/Homepage%20Header%20Parallax%20Images/9-zitat.avif" alt="" decoding="async" />
-          </picture>
+        <!-- Layer 9 — Tagline as real text (was baked into 9-zitat.avif); box geometry
+             matches the old image: positioned in the same 2535×1426 frame, sized in cqw -->
+        <div class="parallax-layer parallax-layer--quote" data-depth="0.6">
+          <div class="hero-quote">
+            <p class="hero-quote__box">From the first ad to the checkout,<br>I design every single step to sell more.<i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i></p>
+          </div>
         </div>
 
       </div><!-- /.hero__parallax -->
 
       <!-- Reference logos — files /portfolio/logo-references/1-edubily.avif … 33-matchory.avif,
            built + animated by the "Logo slider" script at the end of <body>. -->
-      <div class="logo-strip" id="logoStrip" role="region" aria-label="Referenzen">
+      <div class="logo-strip" id="logoStrip" role="region" aria-label="Clients">
         <div class="logo-strip__track"></div>
       </div>
 
-      <a class="hero__scroll" href="#worlds" aria-label="Weiter scrollen">
+      <a class="hero__scroll" href="#worlds" aria-label="Keep scrolling">
         <span></span>
       </a>
     </section>
@@ -777,34 +843,34 @@
       <div class="worlds-dim" aria-hidden="true"></div>
       <div class="worlds__grid">
           <div class="world-card reveal" tabindex="0">
-            <img class="world-card__img" src="/portfolio/design-background.avif" alt="" loading="lazy" decoding="async" />
+            <img class="world-card__img" src="/portfolio/design-background.avif" alt="Jason painting a colourful abstract canvas in an art studio" loading="lazy" decoding="async" />
             <video class="world-card__video" data-src="/portfolio/design-video-web.mp4" muted playsinline preload="auto" aria-hidden="true"></video>
             <div class="world-card__shade" aria-hidden="true"></div>
             <span class="world-card__title">Design</span>
             <ul class="world-card__list">
               <li><a href="#case-ai-gallery">AI product galleries</a></li>
-              <li><a href="#case-aplus">A+ Content</a></li>
-              <li><a href="#case-meta-ads">Ad creative</a></li>
+              <li><a href="#case-aplus">A+ content</a></li>
+              <li><a href="#case-meta-ads">Ad creatives</a></li>
               <li><a href="#case-tierzucht24">Web &amp; shop design</a></li>
               <li><a href="#case-nest-app">UI/UX &amp; app design</a></li>
               <li><a href="#case-3d">3D renderings</a></li>
             </ul>
           </div>
           <div class="world-card reveal" style="--reveal-delay: 80ms" tabindex="0">
-            <img class="world-card__img" src="/portfolio/marketing-background.avif" alt="" loading="lazy" decoding="async" />
+            <img class="world-card__img" src="/portfolio/marketing-background.avif" alt="Jason holding a “Stop wasting ad spend” sign outside a shop" loading="lazy" decoding="async" />
             <video class="world-card__video" data-src="/portfolio/marketing-video-web.mp4" muted playsinline preload="auto" aria-hidden="true"></video>
             <div class="world-card__shade" aria-hidden="true"></div>
             <span class="world-card__title">Marketing</span>
             <ul class="world-card__list">
-              <li><a href="#case-meta-ads">Media Buying</a></li>
-              <li><a href="#case-meta-ads">Meta &amp; TikTok Ads</a></li>
-              <li><a href="#case-meta-ads">Creative Strategy &amp; UGC</a></li>
+              <li><a href="#case-meta-ads">Media buying</a></li>
+              <li><a href="#case-meta-ads">Meta &amp; TikTok ads</a></li>
+              <li><a href="#case-meta-ads">Creative strategy &amp; UGC</a></li>
               <li><a href="#case-email-flows">Klaviyo email marketing</a></li>
               <li><a href="#case-landing-page">Full-funnel performance</a></li>
             </ul>
           </div>
           <div class="world-card reveal" style="--reveal-delay: 160ms" tabindex="0">
-            <img class="world-card__img" src="/portfolio/cro-background.avif" alt="" loading="lazy" decoding="async" />
+            <img class="world-card__img" src="/portfolio/cro-background.avif" alt="Jason presenting A/B test results on a whiteboard" loading="lazy" decoding="async" />
             <video class="world-card__video" data-src="/portfolio/cro-video-web.mp4" muted playsinline preload="auto" aria-hidden="true"></video>
             <div class="world-card__shade" aria-hidden="true"></div>
             <span class="world-card__title">CRO</span>
@@ -813,7 +879,7 @@
               <li><a href="#case-landing-page">Landing page design</a></li>
               <li><a href="#case-landing-page">Heatmaps &amp; session analysis</a></li>
               <li><a href="#case-landing-page">GA4 &amp; Meta Pixel tracking</a></li>
-              <li><a href="#case-tierzucht24">Shopify Management</a></li>
+              <li><a href="#case-tierzucht24">Shopify management</a></li>
             </ul>
           </div>
       </div>
@@ -844,20 +910,20 @@
           </div>
         </div>
         <div class="about__copy">
-          <p class="eyebrow reveal">Über mich</p>
+          <p class="eyebrow reveal">About me</p>
           <h2 class="section__title reveal" style="--reveal-delay: 80ms">
-            Viele Designer machen es schön.<br><em>Ich mache es profitabel.</em>
+            Most designers make it pretty.<br><em>I make it profitable.</em>
           </h2>
           <p class="reveal" style="--reveal-delay: 160ms">
-            7+ Jahre Performance Marketing, über 3 Mio. € verwaltetes Werbebudget und 12+ Jahre Design. Ich habe meine eigene Performance-Agentur geführt (2019–2025) und das Marketing bei edubily geleitet. Ich gestalte Ads, Landingpages und Shops und teste sie, bis sie verkaufen.
+            7+ years in performance marketing, €3M+ in ad spend managed and 12+ years of design. I ran my own performance agency (2019–2025) and led marketing at edubily. I design ads, landing pages and shops, then test them until they sell.
           </p>
           <p class="reveal" style="--reveal-delay: 240ms">
-            Design + Marketing + CRO = eine Person für den ganzen Funnel.
+            Design + Marketing + CRO = one person for the whole funnel.
           </p>
           <ul class="about__points reveal" style="--reveal-delay: 280ms">
-            <li>Ads, die den Scroll stoppen und den CPA senken</li>
-            <li>Seiten, gebaut und A/B-getestet für mehr Conversions</li>
-            <li>Offen für Freelance, Teilzeit &amp; Vollzeit · remote, EU-Zeiten</li>
+            <li>Ads that stop the scroll and cut CPA</li>
+            <li>Pages built and A/B tested to convert</li>
+            <li>Open to freelance, part-time &amp; full-time · remote, EU hours</li>
           </ul>
         </div>
       </div>
@@ -868,25 +934,71 @@
          ================================================================== -->
     <section id="contact" class="section contact">
       <div class="container contact__inner">
-        <p class="eyebrow reveal">Kontakt</p>
+        <p class="eyebrow reveal">Contact</p>
         <h2 class="contact__title reveal" style="--reveal-delay: 80ms">
-          Lass uns über deine nächste Stelle oder dein Projekt sprechen.
+          Let’s talk about your next role or project.
         </h2>
         <p class="contact__sub reveal" style="--reveal-delay: 160ms">
-          Buch dir ein kostenloses 30-Minuten-Gespräch. Ich schaue mir deine Ads oder Produktseite an und bringe 3 konkrete Ideen mit, egal ob wir zusammenarbeiten oder nicht.
+          Hiring for a CRO or performance design role, or need ads and pages that sell more? Book 30 minutes, or just send me an email.
         </p>
-        <div class="contact__cta reveal" style="--reveal-delay: 240ms">
-          <a class="btn btn--primary btn--lg glass-btn" href="#contact" data-booking>
-            Gespräch buchen
-          </a>
+        <div class="contact__cta contact__cta--row reveal" style="--reveal-delay: 240ms">
+          <a class="btn btn--primary btn--lg glass-btn" href="#contact" data-booking>Book a call</a>
+          <!-- TODO: email address — replace href="#" with "mailto:you@example.com" -->
+          <a class="btn btn--ghost btn--lg" href="#" data-todo="email">Email me</a>
+          <!-- TODO: CV file path — upload the PDF and set href (e.g. "/portfolio/cv.pdf") + keep the download attribute -->
+          <a class="btn btn--ghost btn--lg" href="#" data-todo="cv" download>Download CV</a>
+          <!-- TODO: LinkedIn profile URL — set href and keep target="_blank" rel="noopener" -->
+          <a class="btn btn--ghost btn--lg" href="#" data-todo="linkedin" target="_blank" rel="noopener">LinkedIn</a>
         </div>
+        <p class="contact__note reveal" style="--reveal-delay: 300ms">Based in Bali, working EU hours · replies within 24 hours</p>
       </div>
     </section>
 
   </main>
 
-  <footer class="footer"></footer>
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__brand">
+        <picture>
+          <source srcset="/images/pacific-origins-logo-256x85.avif" type="image/avif" />
+          <img src="/images/pacific-origins-logo-256x85.png" alt="Pacific Origins" class="footer__pacific-logo" width="256" height="85" loading="lazy" />
+        </picture>
+        <span class="footer__logo">Jason Martin</span>
+        <p>CRO &amp; Performance Designer</p>
+      </div>
+      <div class="footer__links">
+        <a href="#worlds">Services</a>
+        <a href="#cases">Work</a>
+        <a href="#about">About me</a>
+        <a href="#contact">Contact</a>
+      </div>
+      <div class="footer__legal">
+        <a href="/impressum">Legal notice</a>
+        <a href="/datenschutz">Privacy policy</a>
+        <span>© <span id="year"></span> Jason Martin</span>
+      </div>
+    </div>
+  </footer>
 
+  <!-- Mobile menu: hamburger opens the same links; closes on link click, Esc or a tap outside -->
+  <script>
+  (function () {
+    var nav = document.querySelector('.nav-wrap .nav');
+    var btn = nav && nav.querySelector('.nav__toggle');
+    if (!btn) return;
+    function set(open) {
+      nav.classList.toggle('is-open', open);
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    }
+    btn.addEventListener('click', function () { set(!nav.classList.contains('is-open')); });
+    nav.querySelectorAll('.nav__links a').forEach(function (a) { a.addEventListener('click', function () { set(false); }); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && nav.classList.contains('is-open')) { set(false); btn.focus(); }
+    });
+    document.addEventListener('click', function (e) { if (!nav.contains(e.target)) set(false); });
+  })();
+  </script>
   <script src="/shared-components.js" defer></script>
   <script src="script.js" defer></script>
   <script src="/portfolio/case-studies.js" defer></script>
@@ -898,7 +1010,7 @@
   <script>
     window.BOOKING_API_BASE = 'https://project-bh9tx.vercel.app';
   </script>
-  <script src="booking-popup.js" defer></script>
+  <script src="/portfolio/booking-popup-en.js" defer></script>
   <script src="booking-glass.js" defer></script>
   <script src="cookie-consent.js" defer></script>
 
