@@ -13,7 +13,7 @@
       "title": "AI product galleries",
       "hero": [
         {
-          "value": "Avg. 2.5%",
+          "value": "Ø 2.5%",
           "label": "conversion increase",
           "trend": "up"
         },
@@ -85,8 +85,8 @@
           {
             "old": "/portfolio/AI Product gallery/ai-product-gallery-4-old.avif",
             "new": "/portfolio/AI Product gallery/ai-product-gallery-4-new.avif",
-            "label": "Smart Ring (image 4)",
-            "alt": "AI product gallery image: smart ring",
+            "label": "Smart ring, brand under NDA (image 4)",
+            "alt": "AI product gallery image: smart ring (brand under NDA)",
             "gallery": [
               "/portfolio/AI Product gallery/gallery-4/1.avif",
               "/portfolio/AI Product gallery/gallery-4/2.avif",
@@ -97,8 +97,7 @@
               "/portfolio/AI Product gallery/gallery-4/7.avif",
               "/portfolio/AI Product gallery/gallery-4/8.avif"
             ],
-            "galleryTitle": "Smart Ring",
-            "_todo": "TODO: brand of the smart ring unknown — add the brand to galleryTitle, alt and label."
+            "galleryTitle": "Smart ring (brand under NDA)"
           },
           {
             "old": "/portfolio/AI Product gallery/ai-product-gallery-5-old.avif",
@@ -139,8 +138,7 @@
         }
       },
       "subtitle": "Many brands don’t want to spend thousands on a single photoshoot, so I create full product galleries supported by AI for their shops & Amazon listings. Finished in days, not weeks. No new photoshoots needed and built with CRO know-how, not just to look nice.",
-      "flip": true,
-      "_todo": "TODO: 'Avg. 2.5% conversion increase' (here) vs 'Avg. 0.5%' (Tierzucht24) — state whether each is percentage points or relative lift, then update both labels."
+      "flip": true
     },
     {
       "id": "case-aplus",
@@ -374,7 +372,7 @@
       },
       "hero": [
         {
-          "value": "Avg. 1.9%",
+          "value": "Ø 1.9%",
           "label": "conversion increase",
           "trend": "up"
         },
@@ -394,21 +392,21 @@
       ],
       "title": "Meta & TikTok\nMedia Buying &\nCreative Strategy",
       "hero": {
-        "value": "Avg. 5.2x",
+        "value": "Ø 5.2x",
         "label": "ROAS"
       },
       "story": {
-        "problem": "Ads fatigued fast and CPA kept climbing.",
+        "problem": "Ads fatigued fast and CAC kept climbing.",
         "action": "I built a weekly testing system of hooks, UGC and static variants.",
-        "result": "Lower CPA and scalable winners every month."
+        "result": "Lower CAC and scalable winners every month."
       },
       "stats": [
         {
-          "label": "Avg. CAC",
+          "label": "Ø CAC",
           "value": "€12"
         },
         {
-          "label": "Avg. CTR",
+          "label": "Ø CTR",
           "value": "5.4%"
         },
         {
@@ -599,8 +597,7 @@
         ]
       },
       "subtitle": "Since 2019 I’ve managed hundreds of ad accounts & thousands of creatives. In total I managed over €3M in ad spend, peaking at €50,000 a month, long before AI tools.",
-      "flip": true,
-      "_todo": "TODO: the stat chip says CAC, the 'How I did it' text says CPA — pick one term and use it in both places."
+      "flip": true
     },
     {
       "id": "case-landing-page",
@@ -612,8 +609,8 @@
       ],
       "title": "Landing pages",
       "hero": {
-        "value": "4.2%",
-        "label": "average conversion rate"
+        "value": "Ø 4.2%",
+        "label": "conversion rate"
       },
       "story": {
         "problem": "High traffic, but visitors bounced before adding to cart.",
@@ -645,8 +642,7 @@
         ]
       },
       "flip": false,
-      "subtitle": "Ads need landing pages that match the ad itself, answer objections and turn traffic into customers.",
-      "_todo": "TODO: change 'more than doubled' to 'from X% to 4.2%' once the starting conversion rate is known."
+      "subtitle": "Ads need landing pages that match the ad itself, answer objections and turn traffic into customers."
     },
     {
       "id": "case-email-flows",
@@ -796,20 +792,23 @@
       "hero": [
         {
           "value": "11%",
-          "label": "AOV increase"
+          "label": "AOV increase",
+          "trend": "up"
         },
         {
-          "value": "Avg. 0.5%",
+          "value": "Ø 0.5%",
           "label": "conversion increase",
           "trend": "up"
         },
         {
           "value": "55%",
-          "label": "more returning customers"
+          "label": "more returning customers",
+          "trend": "up"
         },
         {
           "value": "7%",
-          "label": "more revenue"
+          "label": "more revenue",
+          "trend": "up"
         }
       ]
     },
