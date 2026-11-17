@@ -13,8 +13,8 @@
       "title": "AI product galleries",
       "hero": [
         {
-          "value": "Ø 2.5%",
-          "label": "conversion increase",
+          "value": "2.5%",
+          "label": "avg. conversion increase",
           "trend": "up"
         },
         {
@@ -138,7 +138,8 @@
         }
       },
       "subtitle": "Many brands don’t want to spend thousands on a single photoshoot, so I create full product galleries supported by AI for their shops & Amazon listings. Finished in days, not weeks. No new photoshoots needed and built with CRO know-how, not just to look nice.",
-      "flip": true
+      "flip": true,
+      "heroSize": "small"
     },
     {
       "id": "case-aplus",
@@ -163,48 +164,48 @@
             "alt": "Belly Bites dog snack A+ content",
             "modules": [
               {
-                "src": "/portfolio/A+ Content-web/1.Belly Bites/1.avif",
+                "src": "/portfolio/A+ Content-web/1-belly-bites/1.avif",
                 "w": 900,
                 "h": 675
               },
               {
-                "src": "/portfolio/A+ Content-web/1.Belly Bites/2.avif",
+                "src": "/portfolio/A+ Content-web/1-belly-bites/2.avif",
                 "w": 900,
                 "h": 675
               },
               {
-                "src": "/portfolio/A+ Content-web/1.Belly Bites/3.avif",
+                "src": "/portfolio/A+ Content-web/1-belly-bites/3.avif",
                 "w": 900,
                 "h": 675
               },
               {
-                "src": "/portfolio/A+ Content-web/1.Belly Bites/4.avif",
+                "src": "/portfolio/A+ Content-web/1-belly-bites/4.avif",
                 "w": 900,
                 "h": 675
               },
               {
-                "src": "/portfolio/A+ Content-web/1.Belly Bites/5.avif",
+                "src": "/portfolio/A+ Content-web/1-belly-bites/5.avif",
                 "w": 900,
                 "h": 675
               },
               [
                 {
-                  "src": "/portfolio/A+ Content-web/1.Belly Bites/6-1.avif",
+                  "src": "/portfolio/A+ Content-web/1-belly-bites/6-1.avif",
                   "w": 900,
                   "h": 675
                 },
                 {
-                  "src": "/portfolio/A+ Content-web/1.Belly Bites/6-2.avif",
+                  "src": "/portfolio/A+ Content-web/1-belly-bites/6-2.avif",
                   "w": 900,
                   "h": 675
                 },
                 {
-                  "src": "/portfolio/A+ Content-web/1.Belly Bites/6-3.avif",
+                  "src": "/portfolio/A+ Content-web/1-belly-bites/6-3.avif",
                   "w": 900,
                   "h": 675
                 },
                 {
-                  "src": "/portfolio/A+ Content-web/1.Belly Bites/6-4.avif",
+                  "src": "/portfolio/A+ Content-web/1-belly-bites/6-4.avif",
                   "w": 900,
                   "h": 675
                 }
@@ -216,37 +217,37 @@
             "alt": "Pincer trap A+ content",
             "modules": [
               {
-                "src": "/portfolio/A+ Content-web/2.Zangenfalle/1.avif",
+                "src": "/portfolio/A+ Content-web/2-pincer-trap/1.avif",
                 "w": 900,
                 "h": 675
               },
               {
-                "src": "/portfolio/A+ Content-web/2.Zangenfalle/2.avif",
+                "src": "/portfolio/A+ Content-web/2-pincer-trap/2.avif",
                 "w": 900,
                 "h": 938
               },
               {
-                "src": "/portfolio/A+ Content-web/2.Zangenfalle/3.avif",
+                "src": "/portfolio/A+ Content-web/2-pincer-trap/3.avif",
                 "w": 900,
                 "h": 675
               },
               {
-                "src": "/portfolio/A+ Content-web/2.Zangenfalle/4.avif",
+                "src": "/portfolio/A+ Content-web/2-pincer-trap/4.avif",
                 "w": 900,
                 "h": 778
               },
               {
-                "src": "/portfolio/A+ Content-web/2.Zangenfalle/5.avif",
+                "src": "/portfolio/A+ Content-web/2-pincer-trap/5.avif",
                 "w": 900,
                 "h": 675
               },
               {
-                "src": "/portfolio/A+ Content-web/2.Zangenfalle/6.avif",
+                "src": "/portfolio/A+ Content-web/2-pincer-trap/6.avif",
                 "w": 900,
                 "h": 394
               },
               {
-                "src": "/portfolio/A+ Content-web/2.Zangenfalle/7.avif",
+                "src": "/portfolio/A+ Content-web/2-pincer-trap/7.avif",
                 "w": 900,
                 "h": 675
               }
@@ -257,37 +258,37 @@
             "alt": "Wheelbarrow tyre A+ content",
             "modules": [
               {
-                "src": "/portfolio/A+ Content-web/3.Schubkarrenreifen/1.avif",
+                "src": "/portfolio/A+ Content-web/3-wheelbarrow-tyre/1.avif",
                 "w": 900,
                 "h": 675
               },
               {
-                "src": "/portfolio/A+ Content-web/3.Schubkarrenreifen/2.avif",
+                "src": "/portfolio/A+ Content-web/3-wheelbarrow-tyre/2.avif",
                 "w": 900,
                 "h": 810
               },
               {
-                "src": "/portfolio/A+ Content-web/3.Schubkarrenreifen/3.avif",
+                "src": "/portfolio/A+ Content-web/3-wheelbarrow-tyre/3.avif",
                 "w": 900,
                 "h": 728
               },
               {
-                "src": "/portfolio/A+ Content-web/3.Schubkarrenreifen/4.avif",
+                "src": "/portfolio/A+ Content-web/3-wheelbarrow-tyre/4.avif",
                 "w": 900,
                 "h": 838
               },
               {
-                "src": "/portfolio/A+ Content-web/3.Schubkarrenreifen/5.avif",
+                "src": "/portfolio/A+ Content-web/3-wheelbarrow-tyre/5.avif",
                 "w": 900,
                 "h": 675
               },
               {
-                "src": "/portfolio/A+ Content-web/3.Schubkarrenreifen/6.avif",
+                "src": "/portfolio/A+ Content-web/3-wheelbarrow-tyre/6.avif",
                 "w": 900,
                 "h": 400
               },
               {
-                "src": "/portfolio/A+ Content-web/3.Schubkarrenreifen/7.avif",
+                "src": "/portfolio/A+ Content-web/3-wheelbarrow-tyre/7.avif",
                 "w": 900,
                 "h": 675
               }
@@ -298,71 +299,71 @@
             "alt": "Salmon & potato dog food A+ content",
             "modules": [
               {
-                "src": "/portfolio/A+ Content-web/4.Lachs Kartoffel/1.avif",
+                "src": "/portfolio/A+ Content-web/4-salmon-potato/1.avif",
                 "w": 900,
                 "h": 675
               },
               {
-                "src": "/portfolio/A+ Content-web/4.Lachs Kartoffel/2.avif",
-                "w": 900,
-                "h": 675
-              },
-              [
-                {
-                  "src": "/portfolio/A+ Content-web/4.Lachs Kartoffel/3-1.avif",
-                  "w": 900,
-                  "h": 675
-                },
-                {
-                  "src": "/portfolio/A+ Content-web/4.Lachs Kartoffel/3-2.avif",
-                  "w": 900,
-                  "h": 675
-                },
-                {
-                  "src": "/portfolio/A+ Content-web/4.Lachs Kartoffel/3-3.avif",
-                  "w": 900,
-                  "h": 675
-                },
-                {
-                  "src": "/portfolio/A+ Content-web/4.Lachs Kartoffel/3-4.avif",
-                  "w": 900,
-                  "h": 675
-                }
-              ],
-              {
-                "src": "/portfolio/A+ Content-web/4.Lachs Kartoffel/4.avif",
+                "src": "/portfolio/A+ Content-web/4-salmon-potato/2.avif",
                 "w": 900,
                 "h": 675
               },
               [
                 {
-                  "src": "/portfolio/A+ Content-web/4.Lachs Kartoffel/5-1.avif",
+                  "src": "/portfolio/A+ Content-web/4-salmon-potato/3-1.avif",
                   "w": 900,
                   "h": 675
                 },
                 {
-                  "src": "/portfolio/A+ Content-web/4.Lachs Kartoffel/5-2.avif",
+                  "src": "/portfolio/A+ Content-web/4-salmon-potato/3-2.avif",
                   "w": 900,
                   "h": 675
                 },
                 {
-                  "src": "/portfolio/A+ Content-web/4.Lachs Kartoffel/5-3.avif",
+                  "src": "/portfolio/A+ Content-web/4-salmon-potato/3-3.avif",
                   "w": 900,
                   "h": 675
                 },
                 {
-                  "src": "/portfolio/A+ Content-web/4.Lachs Kartoffel/5-4.avif",
-                  "w": 900,
-                  "h": 675
-                },
-                {
-                  "src": "/portfolio/A+ Content-web/4.Lachs Kartoffel/5-5.avif",
+                  "src": "/portfolio/A+ Content-web/4-salmon-potato/3-4.avif",
                   "w": 900,
                   "h": 675
                 }
               ],
               {
-                "src": "/portfolio/A+ Content-web/4.Lachs Kartoffel/6.avif",
+                "src": "/portfolio/A+ Content-web/4-salmon-potato/4.avif",
+                "w": 900,
+                "h": 675
+              },
+              [
+                {
+                  "src": "/portfolio/A+ Content-web/4-salmon-potato/5-1.avif",
+                  "w": 900,
+                  "h": 675
+                },
+                {
+                  "src": "/portfolio/A+ Content-web/4-salmon-potato/5-2.avif",
+                  "w": 900,
+                  "h": 675
+                },
+                {
+                  "src": "/portfolio/A+ Content-web/4-salmon-potato/5-3.avif",
+                  "w": 900,
+                  "h": 675
+                },
+                {
+                  "src": "/portfolio/A+ Content-web/4-salmon-potato/5-4.avif",
+                  "w": 900,
+                  "h": 675
+                },
+                {
+                  "src": "/portfolio/A+ Content-web/4-salmon-potato/5-5.avif",
+                  "w": 900,
+                  "h": 675
+                }
+              ],
+              {
+                "src": "/portfolio/A+ Content-web/4-salmon-potato/6.avif",
                 "w": 900,
                 "h": 676
               }
@@ -372,15 +373,16 @@
       },
       "hero": [
         {
-          "value": "Ø 1.9%",
-          "label": "conversion increase",
+          "value": "1.9%",
+          "label": "avg. conversion increase",
           "trend": "up"
         },
         {
           "value": "€0",
           "label": "photoshoot cost"
         }
-      ]
+      ],
+      "heroSize": "small"
     },
     {
       "id": "case-meta-ads",
@@ -392,8 +394,8 @@
       ],
       "title": "Meta & TikTok\nMedia Buying &\nCreative Strategy",
       "hero": {
-        "value": "Ø 5.2x",
-        "label": "ROAS"
+        "value": "5.2x",
+        "label": "avg. ROAS"
       },
       "story": {
         "problem": "Ads fatigued fast and CAC kept climbing.",
@@ -402,11 +404,11 @@
       },
       "stats": [
         {
-          "label": "Ø CAC",
+          "label": "avg. CAC",
           "value": "€12"
         },
         {
-          "label": "Ø CTR",
+          "label": "avg. CTR",
           "value": "5.4%"
         },
         {
@@ -609,8 +611,8 @@
       ],
       "title": "Landing pages",
       "hero": {
-        "value": "Ø 4.2%",
-        "label": "conversion rate"
+        "value": "4.2%",
+        "label": "avg. conversion rate"
       },
       "story": {
         "problem": "High traffic, but visitors bounced before adding to cart.",
@@ -796,8 +798,8 @@
           "trend": "up"
         },
         {
-          "value": "Ø 0.5%",
-          "label": "conversion increase",
+          "value": "0.5%",
+          "label": "avg. conversion increase",
           "trend": "up"
         },
         {
@@ -810,7 +812,8 @@
           "label": "more revenue",
           "trend": "up"
         }
-      ]
+      ],
+      "heroSize": "small"
     },
     {
       "id": "case-3d",

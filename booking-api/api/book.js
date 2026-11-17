@@ -26,7 +26,7 @@ const MEETING_TITLES = {
 
 // English titles — used when the booking comes from the English /portfolio page (lang: 'en')
 const MEETING_TITLES_EN = {
-  erstgespraech: 'Free 30-minute intro call with Jason Martin',
+  intro:         'Free 30-minute intro call with Jason Martin',
   hiring:        'Hiring call with Jason Martin',
   project:       'Project call with Jason Martin',
 };

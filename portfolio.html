@@ -8,15 +8,16 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jason Martin — CRO &amp; Performance Designer</title>
-  <meta name="description" content="Designer and performance marketer. Ads, landing pages and shops built to convert. €3M+ in ad spend managed. Open to freelance, part-time and full-time roles." />
+  <meta name="description" content="Designer and performance marketer. Ads, landing pages and shops built to convert. €3M+ ad spend managed." />
   <meta name="theme-color" content="#F7F5F1" />
   <meta name="robots" content="noindex, nofollow" />
 
   <!-- Open Graph -->
   <meta property="og:title" content="Jason Martin — CRO &amp; Performance Designer" />
-  <meta property="og:description" content="Designer and performance marketer. Ads, landing pages and shops built to convert. €3M+ in ad spend managed. Open to freelance, part-time and full-time roles." />
+  <meta property="og:description" content="Designer and performance marketer. Ads, landing pages and shops built to convert. €3M+ ad spend managed." />
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="en_US" />
+  <meta name="twitter:description" content="Designer and performance marketer. Ads, landing pages and shops built to convert. €3M+ ad spend managed." />
 
   <!-- Structured Data — WebSite + Organization + SiteNavigationElement -->
   <script type="application/ld+json">
@@ -609,7 +610,7 @@
        media queries match the <picture> sources so each device only
        downloads the variant it actually renders. -->
   <link rel="preload" href="images/Homepage%20Header%20Parallax%20Images/3-headline.avif" as="image" type="image/avif" fetchpriority="high" />
-  <link rel="preload" href="images/Homepage%20Header%20Parallax%20Images/5-jason-freisteller.avif" as="image" type="image/avif" fetchpriority="high" />
+  <link rel="preload" href="images/Homepage%20Header%20Parallax%20Images/5-jason-portrait.avif" as="image" type="image/avif" fetchpriority="high" />
 
   <!-- Full stylesheet — non-render-blocking async load -->
   <link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -666,7 +667,7 @@
       html body .nav__brand-name { display: block; font-size: 0.96rem; }
     }
 
-    /* HERO TAGLINE — real text in the exact frame of the old 9-zitat.avif (2535×1426) */
+    /* HERO TAGLINE — real text in the exact frame of the old quote image (2535×1426) */
     .parallax-layer--quote { container-type: size; pointer-events: none; }
     .hero-quote { position: absolute; inset: 0; margin: auto;
       width: min(100cqw, 177.776cqh); height: min(100cqh, 56.252cqw); container-type: inline-size; }
@@ -757,7 +758,7 @@
            Layer order: 1 = lowest (background), 9 = highest (foreground). -->
       <div class="hero__parallax" id="heroParallax">
 
-        <!-- Layer 1 — Hintergrund CSS-Verlauf, fixed -->
+        <!-- Layer 1 — background CSS gradient, fixed -->
         <div class="parallax-layer parallax-layer--bg" data-depth="0"></div>
 
         <!-- Layer 2 — Windows decoration -->
@@ -781,17 +782,17 @@
           </picture>
         </div>
 
-        <!-- Layer 5 — Jason Freisteller (main subject) -->
+        <!-- Layer 5 — Jason, cut-out portrait (main subject) -->
         <div class="parallax-layer" data-depth="0.20">
           <picture>
-            <img src="images/Homepage%20Header%20Parallax%20Images/5-jason-freisteller.avif" alt="Jason Martin drinking an iced coffee while working on his laptop" fetchpriority="high" />
+            <img src="images/Homepage%20Header%20Parallax%20Images/5-jason-portrait.avif" alt="Jason Martin drinking an iced coffee while working on his laptop" fetchpriority="high" />
           </picture>
         </div>
 
-        <!-- Layer 6 — "günstiger & besser" badge -->
+        <!-- Layer 6 — "€3M+ ad spend" badge -->
         <div class="parallax-layer" data-depth="0.55">
           <picture>
-            <img src="images/Homepage%20Header%20Parallax%20Images/6-gnstiger-besser.avif" alt="Badge: €3M+ ad spend" decoding="async" />
+            <img src="images/Homepage%20Header%20Parallax%20Images/6-ad-spend-badge.avif" alt="Badge: €3M+ ad spend" decoding="async" />
           </picture>
         </div>
 
@@ -809,7 +810,7 @@
           </picture>
         </div>
 
-        <!-- Layer 9 — Tagline as real text (was baked into 9-zitat.avif); box geometry
+        <!-- Layer 9 — Tagline as real text (was baked into the old quote image); box geometry
              matches the old image: positioned in the same 2535×1426 frame, sized in cqw -->
         <div class="parallax-layer parallax-layer--quote" data-depth="0.6">
           <div class="hero-quote">
@@ -970,8 +971,8 @@
         <a href="#contact">Contact</a>
       </div>
       <div class="footer__legal">
-        <a href="/impressum">Legal notice</a>
-        <a href="/datenschutz">Privacy policy</a>
+        <a href="/legal-notice">Legal notice</a>
+        <a href="/privacy">Privacy policy</a>
         <span>© <span id="year"></span> Jason Martin</span>
       </div>
     </div>
@@ -996,7 +997,6 @@
     document.addEventListener('click', function (e) { if (!nav.contains(e.target)) set(false); });
   })();
   </script>
-  <script src="/shared-components.js" defer></script>
   <script src="script.js" defer></script>
   <script src="/portfolio/case-studies.js" defer></script>
 
@@ -1009,7 +1009,7 @@
   </script>
   <script src="/portfolio/booking-popup-en.js" defer></script>
   <script src="booking-glass.js" defer></script>
-  <script src="cookie-consent.js" defer></script>
+  <script src="/portfolio/cookie-consent-en.js" defer></script>
 
 
   <!-- ====================================================================
