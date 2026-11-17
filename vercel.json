@@ -3,10 +3,6 @@
   "trailingSlash": false,
   "framework": null,
   "outputDirectory": ".",
-  "rewrites": [
-    { "source": "/privacy", "destination": "/datenschutz.html" },
-    { "source": "/legal-notice", "destination": "/impressum.html" }
-  ],
   "redirects": [
     {
       "source": "/iphone-fotos-ki-produktgalerie",
