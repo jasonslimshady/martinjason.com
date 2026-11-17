@@ -34,6 +34,8 @@
 .case__hero p { margin: 0; display: grid; gap: 0.2rem; align-content: start; }
 .case__hero--duo { grid-template-columns: 1fr 1fr; }
 .case__hero.case__hero--duo strong { font-size: clamp(2.2rem, 3.4vw, 3.4rem); white-space: nowrap; }
+.case__hero.case__hero--duo-long strong { font-size: clamp(1.8rem, 2.6vw, 2.6rem); }
+.case__hero--duo { row-gap: var(--space-2); }
 .case__hero strong { display: inline-flex; align-items: center; gap: 0.08em; }
 .case__trend { width: 0.62em; height: 0.62em; flex: none; color: #1FAE5B; }
 .case__hero strong {
@@ -280,7 +282,7 @@ html.cs-modal-open { overflow: hidden; }
 .cs-aplus__strip img { flex: 1 1 0; min-width: 0; height: 100%; object-fit: cover; }
 
 /* 3D renders: soft drop shadow (track padded so the shadow isn't clipped) */
-.cs-slider--shadow .cs-slider__track { padding: 14px; margin: -14px; }
+.cs-slider--shadow .cs-slider__track { padding: 28px; margin: -28px; scroll-padding-inline: 28px; }   /* room for the shadow, same visual size */
 .cs-slider--shadow .cs-slide .cs-media { box-shadow: 0 6px 18px rgba(10,10,10,0.14), 0 1px 3px rgba(10,10,10,0.08); }
 
 /* ── 4b. email campaigns: e-mail client frames (2×2, grow + scroll like landing pages) */
@@ -327,7 +329,7 @@ html.cs-modal-open { overflow: hidden; }
 .cs-store { display: block; line-height: 0; border-radius: 10px; transition: transform var(--dur-fast) var(--ease-apple), opacity var(--dur-fast) var(--ease-apple); }
 .cs-store img { height: 48px; width: auto; }
 .cs-store:hover { transform: translateY(-1px); opacity: 0.85; }
-.cs-badges .cs-badge { height: 48px; padding-block: 0; }
+.cs-badges .cs-badge { height: 48px; padding-block: 0; border-radius: 8px; }   /* square-ish like the store badges */
 
 /* ── 6. shop: desktop + overlapping phone ───────────────────────── */
 .cs-v-shop { position: relative; padding: 0 9% 12% 0; }
@@ -367,6 +369,7 @@ html.cs-modal-open { overflow: hidden; }
   .case__how dl div { grid-template-columns: 1fr; gap: 0.1rem; }
   .cs-dialog__grid { grid-template-columns: repeat(2, 1fr); padding: 1rem; gap: 0.75rem; }
   .cs-store img, .cs-badges .cs-badge { height: 42px; }
+  .cs-badges .cs-badge { border-radius: 7px; }
 }
 
 /* ── reduced motion ─────────────────────────────────────────────── */
